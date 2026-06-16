@@ -1,0 +1,55 @@
+name: berps_mobile
+description: "Business Resource Planning System built for task management, invoicing, and job order processing so every team stays aligned from request to delivery."
+publish_to: 'none'
+
+version: 0.1.0+1
+
+environment:
+  sdk: ^3.11.4
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+  file_picker: ^10.3.2
+  http: ^1.6.0
+  image_picker: ^1.2.0
+  shared_preferences: ^2.5.5
+  phosphor_flutter: ^2.1.0
+  url_launcher: ^6.3.2
+  local_auth: ^3.0.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.14.4
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  remove_alpha_ios: true
+  image_path: "assets/logo.png"
+  image_path_ios: "assets/app_icon_ios.png"
+  adaptive_icon_background: "#1E293B"
+  adaptive_icon_foreground: "assets/logo.png"
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/logo.png
+
+  fonts:
+    - family: Rubik
+      fonts:
+        - asset: assets/Rubik/static/Rubik-Regular.ttf
+        - asset: assets/Rubik/static/Rubik-Medium.ttf
+          weight: 500
+        - asset: assets/Rubik/static/Rubik-SemiBold.ttf
+          weight: 600
+        - asset: assets/Rubik/static/Rubik-Bold.ttf
+          weight: 700
+        - asset: assets/Rubik/static/Rubik-ExtraBold.ttf
+          weight: 800

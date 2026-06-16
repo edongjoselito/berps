@@ -1,0 +1,68 @@
+/* Phosphor Icons Custom Styling for BERPS */
+
+/* Base styling for all Phosphor icons */
+.ph {
+    font-size: 1.25rem;
+    line-height: 1;
+    display: inline-block;
+    text-align: center;
+    vertical-align: middle;
+}
+
+/* Sidebar icons */
+.left-side-menu .ph {
+    font-size: 1.2rem;
+    width: 1.2rem;
+    margin-right: 0.5rem;
+    color: inherit;
+}
+
+/* Top navigation icons */
+.topnav-menu .ph {
+    font-size: 1.1rem;
+    color: inherit;
+}
+
+.noti-icon.ph {
+    font-size: 1.25rem;
+    color: inherit;
+}
+
+/* Dropdown menu icons */
+.dropdown-item .ph {
+    font-size: 1rem;
+    width: 1rem;
+    margin-right: 0.5rem;
+    color: inherit;
+}
+
+/* Search icon */
+.app-search .ph {
+    font-size: 1rem;
+    color: inherit;
+}
+
+/* Profile dropdown icons */
+.profile-dropdown .ph {
+    font-size: 1rem;
+    width: 1rem;
+    margin-right: 0.5rem;
+    color: inherit;
+}
+
+/* Ensure consistent spacing and alignment */
+.ph + span {
+    vertical-align: middle;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .left-side-menu .ph {
+        font-size: 1.1rem;
+        width: 1.1rem;
+    }
+    
+    .topnav-menu .ph {
+        font-size: 1rem;
+    }
+}

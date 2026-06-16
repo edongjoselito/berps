@@ -1,0 +1,171 @@
+html, body, div, h1, h2, h3, h4, h5, h6, ul, ol, dl, li, dt, dd, p, blockquote, pre, form, fieldset, table, th, td, img  {
+  margin: 0; padding: 0
+}
+
+/* remember to define focus styles! */
+:focus {
+	outline: 0;
+}
+
+body {
+background-color:#f1f1f1;
+font-family: verdana;
+font-size: small;
+color:#333;
+margin:0;
+padding:0;
+}
+
+#menu,
+#header,
+#sidebar,
+.welcome,
+#search,
+.footer,
+.ExportButton {
+  display:none
+}
+
+
+.tableOne {
+  width:100%;
+  background-color:#fff;
+  color:#222;
+  font-size:12px;
+}
+.tableOne th {
+  background-color:#888;
+  color:#fff;
+  padding:15px 0;
+  border-right:1px solid #fff;
+  border-top:0 !important;
+  font-family:'Arial', sans-serif;
+}
+.tableOne td {
+  border-right:1px solid #fff;
+  padding:5px 15px;
+  font-family:'Arial', sans-serif;
+}
+.tableOne td:nth-child(1) {
+  text-align:left;
+  padding-left:20px;
+}
+.tableOne tr:nth-child(even) {
+  background-color:#edecec;
+  color:#222;
+}
+.tableOne a{
+    text-decoration: none;
+    color:  #000000;
+}
+
+.tableTwo {
+  color:#222;
+  font-family:'Arial', sans-serif;
+}
+
+.tableTop {
+    color: #2e3092;
+    font-size: 12px;
+    font-weight: 300;
+    text-align:center;
+    margin-bottom: 20px;
+    font-family:'Arial', sans-serif;
+}
+
+#specialtd{
+    text-align: right; 
+    font-weight: bold; 
+    color: #000080;
+    width: 25px;
+}
+
+.prospectus-form {
+	display:none;
+}
+.prospectus {
+  padding:0;
+}
+.prospectus-heading {
+  font-size:10px;
+  margin-bottom:4px;
+  color:#000;
+  margin-top:10px;
+}
+.pros1st {margin-top:0}
+.prospectus-table {
+  border-left:1px solid #000;
+  border-top:1px solid #000;
+  width:100%;
+}
+.prospectus-table th {
+  border-right:1px solid #222;
+  border-bottom:1px solid #222;
+  border-top:0;
+  color:#000;
+  background-color:#fff;
+  font-size:10px;
+  padding:3px 5px;
+}
+.prospectus-table td {
+  border-right:1px solid #222;
+  border-bottom:1px solid #222;
+  border-top:0;
+  color:#000;
+  background-color:#fff;
+  font-size:10px;
+  padding:1px 5px;
+  line-height:normal;
+}
+.prospectus-table td:nth-child(4),
+.prospectus-table td:nth-child(5),
+.prospectus-table td:nth-child(6){
+	text-align:center;
+}
+.prospectus-table td:nth-child(3){width:45%}
+.prospectus-table td:nth-child(1){width:10%}
+.prospectus-form {
+  margin-bottom:25px;
+}
+.prospectus-form input[type="text"]{
+  padding:10px;
+}
+.prospectus-form input[type="submit"]{
+  background-color:#2E3092;
+  border:0;
+  color:#fff;
+  padding:10px 15px;
+  cursor:pointer;
+}
+.prospectus-form select {
+  padding:10px;
+}
+.labels {margin-bottom:15px; color:#000}
+.labels p {padding:0; font-size:12px; margin:0 !important}
+.labels p span{font-weight:bold; width:150px; display:inline-block;}
+.blue-color {color:blue}
+.orange-color {color:orange}
+.red-color {color:red}
+.menu {display:none}
+.print-heading h1{
+	display:block;
+	text-align:center;
+	color:#000;
+	font-size:25px;
+}
+.print-heading p {
+	display:block;
+	font-size:14px;
+	color:#222;
+	text-align:center;
+}
+.print-heading p span {font-size:12px}
+.print-heading h2 {
+	display:block;
+	font-size:20px;
+	color:#000;
+	padding:20px 0 30px 0;
+	text-align:center;
+}
+
+

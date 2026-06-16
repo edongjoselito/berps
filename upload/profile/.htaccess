@@ -1,0 +1,10 @@
+# Public profile images — allow cross-origin reads so the Flutter mobile
+# app (Chrome/CanvasKit) can render them. PHP scripts are blocked.
+<FilesMatch "\.(jpg|jpeg|png|gif|webp|heic|heif)$">
+    Header set Access-Control-Allow-Origin "*"
+    Header set Cross-Origin-Resource-Policy "cross-origin"
+</FilesMatch>
+
+<FilesMatch "\.(php|phtml|phar)$">
+    Require all denied
+</FilesMatch>

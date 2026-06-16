@@ -1,0 +1,101 @@
+/* Global fix for sidebar navigation clickability issues */
+/* Add this CSS to ensure sidebar menu remains clickable on all pages */
+
+/* Main sidebar container */
+.left-side-menu {
+    z-index: 1000 !important;
+    position: relative;
+    pointer-events: auto !important;
+}
+
+/* Menu items and links */
+.left-side-menu .metismenu li {
+    pointer-events: auto !important;
+    position: relative;
+    z-index: 1001 !important;
+}
+
+.left-side-menu .metismenu li a {
+    pointer-events: auto !important;
+    z-index: 1002 !important;
+    position: relative;
+    cursor: pointer !important;
+}
+
+/* Sub-menu items */
+.left-side-menu .nav-second-level {
+    z-index: 1003 !important;
+    position: relative;
+    pointer-events: auto !important;
+}
+
+.left-side-menu .nav-second-level li {
+    pointer-events: auto !important;
+    position: relative;
+    z-index: 1004 !important;
+}
+
+.left-side-menu .nav-second-level li a {
+    pointer-events: auto !important;
+    z-index: 1005 !important;
+    position: relative;
+    cursor: pointer !important;
+}
+
+/* Content area - ensure it doesn't overlap sidebar */
+.content-page {
+    z-index: 1 !important;
+    position: relative;
+}
+
+/* DataTables and other potential overlays */
+.dataTables_wrapper,
+.dataTables_container,
+.modal,
+.modal-backdrop,
+.overlay,
+.loading-overlay {
+    z-index: 999 !important;
+}
+
+/* Specific fix for admin dashboard pages */
+.admin-dashboard-page .left-side-menu {
+    z-index: 1000 !important;
+    position: relative;
+}
+
+.admin-dashboard-page .left-side-menu .metismenu li a {
+    pointer-events: auto !important;
+    z-index: 1001 !important;
+    position: relative;
+}
+
+/* Fix for any full-screen overlays */
+.fullscreen-overlay,
+.page-overlay {
+    z-index: 998 !important;
+}
+
+/* Ensure sidebar is always on top of content */
+#wrapper {
+    position: relative;
+}
+
+#wrapper .left-side-menu {
+    position: relative;
+    z-index: 1000;
+}
+
+/* Mobile responsive fixes */
+@media (max-width: 768px) {
+    .left-side-menu {
+        z-index: 1000 !important;
+        position: fixed;
+    }
+    
+    .left-side-menu .metismenu li a {
+        pointer-events: auto !important;
+        z-index: 1001 !important;
+        position: relative;
+    }
+}

@@ -1,0 +1,5 @@
+# Default placeholder avatars used by the Flutter mobile app on web.
+<FilesMatch "\.(jpg|jpeg|png|gif|webp)$">
+    Header set Access-Control-Allow-Origin "*"
+    Header set Cross-Origin-Resource-Policy "cross-origin"
+</FilesMatch>

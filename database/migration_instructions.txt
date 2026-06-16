@@ -1,0 +1,27 @@
+DATABASE MIGRATION INSTRUCTIONS
+================================
+
+To add the attachment column to the expenses table, please run one of the following:
+
+Option 1: Using phpMyAdmin
+1. Open phpMyAdmin (usually at http://localhost/phpmyadmin)
+2. Select the "berps" database
+3. Click on the "expenses" table
+4. Click on the "Structure" tab
+5. Scroll down and click "Add 1 column"
+6. Set the following:
+   - Column name: attachment
+   - Type: VARCHAR
+   - Length/Values: 255
+   - Default: NULL
+   - Position: After "processedBy"
+7. Click "Save"
+
+Option 2: Using SQL command
+Run this SQL query in phpMyAdmin or MySQL client:
+
+ALTER TABLE `expenses` 
+ADD COLUMN `attachment` VARCHAR(255) NULL DEFAULT NULL 
+AFTER `processedBy`;
+
+After running the migration, the expense attachment feature will be fully functional.
