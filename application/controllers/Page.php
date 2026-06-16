@@ -12065,6 +12065,8 @@ class Page extends CI_Controller
     $result['isAdmin'] = $this->session->userdata('level') === 'Admin';
     $result['open_user_id'] = $openUserId;
     $result['taskFilter'] = $taskFilter;
+    $result['currentUserId'] = $this->session->userdata('user_id');
+    $result['currentUserName'] = $this->session->userdata('fName') . ' ' . $this->session->userdata('lName');
     $this->load->view('employee_task_all', $result);
   }
 
@@ -18279,6 +18281,9 @@ class Page extends CI_Controller
       $username = trim((string) ($this->session->userdata('username') ?? ''));
       $result['hasTimeInToday'] = $this->CashModel->hasTimeInToday($settingsID, $username, $today);
     }
+
+    $result['currentUserId'] = $this->session->userdata('user_id');
+    $result['currentUser'] = $this->session->userdata('fName') . ' ' . $this->session->userdata('lName');
 
     $this->load->view('project_list_task', $result);
 

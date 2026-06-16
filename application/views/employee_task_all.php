@@ -589,10 +589,15 @@
                                     <label for="update_assignedPerson">Assigned Person</label>
                                     <select class="custom-select" id="update_assignedPerson" name="assignedPerson" required>
                                         <option value="">-- Select User --</option>
+                                        <option value="<?= (int) ($currentUserId ?? 0); ?>">
+                                            Myself (<?= htmlspecialchars($currentUserName ?? '', ENT_QUOTES, 'UTF-8'); ?>)
+                                        </option>
                                         <?php foreach ($staffOptions as $staff): ?>
+                                            <?php if ((int) ($staff->user_id ?? 0) !== (int) ($currentUserId ?? 0)): ?>
                                             <option value="<?= htmlspecialchars((string) ($staff->user_id ?? ''), ENT_QUOTES, 'UTF-8'); ?>">
                                                 <?= htmlspecialchars(trim((string) (($staff->lName ?? '') . ', ' . ($staff->fName ?? ''))), ENT_QUOTES, 'UTF-8'); ?>
                                             </option>
+                                            <?php endif; ?>
                                         <?php endforeach; ?>
                                     </select>
                                 </div>

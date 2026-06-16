@@ -1540,9 +1540,11 @@ $priorityClasses = array('1' => 'priority-high', '2' => 'priority-medium', '3' =
                                             <option value="<?= htmlspecialchars((string) $currentUserId, ENT_QUOTES, 'UTF-8'); ?>">Me (<?= htmlspecialchars($currentUser, ENT_QUOTES, 'UTF-8'); ?>)</option>
                                         <?php endif; ?>
                                         <?php foreach ($staffOptions as $staff): ?>
+                                            <?php if ((int) ($staff->user_id ?? 0) !== (int) ($currentUserId ?? 0)): ?>
                                             <option value="<?= htmlspecialchars((string) ($staff->user_id ?? ''), ENT_QUOTES, 'UTF-8'); ?>">
                                                 <?= htmlspecialchars(trim((string) (($staff->lName ?? '') . ', ' . ($staff->fName ?? ''))), ENT_QUOTES, 'UTF-8'); ?>
                                             </option>
+                                            <?php endif; ?>
                                         <?php endforeach; ?>
                                     </select>
                                 </div>
@@ -1718,9 +1720,11 @@ $priorityClasses = array('1' => 'priority-high', '2' => 'priority-medium', '3' =
                                             <option value="<?= htmlspecialchars((string) $currentUserId, ENT_QUOTES, 'UTF-8'); ?>">Me (<?= htmlspecialchars($currentUser, ENT_QUOTES, 'UTF-8'); ?>)</option>
                                         <?php endif; ?>
                                         <?php foreach ($staffOptions as $staff): ?>
+                                            <?php if ((int) ($staff->user_id ?? 0) !== (int) ($currentUserId ?? 0)): ?>
                                             <option value="<?= htmlspecialchars((string) ($staff->user_id ?? ''), ENT_QUOTES, 'UTF-8'); ?>">
                                                 <?= htmlspecialchars(trim((string) (($staff->lName ?? '') . ', ' . ($staff->fName ?? ''))), ENT_QUOTES, 'UTF-8'); ?>
                                             </option>
+                                            <?php endif; ?>
                                         <?php endforeach; ?>
                                     </select>
                                 </div>

@@ -774,29 +774,33 @@ if (!function_exists('page_reminders_preview')) {
                             <label for="reminderDescription">Description</label>
                             <textarea class="form-control" name="description" id="reminderDescription" rows="3"></textarea>
                         </div>
-                        <div class="form-group mb-3">
-                            <label for="reminderFrequency">Frequency *</label>
-                            <select class="form-control" name="frequency" id="reminderFrequency" required>
-                                <option value="daily">Daily</option>
-                                <option value="weekly">Weekly</option>
-                                <option value="monthly">Monthly</option>
-                                <option value="yearly">Yearly</option>
-                            </select>
+                        <div class="form-row mb-3">
+                            <div class="form-group col-md-6">
+                                <label for="reminderFrequency">Frequency *</label>
+                                <select class="form-control" name="frequency" id="reminderFrequency" required>
+                                    <option value="daily">Daily</option>
+                                    <option value="weekly">Weekly</option>
+                                    <option value="monthly">Monthly</option>
+                                    <option value="yearly">Yearly</option>
+                                </select>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="reminderStartDate">Start Date *</label>
+                                <input type="date" class="form-control" name="start_date" id="reminderStartDate" required>
+                            </div>
                         </div>
-                        <div class="form-group mb-3">
-                            <label for="reminderStartDate">Start Date *</label>
-                            <input type="date" class="form-control" name="start_date" id="reminderStartDate" required>
-                        </div>
-                        <div class="form-group mb-3">
-                            <label for="reminderDaysBefore">Remind me (days before)</label>
-                            <input type="number" class="form-control" name="reminder_days_before" id="reminderDaysBefore" value="3" min="1" max="30">
-                        </div>
-                        <div class="form-group mb-0">
-                            <label for="reminderActive">Status</label>
-                            <select class="form-control" name="is_active" id="reminderActive">
-                                <option value="1">Active</option>
-                                <option value="0">Inactive</option>
-                            </select>
+                        <div class="form-row mb-3">
+                            <div class="form-group col-md-6">
+                                <label for="reminderDaysBefore">Remind me (days before)</label>
+                                <input type="number" class="form-control" name="reminder_days_before" id="reminderDaysBefore" value="3" min="1" max="30">
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="reminderActive">Status</label>
+                                <select class="form-control" name="is_active" id="reminderActive">
+                                    <option value="1">Active</option>
+                                    <option value="0">Inactive</option>
+                                </select>
+                            </div>
                         </div>
                         <input type="hidden" name="reminder_id" id="reminderId">
                     </form>
