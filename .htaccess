@@ -1,0 +1,9 @@
+
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php/$1 [L,QSA]
+RewriteCond %{HTTP_HOST} ^cms\.softtechservices\.net$ [OR]
+RewriteCond %{HTTP_HOST} ^www\.cms\.softtechservices\.net$
+RewriteRule ^/?$ "https\:\/\/berps\.online\/" [R=301,L]
+
