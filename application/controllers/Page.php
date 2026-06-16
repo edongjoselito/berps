@@ -6111,6 +6111,52 @@ class Page extends CI_Controller
     }
   }
 
+  function reminders()
+  {
+    $user_id = $this->session->userdata('user_id');
+    $settingsID = $this->session->userdata('settingsID');
+
+    if (!$user_id || !$settingsID) {
+      redirect('login');
+      return;
+    }
+
+    // Auto-create user_reminders table if it doesn't exist
+    if (!$this->db->table_exists('user_reminders')) {
+      $this->db->query("CREATE TABLE IF NOT EXISTS `user_reminders` (
+        `reminder_id` int(11) NOT NULL AUTO_INCREMENT,
+        `user_id` int(11) NOT NULL,
+        `settingsID` int(11) NOT NULL,
+        `title` varchar(255) NOT NULL,
+        `description` text,
+        `frequency` enum('daily','weekly','monthly','yearly') NOT NULL,
+        `start_date` date NOT NULL,
+        `next_reminder_date` date NOT NULL,
+        `reminder_days_before` int(11) DEFAULT 3,
+        `is_active` tinyint(1) DEFAULT 1,
+        `last_sent_date` date DEFAULT NULL,
+        `created_at` timestamp DEFAULT CURRENT_TIMESTAMP,
+        `updated_at` timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        PRIMARY KEY (`reminder_id`),
+        KEY `user_id` (`user_id`),
+        KEY `settingsID` (`settingsID`),
+        KEY `next_reminder_date` (`next_reminder_date`)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+    }
+
+    // Get user reminders
+    $data['reminders'] = array();
+    if ($this->db->table_exists('user_reminders')) {
+      $data['reminders'] = $this->db
+        ->where('user_id', $user_id)
+        ->order_by('next_reminder_date', 'ASC')
+        ->get('user_reminders')
+        ->result();
+    }
+
+    $this->load->view('reminders', $data);
+  }
+
   private function sendReminderEmail($reminder, $user_email, $user_name)
   {
     $this->load->library('email');

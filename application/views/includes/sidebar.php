@@ -102,6 +102,13 @@ $__showAttendanceMenu = !$__hasCompanyFeatureRestrictions || $__showPayrollMenu;
                     </li>
 
                     <li>
+                        <a href="<?= base_url(); ?>Page/reminders" class="waves-effect">
+                            <i class="ph ph-bell"></i>
+                            <span> Reminders </span>
+                        </a>
+                    </li>
+
+                    <li>
                         <a href="<?= base_url(); ?>Page/superAdminCompanies" class="waves-effect">
                             <i class="ph ph-domain"></i>
                             <span> Manage Companies </span>
@@ -145,6 +152,13 @@ $__showAttendanceMenu = !$__hasCompanyFeatureRestrictions || $__showPayrollMenu;
                         <a href="<?= base_url(); ?>Page/admin" class="waves-effect">
                             <i class="ph ph-chart-line"></i>
                             <span> Dashboard </span>
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="<?= base_url(); ?>Page/reminders" class="waves-effect">
+                            <i class="ph ph-bell"></i>
+                            <span> Reminders </span>
                         </a>
                     </li>
 
@@ -363,6 +377,13 @@ $__showAttendanceMenu = !$__hasCompanyFeatureRestrictions || $__showPayrollMenu;
                         <a href="<?= base_url(); ?>Page/staff" class="waves-effect">
                             <i class="ph ph-chart-line"></i>
                             <span> Dashboard </span>
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="<?= base_url(); ?>Page/reminders" class="waves-effect">
+                            <i class="ph ph-bell"></i>
+                            <span> Reminders </span>
                         </a>
                     </li>
 

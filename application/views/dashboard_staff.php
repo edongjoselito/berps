@@ -1055,10 +1055,6 @@ $currentMonthLabel    = date('F Y');
                                 <span class="badge badge-pill badge-danger ml-2"><?= number_format($forwardedTaskValue); ?></span>
                             </a>
                             <?php endif; ?>
-                            <button class="btn btn-clean" id="addReminderBtn">
-                                <i class="mdi mdi-bell-plus"></i>
-                                Add Reminder
-                            </button>
                             <a href="<?= base_url(); ?>Page/projectAddTask" class="btn btn-solid">
                                 <i class="mdi mdi-format-list-checks"></i>
                                 Task List
@@ -1108,60 +1104,6 @@ $currentMonthLabel    = date('F Y');
 
                     <div class="content-grid" style="grid-template-columns: 1fr;">
                         <div>
-                            <!-- Reminders Panel -->
-                            <div class="panel mb-4">
-                                <div class="panel-header panel-header--blue">
-                                    <h5><i class="mdi mdi-bell-ring-outline mr-2"></i>My Reminders</h5>
-                                </div>
-                                <div class="panel-body">
-                                    <?php if (empty($reminders)): ?>
-                                    <div class="text-center py-4 text-muted">
-                                        <i class="mdi mdi-bell-off-outline" style="font-size: 48px;"></i>
-                                        <p class="mt-2">No reminders set. Click "Add Reminder" to create one.</p>
-                                    </div>
-                                    <?php else: ?>
-                                    <div class="table-responsive">
-                                        <table class="table table-hover">
-                                            <thead>
-                                                <tr>
-                                                    <th>Title</th>
-                                                    <th>Frequency</th>
-                                                    <th>Next Reminder</th>
-                                                    <th>Days Before</th>
-                                                    <th>Actions</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <?php foreach ($reminders as $reminder): ?>
-                                                <tr>
-                                                    <td>
-                                                        <strong><?= htmlspecialchars($reminder->title); ?></strong>
-                                                        <?php if (!empty($reminder->description)): ?>
-                                                        <br><small class="text-muted"><?= htmlspecialchars(substr($reminder->description, 0, 50)); ?><?= strlen($reminder->description) > 50 ? '...' : ''; ?></small>
-                                                        <?php endif; ?>
-                                                    </td>
-                                                    <td>
-                                                        <span class="badge badge-info"><?= ucfirst($reminder->frequency); ?></span>
-                                                    </td>
-                                                    <td><?= date('M j, Y', strtotime($reminder->next_reminder_date)); ?></td>
-                                                    <td><?= (int) $reminder->reminder_days_before; ?> days</td>
-                                                    <td>
-                                                        <button class="btn btn-sm btn-primary edit-reminder-btn" data-reminder-id="<?= $reminder->reminder_id; ?>" data-title="<?= htmlspecialchars($reminder->title); ?>" data-description="<?= htmlspecialchars($reminder->description); ?>" data-frequency="<?= $reminder->frequency; ?>" data-start-date="<?= $reminder->start_date; ?>" data-days-before="<?= $reminder->reminder_days_before; ?>">
-                                                            <i class="mdi mdi-pencil"></i>
-                                                        </button>
-                                                        <button class="btn btn-sm btn-danger delete-reminder-btn" data-reminder-id="<?= $reminder->reminder_id; ?>">
-                                                            <i class="mdi mdi-delete"></i>
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                                <?php endforeach; ?>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                    <?php endif; ?>
-                                </div>
-                            </div>
-
                             <?php if ($staffDashboardIsPackage2): ?>
                             <!-- Calendar for Package 2 -->
                             <div class="panel">
@@ -1260,52 +1202,6 @@ $currentMonthLabel    = date('F Y');
             </div>
 
             <?php include('includes/footer.php'); ?>
-        </div>
-    </div>
-
-    <!-- Reminder Modal -->
-    <div class="modal fade" id="reminderModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Add Reminder</h5>
-                    <button type="button" class="close" data-dismiss="modal">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <form id="reminderForm">
-                        <div class="form-group mb-3">
-                            <label>Title *</label>
-                            <input type="text" class="form-control" name="title" id="reminderTitle" required>
-                        </div>
-                        <div class="form-group mb-3">
-                            <label>Description</label>
-                            <textarea class="form-control" name="description" id="reminderDescription" rows="3"></textarea>
-                        </div>
-                        <div class="form-group mb-3">
-                            <label>Frequency *</label>
-                            <select class="form-control" name="frequency" id="reminderFrequency" required>
-                                <option value="daily">Daily</option>
-                                <option value="weekly">Weekly</option>
-                                <option value="monthly">Monthly</option>
-                                <option value="yearly">Yearly</option>
-                            </select>
-                        </div>
-                        <div class="form-group mb-3">
-                            <label>Start Date *</label>
-                            <input type="date" class="form-control" name="start_date" id="reminderStartDate" required>
-                        </div>
-                        <div class="form-group mb-3">
-                            <label>Remind me (days before)</label>
-                            <input type="number" class="form-control" name="reminder_days_before" id="reminderDaysBefore" value="3" min="1" max="30">
-                        </div>
-                        <input type="hidden" name="reminder_id" id="reminderId">
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-light" data-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" id="saveReminderBtn">Save Reminder</button>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -1701,37 +1597,8 @@ $currentMonthLabel    = date('F Y');
                 });
             });
 
-            // Reminder functionality
-            const $reminderModal = $('#reminderModal');
-            const $reminderForm = $('#reminderForm');
+            // Reminder notification functionality
             const reminders = <?php echo json_encode(isset($reminders) ? $reminders : array()); ?>;
-
-            function calculateNextReminderDate(startDate, frequency) {
-                const start = new Date(startDate);
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
-
-                let nextDate = new Date(start);
-
-                while (nextDate <= today) {
-                    switch (frequency) {
-                        case 'daily':
-                            nextDate.setDate(nextDate.getDate() + 1);
-                            break;
-                        case 'weekly':
-                            nextDate.setDate(nextDate.getDate() + 7);
-                            break;
-                        case 'monthly':
-                            nextDate.setMonth(nextDate.getMonth() + 1);
-                            break;
-                        case 'yearly':
-                            nextDate.setFullYear(nextDate.getFullYear() + 1);
-                            break;
-                    }
-                }
-
-                return nextDate.toISOString().split('T')[0];
-            }
 
             function checkReminders() {
                 const today = new Date();
