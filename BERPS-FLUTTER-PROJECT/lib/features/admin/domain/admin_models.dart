@@ -430,21 +430,54 @@ class AdminDtrData {
 }
 
 class DtrStaff {
-  DtrStaff({required this.userId, required this.username, required this.name});
+  DtrStaff({
+    required this.userId,
+    required this.username,
+    required this.name,
+    required this.dtrKey,
+    required this.dtrRecordCount,
+  });
+
   final int userId;
   final String username;
   final String name;
-  factory DtrStaff.fromJson(Map<String, dynamic> j) => DtrStaff(
-        userId: _asInt(j['user_id']),
-        username: _asStr(j['username']),
-        name: _asStr(j['name']),
-      );
+  final String dtrKey;
+  final int dtrRecordCount;
+
+  String get selectValue {
+    if (dtrKey.isNotEmpty) return dtrKey;
+    if (username.isNotEmpty) return username;
+    return userId > 0 ? '$userId' : '';
+  }
+
+  String get identifierLabel {
+    final parts = <String>[];
+    if (username.isNotEmpty) parts.add(username);
+    if (userId > 0 && username != '$userId') parts.add('ID $userId');
+    return parts.join(' - ');
+  }
+
+  bool get hasDtrHistory => dtrRecordCount > 0;
+
+  factory DtrStaff.fromJson(Map<String, dynamic> j) {
+    final username = _asStr(j['username']);
+    final userId = _asInt(j['user_id']);
+    return DtrStaff(
+      userId: userId,
+      username: username,
+      name: _asStr(j['name']),
+      dtrKey: _asStr(j['dtr_key']),
+      dtrRecordCount: _asInt(j['dtr_record_count']),
+    );
+  }
 }
 
 class DtrDay {
   DtrDay({
     required this.logDate,
     required this.intervals,
+    required this.amIntervals,
+    required this.pmIntervals,
     required this.totalLabel,
     required this.taskCount,
     required this.isAbsent,
@@ -453,6 +486,8 @@ class DtrDay {
 
   final String logDate;
   final List<TimeInterval> intervals;
+  final List<TimeInterval> amIntervals;
+  final List<TimeInterval> pmIntervals;
   final String totalLabel;
   final int taskCount;
   final bool isAbsent;
@@ -461,6 +496,12 @@ class DtrDay {
   factory DtrDay.fromJson(Map<String, dynamic> j) => DtrDay(
         logDate: _asStr(j['log_date']),
         intervals: ((j['intervals'] as List?) ?? [])
+            .map((e) => TimeInterval.fromJson(e as Map<String, dynamic>))
+            .toList(),
+        amIntervals: ((j['am_intervals'] as List?) ?? [])
+            .map((e) => TimeInterval.fromJson(e as Map<String, dynamic>))
+            .toList(),
+        pmIntervals: ((j['pm_intervals'] as List?) ?? [])
             .map((e) => TimeInterval.fromJson(e as Map<String, dynamic>))
             .toList(),
         totalLabel: _asStr(j['total_label']),

@@ -73,8 +73,11 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                 color: AppTheme.danger.withValues(alpha: 0.08),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(PhosphorIconsBold.signOut,
-                  color: AppTheme.danger, size: 28),
+              child: const Icon(
+                PhosphorIconsBold.signOut,
+                color: AppTheme.danger,
+                size: 28,
+              ),
             ),
             const SizedBox(height: 18),
             const Text(
@@ -101,8 +104,9 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                 Expanded(
                   child: OutlinedButton(
                     onPressed: () => Navigator.of(context).pop(false),
-                    style:
-                        OutlinedButton.styleFrom(minimumSize: const Size(0, 48)),
+                    style: OutlinedButton.styleFrom(
+                      minimumSize: const Size(0, 48),
+                    ),
                     child: const Text('Cancel'),
                   ),
                 ),
@@ -127,11 +131,11 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
   }
 
   String get _activeItemId => switch (_currentIndex) {
-        0 => 'dashboard',
-        1 => 'tasks',
-        2 => 'clients',
-        _ => 'more',
-      };
+    0 => 'dashboard',
+    1 => 'tasks',
+    2 => 'clients',
+    _ => 'more',
+  };
 
   @override
   Widget build(BuildContext context) {

@@ -62,8 +62,18 @@ class AdminGreetingCard extends StatelessWidget {
   final StaffSession session;
 
   static const _months = [
-    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
   ];
   static const _days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
@@ -84,7 +94,8 @@ class AdminGreetingCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final now = DateTime.now();
-    final today = '${_days[now.weekday - 1]} · ${_months[now.month - 1]} ${now.day}';
+    final today =
+        '${_days[now.weekday - 1]} · ${_months[now.month - 1]} ${now.day}';
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
@@ -140,7 +151,9 @@ class AdminGreetingCard extends StatelessWidget {
                   children: [
                     Flexible(
                       child: Text(
-                        session.position.isEmpty ? 'Administrator' : session.position,
+                        session.position.isEmpty
+                            ? 'Administrator'
+                            : session.position,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
@@ -249,7 +262,10 @@ class AdminMetricGrid extends StatelessWidget {
           runSpacing: 12,
           children: [
             for (final card in cards)
-              SizedBox(width: tileWidth, child: _AdminMetricCard(data: card)),
+              SizedBox(
+                width: tileWidth,
+                child: _AdminMetricCard(data: card),
+              ),
           ],
         );
       },
@@ -330,7 +346,11 @@ class _AdminMetricCard extends StatelessWidget {
 }
 
 class AdminErrorView extends StatelessWidget {
-  const AdminErrorView({super.key, required this.message, required this.onRetry});
+  const AdminErrorView({
+    super.key,
+    required this.message,
+    required this.onRetry,
+  });
   final String message;
   final VoidCallback onRetry;
 
@@ -354,8 +374,11 @@ class AdminErrorView extends StatelessWidget {
               color: AppTheme.danger.withValues(alpha: 0.10),
               borderRadius: BorderRadius.circular(16),
             ),
-            child: const Icon(PhosphorIconsFill.warningCircle,
-                color: AppTheme.danger, size: 24),
+            child: const Icon(
+              PhosphorIconsFill.warningCircle,
+              color: AppTheme.danger,
+              size: 24,
+            ),
           ),
           const SizedBox(height: 14),
           const Text(
@@ -433,7 +456,10 @@ class AdminEmptyView extends StatelessWidget {
             Text(
               message!,
               textAlign: TextAlign.center,
-              style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13),
+              style: const TextStyle(
+                color: AppTheme.textSecondary,
+                fontSize: 13,
+              ),
             ),
           ],
         ],
@@ -519,8 +545,18 @@ Color dueMetaColor(String type) {
 }
 
 const List<String> kMonthNames = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December',
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
 ];
 
 /// A single accomplishment row, shared by the admin and per-employee reports.
@@ -567,8 +603,10 @@ class AccomplishmentCard extends StatelessWidget {
               if (item.points != null) ...[
                 const SizedBox(width: 8),
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 3,
+                  ),
                   decoration: BoxDecoration(
                     color: AppTheme.primarySoft,
                     borderRadius: BorderRadius.circular(999),
@@ -606,8 +644,10 @@ class AccomplishmentCard extends StatelessWidget {
               if (item.projectName.trim().isNotEmpty)
                 _meta(PhosphorIconsBold.folderSimple, item.projectName),
               if (item.datePosted.trim().isNotEmpty)
-                _meta(PhosphorIconsBold.calendarBlank,
-                    item.datePosted.split(' ').first),
+                _meta(
+                  PhosphorIconsBold.calendarBlank,
+                  item.datePosted.split(' ').first,
+                ),
             ],
           ),
         ],
@@ -693,9 +733,12 @@ class MonthYearButton extends StatelessWidget {
                         items: [
                           for (var m = 1; m <= 12; m++)
                             DropdownMenuItem(
-                                value: m, child: Text(kMonthNames[m - 1])),
+                              value: m,
+                              child: Text(kMonthNames[m - 1]),
+                            ),
                         ],
-                        onChanged: (v) => setSheet(() => selMonth = v ?? selMonth),
+                        onChanged: (v) =>
+                            setSheet(() => selMonth = v ?? selMonth),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -707,7 +750,8 @@ class MonthYearButton extends StatelessWidget {
                           for (var y = now.year; y >= now.year - 5; y--)
                             DropdownMenuItem(value: y, child: Text('$y')),
                         ],
-                        onChanged: (v) => setSheet(() => selYear = v ?? selYear),
+                        onChanged: (v) =>
+                            setSheet(() => selYear = v ?? selYear),
                       ),
                     ),
                   ],
@@ -771,8 +815,9 @@ class MonthYearButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final label =
-        isAll ? 'All months · $year' : '${kMonthNames[month - 1]} $year';
+    final label = isAll
+        ? 'All months · $year'
+        : '${kMonthNames[month - 1]} $year';
     return GestureDetector(
       onTap: () => _open(context),
       child: Container(
@@ -786,8 +831,11 @@ class MonthYearButton extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(PhosphorIconsBold.calendarDots,
-                size: 16, color: AppTheme.primaryDark),
+            const Icon(
+              PhosphorIconsBold.calendarDots,
+              size: 16,
+              color: AppTheme.primaryDark,
+            ),
             const SizedBox(width: 8),
             Flexible(
               child: Text(
@@ -801,8 +849,11 @@ class MonthYearButton extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 6),
-            const Icon(PhosphorIconsBold.caretDown,
-                size: 13, color: AppTheme.textMuted),
+            const Icon(
+              PhosphorIconsBold.caretDown,
+              size: 13,
+              color: AppTheme.textMuted,
+            ),
           ],
         ),
       ),

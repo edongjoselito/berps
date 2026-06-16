@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:local_auth/local_auth.dart';
 
 class BiometricAuth {
@@ -9,14 +11,30 @@ class BiometricAuth {
 
   /// Checks whether the device supports biometric authentication.
   Future<bool> get isAvailable async {
-    final canCheck = await _localAuth.canCheckBiometrics;
-    final isDeviceSupported = await _localAuth.isDeviceSupported();
-    return canCheck && isDeviceSupported;
+    if (kIsWeb) return false;
+
+    try {
+      final canCheck = await _localAuth.canCheckBiometrics;
+      final isDeviceSupported = await _localAuth.isDeviceSupported();
+      return canCheck && isDeviceSupported;
+    } on MissingPluginException {
+      return false;
+    } catch (_) {
+      return false;
+    }
   }
 
   /// Returns the list of enrolled biometric types (fingerprint, face, etc.)
   Future<List<BiometricType>> get enrolledTypes async {
-    return _localAuth.getAvailableBiometrics();
+    if (kIsWeb) return const [];
+
+    try {
+      return _localAuth.getAvailableBiometrics();
+    } on MissingPluginException {
+      return const [];
+    } catch (_) {
+      return const [];
+    }
   }
 
   /// Prompts the user for biometric authentication.
@@ -24,6 +42,8 @@ class BiometricAuth {
   Future<bool> authenticate({
     String localizedReason = 'Verify your identity',
   }) async {
+    if (kIsWeb) return false;
+
     try {
       return await _localAuth.authenticate(
         localizedReason: localizedReason,

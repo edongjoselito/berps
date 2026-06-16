@@ -70,8 +70,8 @@ class AdminMoreTab extends StatelessWidget {
             color: AppTheme.primaryDeeper,
             title: 'Employee accomplishment',
             subtitle: 'Per-employee report by period',
-            onTap: () => _push(
-                context, EmployeeAccomplishmentScreen(session: session)),
+            onTap: () =>
+                _push(context, EmployeeAccomplishmentScreen(session: session)),
           ),
         ]),
         const SizedBox(height: 22),
@@ -125,8 +125,11 @@ class AdminMoreTab extends StatelessWidget {
               color: AppTheme.primarySoft,
               borderRadius: BorderRadius.circular(16),
             ),
-            child: const Icon(PhosphorIconsFill.shieldStar,
-                color: AppTheme.primaryDark, size: 26),
+            child: const Icon(
+              PhosphorIconsFill.shieldStar,
+              color: AppTheme.primaryDark,
+              size: 26,
+            ),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -245,8 +248,11 @@ class _MenuItem extends StatelessWidget {
                 ],
               ),
             ),
-            const Icon(PhosphorIconsBold.caretRight,
-                size: 16, color: AppTheme.textMuted),
+            const Icon(
+              PhosphorIconsBold.caretRight,
+              size: 16,
+              color: AppTheme.textMuted,
+            ),
           ],
         ),
       ),

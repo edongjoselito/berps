@@ -42,9 +42,9 @@ class _AdminDashboardTabState extends State<AdminDashboardTab> {
   }
 
   Future<AdminDashboard> _load() => _api.fetchDashboard(
-        baseUrl: widget.session.baseUrl,
-        token: widget.session.token,
-      );
+    baseUrl: widget.session.baseUrl,
+    token: widget.session.token,
+  );
 
   void _reload() {
     Haptics.light();
@@ -54,10 +54,7 @@ class _AdminDashboardTabState extends State<AdminDashboardTab> {
   String _peso(double v) {
     final s = v
         .toStringAsFixed(v.truncateToDouble() == v ? 0 : 2)
-        .replaceAllMapped(
-          RegExp(r'(\d)(?=(\d{3})+(?!\d))'),
-          (m) => '${m[1]},',
-        );
+        .replaceAllMapped(RegExp(r'(\d)(?=(\d{3})+(?!\d))'), (m) => '${m[1]},');
     return '₱$s';
   }
 
@@ -297,13 +294,26 @@ class _AdminDashboardTabState extends State<AdminDashboardTab> {
 
     return Row(
       children: [
-        chip('Due today', c.dueToday, AppTheme.warning, PhosphorIconsBold.clock),
+        chip(
+          'Due today',
+          c.dueToday,
+          AppTheme.warning,
+          PhosphorIconsBold.clock,
+        ),
         const SizedBox(width: 10),
-        chip('Due soon', c.dueSoon, AppTheme.primaryDark,
-            PhosphorIconsBold.calendarDots),
+        chip(
+          'Due soon',
+          c.dueSoon,
+          AppTheme.primaryDark,
+          PhosphorIconsBold.calendarDots,
+        ),
         const SizedBox(width: 10),
-        chip('Overdue', c.overdue, AppTheme.danger,
-            PhosphorIconsBold.warningCircle),
+        chip(
+          'Overdue',
+          c.overdue,
+          AppTheme.danger,
+          PhosphorIconsBold.warningCircle,
+        ),
       ],
     );
   }
@@ -341,8 +351,11 @@ class _AdminDashboardTabState extends State<AdminDashboardTab> {
           const SizedBox(height: 10),
           Row(
             children: [
-              const Icon(PhosphorIconsBold.calendarBlank,
-                  size: 13, color: AppTheme.textMuted),
+              const Icon(
+                PhosphorIconsBold.calendarBlank,
+                size: 13,
+                color: AppTheme.textMuted,
+              ),
               const SizedBox(width: 5),
               Expanded(
                 child: Text(

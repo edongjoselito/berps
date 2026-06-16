@@ -11,7 +11,7 @@ $db['default'] = array(
 	'hostname' => '127.0.0.1',
 	// 'hostname' => '120.28.198.188',
 	'username' => 'root',
-	'password' => 'moth34board',
+	'password' => '',
 	'database' => 'itwebpor_cms',
 
 	'dbdriver' => 'mysqli',

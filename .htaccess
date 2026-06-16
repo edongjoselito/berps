@@ -1,0 +1,7 @@
+RewriteEngine On
+RewriteBase /berps/
+
+# Route everything that isn't a real file or directory through index.php
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php/$1 [L]

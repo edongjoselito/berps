@@ -44,11 +44,7 @@ class _OrbBackgroundState extends State<OrbBackground>
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           stops: [0.0, 0.55, 1.0],
-          colors: [
-            Color(0xFFFAFBFE),
-            Color(0xFFF3F7FD),
-            Color(0xFFEAF1FB),
-          ],
+          colors: [Color(0xFFFAFBFE), Color(0xFFF3F7FD), Color(0xFFEAF1FB)],
         ),
       ),
       child: Stack(
@@ -75,10 +71,7 @@ class _OrbBackgroundState extends State<OrbBackground>
               );
             },
           ),
-          CustomPaint(
-            size: media,
-            painter: const _GridPainter(),
-          ),
+          CustomPaint(size: media, painter: const _GridPainter()),
           widget.child,
         ],
       ),
