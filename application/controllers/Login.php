@@ -371,15 +371,8 @@ class Login extends CI_Controller
         // Use email as username
         $username = $email;
 
-        // Default to individual if not specified
-        if ($accountType === '') {
-            $accountType = 'individual';
-        }
-
-        // For individual accounts, use First Name + Last Name as company name
-        if ($accountType === 'individual') {
-            $compName = trim($fName . ' ' . $lName);
-        }
+        // Force company account type
+        $accountType = 'company';
 
         // Email validation
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -389,13 +382,7 @@ class Login extends CI_Controller
             return;
         }
 
-        // Validation
-        if ($accountType === 'company' && $compName === '') {
-            $this->session->set_flashdata('signup_error', 'Company Name is required for company accounts.');
-            $this->session->set_flashdata('form_data', $this->input->post(NULL, TRUE));
-            redirect('Login/signup_page');
-            return;
-        }
+        // Validation - company fields are now hidden, so no validation needed
 
         if ($email === '' || $password === '' || $fName === '' || $lName === '') {
             $this->session->set_flashdata('signup_error', 'Please fill in all required fields.');
@@ -404,22 +391,8 @@ class Login extends CI_Controller
             return;
         }
 
-        // Get enabled packages for validation
-        $enabledPackages = array();
-        if ($this->db->table_exists('signup_packages')) {
-            $this->db->where('is_enabled', 1);
-            $result = $this->db->get('signup_packages')->result();
-            foreach ($result as $row) {
-                $enabledPackages[] = $row->package_id;
-            }
-        }
-
-        if ($package === '' || !in_array($package, $enabledPackages)) {
-            $this->session->set_flashdata('signup_error', 'Please select a valid package.');
-            $this->session->set_flashdata('form_data', $this->input->post(NULL, TRUE));
-            redirect('Login/signup_page');
-            return;
-        }
+        // Force package to 2
+        $package = '2';
 
         // Check if email already exists
         $existingEmail = $this->db->where('email', $email)->get('users')->row();
@@ -430,45 +403,33 @@ class Login extends CI_Controller
             return;
         }
 
-        // Insert into pos_settings
-        $settingsData = array(
-            'CompName' => $compName,
-            'CompAddress' => $compAddress,
-            'CompTin' => $compTin,
-            'Proprietor' => $proprietor,
-            'CompType' => $compType,
-            'BusinessLines' => $businessLines,
-        );
+        // Force settingsID to 6
+        $settingsID = 6;
 
-        // Add package_id and package_ids if columns exist
-        if ($this->db->field_exists('package_id', 'pos_settings')) {
-            if ($package === 'all') {
-                $settingsData['package_id'] = 0; // 0 represents "all packages"
-            } else {
+        // Update pos_settings if it exists
+        $existingSettings = $this->db->where('settingsID', $settingsID)->get('pos_settings')->row();
+        if ($existingSettings) {
+            $settingsData = array(
+                'CompName' => $compName,
+                'CompAddress' => $compAddress,
+                'CompTin' => $compTin,
+                'Proprietor' => $proprietor,
+                'CompType' => $compType,
+                'BusinessLines' => $businessLines,
+            );
+
+            // Add package_id and package_ids if columns exist
+            if ($this->db->field_exists('package_id', 'pos_settings')) {
                 $settingsData['package_id'] = (int) $package;
             }
-        }
 
-        if ($this->db->field_exists('package_ids', 'pos_settings')) {
-            if ($package === 'all') {
-                $settingsData['package_ids'] = 'all';
-            } else {
+            if ($this->db->field_exists('package_ids', 'pos_settings')) {
                 $settingsData['package_ids'] = (string) $package;
             }
+
+            $this->db->where('settingsID', $settingsID);
+            $this->db->update('pos_settings', $settingsData);
         }
-
-        $this->db->insert('pos_settings', $settingsData);
-        $settingsID = $this->db->insert_id();
-
-        if (!$settingsID) {
-            $this->session->set_flashdata('signup_error', 'Failed to create company settings. Please try again.');
-            $this->session->set_flashdata('form_data', $this->input->post(NULL, TRUE));
-            redirect('Login/signup_page');
-            return;
-        }
-
-        // Apply package features to the new company
-        $this->_applyPackageFeatures($settingsID, $package);
 
         // Generate confirmation token
         $confirmationToken = bin2hex(random_bytes(32));

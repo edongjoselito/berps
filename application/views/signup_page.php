@@ -341,102 +341,15 @@
                         </div>
                     </div>
                     
-                    <div class="form-section-title">Account Type</div>
+                    <input type="hidden" name="accountType" value="company">
+                    <input type="hidden" name="compName" value="">
+                    <input type="hidden" name="compTin" value="">
+                    <input type="hidden" name="compType" value="">
+                    <input type="hidden" name="compAddress" value="">
+                    <input type="hidden" name="proprietor" value="">
+                    <input type="hidden" name="businessLines" value="">
                     
-                    <div class="form-group">
-                        <label>Account Type *</label>
-                        <div style="display: flex; gap: 20px; margin-top: 8px;">
-                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: normal;">
-                                <input type="radio" name="accountType" value="individual" id="accountTypeIndividual" <?= !isset($form_data['accountType']) || $form_data['accountType'] === 'individual' ? 'checked' : ''; ?>>
-                                Individual
-                            </label>
-                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: normal;">
-                                <input type="radio" name="accountType" value="company" id="accountTypeCompany" <?= isset($form_data['accountType']) && $form_data['accountType'] === 'company' ? 'checked' : ''; ?>>
-                                Company
-                            </label>
-                        </div>
-                    </div>
-                    
-                    <div class="form-section-title" id="companySectionTitle">Company Information</div>
-                    
-                    <div id="companyFields">
-                        <div class="form-group">
-                            <label for="compName">Company Name *</label>
-                            <input type="text" id="compName" name="compName" value="<?= isset($form_data['compName']) ? htmlspecialchars($form_data['compName']) : ''; ?>">
-                        </div>
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
-                            <div class="form-group">
-                                <label for="compTin">TIN</label>
-                                <input type="text" id="compTin" name="compTin" value="<?= isset($form_data['compTin']) ? htmlspecialchars($form_data['compTin']) : ''; ?>">
-                            </div>
-                            <div class="form-group">
-                                <label for="compType">Company Type</label>
-                                <select id="compType" name="compType">
-                                    <option value="">Select Type</option>
-                                    <option value="Sole Proprietorship" <?= isset($form_data['compType']) && $form_data['compType'] === 'Sole Proprietorship' ? 'selected' : ''; ?>>Sole Proprietorship</option>
-                                    <option value="Partnership" <?= isset($form_data['compType']) && $form_data['compType'] === 'Partnership' ? 'selected' : ''; ?>>Partnership</option>
-                                    <option value="Corporation" <?= isset($form_data['compType']) && $form_data['compType'] === 'Corporation' ? 'selected' : ''; ?>>Corporation</option>
-                                    <option value="LLC" <?= isset($form_data['compType']) && $form_data['compType'] === 'LLC' ? 'selected' : ''; ?>>LLC</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="compAddress">Company Address</label>
-                            <textarea id="compAddress" name="compAddress"><?= isset($form_data['compAddress']) ? htmlspecialchars($form_data['compAddress']) : ''; ?></textarea>
-                        </div>
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
-                            <div class="form-group">
-                                <label for="proprietor">Proprietor</label>
-                                <input type="text" id="proprietor" name="proprietor" value="<?= isset($form_data['proprietor']) ? htmlspecialchars($form_data['proprietor']) : ''; ?>">
-                            </div>
-                            <div class="form-group">
-                                <label for="businessLines">Business Lines</label>
-                                <select id="businessLines" name="businessLines">
-                                    <option value="">Select Business Line</option>
-                                    <option value="Retail" <?= isset($form_data['businessLines']) && $form_data['businessLines'] === 'Retail' ? 'selected' : ''; ?>>Retail</option>
-                                    <option value="Services" <?= isset($form_data['businessLines']) && $form_data['businessLines'] === 'Services' ? 'selected' : ''; ?>>Services</option>
-                                    <option value="Manufacturing" <?= isset($form_data['businessLines']) && $form_data['businessLines'] === 'Manufacturing' ? 'selected' : ''; ?>>Manufacturing</option>
-                                    <option value="Technology" <?= isset($form_data['businessLines']) && $form_data['businessLines'] === 'Technology' ? 'selected' : ''; ?>>Technology</option>
-                                    <option value="Healthcare" <?= isset($form_data['businessLines']) && $form_data['businessLines'] === 'Healthcare' ? 'selected' : ''; ?>>Healthcare</option>
-                                    <option value="Education" <?= isset($form_data['businessLines']) && $form_data['businessLines'] === 'Education' ? 'selected' : ''; ?>>Education</option>
-                                    <option value="Food & Beverage" <?= isset($form_data['businessLines']) && $form_data['businessLines'] === 'Food & Beverage' ? 'selected' : ''; ?>>Food & Beverage</option>
-                                    <option value="Construction" <?= isset($form_data['businessLines']) && $form_data['businessLines'] === 'Construction' ? 'selected' : ''; ?>>Construction</option>
-                                    <option value="Real Estate" <?= isset($form_data['businessLines']) && $form_data['businessLines'] === 'Real Estate' ? 'selected' : ''; ?>>Real Estate</option>
-                                    <option value="Finance" <?= isset($form_data['businessLines']) && $form_data['businessLines'] === 'Finance' ? 'selected' : ''; ?>>Finance</option>
-                                    <option value="Transportation" <?= isset($form_data['businessLines']) && $form_data['businessLines'] === 'Transportation' ? 'selected' : ''; ?>>Transportation</option>
-                                    <option value="Hospitality" <?= isset($form_data['businessLines']) && $form_data['businessLines'] === 'Hospitality' ? 'selected' : ''; ?>>Hospitality</option>
-                                    <option value="Agriculture" <?= isset($form_data['businessLines']) && $form_data['businessLines'] === 'Agriculture' ? 'selected' : ''; ?>>Agriculture</option>
-                                    <option value="Consulting" <?= isset($form_data['businessLines']) && $form_data['businessLines'] === 'Consulting' ? 'selected' : ''; ?>>Consulting</option>
-                                    <option value="E-commerce" <?= isset($form_data['businessLines']) && $form_data['businessLines'] === 'E-commerce' ? 'selected' : ''; ?>>E-commerce</option>
-                                    <option value="Other" <?= isset($form_data['businessLines']) && $form_data['businessLines'] === 'Other' ? 'selected' : ''; ?>>Other</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="form-section-title">Select Your Package</div>
-                    
-                    <div class="form-group">
-                        <label for="package">Choose a package to get started *</label>
-                        <select id="package" name="package" required>
-                            <option value="">Select a Package</option>
-                            <?php if (isset($enabledPackages) && in_array('all', $enabledPackages)): ?>
-                                <option value="all" <?= isset($form_data['package']) && $form_data['package'] === 'all' ? 'selected' : ''; ?>>All Packages - Complete access to all features</option>
-                            <?php endif; ?>
-                            <?php if (isset($enabledPackages) && in_array('1', $enabledPackages)): ?>
-                                <option value="1" <?= isset($form_data['package']) && $form_data['package'] === '1' ? 'selected' : ''; ?>>Package 1: Business Operations Suite - Complete solution for operations, projects, and customer transactions</option>
-                            <?php endif; ?>
-                            <?php if (isset($enabledPackages) && in_array('2', $enabledPackages)): ?>
-                                <option value="2" <?= isset($form_data['package']) && $form_data['package'] === '2' ? 'selected' : ''; ?>>Package 2: Task Management Suite - Task tracking and scheduling for teams</option>
-                            <?php endif; ?>
-                            <?php if (isset($enabledPackages) && in_array('3', $enabledPackages)): ?>
-                                <option value="3" <?= isset($form_data['package']) && $form_data['package'] === '3' ? 'selected' : ''; ?>>Package 3: Payroll Management Suite - Employee compensation and payroll processing</option>
-                            <?php endif; ?>
-                            <?php if (isset($enabledPackages) && in_array('4', $enabledPackages)): ?>
-                                <option value="4" <?= isset($form_data['package']) && $form_data['package'] === '4' ? 'selected' : ''; ?>>Package 4: POS - Retail, cashiering, and point-of-sale access</option>
-                            <?php endif; ?>
-                        </select>
-                    </div>
+                    <input type="hidden" name="package" value="2">
                     
                     <div id="packageDetails" style="margin-top: 15px; padding: 15px; background: #f7f9fc; border-radius: 10px; border: 1px solid var(--border); display: none;">
                         <h4 id="packageTitle" style="margin-bottom: 10px; color: var(--primary);"></h4>
@@ -574,31 +487,7 @@
             }
         });
 
-        // Account type toggle - show/hide company fields
-        const accountTypeIndividual = document.getElementById('accountTypeIndividual');
-        const accountTypeCompany = document.getElementById('accountTypeCompany');
-        const companyFields = document.getElementById('companyFields');
-        const companySectionTitle = document.getElementById('companySectionTitle');
-        const compName = document.getElementById('compName');
-
-        function toggleCompanyFields() {
-            if (accountTypeCompany && accountTypeCompany.checked) {
-                companyFields.style.display = 'block';
-                companySectionTitle.style.display = 'block';
-                compName.required = true;
-            } else {
-                companyFields.style.display = 'none';
-                companySectionTitle.style.display = 'none';
-                compName.required = false;
-            }
-        }
-
-        if (accountTypeIndividual && accountTypeCompany && companyFields && compName && companySectionTitle) {
-            accountTypeIndividual.addEventListener('change', toggleCompanyFields);
-            accountTypeCompany.addEventListener('change', toggleCompanyFields);
-            // Initialize on page load
-            toggleCompanyFields();
-        }
+        // Company fields are hidden
 
         // Form validation
         const signupForm = document.getElementById('signupForm');

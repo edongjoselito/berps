@@ -4523,6 +4523,7 @@ class Page extends CI_Controller
 
     if ($this->session->userdata('level') === 'Admin') {
       $settingsID = $this->session->userdata('settingsID');
+      $user_id = $this->session->userdata('user_id');
       date_default_timezone_set('Asia/Manila'); # add your city to set local time zone
 
       $date = date('Y-m-d');
@@ -4542,6 +4543,114 @@ class Page extends CI_Controller
       $result['taskDueQueue'] = $this->CashModel->openTaskDueQueue($settingsID, null, 6, 7, $date);
       $result['taskDueWindowDays'] = 7;
       $result['unassignedTicketCount'] = $this->_count_unassigned_support_issues($settingsID);
+
+      // Auto-create user_reminders table if it doesn't exist
+      if (!$this->db->table_exists('user_reminders')) {
+        $this->db->query("CREATE TABLE IF NOT EXISTS `user_reminders` (
+          `reminder_id` int(11) NOT NULL AUTO_INCREMENT,
+          `user_id` int(11) NOT NULL,
+          `settingsID` int(11) NOT NULL,
+          `title` varchar(255) NOT NULL,
+          `description` text,
+          `frequency` enum('daily','weekly','monthly','yearly') NOT NULL,
+          `start_date` date NOT NULL,
+          `next_reminder_date` date NOT NULL,
+          `reminder_days_before` int(11) DEFAULT 3,
+          `is_active` tinyint(1) DEFAULT 1,
+          `last_sent_date` date DEFAULT NULL,
+          `created_at` timestamp DEFAULT CURRENT_TIMESTAMP,
+          `updated_at` timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+          PRIMARY KEY (`reminder_id`),
+          KEY `user_id` (`user_id`),
+          KEY `settingsID` (`settingsID`),
+          KEY `next_reminder_date` (`next_reminder_date`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+      }
+
+      // Get user reminders and send email notifications
+      $result['reminders'] = array();
+      if ($this->db->table_exists('user_reminders')) {
+        $result['reminders'] = $this->db
+          ->where('user_id', $user_id)
+          ->where('is_active', 1)
+          ->order_by('next_reminder_date', 'ASC')
+          ->get('user_reminders')
+          ->result();
+
+        // Check and send email reminders
+        $todayDateTime = new DateTime();
+        foreach ($result['reminders'] as $reminder) {
+          if (!empty($reminder->next_reminder_date)) {
+            $reminderDate = new DateTime($reminder->next_reminder_date);
+            $daysBefore = (int) ($reminder->reminder_days_before ?? 3);
+            $alertDate = clone $reminderDate;
+            $alertDate->sub(new DateInterval('P' . $daysBefore . 'D'));
+
+            // Send email if today is within the reminder window and not already sent today
+            if ($todayDateTime >= $alertDate && $todayDateTime <= $reminderDate) {
+              $lastSent = !empty($reminder->last_sent_date) ? new DateTime($reminder->last_sent_date) : null;
+              
+              // Only send if not sent today
+              if (!$lastSent || $lastSent->format('Y-m-d') !== $todayDateTime->format('Y-m-d')) {
+                $user = $this->db->where('user_id', $user_id)->get('users')->row();
+                if ($user && !empty($user->email)) {
+                  $emailSent = $this->sendReminderEmail($reminder, $user->email, $user->fName);
+                  
+                  if ($emailSent) {
+                    // Update last_sent_date
+                    $this->db->where('reminder_id', $reminder->reminder_id);
+                    $this->db->update('user_reminders', array('last_sent_date' => $todayDateTime->format('Y-m-d')));
+                  }
+                }
+              }
+            }
+
+            // Update next_reminder_date if it has passed
+            if ($todayDateTime > $reminderDate) {
+              $nextDate = clone $reminderDate;
+              switch ($reminder->frequency) {
+                case 'daily':
+                  $nextDate->add(new DateInterval('P1D'));
+                  break;
+                case 'weekly':
+                  $nextDate->add(new DateInterval('P7D'));
+                  break;
+                case 'monthly':
+                  $nextDate->add(new DateInterval('P1M'));
+                  break;
+                case 'yearly':
+                  $nextDate->add(new DateInterval('P1Y'));
+                  break;
+              }
+              
+              // Keep advancing until nextDate is in the future
+              while ($nextDate <= $todayDateTime) {
+                switch ($reminder->frequency) {
+                  case 'daily':
+                    $nextDate->add(new DateInterval('P1D'));
+                    break;
+                  case 'weekly':
+                    $nextDate->add(new DateInterval('P7D'));
+                    break;
+                  case 'monthly':
+                    $nextDate->add(new DateInterval('P1M'));
+                    break;
+                  case 'yearly':
+                    $nextDate->add(new DateInterval('P1Y'));
+                    break;
+                }
+              }
+
+              $this->db->where('reminder_id', $reminder->reminder_id);
+              $this->db->update('user_reminders', array(
+                'next_reminder_date' => $nextDate->format('Y-m-d'),
+                'last_sent_date' => null
+              ));
+            }
+          }
+        }
+      }
+
       $this->load->view('dashboard_admin', $result);
     } else {
       echo "Access Denied";
@@ -4553,6 +4662,8 @@ class Page extends CI_Controller
     if ($this->_is_system_admin_user()) {
       date_default_timezone_set('Asia/Manila');
 
+      $user_id = $this->session->userdata('user_id');
+
       // Get all companies/settings
       $result['companies'] = $this->db->get('pos_settings')->result();
 
@@ -4560,6 +4671,113 @@ class Page extends CI_Controller
       $result['totalCompanies'] = count($result['companies']);
       $result['totalUsers'] = $this->db->count_all('users');
       $result['totalClients'] = $this->db->count_all('customers');
+
+      // Auto-create user_reminders table if it doesn't exist
+      if (!$this->db->table_exists('user_reminders')) {
+        $this->db->query("CREATE TABLE IF NOT EXISTS `user_reminders` (
+          `reminder_id` int(11) NOT NULL AUTO_INCREMENT,
+          `user_id` int(11) NOT NULL,
+          `settingsID` int(11) NOT NULL,
+          `title` varchar(255) NOT NULL,
+          `description` text,
+          `frequency` enum('daily','weekly','monthly','yearly') NOT NULL,
+          `start_date` date NOT NULL,
+          `next_reminder_date` date NOT NULL,
+          `reminder_days_before` int(11) DEFAULT 3,
+          `is_active` tinyint(1) DEFAULT 1,
+          `last_sent_date` date DEFAULT NULL,
+          `created_at` timestamp DEFAULT CURRENT_TIMESTAMP,
+          `updated_at` timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+          PRIMARY KEY (`reminder_id`),
+          KEY `user_id` (`user_id`),
+          KEY `settingsID` (`settingsID`),
+          KEY `next_reminder_date` (`next_reminder_date`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+      }
+
+      // Get user reminders and send email notifications
+      $result['reminders'] = array();
+      if ($this->db->table_exists('user_reminders') && $user_id) {
+        $result['reminders'] = $this->db
+          ->where('user_id', $user_id)
+          ->where('is_active', 1)
+          ->order_by('next_reminder_date', 'ASC')
+          ->get('user_reminders')
+          ->result();
+
+        // Check and send email reminders
+        $todayDateTime = new DateTime();
+        foreach ($result['reminders'] as $reminder) {
+          if (!empty($reminder->next_reminder_date)) {
+            $reminderDate = new DateTime($reminder->next_reminder_date);
+            $daysBefore = (int) ($reminder->reminder_days_before ?? 3);
+            $alertDate = clone $reminderDate;
+            $alertDate->sub(new DateInterval('P' . $daysBefore . 'D'));
+
+            // Send email if today is within the reminder window and not already sent today
+            if ($todayDateTime >= $alertDate && $todayDateTime <= $reminderDate) {
+              $lastSent = !empty($reminder->last_sent_date) ? new DateTime($reminder->last_sent_date) : null;
+              
+              // Only send if not sent today
+              if (!$lastSent || $lastSent->format('Y-m-d') !== $todayDateTime->format('Y-m-d')) {
+                $user = $this->db->where('user_id', $user_id)->get('users')->row();
+                if ($user && !empty($user->email)) {
+                  $emailSent = $this->sendReminderEmail($reminder, $user->email, $user->fName);
+                  
+                  if ($emailSent) {
+                    // Update last_sent_date
+                    $this->db->where('reminder_id', $reminder->reminder_id);
+                    $this->db->update('user_reminders', array('last_sent_date' => $todayDateTime->format('Y-m-d')));
+                  }
+                }
+              }
+            }
+
+            // Update next_reminder_date if it has passed
+            if ($todayDateTime > $reminderDate) {
+              $nextDate = clone $reminderDate;
+              switch ($reminder->frequency) {
+                case 'daily':
+                  $nextDate->add(new DateInterval('P1D'));
+                  break;
+                case 'weekly':
+                  $nextDate->add(new DateInterval('P7D'));
+                  break;
+                case 'monthly':
+                  $nextDate->add(new DateInterval('P1M'));
+                  break;
+                case 'yearly':
+                  $nextDate->add(new DateInterval('P1Y'));
+                  break;
+              }
+              
+              // Keep advancing until nextDate is in the future
+              while ($nextDate <= $todayDateTime) {
+                switch ($reminder->frequency) {
+                  case 'daily':
+                    $nextDate->add(new DateInterval('P1D'));
+                    break;
+                  case 'weekly':
+                    $nextDate->add(new DateInterval('P7D'));
+                    break;
+                  case 'monthly':
+                    $nextDate->add(new DateInterval('P1M'));
+                    break;
+                  case 'yearly':
+                    $nextDate->add(new DateInterval('P1Y'));
+                    break;
+                }
+              }
+
+              $this->db->where('reminder_id', $reminder->reminder_id);
+              $this->db->update('user_reminders', array(
+                'next_reminder_date' => $nextDate->format('Y-m-d'),
+                'last_sent_date' => null
+              ));
+            }
+          }
+        }
+      }
 
       $this->load->view('dashboard_super_admin', $result);
     } else {
@@ -4869,17 +5087,157 @@ class Page extends CI_Controller
 
     $settingsID = $this->input->get('settingsID');
     $result['companies'] = $this->db->get('pos_settings')->result();
-    
+
     // Filter admins by settingsID if provided
     if ($settingsID) {
       $this->db->where('settingsID', (int) $settingsID);
     }
     $result['admins'] = $this->db->where('position', 'Admin')->get('users')->result();
-    
+
     // Pass the filter settingsID to the view
     $result['filterSettingsID'] = $settingsID ? (int) $settingsID : null;
-    
+
     $this->load->view('super_admin_admins', $result);
+  }
+
+  function superAdminUsers()
+  {
+    if (!$this->_is_system_admin_user()) {
+      echo "Access Denied";
+      return;
+    }
+
+    $settingsID = $this->input->get('settingsID');
+    $result['companies'] = $this->db->get('pos_settings')->result();
+
+    // Filter users by settingsID if provided
+    if ($settingsID) {
+      $this->db->where('settingsID', (int) $settingsID);
+    }
+    $result['users'] = $this->db->get('users')->result();
+
+    // Pass the filter settingsID to the view
+    $result['filterSettingsID'] = $settingsID ? (int) $settingsID : null;
+
+    $this->load->view('super_admin_users', $result);
+  }
+
+  function saveSuperAdminUser()
+  {
+    header('Content-Type: application/json');
+
+    if (!$this->_is_system_admin_user()) {
+      echo json_encode(array('success' => false, 'message' => 'Access Denied'));
+      return;
+    }
+
+    $userId = (int) $this->input->post('user_id');
+    $settingsID = (int) $this->input->post('settingsID');
+    $email = trim((string) $this->input->post('email'));
+    $password = trim((string) $this->input->post('password'));
+    $fName = trim((string) $this->input->post('fName'));
+    $lName = trim((string) $this->input->post('lName'));
+    $position = trim((string) $this->input->post('position'));
+    $acctStat = trim((string) $this->input->post('acctStat'));
+
+    // Use email as username
+    $username = $email;
+
+    if ($email === '') {
+      echo json_encode(array('success' => false, 'message' => 'Email is required'));
+      return;
+    }
+
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+      echo json_encode(array('success' => false, 'message' => 'Invalid email format'));
+      return;
+    }
+
+    $data = array(
+      'username' => $username,
+      'email' => $email,
+      'fName' => $fName,
+      'lName' => $lName,
+      'position' => $position,
+      'acctStat' => $acctStat
+    );
+
+    if ($password !== '') {
+      $data['password'] = password_hash($password, PASSWORD_BCRYPT);
+    }
+
+    if ($userId > 0) {
+      // Update existing user
+      $this->db->where('user_id', $userId);
+      $result = $this->db->update('users', $data);
+      $dbError = $this->db->error();
+      if (!$result) {
+        error_log('Update user error: ' . print_r($dbError, true));
+        echo json_encode(array('success' => false, 'message' => 'Error saving user: ' . ($dbError['message'] ?? 'Unknown error')));
+        return;
+      }
+    } else {
+      // Create new user
+      if ($settingsID <= 0) {
+        echo json_encode(array('success' => false, 'message' => 'Company is required'));
+        return;
+      }
+
+      if ($password === '') {
+        echo json_encode(array('success' => false, 'message' => 'Password is required for new users'));
+        return;
+      }
+
+      $data['settingsID'] = $settingsID;
+      
+      // Only add created_at if the field exists
+      if ($this->db->field_exists('created_at', 'users')) {
+        $data['created_at'] = date('Y-m-d H:i:s');
+      }
+
+      // Check if email already exists (email is used as username)
+      $existingEmail = $this->db->where('email', $email)->get('users')->row();
+      if ($existingEmail) {
+        echo json_encode(array('success' => false, 'message' => 'Email already exists'));
+        return;
+      }
+
+      $result = $this->db->insert('users', $data);
+      $dbError = $this->db->error();
+      if (!$result) {
+        error_log('Insert user error: ' . print_r($dbError, true));
+        echo json_encode(array('success' => false, 'message' => 'Error saving user: ' . ($dbError['message'] ?? 'Unknown error')));
+        return;
+      }
+    }
+
+    echo json_encode(array('success' => true, 'message' => 'User saved successfully'));
+  }
+
+  function deleteSuperAdminUser()
+  {
+    header('Content-Type: application/json');
+
+    if (!$this->_is_system_admin_user()) {
+      echo json_encode(array('success' => false, 'message' => 'Access Denied'));
+      return;
+    }
+
+    $userId = (int) $this->input->post('user_id');
+
+    if ($userId <= 0) {
+      echo json_encode(array('success' => false, 'message' => 'Invalid user ID'));
+      return;
+    }
+
+    $this->db->where('user_id', $userId);
+    $result = $this->db->delete('users');
+
+    if ($result) {
+      echo json_encode(array('success' => true, 'message' => 'User deleted successfully'));
+    } else {
+      echo json_encode(array('success' => false, 'message' => 'Error deleting user'));
+    }
   }
 
   function saveCompany()
@@ -5501,7 +5859,7 @@ class Page extends CI_Controller
     }
   }
 
-  public function staff()
+  public  function staff()
   {
     date_default_timezone_set('Asia/Manila');
 
@@ -5528,6 +5886,113 @@ class Page extends CI_Controller
     $data['overdueTasks'] = $this->CashModel->getOverdueTasks($settingsID, $user_id, $today);
     $data['dueTodayTasks'] = $this->CashModel->getDueTodayTasks($settingsID, $user_id, $today);
 
+    // Auto-create user_reminders table if it doesn't exist
+    if (!$this->db->table_exists('user_reminders')) {
+      $this->db->query("CREATE TABLE IF NOT EXISTS `user_reminders` (
+        `reminder_id` int(11) NOT NULL AUTO_INCREMENT,
+        `user_id` int(11) NOT NULL,
+        `settingsID` int(11) NOT NULL,
+        `title` varchar(255) NOT NULL,
+        `description` text,
+        `frequency` enum('daily','weekly','monthly','yearly') NOT NULL,
+        `start_date` date NOT NULL,
+        `next_reminder_date` date NOT NULL,
+        `reminder_days_before` int(11) DEFAULT 3,
+        `is_active` tinyint(1) DEFAULT 1,
+        `last_sent_date` date DEFAULT NULL,
+        `created_at` timestamp DEFAULT CURRENT_TIMESTAMP,
+        `updated_at` timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        PRIMARY KEY (`reminder_id`),
+        KEY `user_id` (`user_id`),
+        KEY `settingsID` (`settingsID`),
+        KEY `next_reminder_date` (`next_reminder_date`)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+    }
+
+    // Get user reminders and send email notifications
+    $data['reminders'] = array();
+    if ($this->db->table_exists('user_reminders')) {
+      $data['reminders'] = $this->db
+        ->where('user_id', $user_id)
+        ->where('is_active', 1)
+        ->order_by('next_reminder_date', 'ASC')
+        ->get('user_reminders')
+        ->result();
+
+      // Check and send email reminders
+      $todayDateTime = new DateTime();
+      foreach ($data['reminders'] as $reminder) {
+        if (!empty($reminder->next_reminder_date)) {
+          $reminderDate = new DateTime($reminder->next_reminder_date);
+          $daysBefore = (int) ($reminder->reminder_days_before ?? 3);
+          $alertDate = clone $reminderDate;
+          $alertDate->sub(new DateInterval('P' . $daysBefore . 'D'));
+
+          // Send email if today is within the reminder window and not already sent today
+          if ($todayDateTime >= $alertDate && $todayDateTime <= $reminderDate) {
+            $lastSent = !empty($reminder->last_sent_date) ? new DateTime($reminder->last_sent_date) : null;
+            
+            // Only send if not sent today
+            if (!$lastSent || $lastSent->format('Y-m-d') !== $todayDateTime->format('Y-m-d')) {
+              $user = $this->db->where('user_id', $user_id)->get('users')->row();
+              if ($user && !empty($user->email)) {
+                $emailSent = $this->sendReminderEmail($reminder, $user->email, $user->fName);
+                
+                if ($emailSent) {
+                  // Update last_sent_date
+                  $this->db->where('reminder_id', $reminder->reminder_id);
+                  $this->db->update('user_reminders', array('last_sent_date' => $todayDateTime->format('Y-m-d')));
+                }
+              }
+            }
+          }
+
+          // Update next_reminder_date if it has passed
+          if ($todayDateTime > $reminderDate) {
+            $nextDate = clone $reminderDate;
+            switch ($reminder->frequency) {
+              case 'daily':
+                $nextDate->add(new DateInterval('P1D'));
+                break;
+              case 'weekly':
+                $nextDate->add(new DateInterval('P7D'));
+                break;
+              case 'monthly':
+                $nextDate->add(new DateInterval('P1M'));
+                break;
+              case 'yearly':
+                $nextDate->add(new DateInterval('P1Y'));
+                break;
+            }
+            
+            // Keep advancing until nextDate is in the future
+            while ($nextDate <= $todayDateTime) {
+              switch ($reminder->frequency) {
+                case 'daily':
+                  $nextDate->add(new DateInterval('P1D'));
+                  break;
+                case 'weekly':
+                  $nextDate->add(new DateInterval('P7D'));
+                  break;
+                case 'monthly':
+                  $nextDate->add(new DateInterval('P1M'));
+                  break;
+                case 'yearly':
+                  $nextDate->add(new DateInterval('P1Y'));
+                  break;
+              }
+            }
+
+            $this->db->where('reminder_id', $reminder->reminder_id);
+            $this->db->update('user_reminders', array(
+              'next_reminder_date' => $nextDate->format('Y-m-d'),
+              'last_sent_date' => null
+            ));
+          }
+        }
+      }
+    }
+
     $timeNotice = '';
     if ($username !== '') {
       $open = $this->db->query("select * from dtr where logDate=? and IDNumber=? and ((amTimeIn!='' and (amTimeOut='' or amTimeOut is null)) or (pmTimeIn!='' and (pmTimeOut='' or pmTimeOut is null))) order by dtrID desc limit 1", [$today, $username])->row();
@@ -5543,6 +6008,148 @@ class Page extends CI_Controller
     $data['time_notice'] = $timeNotice;
 
     $this->load->view('dashboard_staff', $data);
+  }
+
+  function saveReminder()
+  {
+    header('Content-Type: application/json');
+
+    $user_id = $this->session->userdata('user_id');
+    $settingsID = $this->session->userdata('settingsID');
+
+    if (!$user_id || !$settingsID) {
+      echo json_encode(array('success' => false, 'message' => 'Authentication required'));
+      return;
+    }
+
+    if (!$this->db->table_exists('user_reminders')) {
+      echo json_encode(array('success' => false, 'message' => 'Reminders table not found'));
+      return;
+    }
+
+    $reminder_id = (int) $this->input->post('reminder_id');
+    $title = trim((string) $this->input->post('title'));
+    $description = trim((string) $this->input->post('description'));
+    $frequency = trim((string) $this->input->post('frequency'));
+    $start_date = trim((string) $this->input->post('start_date'));
+    $next_reminder_date = trim((string) $this->input->post('next_reminder_date'));
+    $reminder_days_before = (int) $this->input->post('reminder_days_before');
+
+    if ($title === '' || $frequency === '' || $start_date === '') {
+      echo json_encode(array('success' => false, 'message' => 'Title, frequency, and start date are required'));
+      return;
+    }
+
+    if (!in_array($frequency, array('daily', 'weekly', 'monthly', 'yearly'))) {
+      echo json_encode(array('success' => false, 'message' => 'Invalid frequency'));
+      return;
+    }
+
+    $data = array(
+      'user_id' => $user_id,
+      'settingsID' => $settingsID,
+      'title' => $title,
+      'description' => $description,
+      'frequency' => $frequency,
+      'start_date' => $start_date,
+      'next_reminder_date' => $next_reminder_date,
+      'reminder_days_before' => $reminder_days_before > 0 ? $reminder_days_before : 3,
+      'is_active' => 1
+    );
+
+    if ($reminder_id > 0) {
+      // Update existing reminder
+      $this->db->where('reminder_id', $reminder_id);
+      $this->db->where('user_id', $user_id);
+      $result = $this->db->update('user_reminders', $data);
+      $dbError = $this->db->error();
+      if (!$result) {
+        error_log('Update reminder error: ' . print_r($dbError, true));
+        echo json_encode(array('success' => false, 'message' => 'Error saving reminder: ' . ($dbError['message'] ?? 'Unknown error')));
+        return;
+      }
+    } else {
+      // Create new reminder
+      $result = $this->db->insert('user_reminders', $data);
+      $dbError = $this->db->error();
+      if (!$result) {
+        error_log('Insert reminder error: ' . print_r($dbError, true));
+        echo json_encode(array('success' => false, 'message' => 'Error saving reminder: ' . ($dbError['message'] ?? 'Unknown error')));
+        return;
+      }
+    }
+
+    echo json_encode(array('success' => true, 'message' => 'Reminder saved successfully'));
+  }
+
+  function deleteReminder()
+  {
+    header('Content-Type: application/json');
+
+    $user_id = $this->session->userdata('user_id');
+
+    if (!$user_id) {
+      echo json_encode(array('success' => false, 'message' => 'Authentication required'));
+      return;
+    }
+
+    $reminder_id = (int) $this->input->post('reminder_id');
+
+    if ($reminder_id <= 0) {
+      echo json_encode(array('success' => false, 'message' => 'Invalid reminder ID'));
+      return;
+    }
+
+    $this->db->where('reminder_id', $reminder_id);
+    $this->db->where('user_id', $user_id);
+    $result = $this->db->delete('user_reminders');
+
+    if ($result) {
+      echo json_encode(array('success' => true, 'message' => 'Reminder deleted successfully'));
+    } else {
+      echo json_encode(array('success' => false, 'message' => 'Error deleting reminder'));
+    }
+  }
+
+  private function sendReminderEmail($reminder, $user_email, $user_name)
+  {
+    $this->load->library('email');
+    $this->load->config('email');
+
+    $daysDiff = 0;
+    if (!empty($reminder->next_reminder_date)) {
+      $reminderDate = new DateTime($reminder->next_reminder_date);
+      $today = new DateTime();
+      $diff = $today->diff($reminderDate);
+      $daysDiff = $diff->days;
+    }
+
+    $message = $this->load->view('email/reminder_notification', array(
+      'user_name' => $user_name,
+      'reminder_title' => $reminder->title,
+      'reminder_description' => $reminder->description,
+      'reminder_date' => $reminder->next_reminder_date,
+      'days_remaining' => $daysDiff,
+      'frequency' => $reminder->frequency
+    ), true);
+
+    $fromAddress = $this->config->item('smtp_user');
+    if (empty($fromAddress)) {
+      $fromAddress = 'no-reply@' . parse_url(base_url(), PHP_URL_HOST);
+    }
+
+    $this->email->from($fromAddress, 'BERPS');
+    $this->email->to($user_email);
+    $this->email->subject('Reminder: ' . $reminder->title);
+    $this->email->message($message);
+
+    $result = $this->email->send();
+
+    if (!$result) {
+      log_message('error', 'Reminder email send failed: ' . $this->email->print_debugger(array('headers')));
+    }
+
+    return $result;
   }
 
   public function clientDashboard()

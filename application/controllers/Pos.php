@@ -88,6 +88,115 @@ class Pos extends CI_Controller
 
     $data = $this->_pos_dashboard_data();
     $data['page_title'] = 'POS Admin Panel';
+
+    // Auto-create user_reminders table if it doesn't exist
+    if (!$this->db->table_exists('user_reminders')) {
+      $this->db->query("CREATE TABLE IF NOT EXISTS `user_reminders` (
+        `reminder_id` int(11) NOT NULL AUTO_INCREMENT,
+        `user_id` int(11) NOT NULL,
+        `settingsID` int(11) NOT NULL,
+        `title` varchar(255) NOT NULL,
+        `description` text,
+        `frequency` enum('daily','weekly','monthly','yearly') NOT NULL,
+        `start_date` date NOT NULL,
+        `next_reminder_date` date NOT NULL,
+        `reminder_days_before` int(11) DEFAULT 3,
+        `is_active` tinyint(1) DEFAULT 1,
+        `last_sent_date` date DEFAULT NULL,
+        `created_at` timestamp DEFAULT CURRENT_TIMESTAMP,
+        `updated_at` timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        PRIMARY KEY (`reminder_id`),
+        KEY `user_id` (`user_id`),
+        KEY `settingsID` (`settingsID`),
+        KEY `next_reminder_date` (`next_reminder_date`)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+    }
+
+    // Get user reminders and send email notifications
+    $user_id = $this->session->userdata('user_id');
+    $data['reminders'] = array();
+    if ($this->db->table_exists('user_reminders') && $user_id) {
+      $data['reminders'] = $this->db
+        ->where('user_id', $user_id)
+        ->where('is_active', 1)
+        ->order_by('next_reminder_date', 'ASC')
+        ->get('user_reminders')
+        ->result();
+
+      // Check and send email reminders
+      $todayDateTime = new DateTime();
+      foreach ($data['reminders'] as $reminder) {
+        if (!empty($reminder->next_reminder_date)) {
+          $reminderDate = new DateTime($reminder->next_reminder_date);
+          $daysBefore = (int) ($reminder->reminder_days_before ?? 3);
+          $alertDate = clone $reminderDate;
+          $alertDate->sub(new DateInterval('P' . $daysBefore . 'D'));
+
+          // Send email if today is within the reminder window and not already sent today
+          if ($todayDateTime >= $alertDate && $todayDateTime <= $reminderDate) {
+            $lastSent = !empty($reminder->last_sent_date) ? new DateTime($reminder->last_sent_date) : null;
+            
+            // Only send if not sent today
+            if (!$lastSent || $lastSent->format('Y-m-d') !== $todayDateTime->format('Y-m-d')) {
+              $user = $this->db->where('user_id', $user_id)->get('users')->row();
+              if ($user && !empty($user->email)) {
+                $emailSent = $this->sendReminderEmail($reminder, $user->email, $user->fName);
+                
+                if ($emailSent) {
+                  // Update last_sent_date
+                  $this->db->where('reminder_id', $reminder->reminder_id);
+                  $this->db->update('user_reminders', array('last_sent_date' => $todayDateTime->format('Y-m-d')));
+                }
+              }
+            }
+          }
+
+          // Update next_reminder_date if it has passed
+          if ($todayDateTime > $reminderDate) {
+            $nextDate = clone $reminderDate;
+            switch ($reminder->frequency) {
+              case 'daily':
+                $nextDate->add(new DateInterval('P1D'));
+                break;
+              case 'weekly':
+                $nextDate->add(new DateInterval('P7D'));
+                break;
+              case 'monthly':
+                $nextDate->add(new DateInterval('P1M'));
+                break;
+              case 'yearly':
+                $nextDate->add(new DateInterval('P1Y'));
+                break;
+            }
+            
+            // Keep advancing until nextDate is in the future
+            while ($nextDate <= $todayDateTime) {
+              switch ($reminder->frequency) {
+                case 'daily':
+                  $nextDate->add(new DateInterval('P1D'));
+                  break;
+                case 'weekly':
+                  $nextDate->add(new DateInterval('P7D'));
+                  break;
+                case 'monthly':
+                  $nextDate->add(new DateInterval('P1M'));
+                  break;
+                case 'yearly':
+                  $nextDate->add(new DateInterval('P1Y'));
+                  break;
+              }
+            }
+
+            $this->db->where('reminder_id', $reminder->reminder_id);
+            $this->db->update('user_reminders', array(
+              'next_reminder_date' => $nextDate->format('Y-m-d'),
+              'last_sent_date' => null
+            ));
+          }
+        }
+      }
+    }
+
     $this->load->view('dashboard_pos_admin', $data);
   }
 
@@ -1228,6 +1337,47 @@ class Pos extends CI_Controller
         'status' => $status,
         'edit_url' => base_url('Pos/posEditProduct/' . (int) ($row->id ?? 0)),
       ];
+    }
+
+    return $result;
+  }
+
+  private function sendReminderEmail($reminder, $user_email, $user_name)
+  {
+    $this->load->library('email');
+    $this->load->config('email');
+
+    $daysDiff = 0;
+    if (!empty($reminder->next_reminder_date)) {
+      $reminderDate = new DateTime($reminder->next_reminder_date);
+      $today = new DateTime();
+      $diff = $today->diff($reminderDate);
+      $daysDiff = $diff->days;
+    }
+
+    $message = $this->load->view('email/reminder_notification', array(
+      'user_name' => $user_name,
+      'reminder_title' => $reminder->title,
+      'reminder_description' => $reminder->description,
+      'reminder_date' => $reminder->next_reminder_date,
+      'days_remaining' => $daysDiff,
+      'frequency' => $reminder->frequency
+    ), true);
+
+    $fromAddress = $this->config->item('smtp_user');
+    if (empty($fromAddress)) {
+      $fromAddress = 'no-reply@' . parse_url(base_url(), PHP_URL_HOST);
+    }
+
+    $this->email->from($fromAddress, 'BERPS');
+    $this->email->to($user_email);
+    $this->email->subject('Reminder: ' . $reminder->title);
+    $this->email->message($message);
+
+    $result = $this->email->send();
+
+    if (!$result) {
+      log_message('error', 'Reminder email send failed: ' . $this->email->print_debugger(array('headers')));
     }
 
     return $result;

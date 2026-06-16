@@ -5,7 +5,14 @@ class Login_model extends CI_Model
 
     public function get_user_by_username($username)
     {
-        return $this->db->get_where('users', ['username' => $username])->row();
+        $user = $this->db->get_where('users', ['username' => $username])->row();
+        
+        // If not found by username, try finding by email (since email is used as username for new users)
+        if (!$user) {
+            $user = $this->db->get_where('users', ['email' => $username])->row();
+        }
+        
+        return $user;
     }
 
     public function get_client_by_identifier($identifier, $settingsID = null)

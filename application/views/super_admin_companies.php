@@ -206,6 +206,9 @@ if (!isset($billingModes['company'])) {
                                                     <button class="btn btn-sm btn-outline-primary manage-admins" data-settings-id="<?= (int) ($company->settingsID ?? 0); ?>" title="Manage Admins">
                                                         <i class="mdi mdi-account-key"></i> Admins
                                                     </button>
+                                                    <button class="btn btn-sm btn-outline-secondary manage-users" data-settings-id="<?= (int) ($company->settingsID ?? 0); ?>" title="Manage Users">
+                                                        <i class="mdi mdi-account-group"></i> Users
+                                                    </button>
                                                     <button class="btn btn-sm btn-outline-success configure-features" data-settings-id="<?= (int) ($company->settingsID ?? 0); ?>" title="Configure Features">
                                                         <i class="mdi mdi-cog"></i> Features
                                                     </button>
@@ -328,6 +331,7 @@ if (!isset($billingModes['company'])) {
             const saveCompanyUrl = '<?= site_url("Page/saveCompany"); ?>';
             const generateActivationKeyUrl = '<?= site_url("Page/generateBranchActivationKey"); ?>';
             const superAdminAdminsUrl = '<?= site_url("Page/superAdminAdmins"); ?>';
+            const superAdminUsersUrl = '<?= site_url("Page/superAdminUsers"); ?>';
             const superAdminCompanyFeaturesUrl = '<?= site_url("Page/superAdminCompanyFeatures"); ?>';
             const superAdminCompanyBillingUrl = '<?= site_url("Page/superAdminCompanyBilling"); ?>';
             const $billingMode = $('#billingMode');
@@ -384,6 +388,11 @@ if (!isset($billingModes['company'])) {
             $(document).on('click', '.manage-admins', function() {
                 const settingsID = $(this).data('settings-id');
                 window.location.href = superAdminAdminsUrl + '?settingsID=' + encodeURIComponent(settingsID);
+            });
+
+            $(document).on('click', '.manage-users', function() {
+                const settingsID = $(this).data('settings-id');
+                window.location.href = superAdminUsersUrl + '?settingsID=' + encodeURIComponent(settingsID);
             });
 
             $(document).on('click', '.configure-features', function() {
