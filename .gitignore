@@ -1,0 +1,11 @@
+# macOS
+.DS_Store
+**/.DS_Store
+__MACOSX/
+.AppleDouble
+.LSOverride
+.Spotlight-V100
+.Trashes
+
+# CodeIgniter session files (keep the dir, its .htaccess and index.html)
+application/sessions/ci_session*
