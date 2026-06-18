@@ -320,7 +320,14 @@ if ($calendarSettingsID > 0 && in_array($calendarLevel, array('admin', 'staff', 
                                 <div>
                                     <h5 class="mb-1">Calendar</h5>
                                 </div>
-                                <div class="d-flex gap-2 mt-2 mt-sm-0">
+                                <div class="d-flex gap-2 mt-2 mt-sm-0 align-items-center">
+                                    <div class="mr-2">
+                                        <select class="form-control form-control-sm" id="eventTypeFilter" style="width: auto;">
+                                            <option value="all">All Events</option>
+                                            <option value="work">Work-Related</option>
+                                            <option value="personal">Personal</option>
+                                        </select>
+                                    </div>
                                     <a class="btn btn-outline-info btn-sm" href="<?= base_url('Calendar/event_types'); ?>">
                                         <i class="mdi mdi-calendar-clock mr-1"></i> Event Types
                                     </a>
@@ -489,7 +496,13 @@ if ($calendarSettingsID > 0 && in_array($calendarLevel, array('admin', 'staff', 
                                 </fieldset>
                             </div>
 
-                            <input type="hidden" name="event_type" id="eventType" value="default">
+                            <div class="col-md-12 mb-3">
+                                <label class="font-weight-bold">Event Type *</label>
+                                <select class="form-control" name="event_type" id="eventType" required>
+                                    <option value="work">Work-Related</option>
+                                    <option value="personal">Personal</option>
+                                </select>
+                            </div>
                             <input type="hidden" name="event_id" id="eventId">
                         </div>
                     </form>
@@ -539,6 +552,12 @@ if ($calendarSettingsID > 0 && in_array($calendarLevel, array('admin', 'staff', 
                 } else {
                     $taskFields.hide();
                 }
+            });
+
+            // Event type filter
+            $('#eventTypeFilter').on('change', function() {
+                const filter = $(this).val();
+                calendar.refetchEvents();
             });
 
             function loadProjects() {
@@ -633,7 +652,7 @@ if ($calendarSettingsID > 0 && in_array($calendarLevel, array('admin', 'staff', 
                 $eventForm[0].reset();
                 $('#eventId').val('');
                 $('#eventColor').val('#dc3545');
-                $('#eventType').val('default');
+                $('#eventType').val('work');
                 $('#eventDescription').val('');
                 $('#eventNotes').val('');
                 $('#eventLocation').val('');
@@ -782,7 +801,28 @@ if ($calendarSettingsID > 0 && in_array($calendarLevel, array('admin', 'staff', 
                 allDaySlot: true,
                 height: window.innerWidth < 768 ? 'auto' : 'auto',
                 aspectRatio: window.innerWidth < 768 ? 1.35 : 1.35,
-                events: '<?= site_url("calendar/get_events") ?>',
+                events: function(info, successCallback, failureCallback) {
+                    const filter = $('#eventTypeFilter').val();
+                    const url = '<?= site_url("calendar/get_events") ?>';
+                    const params = new URLSearchParams({
+                        start: info.startStr,
+                        end: info.endStr,
+                        event_type: filter
+                    });
+
+                    fetch(url + '?' + params.toString())
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.error) {
+                                failureCallback(data.error);
+                            } else {
+                                successCallback(data);
+                            }
+                        })
+                        .catch(error => {
+                            failureCallback(error);
+                        });
+                },
 
                 eventDataTransform(raw) {
                     const color = raw.color || '#dc3545';

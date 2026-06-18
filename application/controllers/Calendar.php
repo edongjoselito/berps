@@ -69,11 +69,12 @@ class Calendar extends CI_Controller {
 
     public function get_events() {
         header('Content-Type: application/json');
-        
+
         $user_id = $this->session->userdata('user_id');
         $settingsID = $this->session->userdata('settingsID');
         $start = $this->input->get('start');
         $end = $this->input->get('end');
+        $event_type_filter = $this->input->get('event_type');
 
         // Check if user is logged in
         if (!$user_id) {
@@ -92,10 +93,16 @@ class Calendar extends CI_Controller {
             $date_filter_start = $start ? "AND start_date >= '$start'" : '';
             $date_filter_end   = $end   ? "AND end_date <= '$end'"     : '';
 
+            // Event type filter
+            $type_filter = '';
+            if ($event_type_filter && $event_type_filter !== 'all') {
+                $type_filter = "AND event_type = '$event_type_filter'";
+            }
+
             $sql = "
                 SELECT *, 1 AS own FROM calendar_events
                 WHERE user_id = ? AND settingsID = ? AND status = 'active'
-                $date_filter_start $date_filter_end
+                $date_filter_start $date_filter_end $type_filter
 
                 ORDER BY start_date ASC
             ";
