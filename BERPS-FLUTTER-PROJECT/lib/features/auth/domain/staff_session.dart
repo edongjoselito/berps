@@ -11,6 +11,7 @@ class StaffSession {
     required this.position,
     required this.avatarUrl,
     required this.settingsId,
+    this.features = const <String>[],
   });
 
   final String baseUrl;
@@ -25,6 +26,50 @@ class StaffSession {
   final String avatarUrl;
   final int settingsId;
 
+  /// Enabled company feature keys for this workspace. Mirrors the web sidebar
+  /// gating (`company_features`). An empty list means "no restrictions" — the
+  /// account has full access to every module.
+  final List<String> features;
+
+  // ── Feature gating ─────────────────────────────────────────────────────────
+
+  static const _payrollFeatures = {
+    'payroll',
+    'employee_payroll',
+    'salary_computation',
+    'payroll_reports',
+  };
+
+  /// True when the workspace restricts modules to an explicit feature set.
+  bool get hasFeatureRestrictions => features.isNotEmpty;
+
+  /// Whether [key] is available. Unrestricted workspaces allow everything.
+  bool hasFeature(String key) =>
+      !hasFeatureRestrictions || features.contains(key);
+
+  bool get hasTasks => hasFeature('tasks');
+  bool get hasCalendar => hasFeature('calendar');
+  bool get hasNotes => hasFeature('notes');
+  bool get hasSupport => hasFeature('support');
+
+  /// Reminders are date/time based and ride along with the calendar feature.
+  bool get hasReminders => hasCalendar;
+
+  /// Attendance/DTR is only surfaced when there are no restrictions or the
+  /// workspace has a payroll-family feature (matches the web sidebar).
+  bool get hasAttendance =>
+      !hasFeatureRestrictions || features.any(_payrollFeatures.contains);
+
+  /// "Package 2" = the Task Management Suite (tasks + notes + calendar only).
+  bool get isPackage2 =>
+      hasFeatureRestrictions &&
+      features.length == 3 &&
+      features.toSet().containsAll(const {'tasks', 'notes', 'calendar'});
+
+  bool get hasMyDtr => hasAttendance && !isPackage2;
+  bool get hasRanking => hasTasks && !isPackage2;
+  bool get hasForwardedTasks => hasTasks && !isPackage2;
+
   /// "Lastname, Firstname" — falls back gracefully when one side is missing.
   String get formalName {
     final f = firstName.trim();
@@ -33,6 +78,16 @@ class StaffSession {
     if (l.isEmpty) return f;
     if (f.isEmpty) return l;
     return '$l, $f';
+  }
+
+  static List<String> _parseFeatures(dynamic value) {
+    if (value is List) {
+      return value
+          .map((e) => e.toString().trim())
+          .where((e) => e.isNotEmpty)
+          .toList(growable: false);
+    }
+    return const <String>[];
   }
 
   factory StaffSession.fromApi(
@@ -56,6 +111,7 @@ class StaffSession {
       position: (user['position'] ?? '').toString(),
       avatarUrl: (user['avatar_url'] ?? '').toString(),
       settingsId: int.tryParse((user['settings_id'] ?? '0').toString()) ?? 0,
+      features: _parseFeatures(user['features']),
     );
   }
 
@@ -72,6 +128,7 @@ class StaffSession {
       position: (json['position'] ?? '').toString(),
       avatarUrl: (json['avatarUrl'] ?? '').toString(),
       settingsId: int.tryParse((json['settingsId'] ?? '0').toString()) ?? 0,
+      features: _parseFeatures(json['features']),
     );
   }
 
@@ -95,6 +152,7 @@ class StaffSession {
       position: position ?? this.position,
       avatarUrl: avatarUrl ?? this.avatarUrl,
       settingsId: settingsId,
+      features: features,
     );
   }
 
@@ -110,5 +168,6 @@ class StaffSession {
         'position': position,
         'avatarUrl': avatarUrl,
         'settingsId': settingsId,
+        'features': features,
       };
 }

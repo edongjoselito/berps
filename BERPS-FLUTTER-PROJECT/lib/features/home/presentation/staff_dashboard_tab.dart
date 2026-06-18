@@ -29,6 +29,9 @@ class StaffDashboardTab extends StatefulWidget {
     required this.onOpenForwardedTasks,
     required this.onOpenUnassignedTickets,
     required this.onOpenSupportTickets,
+    required this.onOpenReminders,
+    required this.onOpenCalendar,
+    required this.onOpenNotes,
   });
 
   final StaffSession session;
@@ -39,6 +42,9 @@ class StaffDashboardTab extends StatefulWidget {
   final VoidCallback onOpenForwardedTasks;
   final VoidCallback onOpenUnassignedTickets;
   final VoidCallback onOpenSupportTickets;
+  final VoidCallback onOpenReminders;
+  final VoidCallback onOpenCalendar;
+  final VoidCallback onOpenNotes;
 
   @override
   State<StaffDashboardTab> createState() => _StaffDashboardTabState();
@@ -151,12 +157,16 @@ class _StaffDashboardTabState extends State<StaffDashboardTab> {
               else
                 _DashboardContent(
                   data: snapshot.data!,
+                  session: widget.session,
                   rankingFuture: _rankingFuture,
                   onOpenTasks: widget.onOpenTasks,
                   onOpenMyDtr: widget.onOpenMyDtr,
                   onOpenForwardedTasks: widget.onOpenForwardedTasks,
                   onOpenUnassignedTickets: widget.onOpenUnassignedTickets,
                   onOpenSupportTickets: widget.onOpenSupportTickets,
+                  onOpenReminders: widget.onOpenReminders,
+                  onOpenCalendar: widget.onOpenCalendar,
+                  onOpenNotes: widget.onOpenNotes,
                 ),
             ],
           );
@@ -308,49 +318,158 @@ class _GreetingCard extends StatelessWidget {
 class _DashboardContent extends StatelessWidget {
   const _DashboardContent({
     required this.data,
+    required this.session,
     required this.rankingFuture,
     required this.onOpenTasks,
     required this.onOpenMyDtr,
     required this.onOpenForwardedTasks,
     required this.onOpenUnassignedTickets,
     required this.onOpenSupportTickets,
+    required this.onOpenReminders,
+    required this.onOpenCalendar,
+    required this.onOpenNotes,
   });
 
   final StaffDashboard data;
+  final StaffSession session;
   final Future<StaffRanking> rankingFuture;
   final VoidCallback onOpenTasks;
   final VoidCallback onOpenMyDtr;
   final VoidCallback onOpenForwardedTasks;
   final VoidCallback onOpenUnassignedTickets;
   final VoidCallback onOpenSupportTickets;
+  final VoidCallback onOpenReminders;
+  final VoidCallback onOpenCalendar;
+  final VoidCallback onOpenNotes;
 
   @override
   Widget build(BuildContext context) {
+    // Quick actions are gated by the workspace's enabled features so restricted
+    // staff don't see attendance/support shortcuts they can't use.
+    final quickActions = <_QuickAction>[
+      if (session.hasMyDtr)
+        _QuickAction(
+          label: 'My DTR',
+          sublabel: 'This month',
+          icon: PhosphorIconsBold.calendarCheck,
+          accent: AppTheme.primaryDark,
+          onTap: onOpenMyDtr,
+        ),
+      if (session.hasReminders)
+        _QuickAction(
+          label: 'Reminders',
+          sublabel: data.remindersDueTodayCount == 0
+              ? 'Stay on track'
+              : '${data.remindersDueTodayCount} due today',
+          icon: PhosphorIconsBold.bellRinging,
+          accent: AppTheme.accent,
+          badge: data.remindersDueTodayCount > 0
+              ? '${data.remindersDueTodayCount}'
+              : null,
+          onTap: onOpenReminders,
+        ),
+      if (session.hasCalendar)
+        _QuickAction(
+          label: 'Calendar',
+          sublabel: 'Events',
+          icon: PhosphorIconsBold.calendarBlank,
+          accent: AppTheme.primary,
+          onTap: onOpenCalendar,
+        ),
+      if (session.hasNotes)
+        _QuickAction(
+          label: 'Notes',
+          sublabel: 'Your notes',
+          icon: PhosphorIconsBold.notebook,
+          accent: AppTheme.primaryDark,
+          onTap: onOpenNotes,
+        ),
+      if (session.hasForwardedTasks)
+        _QuickAction(
+          label: 'Forwarded',
+          sublabel: data.forwardedTaskCount == 0
+              ? 'Inbox empty'
+              : '${data.forwardedTaskCount} waiting',
+          icon: PhosphorIconsBold.arrowsLeftRight,
+          accent: AppTheme.warning,
+          badge: data.forwardedTaskCount > 0
+              ? '${data.forwardedTaskCount}'
+              : null,
+          onTap: onOpenForwardedTasks,
+        ),
+      if (session.hasSupport)
+        _QuickAction(
+          label: 'Unassigned',
+          sublabel: data.unassignedSupportCount == 0
+              ? 'Support queue'
+              : '${data.unassignedSupportCount} waiting',
+          icon: PhosphorIconsBold.userMinus,
+          accent: AppTheme.danger,
+          badge: data.unassignedSupportCount > 0
+              ? '${data.unassignedSupportCount}'
+              : null,
+          onTap: onOpenUnassignedTickets,
+        ),
+      if (session.hasSupport)
+        _QuickAction(
+          label: 'Tickets',
+          sublabel: 'All support',
+          icon: PhosphorIconsBold.lifebuoy,
+          accent: AppTheme.primary,
+          onTap: onOpenSupportTickets,
+        ),
+    ];
+
+    final metricCards = <_MetricCardData>[
+      _MetricCardData(
+        label: 'Done Today',
+        value: '${data.accomplishmentsToday}',
+        icon: PhosphorIconsBold.checkCircle,
+        accent: AppTheme.success,
+      ),
+      if (session.hasAttendance)
+        _MetricCardData(
+          label: 'Hours Today',
+          value: data.todayHoursLabel,
+          icon: PhosphorIconsBold.clockCounterClockwise,
+          accent: AppTheme.primary,
+        ),
+      _MetricCardData(
+        label: 'Due Today',
+        value: '${data.tasksDueToday}',
+        icon: PhosphorIconsBold.calendarDot,
+        accent: AppTheme.accent,
+      ),
+      _MetricCardData(
+        label: 'Overdue',
+        value: '${data.tasksOverdue}',
+        icon: PhosphorIconsBold.warningCircle,
+        accent: AppTheme.danger,
+      ),
+    ];
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        FadeSlide(
-          delay: const Duration(milliseconds: 90),
-          child: _QuickActionsStrip(
-            forwardedCount: data.forwardedTaskCount,
-            unassignedCount: data.unassignedSupportCount,
-            onOpenMyDtr: onOpenMyDtr,
-            onOpenForwardedTasks: onOpenForwardedTasks,
-            onOpenUnassignedTickets: onOpenUnassignedTickets,
-            onOpenSupportTickets: onOpenSupportTickets,
+        if (quickActions.isNotEmpty) ...[
+          FadeSlide(
+            delay: const Duration(milliseconds: 90),
+            child: _QuickActionsStrip(actions: quickActions),
           ),
-        ),
-        const SizedBox(height: 20),
-        FadeSlide(
-          delay: const Duration(milliseconds: 105),
-          child: _DtrPreviewCard(
-            statusLabel: data.attendanceStatusLabel,
-            hoursLabel: data.todayHoursLabel,
-            notice: data.attendanceNotice,
-            onViewDtr: onOpenMyDtr,
+          const SizedBox(height: 20),
+        ],
+        if (session.hasAttendance) ...[
+          FadeSlide(
+            delay: const Duration(milliseconds: 105),
+            child: _DtrPreviewCard(
+              statusLabel: data.attendanceStatusLabel,
+              hoursLabel: data.todayHoursLabel,
+              notice: data.attendanceNotice,
+              onViewDtr: onOpenMyDtr,
+            ),
           ),
-        ),
-        const SizedBox(height: 20),
+          const SizedBox(height: 20),
+        ],
         FadeSlide(
           delay: const Duration(milliseconds: 120),
           child: const _SectionHeader(title: 'Snapshot'),
@@ -358,135 +477,71 @@ class _DashboardContent extends StatelessWidget {
         const SizedBox(height: 12),
         FadeSlide(
           delay: const Duration(milliseconds: 180),
-          child: _MetricGrid(
-            cards: [
-              _MetricCardData(
-                label: 'Done Today',
-                value: '${data.accomplishmentsToday}',
-                icon: PhosphorIconsBold.checkCircle,
-                accent: AppTheme.success,
-              ),
-              _MetricCardData(
-                label: 'Hours Today',
-                value: data.todayHoursLabel,
-                icon: PhosphorIconsBold.clockCounterClockwise,
-                accent: AppTheme.primary,
-              ),
-              _MetricCardData(
-                label: 'Due Today',
-                value: '${data.tasksDueToday}',
-                icon: PhosphorIconsBold.calendarDot,
-                accent: AppTheme.accent,
-              ),
-              _MetricCardData(
-                label: 'Overdue',
-                value: '${data.tasksOverdue}',
-                icon: PhosphorIconsBold.warningCircle,
-                accent: AppTheme.danger,
-              ),
-            ],
-          ),
+          child: _MetricGrid(cards: metricCards),
         ),
         if (data.remindersDueTodayCount > 0) ...[
           const SizedBox(height: 12),
           FadeSlide(
             delay: const Duration(milliseconds: 240),
-            child: _RemindersBanner(count: data.remindersDueTodayCount),
+            child: _RemindersBanner(
+              count: data.remindersDueTodayCount,
+              onTap: session.hasReminders ? onOpenReminders : null,
+            ),
           ),
         ],
-        const SizedBox(height: 20),
-        FadeSlide(
-          delay: const Duration(milliseconds: 300),
-          child: FutureBuilder<StaffRanking>(
-            future: rankingFuture,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const _RankingSkeleton();
-              }
-              if (snapshot.hasError || !snapshot.hasData) {
-                return _RankingFallback(
-                  message: snapshot.error is ApiException
-                      ? (snapshot.error as ApiException).message
-                      : 'Ranking unavailable right now.',
-                );
-              }
-              return _LeaderboardCard(ranking: snapshot.data!);
-            },
+        if (session.hasRanking) ...[
+          const SizedBox(height: 20),
+          FadeSlide(
+            delay: const Duration(milliseconds: 300),
+            child: FutureBuilder<StaffRanking>(
+              future: rankingFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const _RankingSkeleton();
+                }
+                if (snapshot.hasError || !snapshot.hasData) {
+                  return _RankingFallback(
+                    message: snapshot.error is ApiException
+                        ? (snapshot.error as ApiException).message
+                        : 'Ranking unavailable right now.',
+                  );
+                }
+                return _LeaderboardCard(ranking: snapshot.data!);
+              },
+            ),
           ),
-        ),
-        const SizedBox(height: 20),
-        FadeSlide(
-          delay: const Duration(milliseconds: 340),
-          child: _SectionHeader(
-            title: 'In Progress',
-            action: _ViewAllLink(onTap: onOpenTasks),
+        ],
+        if (session.hasTasks) ...[
+          const SizedBox(height: 20),
+          FadeSlide(
+            delay: const Duration(milliseconds: 340),
+            child: _SectionHeader(
+              title: 'In Progress',
+              action: _ViewAllLink(onTap: onOpenTasks),
+            ),
           ),
-        ),
-        const SizedBox(height: 12),
-        FadeSlide(
-          delay: const Duration(milliseconds: 360),
-          child: _TaskPanel(tasks: data.ongoingTasks, onOpenTasks: onOpenTasks),
-        ),
+          const SizedBox(height: 12),
+          FadeSlide(
+            delay: const Duration(milliseconds: 360),
+            child: _TaskPanel(
+              tasks: data.ongoingTasks,
+              onOpenTasks: onOpenTasks,
+            ),
+          ),
+        ],
       ],
     );
   }
 }
 
 class _QuickActionsStrip extends StatelessWidget {
-  const _QuickActionsStrip({
-    required this.forwardedCount,
-    required this.unassignedCount,
-    required this.onOpenMyDtr,
-    required this.onOpenForwardedTasks,
-    required this.onOpenUnassignedTickets,
-    required this.onOpenSupportTickets,
-  });
+  const _QuickActionsStrip({required this.actions});
 
-  final int forwardedCount;
-  final int unassignedCount;
-  final VoidCallback onOpenMyDtr;
-  final VoidCallback onOpenForwardedTasks;
-  final VoidCallback onOpenUnassignedTickets;
-  final VoidCallback onOpenSupportTickets;
+  final List<_QuickAction> actions;
 
   @override
   Widget build(BuildContext context) {
-    final items = <_QuickAction>[
-      _QuickAction(
-        label: 'My DTR',
-        sublabel: 'This month',
-        icon: PhosphorIconsBold.calendarCheck,
-        accent: AppTheme.primaryDark,
-        onTap: onOpenMyDtr,
-      ),
-      _QuickAction(
-        label: 'Forwarded',
-        sublabel: forwardedCount == 0
-            ? 'Inbox empty'
-            : '$forwardedCount waiting',
-        icon: PhosphorIconsBold.arrowsLeftRight,
-        accent: AppTheme.warning,
-        badge: forwardedCount > 0 ? '$forwardedCount' : null,
-        onTap: onOpenForwardedTasks,
-      ),
-      _QuickAction(
-        label: 'Unassigned',
-        sublabel: unassignedCount == 0
-            ? 'Support queue'
-            : '$unassignedCount waiting',
-        icon: PhosphorIconsBold.userMinus,
-        accent: AppTheme.danger,
-        badge: unassignedCount > 0 ? '$unassignedCount' : null,
-        onTap: onOpenUnassignedTickets,
-      ),
-      _QuickAction(
-        label: 'Tickets',
-        sublabel: 'All support',
-        icon: PhosphorIconsBold.lifebuoy,
-        accent: AppTheme.primary,
-        onTap: onOpenSupportTickets,
-      ),
-    ];
+    final items = actions;
 
     return Container(
       padding: const EdgeInsets.fromLTRB(8, 8, 8, 8),
@@ -993,12 +1048,13 @@ class _MetricCard extends StatelessWidget {
 }
 
 class _RemindersBanner extends StatelessWidget {
-  const _RemindersBanner({required this.count});
+  const _RemindersBanner({required this.count, this.onTap});
   final int count;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    final banner = Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
         color: AppTheme.accentSoft,
@@ -1031,9 +1087,18 @@ class _RemindersBanner extends StatelessWidget {
               ),
             ),
           ),
+          if (onTap != null)
+            const Icon(
+              PhosphorIconsBold.caretRight,
+              color: AppTheme.accent,
+              size: 14,
+            ),
         ],
       ),
     );
+
+    if (onTap == null) return banner;
+    return PressScale(onTap: onTap!, child: banner);
   }
 }
 

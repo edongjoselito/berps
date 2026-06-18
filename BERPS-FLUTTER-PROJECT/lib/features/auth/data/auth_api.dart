@@ -125,6 +125,32 @@ class AuthApi {
     );
   }
 
+  /// Creates a new self-service company account. Returns the server message
+  /// (e.g. whether the confirmation email was sent).
+  Future<String> signup({
+    required String baseUrl,
+    required String firstName,
+    required String lastName,
+    required String email,
+    required String password,
+  }) async {
+    final response = await _safeRequest(
+      () => _client.post(
+        _uri(baseUrl, '/api/mobile/auth/signup'),
+        headers: _headers,
+        body: jsonEncode({
+          'first_name': firstName,
+          'last_name': lastName,
+          'email': email,
+          'password': password,
+        }),
+      ),
+    );
+
+    final data = _decode(response);
+    return (data['message'] ?? 'Account created.').toString();
+  }
+
   Future<StaffSession> fetchCurrentSession({
     required String baseUrl,
     required String token,

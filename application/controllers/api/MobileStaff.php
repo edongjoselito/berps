@@ -3698,6 +3698,475 @@ class MobileStaff extends CI_Controller
         ];
     }
 
+    // ── Notes ───────────────────────────────────────────────────────────────
+
+    public function notes()
+    {
+        if ($this->_method() === 'OPTIONS') {
+            return mobile_json(['ok' => true]);
+        }
+        if ($this->_method() !== 'GET') {
+            return mobile_json(['ok' => false, 'message' => 'Method not allowed.'], 405);
+        }
+
+        $claims = $this->_require_staff_claims();
+        if ($claims === null) {
+            return;
+        }
+
+        $settingsID = (int) ($claims['settingsID'] ?? 0);
+        $username   = trim((string) ($claims['username'] ?? ''));
+
+        $rows = $this->CashModel->noteList($username, $settingsID);
+        $notes = [];
+        foreach ((array) $rows as $row) {
+            $notes[] = $this->_note_payload($row);
+        }
+
+        return mobile_json([
+            'ok'    => true,
+            'notes' => $notes,
+        ]);
+    }
+
+    public function createNote()
+    {
+        if ($this->_method() === 'OPTIONS') {
+            return mobile_json(['ok' => true]);
+        }
+        if ($this->_method() !== 'POST') {
+            return mobile_json(['ok' => false, 'message' => 'Method not allowed.'], 405);
+        }
+
+        $claims = $this->_require_staff_claims();
+        if ($claims === null) {
+            return;
+        }
+
+        date_default_timezone_set('Asia/Manila');
+
+        $payload    = $this->_read_payload();
+        $settingsID = (int) ($claims['settingsID'] ?? 0);
+        $username   = trim((string) ($claims['username'] ?? ''));
+
+        $title       = trim((string) ($payload['title'] ?? ''));
+        $description = trim((string) ($payload['description'] ?? $payload['noteDescription'] ?? ''));
+        $tags        = $this->_normalize_tags($payload['tags'] ?? '');
+
+        if ($title === '' && $description === '') {
+            return mobile_json(['ok' => false, 'message' => 'Please enter a note title or description.'], 422);
+        }
+
+        if (!$this->db->field_exists('tags', 'notes')) {
+            $this->db->query("ALTER TABLE notes ADD COLUMN tags VARCHAR(255) DEFAULT NULL");
+        }
+
+        $this->db->insert('notes', [
+            'noteDate'        => date('Y-m-d'),
+            'title'           => $title,
+            'noteDescription' => $description,
+            'tags'            => $tags,
+            'notedBy'         => $username,
+            'settingsID'      => $settingsID,
+            'noteStat'        => 'Active',
+        ]);
+
+        $noteId = (int) $this->db->insert_id();
+        if ($noteId <= 0) {
+            return mobile_json(['ok' => false, 'message' => 'Unable to save the note.'], 500);
+        }
+
+        return mobile_json([
+            'ok'      => true,
+            'message' => 'Note saved successfully.',
+            'note_id' => $noteId,
+        ]);
+    }
+
+    public function updateNote($noteId)
+    {
+        if ($this->_method() === 'OPTIONS') {
+            return mobile_json(['ok' => true]);
+        }
+        if ($this->_method() !== 'POST') {
+            return mobile_json(['ok' => false, 'message' => 'Method not allowed.'], 405);
+        }
+
+        $claims = $this->_require_staff_claims();
+        if ($claims === null) {
+            return;
+        }
+
+        $payload    = $this->_read_payload();
+        $settingsID = (int) ($claims['settingsID'] ?? 0);
+        $username   = trim((string) ($claims['username'] ?? ''));
+
+        $note = $this->_fetch_note_row((int) $noteId, $settingsID, $username);
+        if (!$note) {
+            return mobile_json(['ok' => false, 'message' => 'Note not found.'], 404);
+        }
+
+        $title       = trim((string) ($payload['title'] ?? ''));
+        $description = trim((string) ($payload['description'] ?? $payload['noteDescription'] ?? ''));
+        $tags        = $this->_normalize_tags($payload['tags'] ?? '');
+
+        if ($title === '' && $description === '') {
+            return mobile_json(['ok' => false, 'message' => 'Please enter a note title or description.'], 422);
+        }
+
+        if (!$this->db->field_exists('tags', 'notes')) {
+            $this->db->query("ALTER TABLE notes ADD COLUMN tags VARCHAR(255) DEFAULT NULL");
+        }
+
+        $this->db
+            ->where('noteID', (int) $noteId)
+            ->where('settingsID', $settingsID)
+            ->update('notes', [
+                'title'           => $title,
+                'noteDescription' => $description,
+                'tags'            => $tags,
+            ]);
+
+        return mobile_json(['ok' => true, 'message' => 'Note updated successfully.']);
+    }
+
+    public function deleteNote($noteId)
+    {
+        if ($this->_method() === 'OPTIONS') {
+            return mobile_json(['ok' => true]);
+        }
+        if ($this->_method() !== 'POST' && $this->_method() !== 'DELETE') {
+            return mobile_json(['ok' => false, 'message' => 'Method not allowed.'], 405);
+        }
+
+        $claims = $this->_require_staff_claims();
+        if ($claims === null) {
+            return;
+        }
+
+        $settingsID = (int) ($claims['settingsID'] ?? 0);
+        $username   = trim((string) ($claims['username'] ?? ''));
+
+        $note = $this->_fetch_note_row((int) $noteId, $settingsID, $username);
+        if (!$note) {
+            return mobile_json(['ok' => false, 'message' => 'Note not found.'], 404);
+        }
+
+        $this->db
+            ->where('noteID', (int) $noteId)
+            ->where('settingsID', $settingsID)
+            ->update('notes', ['noteStat' => 'Removed']);
+
+        return mobile_json(['ok' => true, 'message' => 'Note deleted successfully.']);
+    }
+
+    public function toggleNoteFavorite($noteId)
+    {
+        if ($this->_method() === 'OPTIONS') {
+            return mobile_json(['ok' => true]);
+        }
+        if ($this->_method() !== 'POST') {
+            return mobile_json(['ok' => false, 'message' => 'Method not allowed.'], 405);
+        }
+
+        $claims = $this->_require_staff_claims();
+        if ($claims === null) {
+            return;
+        }
+
+        $payload    = $this->_read_payload();
+        $settingsID = (int) ($claims['settingsID'] ?? 0);
+        $username   = trim((string) ($claims['username'] ?? ''));
+
+        $note = $this->_fetch_note_row((int) $noteId, $settingsID, $username);
+        if (!$note) {
+            return mobile_json(['ok' => false, 'message' => 'Note not found.'], 404);
+        }
+
+        if (!$this->db->field_exists('is_favorite', 'notes')) {
+            $this->db->query("ALTER TABLE notes ADD COLUMN is_favorite INT DEFAULT 0");
+        }
+
+        $isFavorite = (int) ($payload['is_favorite'] ?? (((int) ($note->is_favorite ?? 0)) === 1 ? 0 : 1));
+        $isFavorite = $isFavorite === 1 ? 1 : 0;
+
+        $this->db
+            ->where('noteID', (int) $noteId)
+            ->where('settingsID', $settingsID)
+            ->update('notes', ['is_favorite' => $isFavorite]);
+
+        return mobile_json(['ok' => true, 'is_favorite' => $isFavorite === 1]);
+    }
+
+    // ── Reminders ───────────────────────────────────────────────────────────
+
+    public function reminders()
+    {
+        if ($this->_method() === 'OPTIONS') {
+            return mobile_json(['ok' => true]);
+        }
+        if ($this->_method() !== 'GET') {
+            return mobile_json(['ok' => false, 'message' => 'Method not allowed.'], 405);
+        }
+
+        $claims = $this->_require_staff_claims();
+        if ($claims === null) {
+            return;
+        }
+
+        date_default_timezone_set('Asia/Manila');
+
+        $settingsID = (int) ($claims['settingsID'] ?? 0);
+        $userId     = (int) ($claims['user_id'] ?? 0);
+
+        $rows = $this->RemindersModel->getAllReminders($settingsID, $userId);
+        $reminders = [];
+        foreach ((array) $rows as $row) {
+            $reminders[] = $this->_reminder_payload($row);
+        }
+
+        $dueToday = $this->RemindersModel->getDueToday($settingsID, $userId);
+
+        return mobile_json([
+            'ok'              => true,
+            'reminders'       => $reminders,
+            'due_today_count' => is_array($dueToday) ? count($dueToday) : 0,
+        ]);
+    }
+
+    public function createReminder()
+    {
+        if ($this->_method() === 'OPTIONS') {
+            return mobile_json(['ok' => true]);
+        }
+        if ($this->_method() !== 'POST') {
+            return mobile_json(['ok' => false, 'message' => 'Method not allowed.'], 405);
+        }
+
+        $claims = $this->_require_staff_claims();
+        if ($claims === null) {
+            return;
+        }
+
+        date_default_timezone_set('Asia/Manila');
+
+        $payload    = $this->_read_payload();
+        $settingsID = (int) ($claims['settingsID'] ?? 0);
+        $userId     = (int) ($claims['user_id'] ?? 0);
+
+        $title      = trim((string) ($payload['title'] ?? ''));
+        $remindAt   = $this->_normalize_datetime_input($payload);
+        $recurrence = $this->_normalize_recurrence($payload['recurrence'] ?? 'once');
+
+        if ($title === '') {
+            return mobile_json(['ok' => false, 'message' => 'Reminder title is required.'], 422);
+        }
+        if ($remindAt === null) {
+            return mobile_json(['ok' => false, 'message' => 'Please provide a valid reminder date and time.'], 422);
+        }
+
+        $this->RemindersModel->addReminder([
+            'title'       => $title,
+            'description' => trim((string) ($payload['description'] ?? '')),
+            'remind_at'   => $remindAt,
+            'recurrence'  => $recurrence,
+            'settingsID'  => $settingsID,
+            'user_id'     => $userId,
+        ]);
+
+        $reminderId = (int) $this->db->insert_id();
+
+        return mobile_json([
+            'ok'          => true,
+            'message'     => 'Reminder created successfully.',
+            'reminder_id' => $reminderId,
+        ]);
+    }
+
+    public function updateReminder($reminderId)
+    {
+        if ($this->_method() === 'OPTIONS') {
+            return mobile_json(['ok' => true]);
+        }
+        if ($this->_method() !== 'POST') {
+            return mobile_json(['ok' => false, 'message' => 'Method not allowed.'], 405);
+        }
+
+        $claims = $this->_require_staff_claims();
+        if ($claims === null) {
+            return;
+        }
+
+        date_default_timezone_set('Asia/Manila');
+
+        $payload    = $this->_read_payload();
+        $settingsID = (int) ($claims['settingsID'] ?? 0);
+        $userId     = (int) ($claims['user_id'] ?? 0);
+
+        $reminder = $this->_fetch_reminder_row((int) $reminderId, $settingsID, $userId);
+        if (!$reminder) {
+            return mobile_json(['ok' => false, 'message' => 'Reminder not found.'], 404);
+        }
+
+        $title      = trim((string) ($payload['title'] ?? ''));
+        $remindAt   = $this->_normalize_datetime_input($payload);
+        $recurrence = $this->_normalize_recurrence($payload['recurrence'] ?? ($reminder->recurrence ?? 'once'));
+
+        if ($title === '') {
+            return mobile_json(['ok' => false, 'message' => 'Reminder title is required.'], 422);
+        }
+        if ($remindAt === null) {
+            return mobile_json(['ok' => false, 'message' => 'Please provide a valid reminder date and time.'], 422);
+        }
+
+        $this->RemindersModel->updateReminder((int) $reminderId, [
+            'title'       => $title,
+            'description' => trim((string) ($payload['description'] ?? '')),
+            'remind_at'   => $remindAt,
+            'recurrence'  => $recurrence,
+        ]);
+
+        return mobile_json(['ok' => true, 'message' => 'Reminder updated successfully.']);
+    }
+
+    public function deleteReminder($reminderId)
+    {
+        if ($this->_method() === 'OPTIONS') {
+            return mobile_json(['ok' => true]);
+        }
+        if ($this->_method() !== 'POST' && $this->_method() !== 'DELETE') {
+            return mobile_json(['ok' => false, 'message' => 'Method not allowed.'], 405);
+        }
+
+        $claims = $this->_require_staff_claims();
+        if ($claims === null) {
+            return;
+        }
+
+        $settingsID = (int) ($claims['settingsID'] ?? 0);
+        $userId     = (int) ($claims['user_id'] ?? 0);
+
+        $reminder = $this->_fetch_reminder_row((int) $reminderId, $settingsID, $userId);
+        if (!$reminder) {
+            return mobile_json(['ok' => false, 'message' => 'Reminder not found.'], 404);
+        }
+
+        $this->RemindersModel->deleteReminder((int) $reminderId);
+
+        return mobile_json(['ok' => true, 'message' => 'Reminder deleted successfully.']);
+    }
+
+    // ── Notes / Reminders helpers ───────────────────────────────────────────
+
+    private function _note_payload($row)
+    {
+        $rawTags = trim((string) ($row->tags ?? ''));
+        $tags = $rawTags === ''
+            ? []
+            : array_values(array_filter(array_map('trim', explode(',', $rawTags)), function ($t) {
+                return $t !== '';
+            }));
+
+        $date = (string) ($row->noteDate ?? '');
+
+        return [
+            'id'          => (int) ($row->noteID ?? 0),
+            'title'       => (string) ($row->title ?? ''),
+            'description' => (string) ($row->noteDescription ?? ''),
+            'tags'        => $tags,
+            'is_favorite' => (int) ($row->is_favorite ?? 0) === 1,
+            'date'        => $date,
+            'date_label'  => $date !== '' ? date('M d, Y', strtotime($date)) : '',
+        ];
+    }
+
+    private function _fetch_note_row($noteId, $settingsID, $username)
+    {
+        return $this->db
+            ->from('notes')
+            ->where('noteID', (int) $noteId)
+            ->where('settingsID', $settingsID)
+            ->where('notedBy', $username)
+            ->where('noteStat', 'Active')
+            ->limit(1)
+            ->get()
+            ->row();
+    }
+
+    private function _normalize_tags($value)
+    {
+        if (is_array($value)) {
+            $value = implode(',', array_map('strval', $value));
+        }
+        $parts = array_filter(array_map('trim', explode(',', (string) $value)), function ($t) {
+            return $t !== '';
+        });
+        return implode(', ', $parts);
+    }
+
+    private function _reminder_payload($row)
+    {
+        $remindAt = (string) ($row->remind_at ?? '');
+        return [
+            'id'              => (int) ($row->id ?? 0),
+            'title'           => (string) ($row->title ?? ''),
+            'description'     => (string) ($row->description ?? ''),
+            'remind_at'       => $remindAt,
+            'remind_at_label' => $remindAt !== '' ? date('M d, Y · g:i A', strtotime($remindAt)) : '',
+            'recurrence'      => (string) (($row->recurrence ?? 'once') ?: 'once'),
+        ];
+    }
+
+    private function _fetch_reminder_row($reminderId, $settingsID, $userId)
+    {
+        $row = $this->RemindersModel->getReminderById((int) $reminderId);
+        if (!$row) {
+            return null;
+        }
+        if ((int) ($row->settingsID ?? 0) !== (int) $settingsID) {
+            return null;
+        }
+        if ((int) ($row->user_id ?? 0) !== (int) $userId) {
+            return null;
+        }
+        return $row;
+    }
+
+    private function _normalize_recurrence($value)
+    {
+        $value = strtolower(trim((string) $value));
+        return in_array($value, ['once', 'monthly', 'yearly'], true) ? $value : 'once';
+    }
+
+    /**
+     * Accepts either a combined `remind_at` ("Y-m-d H:i[:s]") or separate
+     * `remind_date` + `remind_time` fields and returns a normalized
+     * "Y-m-d H:i:s" string, or null when the input is invalid.
+     */
+    private function _normalize_datetime_input($payload)
+    {
+        $combined = trim((string) ($payload['remind_at'] ?? ''));
+        $date = trim((string) ($payload['remind_date'] ?? ''));
+        $time = trim((string) ($payload['remind_time'] ?? ''));
+
+        $candidate = '';
+        if ($combined !== '') {
+            $candidate = $combined;
+        } elseif ($date !== '') {
+            $candidate = $date . ' ' . ($time !== '' ? $time : '00:00');
+        }
+
+        if ($candidate === '') {
+            return null;
+        }
+
+        $ts = strtotime($candidate);
+        if ($ts === false) {
+            return null;
+        }
+        return date('Y-m-d H:i:s', $ts);
+    }
+
     private function _require_staff_claims()
     {
         $claims = mobile_require_claims();

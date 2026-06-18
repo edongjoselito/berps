@@ -111,6 +111,100 @@ class MobileAuth extends CI_Controller
         ]);
     }
 
+    public function signup()
+    {
+        if ($this->_method() === 'OPTIONS') {
+            return mobile_json(['ok' => true]);
+        }
+        if ($this->_method() !== 'POST') {
+            return mobile_json(['ok' => false, 'message' => 'Method not allowed.'], 405);
+        }
+
+        $payload   = $this->_read_payload();
+        $firstName = trim((string)($payload['first_name'] ?? $payload['fName'] ?? ''));
+        $lastName  = trim((string)($payload['last_name'] ?? $payload['lName'] ?? ''));
+        $email     = strtolower(trim((string)($payload['email'] ?? '')));
+        $password  = (string)($payload['password'] ?? '');
+
+        if ($firstName === '' || $lastName === '' || $email === '' || $password === '') {
+            return mobile_json([
+                'ok'      => false,
+                'message' => 'Please fill in all required fields.',
+            ], 422);
+        }
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return mobile_json([
+                'ok'      => false,
+                'message' => 'Please enter a valid email address.',
+            ], 422);
+        }
+        if (strlen($password) < 8) {
+            return mobile_json([
+                'ok'      => false,
+                'message' => 'Password must be at least 8 characters.',
+            ], 422);
+        }
+
+        $this->_ensure_confirmation_columns();
+
+        // Mirror the web signup flow: new self-service accounts are company
+        // admins on the Task Management package (settingsID 6, package 2).
+        $existingEmail = $this->db->where('email', $email)->get('users')->row();
+        if ($existingEmail) {
+            return mobile_json([
+                'ok'      => false,
+                'message' => 'Email already registered. Please use another email.',
+            ], 409);
+        }
+
+        $existingUsername = $this->Login_model->get_user_by_username($email);
+        if ($existingUsername) {
+            return mobile_json([
+                'ok'      => false,
+                'message' => 'Email already registered. Please use another email.',
+            ], 409);
+        }
+
+        $settingsID        = 6;
+        $confirmationToken = bin2hex(random_bytes(32));
+        $tokenExpiry       = date('Y-m-d H:i:s', strtotime('+24 hours'));
+
+        $userData = [
+            'username'                  => $email,
+            'email'                     => $email,
+            'password'                  => password_hash($password, PASSWORD_BCRYPT),
+            'fName'                     => $firstName,
+            'lName'                     => $lastName,
+            'position'                  => 'Admin',
+            'acctStat'                  => 'Pending',
+            'settingsID'                => $settingsID,
+            'confirmation_token'        => $confirmationToken,
+            'confirmation_token_expiry' => $tokenExpiry,
+        ];
+        if ($this->db->field_exists('created_at', 'users')) {
+            $userData['created_at'] = date('Y-m-d H:i:s');
+        }
+
+        $this->db->insert('users', $userData);
+        $userID = (int) $this->db->insert_id();
+        if ($userID <= 0) {
+            return mobile_json([
+                'ok'      => false,
+                'message' => 'Failed to create your account. Please try again.',
+            ], 500);
+        }
+
+        $emailSent = $this->_send_confirmation_email($email, $email, $confirmationToken);
+
+        return mobile_json([
+            'ok'           => true,
+            'email_sent'   => (bool) $emailSent,
+            'message'      => $emailSent
+                ? 'Account created. Please check your email to confirm your account before signing in.'
+                : 'Account created, but we could not send the confirmation email. Please contact support@berps.online to activate your account.',
+        ]);
+    }
+
     public function me()
     {
         if ($this->_method() === 'OPTIONS') {
@@ -285,6 +379,49 @@ class MobileAuth extends CI_Controller
         return (string) random_int($min, $max);
     }
 
+    private function _ensure_confirmation_columns()
+    {
+        if (!$this->db->field_exists('confirmation_token', 'users')) {
+            $this->db->query("ALTER TABLE users ADD COLUMN confirmation_token VARCHAR(64) NULL");
+        }
+        if (!$this->db->field_exists('confirmation_token_expiry', 'users')) {
+            $this->db->query("ALTER TABLE users ADD COLUMN confirmation_token_expiry DATETIME NULL");
+        }
+    }
+
+    private function _send_confirmation_email($email, $username, $token)
+    {
+        try {
+            $this->load->library('email');
+            $this->load->config('email');
+
+            $confirmationLink = site_url('Login/confirm/' . $token);
+            $message = $this->load->view('email/confirm_account', [
+                'username'          => $username,
+                'confirmation_link' => $confirmationLink,
+            ], true);
+
+            $fromAddress = $this->config->item('smtp_user');
+            if (empty($fromAddress)) {
+                $fromAddress = 'no-reply@' . parse_url(base_url(), PHP_URL_HOST);
+            }
+
+            $this->email->from($fromAddress, 'BERPS');
+            $this->email->to($email);
+            $this->email->subject('Confirm Your BERPS Account');
+            $this->email->message($message);
+
+            $result = $this->email->send();
+            if (!$result) {
+                log_message('error', '[mobile_signup] email send failed: ' . $this->email->print_debugger(['headers']));
+            }
+            return $result;
+        } catch (Throwable $e) {
+            log_message('error', '[mobile_signup] email exception: ' . $e->getMessage());
+            return false;
+        }
+    }
+
 
     private function _user_payload($user)
     {
@@ -306,7 +443,40 @@ class MobileAuth extends CI_Controller
             'position'    => (string) ($user->position ?? ''),
             'acct_stat'   => (string) ($user->acctStat ?? ''),
             'settings_id' => (int) ($user->settingsID ?? 0),
+            'features'    => $this->_company_features((int) ($user->settingsID ?? 0)),
         ];
+    }
+
+    /**
+     * Returns the enabled company feature keys for a workspace (settingsID).
+     *
+     * Mirrors the web sidebar gating (application/views/includes/sidebar.php):
+     * an empty list means "no restrictions" (full access), otherwise the client
+     * should only surface modules whose feature key is present.
+     */
+    private function _company_features($settingsID)
+    {
+        if ($settingsID <= 0 || !$this->db->table_exists('company_features')) {
+            return [];
+        }
+
+        $rows = $this->db
+            ->select('feature_key')
+            ->from('company_features')
+            ->where('settingsID', $settingsID)
+            ->where('is_enabled', 1)
+            ->get()
+            ->result();
+
+        $features = [];
+        foreach ($rows as $row) {
+            $key = trim((string) ($row->feature_key ?? ''));
+            if ($key !== '') {
+                $features[] = $key;
+            }
+        }
+
+        return array_values(array_unique($features));
     }
 
     private function _avatar_url($avatar)

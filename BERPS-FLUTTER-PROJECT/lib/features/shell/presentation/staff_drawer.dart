@@ -18,6 +18,8 @@ class StaffDrawer extends StatelessWidget {
     required this.onSelectAccount,
     required this.onSelectMyDtr,
     required this.onSelectCalendar,
+    required this.onSelectNotes,
+    required this.onSelectReminders,
     required this.onSelectAnnualGoals,
     required this.onSelectSupportDashboard,
     required this.onSignOut,
@@ -32,6 +34,8 @@ class StaffDrawer extends StatelessWidget {
   final VoidCallback onSelectAccount;
   final VoidCallback onSelectMyDtr;
   final VoidCallback onSelectCalendar;
+  final VoidCallback onSelectNotes;
+  final VoidCallback onSelectReminders;
   final VoidCallback onSelectAnnualGoals;
   final VoidCallback onSelectSupportDashboard;
   final Future<void> Function() onSignOut;
@@ -66,30 +70,33 @@ class StaffDrawer extends StatelessWidget {
                     activeItemId: activeItemId,
                     onTap: onSelectDashboard,
                   ),
-                  _NavItem(
-                    id: 'attendance',
-                    icon: PhosphorIconsRegular.calendarDots,
-                    iconActive: PhosphorIconsFill.calendarDots,
-                    label: 'Attendance',
-                    activeItemId: activeItemId,
-                    onTap: onSelectAttendance,
-                  ),
-                  _NavItem(
-                    id: 'my-dtr',
-                    icon: PhosphorIconsRegular.clock,
-                    iconActive: PhosphorIconsFill.clock,
-                    label: 'My DTR',
-                    activeItemId: activeItemId,
-                    onTap: onSelectMyDtr,
-                  ),
-                  _NavItem(
-                    id: 'tasks',
-                    icon: PhosphorIconsRegular.listChecks,
-                    iconActive: PhosphorIconsFill.listChecks,
-                    label: 'Tasks',
-                    activeItemId: activeItemId,
-                    onTap: onSelectTasks,
-                  ),
+                  if (session.hasAttendance)
+                    _NavItem(
+                      id: 'attendance',
+                      icon: PhosphorIconsRegular.calendarDots,
+                      iconActive: PhosphorIconsFill.calendarDots,
+                      label: 'Attendance',
+                      activeItemId: activeItemId,
+                      onTap: onSelectAttendance,
+                    ),
+                  if (session.hasMyDtr)
+                    _NavItem(
+                      id: 'my-dtr',
+                      icon: PhosphorIconsRegular.clock,
+                      iconActive: PhosphorIconsFill.clock,
+                      label: 'My DTR',
+                      activeItemId: activeItemId,
+                      onTap: onSelectMyDtr,
+                    ),
+                  if (session.hasTasks)
+                    _NavItem(
+                      id: 'tasks',
+                      icon: PhosphorIconsRegular.listChecks,
+                      iconActive: PhosphorIconsFill.listChecks,
+                      label: 'Tasks',
+                      activeItemId: activeItemId,
+                      onTap: onSelectTasks,
+                    ),
                   _NavItem(
                     id: 'account',
                     icon: PhosphorIconsRegular.userCircle,
@@ -99,30 +106,51 @@ class StaffDrawer extends StatelessWidget {
                     onTap: onSelectAccount,
                   ),
                   const _SectionLabel('Workspace', PhosphorIconsBold.buildings),
-                  _NavItem(
-                    id: 'calendar',
-                    icon: PhosphorIconsRegular.calendarBlank,
-                    iconActive: PhosphorIconsFill.calendarBlank,
-                    label: 'Calendar',
-                    activeItemId: activeItemId,
-                    onTap: onSelectCalendar,
-                  ),
-                  _NavItem(
-                    id: 'annual-goals',
-                    icon: PhosphorIconsRegular.trophy,
-                    iconActive: PhosphorIconsFill.trophy,
-                    label: 'Annual Goals',
-                    activeItemId: activeItemId,
-                    onTap: onSelectAnnualGoals,
-                  ),
-                  _NavItem(
-                    id: 'support-dashboard',
-                    icon: PhosphorIconsRegular.chartLineUp,
-                    iconActive: PhosphorIconsFill.chartLineUp,
-                    label: 'Support Dashboard',
-                    activeItemId: activeItemId,
-                    onTap: onSelectSupportDashboard,
-                  ),
+                  if (session.hasCalendar)
+                    _NavItem(
+                      id: 'calendar',
+                      icon: PhosphorIconsRegular.calendarBlank,
+                      iconActive: PhosphorIconsFill.calendarBlank,
+                      label: 'Calendar',
+                      activeItemId: activeItemId,
+                      onTap: onSelectCalendar,
+                    ),
+                  if (session.hasReminders)
+                    _NavItem(
+                      id: 'reminders',
+                      icon: PhosphorIconsRegular.bellRinging,
+                      iconActive: PhosphorIconsFill.bellRinging,
+                      label: 'Reminders',
+                      activeItemId: activeItemId,
+                      onTap: onSelectReminders,
+                    ),
+                  if (session.hasNotes)
+                    _NavItem(
+                      id: 'notes',
+                      icon: PhosphorIconsRegular.notebook,
+                      iconActive: PhosphorIconsFill.notebook,
+                      label: 'Notes',
+                      activeItemId: activeItemId,
+                      onTap: onSelectNotes,
+                    ),
+                  if (session.hasRanking)
+                    _NavItem(
+                      id: 'annual-goals',
+                      icon: PhosphorIconsRegular.trophy,
+                      iconActive: PhosphorIconsFill.trophy,
+                      label: 'Annual Goals',
+                      activeItemId: activeItemId,
+                      onTap: onSelectAnnualGoals,
+                    ),
+                  if (session.hasSupport)
+                    _NavItem(
+                      id: 'support-dashboard',
+                      icon: PhosphorIconsRegular.chartLineUp,
+                      iconActive: PhosphorIconsFill.chartLineUp,
+                      label: 'Support Dashboard',
+                      activeItemId: activeItemId,
+                      onTap: onSelectSupportDashboard,
+                    ),
                 ],
               ),
             ),

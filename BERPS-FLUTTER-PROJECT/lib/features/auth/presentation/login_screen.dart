@@ -12,6 +12,7 @@ import '../../../core/widgets/orb_background.dart';
 import '../../privacy/presentation/privacy_consent_dialog.dart';
 import 'auth_controller.dart';
 import 'forgot_password_screen.dart';
+import 'signup_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key, required this.controller});
@@ -169,6 +170,33 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  Future<void> _openSignup() async {
+    Haptics.light();
+    setState(() {
+      _submitting = true;
+      _error = null;
+    });
+
+    try {
+      await widget.controller.ensureWorkspaceReady();
+      if (!mounted) return;
+      await Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => SignupScreen(
+            api: widget.controller.api,
+            baseUrl: widget.controller.baseUrl,
+          ),
+        ),
+      );
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      Haptics.warn();
+      setState(() => _error = e.message);
+    } finally {
+      if (mounted) setState(() => _submitting = false);
+    }
+  }
+
   Future<void> _openForgotPassword() async {
     Haptics.light();
     setState(() {
@@ -253,6 +281,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           },
                           onForgot: _submitting ? null : _openForgotPassword,
                           onSubmit: _submitting ? null : _signIn,
+                          onSignUp: _submitting ? null : _openSignup,
                           biometricEnabled: _biometricEnabled,
                           biometricLabel: _biometricLabel,
                           onBiometric: _submitting ? null : _tryBiometric,
@@ -389,6 +418,7 @@ class _LoginCard extends StatelessWidget {
     required this.onToggleRemember,
     required this.onForgot,
     required this.onSubmit,
+    required this.onSignUp,
     this.biometricEnabled = false,
     this.biometricLabel = 'Biometric',
     this.onBiometric,
@@ -405,6 +435,7 @@ class _LoginCard extends StatelessWidget {
   final ValueChanged<bool> onToggleRemember;
   final VoidCallback? onForgot;
   final VoidCallback? onSubmit;
+  final VoidCallback? onSignUp;
   final bool biometricEnabled;
   final String biometricLabel;
   final VoidCallback? onBiometric;
@@ -428,7 +459,6 @@ class _LoginCard extends StatelessWidget {
               autocorrect: false,
               keyboardType: TextInputType.emailAddress,
               decoration: const InputDecoration(
-                hintText: 'you@company.com',
                 contentPadding: EdgeInsets.symmetric(
                   horizontal: 14,
                   vertical: 14,
@@ -450,7 +480,6 @@ class _LoginCard extends StatelessWidget {
               controller: passwordController,
               obscureText: obscure,
               decoration: InputDecoration(
-                hintText: 'Enter your password',
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 14,
                   vertical: 14,
@@ -504,9 +533,52 @@ class _LoginCard extends StatelessWidget {
                 ),
               ),
             ],
+            const SizedBox(height: 14),
+            const _CardDivider(),
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text(
+                  'New to BERPS?',
+                  style: TextStyle(
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w600,
+                    color: AppTheme.textSecondary,
+                  ),
+                ),
+                const SizedBox(width: 6),
+                _UnderlineLink(label: 'Create an account', onTap: onSignUp),
+              ],
+            ),
           ],
         ),
       ),
+    );
+  }
+}
+
+class _CardDivider extends StatelessWidget {
+  const _CardDivider();
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(child: Container(height: 1, color: AppTheme.border)),
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 10),
+          child: Text(
+            'or',
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              color: AppTheme.textMuted,
+            ),
+          ),
+        ),
+        Expanded(child: Container(height: 1, color: AppTheme.border)),
+      ],
     );
   }
 }

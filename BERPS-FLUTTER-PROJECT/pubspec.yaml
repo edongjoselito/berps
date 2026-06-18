@@ -30,9 +30,15 @@ flutter_launcher_icons:
   android: true
   ios: true
   remove_alpha_ios: true
+  # Light (default) icon: colorful logo flattened onto a clean white tile.
+  background_color_ios: "#FFFFFF"
   image_path: "assets/logo.png"
-  image_path_ios: "assets/app_icon_ios.png"
-  adaptive_icon_background: "#1E293B"
+  image_path_ios: "assets/logo.png"
+  # iOS 18 dark-mode variant: the existing logo-on-dark-slate icon.
+  image_path_ios_dark_transparent: "assets/app_icon_ios.png"
+  # Android adaptive icon now uses a light background (Android can't auto-swap
+  # per system theme, so a clean light tile replaces the old dark slate).
+  adaptive_icon_background: "#FFFFFF"
   adaptive_icon_foreground: "assets/logo.png"
 
 flutter:
