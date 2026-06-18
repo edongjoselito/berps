@@ -62,6 +62,18 @@ $route['api/mobile/staff/annual-goals/(:num)']             = 'api/MobileStaff/an
 $route['api/mobile/staff/support/dashboard']               = 'api/MobileStaff/supportDashboard';
 $route['api/mobile/staff/my-dtr']                           = 'api/MobileStaff/myDTR';
 $route['api/mobile/staff/profile/update']                   = 'api/MobileStaff/updateProfile';
+$route['api/mobile/staff/notes']                            = 'api/MobileStaff/notes';
+$route['api/mobile/staff/notes/create']                     = 'api/MobileStaff/createNote';
+$route['api/mobile/staff/notes/(:num)/update']              = 'api/MobileStaff/updateNote/$1';
+$route['api/mobile/staff/notes/(:num)/delete']              = 'api/MobileStaff/deleteNote/$1';
+$route['api/mobile/staff/notes/(:num)/favorite']           = 'api/MobileStaff/toggleNoteFavorite/$1';
+$route['api/mobile/staff/reminders']                        = 'api/MobileStaff/reminders';
+$route['api/mobile/staff/reminders/create']                = 'api/MobileStaff/createReminder';
+$route['api/mobile/staff/reminders/(:num)/update']          = 'api/MobileStaff/updateReminder/$1';
+$route['api/mobile/staff/reminders/(:num)/delete']          = 'api/MobileStaff/deleteReminder/$1';
+
+// ── Mobile Auth (self-service signup) ────────────────────────────────────────
+$route['api/mobile/auth/signup']                            = 'api/MobileAuth/signup';
 
 // ── Mobile Admin endpoints (level "Admin" tokens only) ───────────────────────
 $route['api/mobile/admin/dashboard']                        = 'api/MobileAdmin/dashboard';
