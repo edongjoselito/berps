@@ -50,7 +50,7 @@ class MobileHeader extends StatelessWidget {
                 title,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.w900,
                   color: AppTheme.textPrimary,
@@ -63,7 +63,7 @@ class MobileHeader extends StatelessWidget {
                   subtitle!,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 12.5,
                     fontWeight: FontWeight.w600,
                     color: AppTheme.textSecondary,
@@ -99,7 +99,7 @@ class MobileHeaderButton extends StatelessWidget {
         width: 44,
         height: 44,
         decoration: BoxDecoration(
-          color: filled ? AppTheme.primaryDark : AppTheme.surface,
+          color: filled ? AppTheme.primaryDark : Colors.white,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color: filled ? AppTheme.primaryDark : AppTheme.border,
@@ -171,7 +171,7 @@ class MobileSurfaceCard extends StatelessWidget {
     return Container(
       padding: padding,
       decoration: BoxDecoration(
-        color: AppTheme.surface,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(22),
         border: Border.all(color: AppTheme.border.withValues(alpha: 0.7)),
         boxShadow: [
@@ -200,7 +200,7 @@ class MobileSectionLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       text.toUpperCase(),
-      style: TextStyle(
+      style: const TextStyle(
         fontSize: 11,
         fontWeight: FontWeight.w900,
         letterSpacing: 1.5,

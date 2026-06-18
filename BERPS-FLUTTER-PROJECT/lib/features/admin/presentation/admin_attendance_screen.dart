@@ -88,7 +88,7 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 14, vertical: 13),
                     decoration: BoxDecoration(
-                      color: AppTheme.surface,
+                      color: Colors.white,
                       borderRadius: BorderRadius.circular(14),
                       border: Border.all(color: AppTheme.border),
                       boxShadow: AppTheme.shadowSoft,
@@ -101,14 +101,14 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
                         Expanded(
                           child: Text(
                             formatRangeLabel(_fmt(_from), _fmt(_to)),
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontWeight: FontWeight.w800,
                               fontSize: 13.5,
                               color: AppTheme.textPrimary,
                             ),
                           ),
                         ),
-                        Icon(PhosphorIconsBold.caretRight,
+                        const Icon(PhosphorIconsBold.caretRight,
                             size: 15, color: AppTheme.textMuted),
                       ],
                     ),
@@ -188,7 +188,7 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: AppTheme.surface,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppTheme.border),
         boxShadow: AppTheme.shadowSoft,
@@ -201,7 +201,7 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
               Expanded(
                 child: Text(
                   r.employeeName.isEmpty ? '(unknown)' : r.employeeName,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontWeight: FontWeight.w800,
                     fontSize: 14.5,
                     color: AppTheme.textPrimary,
@@ -235,7 +235,7 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
               Text(
                 formatCompactDate(r.logDate),
                 style:
-                    TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                    const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
               ),
               const SizedBox(width: 12),
               Icon(PhosphorIconsBold.checkSquareOffset,
@@ -244,7 +244,7 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
               Text(
                 '${r.accomplishmentCount} done',
                 style:
-                    TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                    const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
               ),
             ],
           ),
@@ -264,7 +264,7 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
                       ),
                       child: Text(
                         i.label,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
                           color: AppTheme.textSecondary,

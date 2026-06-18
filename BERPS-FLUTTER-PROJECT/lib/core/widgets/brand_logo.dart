@@ -52,7 +52,7 @@ class BrandLogo extends StatelessWidget {
       height: size + framePadding * 2,
       padding: EdgeInsets.all(framePadding),
       decoration: BoxDecoration(
-        color: AppTheme.surface,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(borderRadius),
         border: Border.all(color: AppTheme.border),
         boxShadow: [

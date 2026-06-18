@@ -171,7 +171,7 @@ class _SummaryCard extends StatelessWidget {
           ),
           if (goal.notes.isNotEmpty) ...[
             const SizedBox(height: 16),
-            Text(
+            const Text(
               'Notes',
               style: TextStyle(
                 color: AppTheme.textSecondary,
@@ -183,7 +183,7 @@ class _SummaryCard extends StatelessWidget {
             const SizedBox(height: 6),
             Text(
               goal.notes,
-              style: TextStyle(
+              style: const TextStyle(
                 color: AppTheme.textPrimary,
                 fontSize: 13,
                 height: 1.4,
@@ -194,7 +194,7 @@ class _SummaryCard extends StatelessWidget {
             const SizedBox(height: 12),
             Text(
               'Set by ${goal.createdBy}',
-              style: TextStyle(
+              style: const TextStyle(
                 color: AppTheme.textMuted,
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
@@ -232,7 +232,7 @@ class _MetricBlock extends StatelessWidget {
           children: [
             Text(
               label,
-              style: TextStyle(
+              style: const TextStyle(
                 color: AppTheme.textSecondary,
                 fontSize: 12,
                 fontWeight: FontWeight.w900,
@@ -263,7 +263,7 @@ class _MetricBlock extends StatelessWidget {
         const SizedBox(height: 6),
         Text(
           '$actual of $target',
-          style: TextStyle(
+          style: const TextStyle(
             color: AppTheme.textPrimary,
             fontSize: 13.5,
             fontWeight: FontWeight.w900,
@@ -289,7 +289,7 @@ class _MonthlyTable extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 10),
             child: Row(
-              children: [
+              children: const [
                 SizedBox(
                   width: 48,
                   child: Text(
@@ -328,7 +328,7 @@ class _MonthlyTable extends StatelessWidget {
               ],
             ),
           ),
-          Divider(height: 1, color: AppTheme.border),
+          const Divider(height: 1, color: AppTheme.border),
           for (final m in months) ...[
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 10),
@@ -338,7 +338,7 @@ class _MonthlyTable extends StatelessWidget {
                     width: 48,
                     child: Text(
                       m.label,
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: AppTheme.textPrimary,
                         fontSize: 13,
                         fontWeight: FontWeight.w800,
@@ -348,7 +348,7 @@ class _MonthlyTable extends StatelessWidget {
                   Expanded(
                     child: Text(
                       m.clients.toString(),
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: AppTheme.textPrimary,
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
@@ -359,7 +359,7 @@ class _MonthlyTable extends StatelessWidget {
                     child: Text(
                       formatCurrency(m.income),
                       textAlign: TextAlign.right,
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: AppTheme.textPrimary,
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
@@ -370,7 +370,7 @@ class _MonthlyTable extends StatelessWidget {
               ),
             ),
             if (m != months.last)
-              Divider(height: 1, color: AppTheme.border),
+              const Divider(height: 1, color: AppTheme.border),
           ],
         ],
       ),
@@ -400,7 +400,7 @@ class _SectionHeader extends StatelessWidget {
         const SizedBox(width: 10),
         Text(
           title.toUpperCase(),
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 11,
             fontWeight: FontWeight.w900,
             letterSpacing: 1.5,
@@ -420,7 +420,7 @@ class _NoGoalSet extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: AppTheme.surface,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: AppTheme.border),
       ),
@@ -441,7 +441,7 @@ class _NoGoalSet extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 14),
-          Text(
+          const Text(
             'No goal set for this year',
             style: TextStyle(
               color: AppTheme.textPrimary,
@@ -450,7 +450,7 @@ class _NoGoalSet extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 6),
-          Text(
+          const Text(
             'An admin can set the targets from the web app.',
             textAlign: TextAlign.center,
             style: TextStyle(
@@ -476,7 +476,7 @@ class _ErrorBlock extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          const Text(
             'Unable to load',
             style: TextStyle(
               fontWeight: FontWeight.w900,
@@ -487,7 +487,7 @@ class _ErrorBlock extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             message,
-            style: TextStyle(color: AppTheme.textSecondary, fontSize: 13),
+            style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13),
           ),
           const SizedBox(height: 12),
           Align(

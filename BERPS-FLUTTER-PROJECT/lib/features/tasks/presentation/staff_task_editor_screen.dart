@@ -592,7 +592,7 @@ class _EditorBody extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Expanded(
+                    const Expanded(
                       child: Text(
                         'Checklist',
                         style: TextStyle(
@@ -665,7 +665,7 @@ class _EditorBody extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 20),
-            Text(
+            const Text(
               'History',
               style: TextStyle(
                 fontWeight: FontWeight.w800,
@@ -674,7 +674,7 @@ class _EditorBody extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             if (detail!.history.isEmpty)
-              Text(
+              const Text(
                 'No task history yet.',
                 style: TextStyle(color: AppTheme.textSecondary),
               )
@@ -684,7 +684,7 @@ class _EditorBody extends StatelessWidget {
                   margin: const EdgeInsets.only(bottom: 10),
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: AppTheme.surface,
+                    color: Colors.white,
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(color: AppTheme.border),
                   ),
@@ -693,7 +693,7 @@ class _EditorBody extends StatelessWidget {
                     children: [
                       Text(
                         entry.note.isEmpty ? 'No note' : entry.note,
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: AppTheme.textPrimary,
                           fontWeight: FontWeight.w700,
                         ),
@@ -701,7 +701,7 @@ class _EditorBody extends StatelessWidget {
                       const SizedBox(height: 6),
                       Text(
                         '${entry.postedBy} • ${formatCompactDate(entry.postedAt.isEmpty ? _today() : entry.postedAt)}',
-                        style: TextStyle(color: AppTheme.textSecondary),
+                        style: const TextStyle(color: AppTheme.textSecondary),
                       ),
                     ],
                   ),
@@ -733,7 +733,7 @@ class _DateButton extends StatelessWidget {
       child: Ink(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: AppTheme.surfaceMuted,
+          color: const Color(0xFFF7F9FC),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: AppTheme.border),
         ),
@@ -742,7 +742,7 @@ class _DateButton extends StatelessWidget {
           children: [
             Text(
               label,
-              style: TextStyle(
+              style: const TextStyle(
                 color: AppTheme.textSecondary,
                 fontWeight: FontWeight.w600,
               ),
@@ -750,7 +750,7 @@ class _DateButton extends StatelessWidget {
             const SizedBox(height: 6),
             Text(
               value,
-              style: TextStyle(
+              style: const TextStyle(
                 color: AppTheme.textPrimary,
                 fontWeight: FontWeight.w700,
               ),
@@ -811,7 +811,7 @@ class _SectionLabel extends StatelessWidget {
         const SizedBox(width: 6),
         Text(
           text.toUpperCase(),
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 10.5,
             fontWeight: FontWeight.w900,
             letterSpacing: 1.2,
@@ -895,7 +895,7 @@ class _TaskEditorError extends StatelessWidget {
         padding: const EdgeInsets.all(24),
         child: Text(
           message,
-          style: TextStyle(color: AppTheme.textSecondary),
+          style: const TextStyle(color: AppTheme.textSecondary),
           textAlign: TextAlign.center,
         ),
       ),

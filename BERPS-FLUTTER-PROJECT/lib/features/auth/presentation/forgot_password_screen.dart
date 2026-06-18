@@ -300,7 +300,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           keyboardType: TextInputType.number,
           maxLength: 6,
           textAlign: TextAlign.center,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 22,
             fontWeight: FontWeight.w800,
             letterSpacing: 8,
@@ -417,7 +417,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           ),
         ),
         const SizedBox(height: 18),
-        Text(
+        const Text(
           'Password updated',
           textAlign: TextAlign.center,
           style: TextStyle(
@@ -427,7 +427,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           ),
         ),
         const SizedBox(height: 8),
-        Text(
+        const Text(
           'You can now sign in with your new password.',
           textAlign: TextAlign.center,
           style: TextStyle(
@@ -461,7 +461,7 @@ class _StepPill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: AppTheme.surface,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(999),
         border: Border.all(color: AppTheme.border),
       ),
@@ -476,7 +476,7 @@ class _StepPill extends StatelessWidget {
           const SizedBox(width: 8),
           Text(
             'Step $stepNumber of 3',
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 11.5,
               fontWeight: FontWeight.w700,
               color: AppTheme.textPrimary,
@@ -530,7 +530,7 @@ class _ResetHero extends StatelessWidget {
           Text(
             title,
             textAlign: TextAlign.center,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.w900,
               color: AppTheme.textPrimary,
@@ -541,7 +541,7 @@ class _ResetHero extends StatelessWidget {
           Text(
             subtitle,
             textAlign: TextAlign.center,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 13,
               color: AppTheme.textSecondary,
               height: 1.45,
@@ -568,7 +568,7 @@ class _FieldLabel extends StatelessWidget {
           const SizedBox(width: 6),
           Text(
             text,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 12.5,
               fontWeight: FontWeight.w700,
               color: AppTheme.textSecondary,

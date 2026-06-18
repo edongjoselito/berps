@@ -83,14 +83,14 @@ class DataDeletionScreen extends StatelessWidget {
                       child: Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: AppTheme.surface,
+                          color: Colors.white,
                           borderRadius: BorderRadius.circular(18),
                           border: Border.all(color: AppTheme.border),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
+                            const Text(
                               'Server Data',
                               style: TextStyle(
                                 fontSize: 14,
@@ -134,14 +134,14 @@ class DataDeletionScreen extends StatelessWidget {
                       child: Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: AppTheme.surface,
+                          color: Colors.white,
                           borderRadius: BorderRadius.circular(18),
                           border: Border.all(color: AppTheme.border),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
+                            const Text(
                               'Device Data',
                               style: TextStyle(
                                 fontSize: 14,
@@ -216,7 +216,7 @@ class _BodyText extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       text,
-      style: TextStyle(
+      style: const TextStyle(
         fontSize: 13,
         color: AppTheme.textSecondary,
         height: 1.5,
@@ -242,7 +242,7 @@ class _DeletionItem extends StatelessWidget {
           const SizedBox(width: 10),
           Text(
             label,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w700,
               color: AppTheme.textPrimary,

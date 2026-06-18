@@ -129,7 +129,7 @@ class LoadingButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final fg = isPrimary ? Colors.white : AppTheme.primaryDark;
-    final bg = isPrimary ? AppTheme.primaryDark : AppTheme.surface;
+    final bg = isPrimary ? AppTheme.primaryDark : Colors.white;
 
     return PressScale(
       onTap: isLoading ? null : onPressed,

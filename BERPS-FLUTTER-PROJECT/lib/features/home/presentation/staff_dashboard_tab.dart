@@ -196,7 +196,7 @@ class _GreetingCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(18, 18, 18, 18),
       decoration: BoxDecoration(
-        color: AppTheme.surface,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: AppTheme.border),
         boxShadow: AppTheme.shadowSoft,
@@ -223,7 +223,7 @@ class _GreetingCard extends StatelessWidget {
                     const SizedBox(width: 6),
                     Text(
                       greeting,
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: AppTheme.textSecondary,
                         fontWeight: FontWeight.w700,
                         fontSize: 12,
@@ -264,7 +264,7 @@ class _GreetingCard extends StatelessWidget {
                         width: 3,
                         height: 3,
                         margin: const EdgeInsets.symmetric(horizontal: 6),
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           color: AppTheme.textMuted,
                           shape: BoxShape.circle,
                         ),
@@ -275,7 +275,7 @@ class _GreetingCard extends StatelessWidget {
                         today,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: AppTheme.textMuted,
                           fontSize: 11.5,
                           fontWeight: FontWeight.w600,
@@ -546,7 +546,7 @@ class _QuickActionsStrip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(8, 8, 8, 8),
       decoration: BoxDecoration(
-        color: AppTheme.surface,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: AppTheme.border),
         boxShadow: AppTheme.shadowSoft,
@@ -663,7 +663,7 @@ class _QuickActionTile extends StatelessWidget {
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
-              style: TextStyle(
+              style: const TextStyle(
                 fontWeight: FontWeight.w800,
                 color: AppTheme.textPrimary,
                 fontSize: 12.5,
@@ -675,7 +675,7 @@ class _QuickActionTile extends StatelessWidget {
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
-              style: TextStyle(
+              style: const TextStyle(
                 color: AppTheme.textSecondary,
                 fontSize: 10.5,
                 fontWeight: FontWeight.w600,
@@ -755,7 +755,7 @@ class _DtrPreviewCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: AppTheme.surface.withValues(alpha: 0.12),
+                  color: Colors.white.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Icon(
@@ -790,7 +790,7 @@ class _DtrPreviewCard extends StatelessWidget {
                 ),
               ),
               Material(
-                color: AppTheme.surface.withValues(alpha: 0.12),
+                color: Colors.white.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(10),
                 child: InkWell(
                   onTap: () {
@@ -828,7 +828,7 @@ class _DtrPreviewCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             decoration: BoxDecoration(
-              color: AppTheme.surface.withValues(alpha: 0.10),
+              color: Colors.white.withValues(alpha: 0.10),
               borderRadius: BorderRadius.circular(14),
             ),
             child: Row(
@@ -865,7 +865,7 @@ class _DtrPreviewCard extends StatelessWidget {
                     vertical: 5,
                   ),
                   decoration: BoxDecoration(
-                    color: AppTheme.surface.withValues(alpha: 0.12),
+                    color: Colors.white.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text(
@@ -929,7 +929,7 @@ class _SectionHeader extends StatelessWidget {
         Expanded(
           child: Text(
             title,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 14.5,
               fontWeight: FontWeight.w900,
               color: AppTheme.textPrimary,
@@ -990,7 +990,7 @@ class _MetricCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: AppTheme.surface,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: AppTheme.border),
         boxShadow: AppTheme.shadowSoft,
@@ -1035,7 +1035,7 @@ class _MetricCard extends StatelessWidget {
           const SizedBox(height: 2),
           Text(
             data.label,
-            style: TextStyle(
+            style: const TextStyle(
               color: AppTheme.textSecondary,
               fontWeight: FontWeight.w700,
               fontSize: 12,
@@ -1067,7 +1067,7 @@ class _RemindersBanner extends StatelessWidget {
             width: 30,
             height: 30,
             decoration: BoxDecoration(
-              color: AppTheme.surface,
+              color: Colors.white,
               borderRadius: BorderRadius.circular(9),
             ),
             child: const Icon(
@@ -1080,7 +1080,7 @@ class _RemindersBanner extends StatelessWidget {
           Expanded(
             child: Text(
               '$count reminder${count == 1 ? '' : 's'} due today.',
-              style: TextStyle(
+              style: const TextStyle(
                 color: AppTheme.textPrimary,
                 fontWeight: FontWeight.w700,
                 fontSize: 12.5,
@@ -1115,7 +1115,7 @@ class _LeaderboardCard extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: AppTheme.surface,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: AppTheme.border),
         boxShadow: AppTheme.shadowSoft,
@@ -1129,8 +1129,8 @@ class _LeaderboardCard extends StatelessWidget {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  AppTheme.accentSoft,
-                  AppTheme.surface,
+                  const Color(0xFFFFFBEC),
+                  Colors.white.withValues(alpha: 0.6),
                 ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
@@ -1170,7 +1170,7 @@ class _LeaderboardCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
+                      const Text(
                         'Accomplishment Summary',
                         style: TextStyle(
                           fontSize: 14.5,
@@ -1182,7 +1182,7 @@ class _LeaderboardCard extends StatelessWidget {
                       const SizedBox(height: 2),
                       Text(
                         '${ranking.periodLabel} · ${ranking.totalPoints} pts total',
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: AppTheme.textSecondary,
                           fontWeight: FontWeight.w600,
                           fontSize: 11.5,
@@ -1232,7 +1232,7 @@ class _LeaderboardCard extends StatelessWidget {
               ],
             ),
           ),
-          Divider(height: 1, color: AppTheme.border),
+          const Divider(height: 1, color: AppTheme.border),
           if (!hasData)
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 16, vertical: 18),
@@ -1335,7 +1335,7 @@ class _LeaderboardRow extends StatelessWidget {
                     alignment: Alignment.center,
                     child: Text(
                       '${entry.rank}',
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: AppTheme.textSecondary,
                         fontWeight: FontWeight.w800,
                         fontSize: 12.5,
@@ -1383,7 +1383,7 @@ class _LeaderboardRow extends StatelessWidget {
                         entry.name.isEmpty ? '—' : entry.name,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontWeight: FontWeight.w800,
                           color: AppTheme.textPrimary,
                           fontSize: 13,
@@ -1420,7 +1420,7 @@ class _LeaderboardRow extends StatelessWidget {
                     entry.role,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: AppTheme.textSecondary,
                       fontSize: 11,
                     ),
@@ -1443,7 +1443,7 @@ class _LeaderboardRow extends StatelessWidget {
                   letterSpacing: -0.3,
                 ),
               ),
-              Text(
+              const Text(
                 'pts',
                 style: TextStyle(
                   color: AppTheme.textMuted,
@@ -1474,14 +1474,14 @@ class _RankingEmpty extends StatelessWidget {
             color: AppTheme.surfaceMuted,
             borderRadius: BorderRadius.circular(12),
           ),
-          child: Icon(
+          child: const Icon(
             PhosphorIconsBold.trophy,
             color: AppTheme.textMuted,
             size: 18,
           ),
         ),
         const SizedBox(width: 12),
-        Expanded(
+        const Expanded(
           child: Text(
             'No rankings yet for this period.',
             style: TextStyle(color: AppTheme.textSecondary, fontSize: 12.5),
@@ -1501,7 +1501,7 @@ class _RankingFallback extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppTheme.surface,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: AppTheme.border),
         boxShadow: AppTheme.shadowSoft,
@@ -1526,7 +1526,7 @@ class _RankingFallback extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                const Text(
                   'Accomplishment Summary',
                   style: TextStyle(
                     fontWeight: FontWeight.w900,
@@ -1537,7 +1537,7 @@ class _RankingFallback extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   message,
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: AppTheme.textSecondary,
                     fontSize: 12,
                   ),
@@ -1638,7 +1638,7 @@ class _TaskPanel extends StatelessWidget {
       return Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: AppTheme.surface,
+          color: Colors.white,
           borderRadius: BorderRadius.circular(18),
           border: Border.all(color: AppTheme.border),
           boxShadow: AppTheme.shadowSoft,
@@ -1659,7 +1659,7 @@ class _TaskPanel extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 12),
-            Expanded(
+            const Expanded(
               child: Text(
                 'No active tasks in your deadline window.',
                 style: TextStyle(color: AppTheme.textSecondary, fontSize: 12.5),
@@ -1693,7 +1693,7 @@ class _OngoingTaskTile extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: AppTheme.surface,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppTheme.border),
         boxShadow: AppTheme.shadowSoft,
@@ -1708,7 +1708,7 @@ class _OngoingTaskTile extends StatelessWidget {
                   task.title,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontWeight: FontWeight.w800,
                     color: AppTheme.textPrimary,
                     fontSize: 13.5,
@@ -1732,7 +1732,7 @@ class _OngoingTaskTile extends StatelessWidget {
               task.subtitle,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(
+              style: const TextStyle(
                 color: AppTheme.textSecondary,
                 fontSize: 12,
               ),
@@ -1756,7 +1756,7 @@ class _OngoingTaskTile extends StatelessWidget {
                   'Due ${task.dueDate.isEmpty ? 'Not set' : task.dueDate}',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: AppTheme.textSecondary,
                     fontWeight: FontWeight.w600,
                     fontSize: 11,
@@ -1869,7 +1869,7 @@ class _ErrorState extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: AppTheme.surface,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: AppTheme.border),
       ),
@@ -1892,7 +1892,7 @@ class _ErrorState extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 12),
-              Expanded(
+              const Expanded(
                 child: Text(
                   'Unable to load dashboard',
                   style: TextStyle(
@@ -1906,7 +1906,7 @@ class _ErrorState extends StatelessWidget {
           const SizedBox(height: 10),
           Text(
             message,
-            style: TextStyle(
+            style: const TextStyle(
               color: AppTheme.textSecondary,
               fontSize: 12.5,
             ),

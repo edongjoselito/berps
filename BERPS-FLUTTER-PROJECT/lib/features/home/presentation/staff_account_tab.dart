@@ -190,13 +190,13 @@ class _StaffAccountTabState extends State<StaffAccountTab> {
                 ),
                 title: Text(
                   '$_biometricLabel Login',
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontWeight: FontWeight.w800,
                     fontSize: 14,
                     color: AppTheme.textPrimary,
                   ),
                 ),
-                subtitle: Text(
+                subtitle: const Text(
                   'Sign in faster using your device biometrics.',
                   style: TextStyle(
                     fontSize: 12.5,
@@ -310,7 +310,7 @@ class _SectionLabel extends StatelessWidget {
         const SizedBox(width: 10),
         Text(
           text.toUpperCase(),
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 11,
             fontWeight: FontWeight.w900,
             letterSpacing: 1.5,
@@ -343,7 +343,7 @@ class _WorkspaceCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
-        color: AppTheme.surface,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppTheme.border),
       ),
@@ -371,7 +371,7 @@ class _WorkspaceCard extends StatelessWidget {
               children: [
                 Text(
                   appName,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontWeight: FontWeight.w900,
                     fontSize: 14,
                     color: AppTheme.textPrimary,
@@ -382,7 +382,7 @@ class _WorkspaceCard extends StatelessWidget {
                   domain,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
                     color: AppTheme.textSecondary,
@@ -452,7 +452,7 @@ class _ProfileCard extends StatelessWidget {
                       session.fullName.isEmpty
                           ? session.username
                           : session.fullName,
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: AppTheme.textPrimary,
                         fontWeight: FontWeight.w900,
                         fontSize: 17,
@@ -509,7 +509,7 @@ class _ProfileInfoRow extends StatelessWidget {
             child: Text(
               label,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(
+              style: const TextStyle(
                 color: AppTheme.textPrimary,
                 fontWeight: FontWeight.w700,
                 fontSize: 12.5,
@@ -565,7 +565,7 @@ class _ActionCard extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontWeight: FontWeight.w900,
                       color: AppTheme.textPrimary,
                       fontSize: 14,
@@ -576,7 +576,7 @@ class _ActionCard extends StatelessWidget {
                     subtitle,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: AppTheme.textSecondary,
                       fontSize: 12.5,
                       height: 1.35,

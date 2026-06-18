@@ -167,7 +167,7 @@ class _NotificationCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: AppTheme.surface,
+          color: Colors.white,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: unread ? _accent.withValues(alpha: 0.32) : AppTheme.border,
@@ -198,7 +198,7 @@ class _NotificationCard extends StatelessWidget {
                           item.title.isEmpty ? 'Notification' : item.title,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontWeight: FontWeight.w800,
                             fontSize: 13.5,
                             color: AppTheme.textPrimary,
@@ -224,7 +224,7 @@ class _NotificationCard extends StatelessWidget {
                       item.message,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: AppTheme.textSecondary,
                         fontSize: 12.5,
                         height: 1.4,
@@ -245,7 +245,7 @@ class _NotificationCard extends StatelessWidget {
                           item.actorName,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: AppTheme.textMuted,
                             fontSize: 11,
                             fontWeight: FontWeight.w700,
@@ -268,7 +268,7 @@ class _NotificationCard extends StatelessWidget {
                             item.createdLabel,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: AppTheme.textMuted,
                               fontSize: 11,
                               fontWeight: FontWeight.w600,
@@ -296,7 +296,7 @@ class _EmptyState extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: AppTheme.surface,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: AppTheme.border),
       ),
@@ -317,7 +317,7 @@ class _EmptyState extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 14),
-          Text(
+          const Text(
             'No notifications yet',
             style: TextStyle(
               fontWeight: FontWeight.w900,
@@ -326,7 +326,7 @@ class _EmptyState extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 6),
-          Text(
+          const Text(
             'You will see task updates and support replies here.',
             textAlign: TextAlign.center,
             style: TextStyle(
@@ -391,14 +391,14 @@ class _ErrorCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: AppTheme.surface,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: AppTheme.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          const Text(
             'Unable to load notifications',
             style: TextStyle(
               fontWeight: FontWeight.w900,
@@ -408,7 +408,7 @@ class _ErrorCard extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             message,
-            style: TextStyle(color: AppTheme.textSecondary, fontSize: 13),
+            style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13),
           ),
           const SizedBox(height: 14),
           FilledButton.icon(

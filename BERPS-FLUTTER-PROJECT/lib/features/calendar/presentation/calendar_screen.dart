@@ -68,7 +68,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
       context: context,
       builder: (dialogContext) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text(
+        title: const Text(
           'Delete event?',
           style: TextStyle(
             fontWeight: FontWeight.w900,
@@ -77,7 +77,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
         ),
         content: Text(
           '"${event.title}" will be permanently removed.',
-          style: TextStyle(color: AppTheme.textSecondary),
+          style: const TextStyle(color: AppTheme.textSecondary),
         ),
         actions: [
           TextButton(
@@ -275,7 +275,7 @@ class _CalendarSectionHeader extends StatelessWidget {
         const SizedBox(width: 10),
         Text(
           title.toUpperCase(),
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 11,
             fontWeight: FontWeight.w900,
             letterSpacing: 1.5,
@@ -385,7 +385,7 @@ class _EventCard extends StatelessWidget {
                             event.title,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontWeight: FontWeight.w900,
                               color: AppTheme.textPrimary,
                               fontSize: 14.5,
@@ -427,7 +427,7 @@ class _EventCard extends StatelessWidget {
                         Expanded(
                           child: Text(
                             timeLabel,
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: AppTheme.textSecondary,
                               fontSize: 12,
                               fontWeight: FontWeight.w700,
@@ -451,7 +451,7 @@ class _EventCard extends StatelessWidget {
                               event.location,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
+                              style: const TextStyle(
                                 color: AppTheme.textMuted,
                                 fontSize: 11.5,
                                 fontWeight: FontWeight.w600,
@@ -565,7 +565,7 @@ class _EmptyState extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          Text(
+          const Text(
             'No events yet',
             style: TextStyle(
               fontWeight: FontWeight.w900,
@@ -574,7 +574,7 @@ class _EmptyState extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 4),
-          Text(
+          const Text(
             'Tap "New event" to add a personal note or reminder.',
             style: TextStyle(
               color: AppTheme.textSecondary,
@@ -599,7 +599,7 @@ class _ErrorCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          const Text(
             'Calendar unavailable',
             style: TextStyle(
               fontWeight: FontWeight.w900,
@@ -610,7 +610,7 @@ class _ErrorCard extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             message,
-            style: TextStyle(color: AppTheme.textSecondary, fontSize: 13),
+            style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13),
           ),
           const SizedBox(height: 14),
           Align(

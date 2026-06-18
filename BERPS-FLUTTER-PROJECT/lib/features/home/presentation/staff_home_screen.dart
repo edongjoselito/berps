@@ -89,7 +89,7 @@ class _StaffHomeScreenState extends State<StaffHomeScreen> {
               ),
             ),
             const SizedBox(height: 18),
-            Text(
+            const Text(
               'Sign out?',
               style: TextStyle(
                 fontWeight: FontWeight.w900,
@@ -98,7 +98,7 @@ class _StaffHomeScreenState extends State<StaffHomeScreen> {
               ),
             ),
             const SizedBox(height: 8),
-            Text(
+            const Text(
               'You will need to sign in again to continue.',
               textAlign: TextAlign.center,
               style: TextStyle(
@@ -307,9 +307,9 @@ class _StaffHomeScreenState extends State<StaffHomeScreen> {
         ),
       ),
       bottomNavigationBar: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           border: Border(top: BorderSide(color: AppTheme.border)),
-          color: AppTheme.surface,
+          color: Colors.white,
           boxShadow: [
             BoxShadow(
               color: Color(0x0A0F1E3A),

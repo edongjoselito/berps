@@ -139,7 +139,7 @@ class _WelcomeHero extends StatelessWidget {
       children: [
         BrandLogo(url: config?.logoUrl ?? '', size: 72),
         const SizedBox(height: 20),
-        Text(
+        const Text(
           'BERPS Mobile',
           textAlign: TextAlign.center,
           style: TextStyle(
@@ -150,7 +150,7 @@ class _WelcomeHero extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-        Text(
+        const Text(
           'Enter your workspace URL to get started.',
           textAlign: TextAlign.center,
           style: TextStyle(

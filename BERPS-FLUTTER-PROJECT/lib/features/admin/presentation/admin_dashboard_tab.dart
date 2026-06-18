@@ -210,7 +210,7 @@ class _AdminDashboardTabState extends State<AdminDashboardTab> {
             child: Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: AppTheme.surface,
+                color: Colors.white,
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(color: AppTheme.border),
                 boxShadow: AppTheme.shadowSoft,
@@ -228,7 +228,7 @@ class _AdminDashboardTabState extends State<AdminDashboardTab> {
                             d.accomplished[i].name,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontWeight: FontWeight.w700,
                               fontSize: 14,
                               color: AppTheme.textPrimary,
@@ -280,7 +280,7 @@ class _AdminDashboardTabState extends State<AdminDashboardTab> {
                 label,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w600,
                   color: AppTheme.textSecondary,
@@ -323,7 +323,7 @@ class _AdminDashboardTabState extends State<AdminDashboardTab> {
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: AppTheme.surface,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: AppTheme.border),
         boxShadow: AppTheme.shadowSoft,
@@ -335,7 +335,7 @@ class _AdminDashboardTabState extends State<AdminDashboardTab> {
             t.title,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(
+            style: const TextStyle(
               fontWeight: FontWeight.w800,
               fontSize: 14.5,
               color: AppTheme.textPrimary,
@@ -346,12 +346,12 @@ class _AdminDashboardTabState extends State<AdminDashboardTab> {
             '${t.assignedName.isEmpty ? 'Unassigned' : t.assignedName} · ${t.subtitle.isEmpty ? 'No project' : t.subtitle}',
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+            style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
           ),
           const SizedBox(height: 10),
           Row(
             children: [
-              Icon(
+              const Icon(
                 PhosphorIconsBold.calendarBlank,
                 size: 13,
                 color: AppTheme.textMuted,
@@ -364,7 +364,7 @@ class _AdminDashboardTabState extends State<AdminDashboardTab> {
                       : formatCompactDate(t.dueDate),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 11.5,
                     fontWeight: FontWeight.w600,
                     color: AppTheme.textSecondary,
@@ -412,14 +412,14 @@ class _AdminDashboardTabState extends State<AdminDashboardTab> {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 22, horizontal: 16),
       decoration: BoxDecoration(
-        color: AppTheme.surface,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppTheme.border),
       ),
       child: Text(
         message,
         textAlign: TextAlign.center,
-        style: TextStyle(color: AppTheme.textSecondary, fontSize: 13),
+        style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13),
       ),
     );
   }

@@ -39,16 +39,12 @@ class _OrbBackgroundState extends State<OrbBackground>
     final media = MediaQuery.of(context).size;
 
     return DecoratedBox(
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          stops: const [0.0, 0.55, 1.0],
-          colors: [
-            AppTheme.background,
-            AppTheme.backgroundAlt,
-            AppTheme.surfaceMuted,
-          ],
+          stops: [0.0, 0.55, 1.0],
+          colors: [Color(0xFFFAFBFE), Color(0xFFF3F7FD), Color(0xFFEAF1FB)],
         ),
       ),
       child: Stack(

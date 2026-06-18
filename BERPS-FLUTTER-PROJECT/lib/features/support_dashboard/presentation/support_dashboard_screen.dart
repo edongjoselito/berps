@@ -331,7 +331,7 @@ class _TotalsGrid extends StatelessWidget {
                       width: 30,
                       height: 30,
                       decoration: BoxDecoration(
-                        color: AppTheme.surface.withValues(alpha: 0.15),
+                        color: Colors.white.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Icon(cell.icon, size: 16, color: Colors.white),
@@ -403,7 +403,7 @@ class _SectionHeader extends StatelessWidget {
         const SizedBox(width: 10),
         Text(
           title.toUpperCase(),
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 11,
             fontWeight: FontWeight.w900,
             letterSpacing: 1.5,
@@ -492,7 +492,7 @@ class _MonthMetric extends StatelessWidget {
           label,
           maxLines: 2,
           textAlign: TextAlign.center,
-          style: TextStyle(
+          style: const TextStyle(
             color: AppTheme.textSecondary,
             fontSize: 11,
             fontWeight: FontWeight.w700,
@@ -537,7 +537,7 @@ class _BreakdownList extends StatelessWidget {
                     width: 110,
                     child: Text(
                       row.title,
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: AppTheme.textPrimary,
                         fontWeight: FontWeight.w800,
                         fontSize: 12.5,
@@ -561,7 +561,7 @@ class _BreakdownList extends StatelessWidget {
                     child: Text(
                       row.value.toString(),
                       textAlign: TextAlign.right,
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: AppTheme.textPrimary,
                         fontWeight: FontWeight.w900,
                         fontSize: 13,
@@ -595,7 +595,7 @@ class _DepartmentList extends StatelessWidget {
                   Expanded(
                     child: Text(
                       rows[i].name.isEmpty ? 'Unassigned' : rows[i].name,
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: AppTheme.textPrimary,
                         fontWeight: FontWeight.w800,
                         fontSize: 13,
@@ -615,7 +615,7 @@ class _DepartmentList extends StatelessWidget {
               ),
             ),
             if (i != rows.length - 1)
-              Divider(height: 1, color: AppTheme.border),
+              const Divider(height: 1, color: AppTheme.border),
           ],
         ],
       ),
@@ -691,7 +691,7 @@ class _TrendCard extends StatelessWidget {
                           const SizedBox(height: 6),
                           Text(
                             p.label,
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: AppTheme.textMuted,
                               fontSize: 8,
                               fontWeight: FontWeight.w700,
@@ -773,7 +773,7 @@ class _LegendDot extends StatelessWidget {
         const SizedBox(width: 6),
         Text(
           label,
-          style: TextStyle(
+          style: const TextStyle(
             color: AppTheme.textSecondary,
             fontSize: 11.5,
             fontWeight: FontWeight.w800,
@@ -818,7 +818,7 @@ class _TicketRow extends StatelessWidget {
                       if (ticket.ticketNumber.isNotEmpty) ...[
                         Text(
                           '#${ticket.ticketNumber}',
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: AppTheme.textMuted,
                             fontSize: 11,
                             fontWeight: FontWeight.w900,
@@ -831,7 +831,7 @@ class _TicketRow extends StatelessWidget {
                           ticket.title,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: AppTheme.textPrimary,
                             fontWeight: FontWeight.w900,
                             fontSize: 13.5,
@@ -865,7 +865,7 @@ class _TicketRow extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       ticket.createdLabel,
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: AppTheme.textMuted,
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
@@ -875,7 +875,7 @@ class _TicketRow extends StatelessWidget {
                 ],
               ),
             ),
-            Icon(
+            const Icon(
               PhosphorIconsBold.caretRight,
               size: 14,
               color: AppTheme.textMuted,
@@ -898,7 +898,7 @@ class _ErrorBlock extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          const Text(
             'Unable to load',
             style: TextStyle(
               fontWeight: FontWeight.w900,
@@ -909,7 +909,7 @@ class _ErrorBlock extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             message,
-            style: TextStyle(color: AppTheme.textSecondary, fontSize: 13),
+            style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13),
           ),
           const SizedBox(height: 12),
           Align(

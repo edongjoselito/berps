@@ -118,7 +118,7 @@ class _EmployeeTasksScreenState extends State<EmployeeTasksScreen> {
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
-        color: AppTheme.surface,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppTheme.border),
         boxShadow: AppTheme.shadowSoft,
@@ -147,7 +147,7 @@ class _EmployeeTasksScreenState extends State<EmployeeTasksScreen> {
           ),
           title: Text(
             e.name.isEmpty ? '(no name)' : e.name,
-            style: TextStyle(
+            style: const TextStyle(
               fontWeight: FontWeight.w800,
               fontSize: 14.5,
               color: AppTheme.textPrimary,
@@ -155,7 +155,7 @@ class _EmployeeTasksScreenState extends State<EmployeeTasksScreen> {
           ),
           subtitle: Text(
             e.position.isEmpty ? 'Staff' : e.position,
-            style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+            style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
           ),
           trailing: Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
@@ -176,7 +176,7 @@ class _EmployeeTasksScreenState extends State<EmployeeTasksScreen> {
           ),
           children: e.pendingTasks.isEmpty
               ? [
-                  Padding(
+                  const Padding(
                     padding: EdgeInsets.symmetric(vertical: 8),
                     child: Text(
                       'No pending tasks.',
@@ -208,7 +208,7 @@ class _EmployeeTasksScreenState extends State<EmployeeTasksScreen> {
               Expanded(
                 child: Text(
                   t.title,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontWeight: FontWeight.w700,
                     fontSize: 13.5,
                     color: AppTheme.textPrimary,
@@ -241,13 +241,13 @@ class _EmployeeTasksScreenState extends State<EmployeeTasksScreen> {
               Text(
                 t.dueDate.isEmpty ? 'No due date' : formatCompactDate(t.dueDate),
                 style:
-                    TextStyle(fontSize: 11.5, color: AppTheme.textSecondary),
+                    const TextStyle(fontSize: 11.5, color: AppTheme.textSecondary),
               ),
               const Spacer(),
               Text(
                 t.projectName,
                 style:
-                    TextStyle(fontSize: 11.5, color: AppTheme.textMuted),
+                    const TextStyle(fontSize: 11.5, color: AppTheme.textMuted),
               ),
             ],
           ),

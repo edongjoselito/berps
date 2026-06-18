@@ -47,12 +47,10 @@ class _SkeletonState extends State<Skeleton>
             gradient: LinearGradient(
               begin: Alignment(-1 + t * 2, 0),
               end: Alignment(1 + t * 2, 0),
-              colors: [
-                AppTheme.surfaceMuted,
-                AppTheme.isDark
-                    ? const Color(0xFF273349)
-                    : const Color(0xFFF7FAFE),
-                AppTheme.surfaceMuted,
+              colors: const [
+                Color(0xFFEEF3FB),
+                Color(0xFFF7FAFE),
+                Color(0xFFEEF3FB),
               ],
               stops: const [0.0, 0.5, 1.0],
             ),
@@ -82,7 +80,7 @@ class SkeletonCard extends StatelessWidget {
     return Container(
       padding: padding,
       decoration: BoxDecoration(
-        color: AppTheme.surface,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(radius),
         border: Border.all(color: AppTheme.border),
       ),

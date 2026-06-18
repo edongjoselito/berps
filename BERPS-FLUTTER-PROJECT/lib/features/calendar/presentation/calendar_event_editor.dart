@@ -189,14 +189,14 @@ class _CalendarEventEditorState extends State<CalendarEventEditor> {
       context: context,
       builder: (dialogContext) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text(
+        title: const Text(
           'Delete event?',
           style: TextStyle(
             fontWeight: FontWeight.w900,
             color: AppTheme.textPrimary,
           ),
         ),
-        content: Text(
+        content: const Text(
           'This event will be permanently removed.',
           style: TextStyle(color: AppTheme.textSecondary),
         ),
@@ -302,7 +302,7 @@ class _CalendarEventEditorState extends State<CalendarEventEditor> {
                   children: [
                     SwitchListTile.adaptive(
                       contentPadding: EdgeInsets.zero,
-                      title: Text(
+                      title: const Text(
                         'All day',
                         style: TextStyle(
                           fontWeight: FontWeight.w800,
@@ -345,7 +345,7 @@ class _CalendarEventEditorState extends State<CalendarEventEditor> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    const Text(
                       'Color',
                       style: TextStyle(
                         fontWeight: FontWeight.w800,
@@ -396,14 +396,14 @@ class _CalendarEventEditorState extends State<CalendarEventEditor> {
                     const SizedBox(height: 16),
                     SwitchListTile.adaptive(
                       contentPadding: EdgeInsets.zero,
-                      title: Text(
+                      title: const Text(
                         'Visible to teammates',
                         style: TextStyle(
                           fontWeight: FontWeight.w800,
                           color: AppTheme.textPrimary,
                         ),
                       ),
-                      subtitle: Text(
+                      subtitle: const Text(
                         'Share this event with everyone in your workspace.',
                         style: TextStyle(
                           color: AppTheme.textSecondary,
@@ -425,14 +425,14 @@ class _CalendarEventEditorState extends State<CalendarEventEditor> {
                   children: [
                     SwitchListTile.adaptive(
                       contentPadding: EdgeInsets.zero,
-                      title: Text(
+                      title: const Text(
                         'Email reminder',
                         style: TextStyle(
                           fontWeight: FontWeight.w800,
                           color: AppTheme.textPrimary,
                         ),
                       ),
-                      subtitle: Text(
+                      subtitle: const Text(
                         'Send a reminder 1 day before the event.',
                         style: TextStyle(
                           color: AppTheme.textSecondary,
@@ -503,7 +503,7 @@ class _CalendarEventEditorState extends State<CalendarEventEditor> {
                     color: AppTheme.surfaceMuted,
                     borderRadius: BorderRadius.circular(14),
                   ),
-                  child: Text(
+                  child: const Text(
                     'This event was created by a teammate — you can view it but cannot make changes.',
                     style: TextStyle(
                       color: AppTheme.textSecondary,
@@ -543,7 +543,7 @@ class _SectionHeader extends StatelessWidget {
         const SizedBox(width: 10),
         Text(
           title.toUpperCase(),
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 11,
             fontWeight: FontWeight.w900,
             letterSpacing: 1.5,
@@ -606,7 +606,7 @@ class _DateTimeRow extends StatelessWidget {
                 children: [
                   Text(
                     label,
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: AppTheme.textSecondary,
                       fontSize: 12,
                       fontWeight: FontWeight.w700,
@@ -615,7 +615,7 @@ class _DateTimeRow extends StatelessWidget {
                   const SizedBox(height: 3),
                   Text(
                     _format(value),
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: AppTheme.textPrimary,
                       fontSize: 14,
                       fontWeight: FontWeight.w900,
@@ -624,7 +624,7 @@ class _DateTimeRow extends StatelessWidget {
                 ],
               ),
             ),
-            Icon(
+            const Icon(
               PhosphorIconsBold.caretRight,
               size: 14,
               color: AppTheme.textMuted,

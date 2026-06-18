@@ -196,7 +196,7 @@ class _ToastWidgetState extends State<_ToastWidget>
               child: Container(
                 padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
                 decoration: BoxDecoration(
-                  color: AppTheme.surface,
+                  color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
                     color: style.accent.withValues(alpha: 0.18),
@@ -234,7 +234,7 @@ class _ToastWidgetState extends State<_ToastWidget>
                           widget.message,
                           maxLines: 4,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: AppTheme.textPrimary,
                             fontWeight: FontWeight.w700,
                             fontSize: 13.5,
@@ -247,7 +247,7 @@ class _ToastWidgetState extends State<_ToastWidget>
                     InkWell(
                       onTap: _dismiss,
                       borderRadius: BorderRadius.circular(8),
-                      child: Padding(
+                      child: const Padding(
                         padding: EdgeInsets.all(4),
                         child: Icon(
                           PhosphorIconsBold.x,

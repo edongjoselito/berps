@@ -38,15 +38,7 @@ class _BerpsMobileAppState extends State<BerpsMobileApp> {
       debugShowCheckedModeBanner: false,
       title: 'BERPS',
       // App title shown in task switcher.
-      theme: AppTheme.light(),
-      darkTheme: AppTheme.dark(),
-      themeMode: ThemeMode.system,
-      builder: (context, child) {
-        // Publish the resolved brightness once per frame so AppTheme's
-        // adaptive tokens stay in sync with the active light/dark theme.
-        AppTheme.brightness = Theme.of(context).brightness;
-        return child!;
-      },
+      theme: AppTheme.build(),
       home: FutureBuilder<AuthController>(
         future: _controllerFuture,
         builder: (context, snapshot) {
@@ -140,7 +132,7 @@ class _SplashScreenState extends State<_SplashScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.surface,
+      backgroundColor: Colors.white,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -150,7 +142,7 @@ class _SplashScreenState extends State<_SplashScreen>
               height: 76,
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: AppTheme.surface,
+                color: Colors.white,
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(color: AppTheme.border),
                 boxShadow: [
@@ -164,7 +156,7 @@ class _SplashScreenState extends State<_SplashScreen>
               child: Image.asset('assets/logo.png', fit: BoxFit.contain),
             ),
             const SizedBox(height: 22),
-            Text(
+            const Text(
               'BERPS',
               style: TextStyle(
                 fontWeight: FontWeight.w900,
@@ -174,7 +166,7 @@ class _SplashScreenState extends State<_SplashScreen>
               ),
             ),
             const SizedBox(height: 4),
-            Text(
+            const Text(
               'Loading workspace…',
               style: TextStyle(
                 color: AppTheme.textSecondary,
@@ -212,7 +204,7 @@ class _StartupError extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.surface,
+      backgroundColor: Colors.white,
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -233,7 +225,7 @@ class _StartupError extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 14),
-              Text(
+              const Text(
                 'Startup failed',
                 style: TextStyle(
                   fontWeight: FontWeight.w900,
@@ -245,7 +237,7 @@ class _StartupError extends StatelessWidget {
               Text(
                 message,
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: const TextStyle(
                   color: AppTheme.textSecondary,
                   fontSize: 13,
                 ),

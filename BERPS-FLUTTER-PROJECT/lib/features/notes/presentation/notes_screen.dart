@@ -73,7 +73,7 @@ class _NotesScreenState extends State<NotesScreen> {
       context: context,
       builder: (dialogContext) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text(
+        title: const Text(
           'Delete note?',
           style: TextStyle(
             fontWeight: FontWeight.w900,
@@ -82,7 +82,7 @@ class _NotesScreenState extends State<NotesScreen> {
         ),
         content: Text(
           '"${note.displayTitle}" will be removed.',
-          style: TextStyle(color: AppTheme.textSecondary),
+          style: const TextStyle(color: AppTheme.textSecondary),
         ),
         actions: [
           TextButton(
@@ -244,7 +244,7 @@ class _SectionHeader extends StatelessWidget {
         const SizedBox(width: 8),
         Text(
           title,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 13.5,
             fontWeight: FontWeight.w900,
             color: AppTheme.textPrimary,
@@ -275,7 +275,7 @@ class _NoteCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: AppTheme.surface,
+          color: Colors.white,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: AppTheme.border),
           boxShadow: AppTheme.shadowSoft,
@@ -290,7 +290,7 @@ class _NoteCard extends StatelessWidget {
                     note.displayTitle,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontWeight: FontWeight.w800,
                       color: AppTheme.textPrimary,
                       fontSize: 14,
@@ -333,7 +333,7 @@ class _NoteCard extends StatelessWidget {
                 note.description,
                 maxLines: 3,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(
+                style: const TextStyle(
                   color: AppTheme.textSecondary,
                   fontSize: 12.5,
                   height: 1.4,
@@ -353,7 +353,7 @@ class _NoteCard extends StatelessWidget {
             const SizedBox(height: 10),
             Row(
               children: [
-                Icon(
+                const Icon(
                   PhosphorIconsBold.calendarBlank,
                   size: 12,
                   color: AppTheme.textMuted,
@@ -361,7 +361,7 @@ class _NoteCard extends StatelessWidget {
                 const SizedBox(width: 5),
                 Text(
                   note.dateLabel.isEmpty ? note.date : note.dateLabel,
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: AppTheme.textMuted,
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
@@ -498,7 +498,7 @@ class _NoteEditorSheetState extends State<_NoteEditorSheet> {
     return Padding(
       padding: EdgeInsets.only(bottom: bottomInset),
       child: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           color: AppTheme.surface,
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
@@ -521,7 +521,7 @@ class _NoteEditorSheetState extends State<_NoteEditorSheet> {
               const SizedBox(height: 16),
               Text(
                 _isEditing ? 'Edit note' : 'New note',
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w900,
                   color: AppTheme.textPrimary,
@@ -600,7 +600,7 @@ class _FieldLabel extends StatelessWidget {
       padding: const EdgeInsets.only(left: 4, bottom: 8),
       child: Text(
         text,
-        style: TextStyle(
+        style: const TextStyle(
           fontSize: 12.5,
           fontWeight: FontWeight.w700,
           color: AppTheme.textSecondary,
@@ -619,7 +619,7 @@ class _EmptyState extends StatelessWidget {
       margin: const EdgeInsets.only(top: 40),
       padding: const EdgeInsets.all(28),
       decoration: BoxDecoration(
-        color: AppTheme.surface,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: AppTheme.border),
       ),
@@ -639,7 +639,7 @@ class _EmptyState extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          Text(
+          const Text(
             'No notes yet',
             style: TextStyle(
               fontSize: 15,
@@ -648,7 +648,7 @@ class _EmptyState extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 6),
-          Text(
+          const Text(
             'Tap "New note" to jot down your first note.',
             textAlign: TextAlign.center,
             style: TextStyle(
@@ -673,7 +673,7 @@ class _ErrorCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: AppTheme.surface,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: AppTheme.border),
       ),
@@ -696,7 +696,7 @@ class _ErrorCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 12),
-              Expanded(
+              const Expanded(
                 child: Text(
                   'Unable to load notes',
                   style: TextStyle(
@@ -710,7 +710,7 @@ class _ErrorCard extends StatelessWidget {
           const SizedBox(height: 10),
           Text(
             message,
-            style: TextStyle(
+            style: const TextStyle(
               color: AppTheme.textSecondary,
               fontSize: 12.5,
             ),

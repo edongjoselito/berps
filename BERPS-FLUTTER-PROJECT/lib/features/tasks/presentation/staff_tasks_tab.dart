@@ -327,7 +327,7 @@ class _StaffTasksTabState extends State<StaffTasksTab> {
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text(
+        title: const Text(
           'Delete this task?',
           style: TextStyle(
             fontWeight: FontWeight.w900,
@@ -336,7 +336,7 @@ class _StaffTasksTabState extends State<StaffTasksTab> {
         ),
         content: Text(
           '"${task.title}" will be permanently removed.',
-          style: TextStyle(color: AppTheme.textSecondary),
+          style: const TextStyle(color: AppTheme.textSecondary),
         ),
         actions: [
           TextButton(
@@ -555,7 +555,7 @@ class _TaskStatsRow extends StatelessWidget {
                       width: 30,
                       height: 30,
                       decoration: BoxDecoration(
-                        color: AppTheme.surface.withValues(alpha: 0.15),
+                        color: Colors.white.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Icon(item.icon, size: 16, color: Colors.white),
@@ -647,7 +647,7 @@ class _AddTaskButton extends StatelessWidget {
                 width: 28,
                 height: 28,
                 decoration: BoxDecoration(
-                  color: AppTheme.surface.withValues(alpha: 0.18),
+                  color: Colors.white.withValues(alpha: 0.18),
                   borderRadius: BorderRadius.circular(9),
                 ),
                 child: const Icon(
@@ -708,7 +708,7 @@ class _TaskFilters extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(4),
           decoration: BoxDecoration(
-            color: AppTheme.surface,
+            color: Colors.white,
             borderRadius: BorderRadius.circular(14),
             border: Border.all(color: AppTheme.border),
           ),
@@ -835,7 +835,7 @@ class _FilterChip extends StatelessWidget {
         decoration: BoxDecoration(
           color: selected
               ? AppTheme.primary.withValues(alpha: 0.10)
-              : AppTheme.surface,
+              : Colors.white,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: selected ? AppTheme.primary : AppTheme.border,
@@ -884,7 +884,7 @@ class _TimeInWarning extends StatelessWidget {
             width: 32,
             height: 32,
             decoration: BoxDecoration(
-              color: AppTheme.surface,
+              color: Colors.white,
               borderRadius: BorderRadius.circular(10),
             ),
             child: const Icon(
@@ -894,7 +894,7 @@ class _TimeInWarning extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 12),
-          Expanded(
+          const Expanded(
             child: Text(
               'Task creation and updates require a time-in for today.',
               style: TextStyle(
@@ -938,7 +938,7 @@ class _TaskSectionHeader extends StatelessWidget {
         const SizedBox(width: 10),
         Text(
           title.toUpperCase(),
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 11,
             fontWeight: FontWeight.w900,
             letterSpacing: 1.5,
@@ -995,7 +995,7 @@ class _TaskCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: AppTheme.surface,
+          color: Colors.white,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(color: AppTheme.border),
           boxShadow: AppTheme.shadowSoft,
@@ -1023,7 +1023,7 @@ class _TaskCard extends StatelessWidget {
                         task.title,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontWeight: FontWeight.w900,
                           color: AppTheme.textPrimary,
                           fontSize: 14.5,
@@ -1102,7 +1102,7 @@ class _TaskCard extends StatelessWidget {
                 ),
                 child: Text(
                   task.adminComment,
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: AppTheme.textSecondary,
                     fontSize: 12.5,
                     height: 1.4,
@@ -1113,7 +1113,7 @@ class _TaskCard extends StatelessWidget {
             if (task.attachmentLink.isNotEmpty) ...[
               const SizedBox(height: 10),
               Row(
-                children: [
+                children: const [
                   Icon(
                     PhosphorIconsBold.paperclip,
                     size: 12,
@@ -1167,7 +1167,7 @@ class _TaskMetaPill extends StatelessWidget {
               child: Text(
                 label,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(
+                style: const TextStyle(
                   color: AppTheme.textPrimary,
                   fontWeight: FontWeight.w700,
                   fontSize: 11,
@@ -1260,14 +1260,14 @@ class _TaskTabError extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppTheme.surface,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: AppTheme.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          const Text(
             'Unable to load tasks',
             style: TextStyle(
               fontWeight: FontWeight.w900,
@@ -1277,7 +1277,7 @@ class _TaskTabError extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             message,
-            style: TextStyle(color: AppTheme.textSecondary, fontSize: 13),
+            style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13),
           ),
           const SizedBox(height: 14),
           FilledButton.icon(
@@ -1368,8 +1368,8 @@ class _SheetContainer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-        color: AppTheme.surface,
+      decoration: const BoxDecoration(
+        color: Colors.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: SafeArea(
@@ -1406,7 +1406,7 @@ class _SheetContainer extends StatelessWidget {
                       children: [
                         Text(
                           title,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 15.5,
                             fontWeight: FontWeight.w900,
                             color: AppTheme.textPrimary,
@@ -1417,7 +1417,7 @@ class _SheetContainer extends StatelessWidget {
                           subtitle,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 12,
                             color: AppTheme.textSecondary,
                             fontWeight: FontWeight.w600,
@@ -1503,7 +1503,7 @@ class _ActionRow extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       subtitle,
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: AppTheme.textSecondary,
                         fontSize: 11.5,
                       ),
@@ -1534,7 +1534,7 @@ class _SheetFieldLabel extends StatelessWidget {
       padding: const EdgeInsets.only(left: 4, bottom: 6),
       child: Text(
         text.toUpperCase(),
-        style: TextStyle(
+        style: const TextStyle(
           fontSize: 10.5,
           fontWeight: FontWeight.w900,
           letterSpacing: 1.2,
@@ -1568,7 +1568,7 @@ class _StatusChoice extends StatelessWidget {
         decoration: BoxDecoration(
           color: selected
               ? AppTheme.primary.withValues(alpha: 0.10)
-              : AppTheme.surface,
+              : Colors.white,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: selected ? AppTheme.primary : AppTheme.border,
@@ -1607,7 +1607,7 @@ class _TaskEmptyState extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: AppTheme.surface,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: AppTheme.border),
       ),
@@ -1627,7 +1627,7 @@ class _TaskEmptyState extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 14),
-          Expanded(
+          const Expanded(
             child: Text(
               'No tasks match the current filter.',
               style: TextStyle(color: AppTheme.textSecondary, fontSize: 13),

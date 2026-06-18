@@ -152,7 +152,7 @@ class _AdminTasksTabState extends State<AdminTasksTab> {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(
-        color: AppTheme.surface,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: AppTheme.border),
         boxShadow: AppTheme.shadowSoft,
@@ -166,7 +166,7 @@ class _AdminTasksTabState extends State<AdminTasksTab> {
               Expanded(
                 child: Text(
                   t.title,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontWeight: FontWeight.w800,
                     fontSize: 15,
                     color: AppTheme.textPrimary,
@@ -202,7 +202,7 @@ class _AdminTasksTabState extends State<AdminTasksTab> {
                   t.assignedName,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 12.5,
                     fontWeight: FontWeight.w600,
                     color: AppTheme.textSecondary,
@@ -222,7 +222,7 @@ class _AdminTasksTabState extends State<AdminTasksTab> {
                   t.projectName,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 12.5,
                     color: AppTheme.textSecondary,
                   ),
@@ -280,7 +280,7 @@ class _AdminTasksTabState extends State<AdminTasksTab> {
               ),
               child: Text(
                 t.adminComment,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 12,
                   color: AppTheme.textSecondary,
                   height: 1.4,
@@ -392,8 +392,8 @@ class _CreateTaskSheetState extends State<_CreateTaskSheet> {
     return Padding(
       padding: EdgeInsets.only(bottom: bottom),
       child: Container(
-        decoration: BoxDecoration(
-          color: AppTheme.surface,
+        decoration: const BoxDecoration(
+          color: Colors.white,
           borderRadius: BorderRadius.vertical(top: Radius.circular(26)),
         ),
         padding: const EdgeInsets.fromLTRB(20, 14, 20, 24),
@@ -413,7 +413,7 @@ class _CreateTaskSheetState extends State<_CreateTaskSheet> {
                 ),
               ),
               const SizedBox(height: 16),
-              Text(
+              const Text(
                 'New task',
                 style: TextStyle(
                   fontWeight: FontWeight.w900,
@@ -500,7 +500,7 @@ class _CreateTaskSheetState extends State<_CreateTaskSheet> {
         padding: const EdgeInsets.only(bottom: 6),
         child: Text(
           text,
-          style: TextStyle(
+          style: const TextStyle(
             fontWeight: FontWeight.w700,
             fontSize: 13,
             color: AppTheme.textSecondary,
@@ -526,7 +526,7 @@ class _CreateTaskSheetState extends State<_CreateTaskSheet> {
           value: value,
           isExpanded: true,
           hint: Text(hint,
-              style: TextStyle(color: AppTheme.textMuted, fontSize: 14)),
+              style: const TextStyle(color: AppTheme.textMuted, fontSize: 14)),
           items: items,
           onChanged: onChanged,
         ),
@@ -585,7 +585,7 @@ class _CreateTaskSheetState extends State<_CreateTaskSheet> {
                 Expanded(
                   child: Text(
                     formatCompactDate(_fmt(value)),
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
                       color: AppTheme.textPrimary,

@@ -238,7 +238,7 @@ class _Header extends StatelessWidget {
         child: Row(
           children: [
             Material(
-              color: AppTheme.surface.withValues(alpha: 0.12),
+              color: Colors.white.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(10),
               child: InkWell(
                 onTap: onBack,
@@ -282,7 +282,7 @@ class _Header extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: AppTheme.surface.withValues(alpha: 0.12),
+                color: Colors.white.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Icon(
@@ -335,7 +335,7 @@ class _MonthSelector extends StatelessWidget {
     final label = _months[month - 1];
     return Container(
       decoration: BoxDecoration(
-        color: AppTheme.surface,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppTheme.border),
         boxShadow: [
@@ -378,14 +378,14 @@ class _MonthSelector extends StatelessWidget {
                     children: [
                       Text(
                         '$label $year',
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontWeight: FontWeight.w900,
                           fontSize: 17,
                           color: AppTheme.textPrimary,
                         ),
                       ),
                       const SizedBox(height: 2),
-                      Text(
+                      const Text(
                         'Tap to change month',
                         style: TextStyle(
                           fontSize: 13,
@@ -529,7 +529,7 @@ class _SummaryCard extends StatelessWidget {
                 width: 38,
                 height: 38,
                 decoration: BoxDecoration(
-                  color: AppTheme.surface.withValues(alpha: 0.15),
+                  color: Colors.white.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Icon(
@@ -676,7 +676,7 @@ class _SectionHeader extends StatelessWidget {
         const SizedBox(width: 10),
         Text(
           title,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w900,
             color: AppTheme.textPrimary,
@@ -758,7 +758,7 @@ class _DtrRowCard extends StatelessWidget {
       onTap: () => Haptics.light(),
       child: Container(
         decoration: BoxDecoration(
-          color: isWeekend ? AppTheme.surfaceMuted : AppTheme.surface,
+          color: isWeekend ? const Color(0xFFF8F9FB) : Colors.white,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isTodayRow ? AppTheme.primary : AppTheme.border,
@@ -814,7 +814,7 @@ class _DtrRowCard extends StatelessWidget {
                                 children: [
                                   Text(
                                     '$weekday, $monthShort',
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       fontWeight: FontWeight.w900,
                                       fontSize: 14,
                                       color: AppTheme.textPrimary,
@@ -823,7 +823,7 @@ class _DtrRowCard extends StatelessWidget {
                                   const SizedBox(height: 2),
                                   Text(
                                     row.date,
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       fontSize: 11,
                                       fontWeight: FontWeight.w700,
                                       color: AppTheme.textMuted,
@@ -883,13 +883,13 @@ class _DtrRowCard extends StatelessWidget {
                           const SizedBox(height: 10),
                           Row(
                             children: [
-                              Icon(
+                              const Icon(
                                 PhosphorIconsBold.timer,
                                 size: 14,
                                 color: AppTheme.textSecondary,
                               ),
                               const SizedBox(width: 6),
-                              Text(
+                              const Text(
                                 'Total Hours',
                                 style: TextStyle(
                                   fontSize: 12,
@@ -1035,7 +1035,7 @@ class _TimelineBreakdown extends StatelessWidget {
                   color: AppTheme.surfaceMuted,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Text(
+                child: const Text(
                   'No record',
                   style: TextStyle(
                     fontSize: 12,
@@ -1062,7 +1062,7 @@ class _TimelineBreakdown extends StatelessWidget {
                         ),
                         child: Text(
                           txt,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w700,
                             color: AppTheme.textPrimary,
@@ -1120,7 +1120,7 @@ class _ErrorCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppTheme.surface,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: AppTheme.border),
       ),
@@ -1141,7 +1141,7 @@ class _ErrorCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 14),
-          Text(
+          const Text(
             'Unable to load DTR',
             style: TextStyle(
               fontWeight: FontWeight.w900,
@@ -1153,7 +1153,7 @@ class _ErrorCard extends StatelessWidget {
           Text(
             message,
             textAlign: TextAlign.center,
-            style: TextStyle(
+            style: const TextStyle(
               color: AppTheme.textSecondary,
               fontSize: 13.5,
               height: 1.4,
@@ -1200,7 +1200,7 @@ class _EmptyState extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(32),
       decoration: BoxDecoration(
-        color: AppTheme.surface,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: AppTheme.border),
       ),
@@ -1223,14 +1223,14 @@ class _EmptyState extends StatelessWidget {
           Text(
             'No records for $label $year',
             textAlign: TextAlign.center,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w900,
               color: AppTheme.textPrimary,
             ),
           ),
           const SizedBox(height: 6),
-          Text(
+          const Text(
             'Attendance records will appear once your time-in and time-out are logged.',
             textAlign: TextAlign.center,
             style: TextStyle(
@@ -1262,7 +1262,7 @@ class _WeekSeparator extends StatelessWidget {
           const SizedBox(width: 10),
           Text(
             'Week $weekNumber',
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 10,
               fontWeight: FontWeight.w800,
               color: AppTheme.textMuted,

@@ -225,7 +225,7 @@ class _ScopeChip extends StatelessWidget {
         duration: const Duration(milliseconds: 220),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
         decoration: BoxDecoration(
-          color: active ? AppTheme.primary : AppTheme.surface,
+          color: active ? AppTheme.primary : Colors.white,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: active ? AppTheme.primary : AppTheme.border,
@@ -324,7 +324,7 @@ class _IssueCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: AppTheme.surface,
+          color: Colors.white,
           borderRadius: BorderRadius.circular(18),
           border: Border.all(color: AppTheme.border),
           boxShadow: AppTheme.shadowSoft,
@@ -384,7 +384,7 @@ class _IssueCard extends StatelessWidget {
                 issue.title,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(
+                style: const TextStyle(
                   fontWeight: FontWeight.w900,
                   fontSize: 14,
                   color: AppTheme.textPrimary,
@@ -397,7 +397,7 @@ class _IssueCard extends StatelessWidget {
               padding: const EdgeInsets.only(left: 14),
               child: Row(
                 children: [
-                  Icon(
+                  const Icon(
                     PhosphorIconsBold.user,
                     size: 11,
                     color: AppTheme.textSecondary,
@@ -408,7 +408,7 @@ class _IssueCard extends StatelessWidget {
                       issue.customerName.isEmpty ? '—' : issue.customerName,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: AppTheme.textSecondary,
                         fontSize: 11.5,
                         fontWeight: FontWeight.w600,
@@ -480,7 +480,7 @@ class _MetaPill extends StatelessWidget {
           const SizedBox(width: 5),
           Text(
             label,
-            style: TextStyle(
+            style: const TextStyle(
               fontWeight: FontWeight.w700,
               fontSize: 10.5,
               color: AppTheme.textPrimary,
@@ -535,7 +535,7 @@ class _EmptyState extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: AppTheme.surface,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: AppTheme.border),
       ),
@@ -556,7 +556,7 @@ class _EmptyState extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 14),
-          Text(
+          const Text(
             'No tickets found',
             style: TextStyle(
               fontWeight: FontWeight.w900,
@@ -565,7 +565,7 @@ class _EmptyState extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 6),
-          Text(
+          const Text(
             'No support tickets in this scope.',
             textAlign: TextAlign.center,
             style: TextStyle(
@@ -590,14 +590,14 @@ class _ErrorState extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: AppTheme.surface,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: AppTheme.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          const Text(
             'Unable to load tickets',
             style: TextStyle(
               fontWeight: FontWeight.w900,
@@ -607,7 +607,7 @@ class _ErrorState extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             message,
-            style: TextStyle(
+            style: const TextStyle(
               color: AppTheme.textSecondary,
               fontSize: 12.5,
             ),
