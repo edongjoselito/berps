@@ -42,7 +42,7 @@ class AdminDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Drawer(
-      backgroundColor: Colors.white,
+      backgroundColor: AppTheme.surface,
       width: MediaQuery.of(context).size.width * 0.84,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
@@ -129,7 +129,7 @@ class AdminDrawer extends StatelessWidget {
                 ],
               ),
             ),
-            const Divider(height: 1, color: AppTheme.border),
+            Divider(height: 1, color: AppTheme.border),
             Padding(
               padding: const EdgeInsets.fromLTRB(12, 8, 12, 6),
               child: _DrawerAction(
@@ -205,7 +205,7 @@ class _Header extends StatelessWidget {
                   url: session.avatarUrl,
                   size: 52,
                   radius: 16,
-                  background: Colors.white,
+                  background: AppTheme.surface,
                   placeholderColor: AppTheme.primary,
                 ),
                 const SizedBox(width: 12),
@@ -217,7 +217,7 @@ class _Header extends StatelessWidget {
                         session.formalName,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: AppTheme.textPrimary,
                           fontWeight: FontWeight.w900,
                           fontSize: 14.5,
@@ -244,7 +244,7 @@ class _Header extends StatelessWidget {
                           session.email,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: AppTheme.textSecondary,
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
@@ -280,7 +280,7 @@ class _SectionLabel extends StatelessWidget {
           ],
           Text(
             text.toUpperCase(),
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 10.5,
               fontWeight: FontWeight.w900,
               letterSpacing: 1.2,

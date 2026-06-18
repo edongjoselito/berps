@@ -269,7 +269,7 @@ class _SectionTitle extends StatelessWidget {
         ],
         Text(
           text,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w900,
             color: AppTheme.textPrimary,
@@ -301,7 +301,7 @@ class _RangeCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppTheme.surface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppTheme.border),
         boxShadow: AppTheme.shadowSoft,
@@ -330,7 +330,7 @@ class _RangeCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Text(
+                    Text(
                       'Range',
                       style: TextStyle(
                         fontSize: 10,
@@ -344,7 +344,7 @@ class _RangeCard extends StatelessWidget {
                       label,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 13.5,
                         fontWeight: FontWeight.w800,
                         color: AppTheme.textPrimary,
@@ -456,7 +456,7 @@ class _PunchHeroCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppTheme.surface,
         borderRadius: BorderRadius.circular(22),
         border: Border.all(color: AppTheme.border),
         boxShadow: AppTheme.shadowMedium,
@@ -541,7 +541,7 @@ class _PunchHeroCard extends StatelessWidget {
                       vertical: 6,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.18),
+                      color: AppTheme.surface.withValues(alpha: 0.18),
                       borderRadius: BorderRadius.circular(999),
                     ),
                     child: Row(
@@ -652,7 +652,7 @@ class _PunchButton extends StatelessWidget {
                   end: Alignment.bottomRight,
                 )
               : null,
-          color: primary ? null : Colors.white,
+          color: primary ? null : AppTheme.surface,
           borderRadius: BorderRadius.circular(14),
           border: primary ? null : Border.all(color: AppTheme.borderStrong),
           boxShadow: primary
@@ -722,7 +722,7 @@ class _PunchMetricCard extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             value,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w900,
               color: AppTheme.textPrimary,
@@ -732,7 +732,7 @@ class _PunchMetricCard extends StatelessWidget {
           const SizedBox(height: 2),
           Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               color: AppTheme.textSecondary,
               fontWeight: FontWeight.w700,
               fontSize: 11.5,
@@ -816,7 +816,7 @@ class _SummaryRow extends StatelessWidget {
                           width: 30,
                           height: 30,
                           decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.15),
+                            color: AppTheme.surface.withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Icon(item.icon, size: 16, color: Colors.white),
@@ -895,7 +895,7 @@ class _AttendanceRecordCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppTheme.surface,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: AppTheme.border),
         boxShadow: AppTheme.shadowSoft,
@@ -917,7 +917,7 @@ class _AttendanceRecordCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   formatDisplayDate(record.date),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.w900,
                     color: AppTheme.textPrimary,
                     fontSize: 14,
@@ -961,7 +961,7 @@ class _AttendanceRecordCard extends StatelessWidget {
           ),
           const SizedBox(height: 14),
           if (record.intervals.isEmpty)
-            const Text(
+            Text(
               'No punch intervals recorded.',
               style: TextStyle(color: AppTheme.textSecondary, fontSize: 12.5),
             )
@@ -1000,7 +1000,7 @@ class _IntervalRow extends StatelessWidget {
                 color: AppTheme.success,
               ),
               const SizedBox(width: 8),
-              const Text(
+              Text(
                 'Time In',
                 style: TextStyle(
                   color: AppTheme.textSecondary,
@@ -1011,7 +1011,7 @@ class _IntervalRow extends StatelessWidget {
               const Spacer(),
               Text(
                 interval.timeInLabel.isEmpty ? '--' : interval.timeInLabel,
-                style: const TextStyle(
+                style: TextStyle(
                   color: AppTheme.textPrimary,
                   fontWeight: FontWeight.w800,
                   fontSize: 12.5,
@@ -1032,7 +1032,7 @@ class _IntervalRow extends StatelessWidget {
                     : AppTheme.primaryDark,
               ),
               const SizedBox(width: 8),
-              const Text(
+              Text(
                 'Time Out',
                 style: TextStyle(
                   color: AppTheme.textSecondary,
@@ -1081,7 +1081,7 @@ class _MetricPill extends StatelessWidget {
           const SizedBox(width: 6),
           Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               color: AppTheme.textPrimary,
               fontWeight: FontWeight.w700,
               fontSize: 11.5,
@@ -1168,14 +1168,14 @@ class _AttendanceError extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppTheme.surface,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: AppTheme.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Unable to load attendance',
             style: TextStyle(
               fontWeight: FontWeight.w900,
@@ -1185,7 +1185,7 @@ class _AttendanceError extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             message,
-            style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13),
+            style: TextStyle(color: AppTheme.textSecondary, fontSize: 13),
           ),
           const SizedBox(height: 14),
           FilledButton.icon(
@@ -1209,7 +1209,7 @@ class _EmptyState extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppTheme.surface,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: AppTheme.border),
       ),
@@ -1232,7 +1232,7 @@ class _EmptyState extends StatelessWidget {
           Expanded(
             child: Text(
               message,
-              style: const TextStyle(
+              style: TextStyle(
                 color: AppTheme.textSecondary,
                 fontSize: 13,
               ),

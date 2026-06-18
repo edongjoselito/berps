@@ -140,7 +140,7 @@ class AdminMoreTab extends StatelessWidget {
                   session.formalName,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.w900,
                     fontSize: 16,
                     color: AppTheme.textPrimary,
@@ -151,7 +151,7 @@ class AdminMoreTab extends StatelessWidget {
                   session.email.isNotEmpty ? session.email : session.username,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12.5,
                     color: AppTheme.textSecondary,
                   ),
@@ -172,7 +172,7 @@ class AdminMoreTab extends StatelessWidget {
   Widget _menuCard(List<_MenuItem> items) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppTheme.surface,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: AppTheme.border),
         boxShadow: AppTheme.shadowSoft,
@@ -181,7 +181,7 @@ class AdminMoreTab extends StatelessWidget {
         children: [
           for (var i = 0; i < items.length; i++) ...[
             if (i > 0)
-              const Divider(height: 1, indent: 64, color: AppTheme.border),
+              Divider(height: 1, indent: 64, color: AppTheme.border),
             items[i],
           ],
         ],
@@ -231,7 +231,7 @@ class _MenuItem extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.w800,
                       fontSize: 14.5,
                       color: AppTheme.textPrimary,
@@ -240,7 +240,7 @@ class _MenuItem extends StatelessWidget {
                   const SizedBox(height: 1),
                   Text(
                     subtitle,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12,
                       color: AppTheme.textSecondary,
                     ),
@@ -248,7 +248,7 @@ class _MenuItem extends StatelessWidget {
                 ],
               ),
             ),
-            const Icon(
+            Icon(
               PhosphorIconsBold.caretRight,
               size: 16,
               color: AppTheme.textMuted,

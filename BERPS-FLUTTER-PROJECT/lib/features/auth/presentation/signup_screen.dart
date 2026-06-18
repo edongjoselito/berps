@@ -285,7 +285,7 @@ class _SignupScreenState extends State<SignupScreen> {
           ),
         ),
         const SizedBox(height: 18),
-        const Text(
+        Text(
           'Account created',
           textAlign: TextAlign.center,
           style: TextStyle(
@@ -298,7 +298,7 @@ class _SignupScreenState extends State<SignupScreen> {
         Text(
           _doneMessage,
           textAlign: TextAlign.center,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 13,
             color: AppTheme.textSecondary,
             height: 1.45,
@@ -336,7 +336,7 @@ class _SignupHero extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          const Text(
+          Text(
             'Create your account',
             textAlign: TextAlign.center,
             style: TextStyle(
@@ -347,7 +347,7 @@ class _SignupHero extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 6),
-          const Text(
+          Text(
             'Get started with BERPS — Tasks, Notes and Calendar to keep your '
             'team aligned from request to delivery.',
             textAlign: TextAlign.center,
@@ -378,7 +378,7 @@ class _FieldLabel extends StatelessWidget {
           const SizedBox(width: 6),
           Text(
             text,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 12.5,
               fontWeight: FontWeight.w700,
               color: AppTheme.textSecondary,

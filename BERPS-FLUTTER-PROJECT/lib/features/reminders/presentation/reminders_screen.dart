@@ -58,7 +58,7 @@ class _RemindersScreenState extends State<RemindersScreen> {
       context: context,
       builder: (dialogContext) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text(
+        title: Text(
           'Delete reminder?',
           style: TextStyle(
             fontWeight: FontWeight.w900,
@@ -67,7 +67,7 @@ class _RemindersScreenState extends State<RemindersScreen> {
         ),
         content: Text(
           '"${reminder.title}" will be removed.',
-          style: const TextStyle(color: AppTheme.textSecondary),
+          style: TextStyle(color: AppTheme.textSecondary),
         ),
         actions: [
           TextButton(
@@ -214,7 +214,7 @@ class _ReminderCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppTheme.surface,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: AppTheme.border),
           boxShadow: AppTheme.shadowSoft,
@@ -243,7 +243,7 @@ class _ReminderCard extends StatelessWidget {
                     reminder.title,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.w800,
                       color: AppTheme.textPrimary,
                       fontSize: 14,
@@ -255,7 +255,7 @@ class _ReminderCard extends StatelessWidget {
                       reminder.description,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: AppTheme.textSecondary,
                         fontSize: 12,
                         height: 1.35,
@@ -297,7 +297,7 @@ class _ReminderCard extends StatelessWidget {
                         ),
                         child: Text(
                           reminder.recurrenceLabel,
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: AppTheme.textSecondary,
                             fontSize: 9.5,
                             fontWeight: FontWeight.w800,
@@ -458,7 +458,7 @@ class _ReminderEditorSheetState extends State<_ReminderEditorSheet> {
     return Padding(
       padding: EdgeInsets.only(bottom: bottomInset),
       child: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           color: AppTheme.surface,
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
@@ -481,7 +481,7 @@ class _ReminderEditorSheetState extends State<_ReminderEditorSheet> {
               const SizedBox(height: 16),
               Text(
                 _isEditing ? 'Edit reminder' : 'New reminder',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w900,
                   color: AppTheme.textPrimary,
@@ -625,7 +625,7 @@ class _PickerField extends StatelessWidget {
                     value,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12.5,
                       fontWeight: FontWeight.w700,
                       color: AppTheme.textPrimary,
@@ -690,7 +690,7 @@ class _FieldLabel extends StatelessWidget {
       padding: const EdgeInsets.only(left: 4, bottom: 8),
       child: Text(
         text,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 12.5,
           fontWeight: FontWeight.w700,
           color: AppTheme.textSecondary,
@@ -709,7 +709,7 @@ class _EmptyState extends StatelessWidget {
       margin: const EdgeInsets.only(top: 40),
       padding: const EdgeInsets.all(28),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppTheme.surface,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: AppTheme.border),
       ),
@@ -729,7 +729,7 @@ class _EmptyState extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          const Text(
+          Text(
             'No reminders yet',
             style: TextStyle(
               fontSize: 15,
@@ -738,7 +738,7 @@ class _EmptyState extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 6),
-          const Text(
+          Text(
             'Tap "New reminder" to schedule your first one.',
             textAlign: TextAlign.center,
             style: TextStyle(
@@ -763,7 +763,7 @@ class _ErrorCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppTheme.surface,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: AppTheme.border),
       ),
@@ -786,7 +786,7 @@ class _ErrorCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 12),
-              const Expanded(
+              Expanded(
                 child: Text(
                   'Unable to load reminders',
                   style: TextStyle(
@@ -800,7 +800,7 @@ class _ErrorCard extends StatelessWidget {
           const SizedBox(height: 10),
           Text(
             message,
-            style: const TextStyle(
+            style: TextStyle(
               color: AppTheme.textSecondary,
               fontSize: 12.5,
             ),

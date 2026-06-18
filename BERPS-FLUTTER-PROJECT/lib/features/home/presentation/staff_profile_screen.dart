@@ -202,7 +202,7 @@ class _StaffProfileScreenState extends State<StaffProfileScreen> {
     Haptics.light();
     showModalBottomSheet<void>(
       context: context,
-      backgroundColor: Colors.white,
+      backgroundColor: AppTheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -223,7 +223,7 @@ class _StaffProfileScreenState extends State<StaffProfileScreen> {
                     borderRadius: BorderRadius.circular(999),
                   ),
                 ),
-                const Align(
+                Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
                     'Update profile picture',
@@ -637,7 +637,7 @@ class _ProfileHeaderCard extends StatelessWidget {
                   width: 96,
                   height: 96,
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.15),
+                    color: AppTheme.surface.withValues(alpha: 0.15),
                     shape: BoxShape.circle,
                     border: Border.all(
                       color: Colors.white.withValues(alpha: 0.30),
@@ -650,7 +650,7 @@ class _ProfileHeaderCard extends StatelessWidget {
                       size: 96,
                       radius: 0,
                       background: Colors.transparent,
-                      placeholderColor: Colors.white,
+                      placeholderColor: AppTheme.surfaceMuted,
                       placeholderSize: 40,
                     ),
                   ),
@@ -682,7 +682,7 @@ class _ProfileHeaderCard extends StatelessWidget {
                       width: 30,
                       height: 30,
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: AppTheme.surface,
                         shape: BoxShape.circle,
                         border: Border.all(
                           color: const Color(0xFF1E3A5F),
@@ -724,7 +724,7 @@ class _ProfileHeaderCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.12),
+              color: AppTheme.surface.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Row(
@@ -786,7 +786,7 @@ class _InfoCard extends StatelessWidget {
           for (var i = 0; i < rows.length; i++) ...[
             _InfoRowTile(row: rows[i]),
             if (i != rows.length - 1)
-              const Divider(height: 1, thickness: 1, color: AppTheme.border),
+              Divider(height: 1, thickness: 1, color: AppTheme.border),
           ],
         ],
       ),
@@ -830,7 +830,7 @@ class _InfoRowTile extends StatelessWidget {
             width: 100,
             child: Text(
               row.label,
-              style: const TextStyle(
+              style: TextStyle(
                 color: AppTheme.textSecondary,
                 fontSize: 12.5,
                 fontWeight: FontWeight.w700,
@@ -841,7 +841,7 @@ class _InfoRowTile extends StatelessWidget {
           Expanded(
             child: Text(
               value,
-              style: const TextStyle(
+              style: TextStyle(
                 color: AppTheme.textPrimary,
                 fontSize: 13.5,
                 fontWeight: FontWeight.w700,
@@ -876,7 +876,7 @@ class _SectionHeader extends StatelessWidget {
         const SizedBox(width: 10),
         Text(
           title.toUpperCase(),
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 11,
             fontWeight: FontWeight.w900,
             letterSpacing: 1.5,
@@ -930,7 +930,7 @@ class _PhotoSourceTile extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.w900,
                       color: AppTheme.textPrimary,
                       fontSize: 14,
@@ -939,7 +939,7 @@ class _PhotoSourceTile extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     subtitle,
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: AppTheme.textSecondary,
                       fontSize: 12,
                     ),
@@ -947,7 +947,7 @@ class _PhotoSourceTile extends StatelessWidget {
                 ],
               ),
             ),
-            const Icon(
+            Icon(
               PhosphorIconsBold.caretRight,
               size: 14,
               color: AppTheme.textMuted,
@@ -1044,7 +1044,7 @@ class _EditCard extends StatelessWidget {
               children: [
                 Text(
                   field.label,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
                     color: AppTheme.textSecondary,
@@ -1054,7 +1054,7 @@ class _EditCard extends StatelessWidget {
                 TextField(
                   controller: field.controller,
                   keyboardType: field.keyboardType,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
                     color: AppTheme.textPrimary,
@@ -1103,7 +1103,7 @@ class _ErrorCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 12),
-              const Expanded(
+              Expanded(
                 child: Text(
                   'Profile unavailable',
                   style: TextStyle(
@@ -1118,7 +1118,7 @@ class _ErrorCard extends StatelessWidget {
           const SizedBox(height: 10),
           Text(
             message,
-            style: const TextStyle(
+            style: TextStyle(
               color: AppTheme.textSecondary,
               fontSize: 13,
               height: 1.4,

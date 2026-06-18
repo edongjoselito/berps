@@ -151,7 +151,7 @@ class _EmployeeAccomplishmentScreenState
                   children: [
                     Text(
                       '${data.length} accomplishment(s)',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.w700,
                         fontSize: 12.5,
                         color: AppTheme.textSecondary,
@@ -187,7 +187,7 @@ class _EmployeeAccomplishmentScreenState
             child: DropdownButton<EmployeeOption>(
               value: _selected,
               isExpanded: true,
-              hint: const Text('Select employee',
+              hint: Text('Select employee',
                   style: TextStyle(color: AppTheme.textMuted)),
               items: employees
                   .map((e) =>
@@ -208,7 +208,7 @@ class _EmployeeAccomplishmentScreenState
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppTheme.surface,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: AppTheme.border),
         boxShadow: AppTheme.shadowSoft,

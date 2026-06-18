@@ -489,11 +489,11 @@ class _SupportIssueViewScreenState extends State<SupportIssueViewScreen> {
                     context.gutter,
                     MediaQuery.of(context).padding.bottom + 10,
                   ),
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
+                  decoration: BoxDecoration(
+                    color: AppTheme.surface,
                     border: Border(top: BorderSide(color: AppTheme.border)),
                   ),
-                  child: const Row(
+                  child: Row(
                     children: [
                       Icon(
                         PhosphorIconsBold.lock,
@@ -602,7 +602,7 @@ class _ConversationCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppTheme.surface,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: AppTheme.border),
         boxShadow: AppTheme.shadowSoft,
@@ -610,7 +610,7 @@ class _ConversationCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
               Icon(
                 PhosphorIconsBold.chatsCircle,
@@ -631,7 +631,7 @@ class _ConversationCard extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             '${comments.length} message${comments.length == 1 ? '' : 's'}',
-            style: const TextStyle(
+            style: TextStyle(
               color: AppTheme.textSecondary,
               fontSize: 12,
               fontWeight: FontWeight.w600,
@@ -697,7 +697,7 @@ class _IssueSummaryCardState extends State<_IssueSummaryCard> {
     final issue = widget.issue;
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppTheme.surface,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: AppTheme.border),
         boxShadow: AppTheme.shadowSoft,
@@ -739,7 +739,7 @@ class _IssueSummaryCardState extends State<_IssueSummaryCard> {
                                     : issue.customerName,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontWeight: FontWeight.w900,
                                   color: AppTheme.textPrimary,
                                   fontSize: 13.5,
@@ -773,7 +773,7 @@ class _IssueSummaryCardState extends State<_IssueSummaryCard> {
                           _expanded
                               ? 'Hide ticket details'
                               : 'Show ticket details',
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: AppTheme.textSecondary,
                             fontSize: 11.5,
                             fontWeight: FontWeight.w700,
@@ -786,7 +786,7 @@ class _IssueSummaryCardState extends State<_IssueSummaryCard> {
                   AnimatedRotation(
                     duration: const Duration(milliseconds: 220),
                     turns: _expanded ? 0.5 : 0,
-                    child: const Icon(
+                    child: Icon(
                       PhosphorIconsBold.caretDown,
                       size: 14,
                       color: AppTheme.textSecondary,
@@ -806,14 +806,14 @@ class _IssueSummaryCardState extends State<_IssueSummaryCard> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Divider(height: 1, color: AppTheme.border),
+                        Divider(height: 1, color: AppTheme.border),
                         const SizedBox(height: 12),
                         if (issue.customerEmail.isNotEmpty)
                           Padding(
                             padding: const EdgeInsets.only(bottom: 10),
                             child: Row(
                               children: [
-                                const Icon(
+                                Icon(
                                   PhosphorIconsBold.envelopeSimple,
                                   size: 13,
                                   color: AppTheme.textSecondary,
@@ -824,7 +824,7 @@ class _IssueSummaryCardState extends State<_IssueSummaryCard> {
                                     issue.customerEmail,
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       color: AppTheme.textSecondary,
                                       fontSize: 12,
                                       fontWeight: FontWeight.w600,
@@ -843,7 +843,7 @@ class _IssueSummaryCardState extends State<_IssueSummaryCard> {
                             ),
                             child: Text(
                               issue.description,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 color: AppTheme.textPrimary,
                                 fontSize: 12.5,
                                 height: 1.45,
@@ -967,7 +967,7 @@ class _IssueActionsCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppTheme.surface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppTheme.border),
         boxShadow: AppTheme.shadowSoft,
@@ -999,7 +999,7 @@ class _SummaryPill extends StatelessWidget {
           const SizedBox(width: 5),
           Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w700,
               color: AppTheme.textPrimary,
@@ -1085,11 +1085,13 @@ class _CommentBubble extends StatelessWidget {
 
     final bubbleColor = isMine
         ? AppTheme.primaryDark
-        : (isCustomer ? const Color(0xFFFFF8EB) : AppTheme.surfaceMuted);
+        : (isCustomer ? AppTheme.accentSoft : AppTheme.surfaceMuted);
     final textColor = isMine ? Colors.white : AppTheme.textPrimary;
     final borderColor = isMine
         ? AppTheme.primaryDark
-        : (isCustomer ? const Color(0xFFF4DEAB) : AppTheme.border);
+        : (isCustomer
+              ? AppTheme.accent.withValues(alpha: 0.35)
+              : AppTheme.border);
 
     return Column(
       crossAxisAlignment: align,
@@ -1408,7 +1410,7 @@ class _SectionHeader extends StatelessWidget {
         const SizedBox(width: 10),
         Text(
           title.toUpperCase(),
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 11,
             fontWeight: FontWeight.w900,
             letterSpacing: 1.5,
@@ -1444,7 +1446,7 @@ class _ChatLocked extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppTheme.surface,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: AppTheme.border),
       ),
@@ -1465,7 +1467,7 @@ class _ChatLocked extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 14),
-          const Text(
+          Text(
             'Access restricted',
             style: TextStyle(
               fontWeight: FontWeight.w900,
@@ -1474,7 +1476,7 @@ class _ChatLocked extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 6),
-          const Text(
+          Text(
             'You do not have permission to view this conversation.',
             textAlign: TextAlign.center,
             style: TextStyle(
@@ -1497,7 +1499,7 @@ class _ChatEmpty extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppTheme.surface,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: AppTheme.border),
       ),
@@ -1518,7 +1520,7 @@ class _ChatEmpty extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 14),
-          const Text(
+          Text(
             'No messages yet',
             style: TextStyle(
               fontWeight: FontWeight.w900,
@@ -1527,7 +1529,7 @@ class _ChatEmpty extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 6),
-          const Text(
+          Text(
             'Start the conversation with the customer.',
             textAlign: TextAlign.center,
             style: TextStyle(
@@ -1587,7 +1589,7 @@ class _ErrorState extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(18),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppTheme.surface,
             borderRadius: BorderRadius.circular(18),
             border: Border.all(color: AppTheme.border),
           ),
@@ -1595,7 +1597,7 @@ class _ErrorState extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 'Unable to load ticket',
                 style: TextStyle(
                   fontWeight: FontWeight.w900,
@@ -1605,7 +1607,7 @@ class _ErrorState extends StatelessWidget {
               const SizedBox(height: 6),
               Text(
                 message,
-                style: const TextStyle(
+                style: TextStyle(
                   color: AppTheme.textSecondary,
                   fontSize: 12.5,
                 ),
@@ -1650,7 +1652,7 @@ class _ReplyComposer extends StatelessWidget {
         context.gutter,
         MediaQuery.of(context).padding.bottom + 10,
       ),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AppTheme.background,
         border: Border(top: BorderSide(color: AppTheme.border)),
       ),
@@ -1668,7 +1670,7 @@ class _ReplyComposer extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppTheme.surface,
               borderRadius: BorderRadius.circular(18),
               border: Border.all(color: AppTheme.border),
               boxShadow: AppTheme.shadowSoft,
@@ -1702,7 +1704,7 @@ class _ReplyComposer extends StatelessWidget {
                       minLines: 1,
                       maxLines: 5,
                       textCapitalization: TextCapitalization.sentences,
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         hintText: 'Write a reply…',
                         border: InputBorder.none,
                         enabledBorder: InputBorder.none,
@@ -1791,8 +1793,8 @@ class _AttachmentActionSheet extends StatelessWidget {
     ];
 
     return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
+      decoration: BoxDecoration(
+        color: AppTheme.surface,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       padding: EdgeInsets.fromLTRB(
@@ -1805,7 +1807,7 @@ class _AttachmentActionSheet extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Text(
+          Text(
             'Add Attachment',
             style: TextStyle(
               fontWeight: FontWeight.w900,
@@ -1835,7 +1837,7 @@ class _AttachmentActionSheet extends StatelessWidget {
                       const SizedBox(width: 10),
                       Text(
                         item.label,
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: AppTheme.textPrimary,
                           fontWeight: FontWeight.w800,
                           fontSize: 12.5,
@@ -1884,7 +1886,7 @@ class _SelectedAttachmentBanner extends StatelessWidget {
               attachment.name,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
+              style: TextStyle(
                 color: AppTheme.textPrimary,
                 fontWeight: FontWeight.w700,
                 fontSize: 12,
@@ -1898,10 +1900,10 @@ class _SelectedAttachmentBanner extends StatelessWidget {
               width: 24,
               height: 24,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppTheme.surface,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Icon(
+              child: Icon(
                 PhosphorIconsBold.x,
                 size: 12,
                 color: AppTheme.textSecondary,
@@ -1937,8 +1939,8 @@ class _ForwardIssueSheetState extends State<_ForwardIssueSheet> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
+      decoration: BoxDecoration(
+        color: AppTheme.surface,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       padding: EdgeInsets.fromLTRB(
@@ -1951,7 +1953,7 @@ class _ForwardIssueSheetState extends State<_ForwardIssueSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Text(
+          Text(
             'Forward Ticket',
             style: TextStyle(
               fontWeight: FontWeight.w900,
@@ -2037,8 +2039,8 @@ class _TagIssueSheetState extends State<_TagIssueSheet> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
+      decoration: BoxDecoration(
+        color: AppTheme.surface,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       padding: EdgeInsets.fromLTRB(
@@ -2051,7 +2053,7 @@ class _TagIssueSheetState extends State<_TagIssueSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Text(
+          Text(
             'Tag Personnel',
             style: TextStyle(
               fontWeight: FontWeight.w900,
@@ -2183,8 +2185,8 @@ class _CloseTicketSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
+      decoration: BoxDecoration(
+        color: AppTheme.surface,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       padding: EdgeInsets.fromLTRB(
@@ -2197,7 +2199,7 @@ class _CloseTicketSheet extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Text(
+          Text(
             'Close Ticket',
             style: TextStyle(
               fontWeight: FontWeight.w900,
@@ -2206,7 +2208,7 @@ class _CloseTicketSheet extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 6),
-          const Text(
+          Text(
             'Send the completion message that the client will see.',
             style: TextStyle(color: AppTheme.textSecondary, fontSize: 12.5),
           ),

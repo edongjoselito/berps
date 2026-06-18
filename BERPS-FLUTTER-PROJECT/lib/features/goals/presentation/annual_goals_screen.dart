@@ -182,7 +182,7 @@ class _CurrentGoalCard extends StatelessWidget {
                 const Spacer(),
                 Text(
                   '${goal.year}',
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppTheme.textPrimary,
                     fontSize: 22,
                     fontWeight: FontWeight.w900,
@@ -219,7 +219,7 @@ class _CurrentGoalCard extends StatelessWidget {
                 ),
                 child: Text(
                   goal.notes,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppTheme.textSecondary,
                     fontSize: 12.5,
                     height: 1.4,
@@ -300,7 +300,7 @@ class _YearCard extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 6),
-            const Icon(
+            Icon(
               PhosphorIconsBold.caretRight,
               size: 14,
               color: AppTheme.textMuted,
@@ -353,7 +353,7 @@ class _ProgressRow extends StatelessWidget {
           children: [
             Text(
               label,
-              style: const TextStyle(
+              style: TextStyle(
                 color: AppTheme.textSecondary,
                 fontSize: 12,
                 fontWeight: FontWeight.w800,
@@ -384,7 +384,7 @@ class _ProgressRow extends StatelessWidget {
         const SizedBox(height: 6),
         Text(
           '${_formatNumber(actual)} of ${_formatNumber(target)}',
-          style: const TextStyle(
+          style: TextStyle(
             color: AppTheme.textPrimary,
             fontSize: 12.5,
             fontWeight: FontWeight.w800,
@@ -420,7 +420,7 @@ class _ProgressMini extends StatelessWidget {
       children: [
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             color: AppTheme.textSecondary,
             fontSize: 11,
             fontWeight: FontWeight.w800,
@@ -478,7 +478,7 @@ class _SectionHeader extends StatelessWidget {
         const SizedBox(width: 10),
         Text(
           title.toUpperCase(),
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 11,
             fontWeight: FontWeight.w900,
             letterSpacing: 1.5,
@@ -514,7 +514,7 @@ class _EmptyState extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppTheme.surface,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: AppTheme.border),
       ),
@@ -535,7 +535,7 @@ class _EmptyState extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 14),
-          const Text(
+          Text(
             'No goals set',
             style: TextStyle(
               fontWeight: FontWeight.w900,
@@ -544,7 +544,7 @@ class _EmptyState extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 6),
-          const Text(
+          Text(
             'Annual goals are set by an admin from the web app.',
             textAlign: TextAlign.center,
             style: TextStyle(
@@ -570,7 +570,7 @@ class _ErrorCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Goals unavailable',
             style: TextStyle(
               fontWeight: FontWeight.w900,
@@ -581,7 +581,7 @@ class _ErrorCard extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             message,
-            style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13),
+            style: TextStyle(color: AppTheme.textSecondary, fontSize: 13),
           ),
           const SizedBox(height: 14),
           Align(

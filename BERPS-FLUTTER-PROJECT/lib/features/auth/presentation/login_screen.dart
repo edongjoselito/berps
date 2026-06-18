@@ -299,7 +299,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                       Haptics.light();
                                       widget.controller.resetPairing();
                                     },
-                              icon: const Icon(
+                              icon: Icon(
                                 PhosphorIconsBold.arrowsLeftRight,
                                 size: 16,
                                 color: AppTheme.textMuted,
@@ -359,7 +359,7 @@ class _LoginHero extends StatelessWidget {
         Text(
           title,
           textAlign: TextAlign.center,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 26,
             fontWeight: FontWeight.w900,
             color: AppTheme.textPrimary,
@@ -372,7 +372,7 @@ class _LoginHero extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(
+              Icon(
                 PhosphorIconsBold.globe,
                 size: 12,
                 color: AppTheme.textMuted,
@@ -381,7 +381,7 @@ class _LoginHero extends StatelessWidget {
               Text(
                 domain,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 12.5,
                   fontWeight: FontWeight.w800,
                   color: AppTheme.textMuted,
@@ -391,7 +391,7 @@ class _LoginHero extends StatelessWidget {
             ],
           )
         else
-          const Text(
+          Text(
             'Sign in to continue.',
             textAlign: TextAlign.center,
             style: TextStyle(
@@ -529,7 +529,7 @@ class _LoginCard extends StatelessWidget {
                 label: Text('Sign in with $biometricLabel'),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: AppTheme.primary,
-                  side: const BorderSide(color: AppTheme.borderStrong),
+                  side: BorderSide(color: AppTheme.borderStrong),
                 ),
               ),
             ],
@@ -539,7 +539,7 @@ class _LoginCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Text(
+                Text(
                   'New to BERPS?',
                   style: TextStyle(
                     fontSize: 12.5,
@@ -566,7 +566,7 @@ class _CardDivider extends StatelessWidget {
     return Row(
       children: [
         Expanded(child: Container(height: 1, color: AppTheme.border)),
-        const Padding(
+        Padding(
           padding: EdgeInsets.symmetric(horizontal: 10),
           child: Text(
             'or',
@@ -598,7 +598,7 @@ class _FieldLabel extends StatelessWidget {
           const SizedBox(width: 6),
           Text(
             text,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 12.5,
               fontWeight: FontWeight.w700,
               color: AppTheme.textSecondary,
@@ -629,7 +629,7 @@ class _RememberToggle extends StatelessWidget {
               width: 18,
               height: 18,
               decoration: BoxDecoration(
-                color: value ? AppTheme.primary : Colors.white,
+                color: value ? AppTheme.primary : AppTheme.surface,
                 borderRadius: BorderRadius.circular(5),
                 border: Border.all(
                   color: value ? AppTheme.primary : AppTheme.borderStrong,
@@ -645,7 +645,7 @@ class _RememberToggle extends StatelessWidget {
                   : null,
             ),
             const SizedBox(width: 8),
-            const Text(
+            Text(
               'Remember me',
               style: TextStyle(
                 fontSize: 12.5,

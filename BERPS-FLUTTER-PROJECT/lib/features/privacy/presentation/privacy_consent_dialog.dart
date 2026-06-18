@@ -41,7 +41,7 @@ class _PrivacyConsentDialogState extends State<PrivacyConsentDialog> {
               ),
             ),
             const SizedBox(height: 14),
-            const Text(
+            Text(
               'Data Privacy Consent',
               style: TextStyle(
                 fontSize: 18,
@@ -50,7 +50,7 @@ class _PrivacyConsentDialogState extends State<PrivacyConsentDialog> {
               ),
             ),
             const SizedBox(height: 10),
-            const Text(
+            Text(
               'Before you sign in, please review how BERPS handles your personal data. '
               'By continuing, you agree that your workspace may collect and process '
               'the information described in the Privacy Policy.',
@@ -112,7 +112,7 @@ class _PrivacyConsentDialogState extends State<PrivacyConsentDialog> {
                           : null,
                     ),
                     const SizedBox(width: 10),
-                    const Flexible(
+                    Flexible(
                       child: Text(
                         'I agree to the Privacy Policy and data collection practices.',
                         style: TextStyle(

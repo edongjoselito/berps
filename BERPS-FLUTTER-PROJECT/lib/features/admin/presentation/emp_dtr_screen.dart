@@ -162,7 +162,7 @@ class _EmpDtrScreenState extends State<EmpDtrScreen> {
     return Container(
       padding: const EdgeInsets.all(9),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppTheme.surface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppTheme.border),
         boxShadow: AppTheme.shadowSoft,
@@ -198,7 +198,7 @@ class _EmpDtrScreenState extends State<EmpDtrScreen> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppTheme.surface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppTheme.border),
         boxShadow: AppTheme.shadowSoft,
@@ -216,7 +216,7 @@ class _EmpDtrScreenState extends State<EmpDtrScreen> {
                       d.selectedEmployeeName,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: AppTheme.textPrimary,
                         fontWeight: FontWeight.w900,
                         fontSize: 15.5,
@@ -225,7 +225,7 @@ class _EmpDtrScreenState extends State<EmpDtrScreen> {
                     const SizedBox(height: 2),
                     Text(
                       _periodLabel(),
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: AppTheme.textSecondary,
                         fontSize: 11.5,
                         fontWeight: FontWeight.w700,
@@ -279,7 +279,7 @@ class _EmpDtrScreenState extends State<EmpDtrScreen> {
   Widget _recordsHeader(AdminDtrData data) {
     return Row(
       children: [
-        const Expanded(
+        Expanded(
           child: Text(
             'Daily records',
             style: TextStyle(
@@ -291,7 +291,7 @@ class _EmpDtrScreenState extends State<EmpDtrScreen> {
         ),
         Text(
           '${data.days.length} day(s)',
-          style: const TextStyle(
+          style: TextStyle(
             color: AppTheme.textMuted,
             fontSize: 11.5,
             fontWeight: FontWeight.w700,
@@ -318,7 +318,7 @@ class _EmpDtrScreenState extends State<EmpDtrScreen> {
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppTheme.surface,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: AppTheme.border),
       ),
@@ -352,7 +352,7 @@ class _EmpDtrScreenState extends State<EmpDtrScreen> {
                 ),
                 const SizedBox(height: 8),
                 if (day.isAbsent)
-                  const Text(
+                  Text(
                     'No punch logs',
                     style: TextStyle(
                       color: AppTheme.textMuted,
@@ -383,7 +383,7 @@ class _EmpDtrScreenState extends State<EmpDtrScreen> {
             width: 34,
             child: Text(
               label,
-              style: const TextStyle(
+              style: TextStyle(
                 color: AppTheme.textMuted,
                 fontSize: 10.5,
                 fontWeight: FontWeight.w900,
@@ -478,7 +478,7 @@ class _ControlButton extends StatelessWidget {
                     label,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: AppTheme.textPrimary,
                       fontSize: 12.5,
                       fontWeight: FontWeight.w900,
@@ -489,7 +489,7 @@ class _ControlButton extends StatelessWidget {
                     meta,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: AppTheme.textMuted,
                       fontSize: 10.5,
                       fontWeight: FontWeight.w700,
@@ -498,7 +498,7 @@ class _ControlButton extends StatelessWidget {
                 ],
               ),
             ),
-            const Icon(
+            Icon(
               PhosphorIconsBold.caretDown,
               size: 13,
               color: AppTheme.textMuted,
@@ -551,7 +551,7 @@ class _MiniStat extends StatelessWidget {
               label,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
+              style: TextStyle(
                 color: AppTheme.textSecondary,
                 fontSize: 10.5,
                 fontWeight: FontWeight.w800,
@@ -647,7 +647,7 @@ class _DateBadge extends StatelessWidget {
             const SizedBox(height: 1),
             Text(
               weekday,
-              style: const TextStyle(
+              style: TextStyle(
                 color: AppTheme.textMuted,
                 fontSize: 9,
                 fontWeight: FontWeight.w800,
@@ -694,8 +694,8 @@ class _EmployeePickerSheetState extends State<_EmployeePickerSheet> {
         constraints: BoxConstraints(
           maxHeight: MediaQuery.sizeOf(context).height * 0.82,
         ),
-        decoration: const BoxDecoration(
-          color: Colors.white,
+        decoration: BoxDecoration(
+          color: AppTheme.surface,
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
         padding: const EdgeInsets.fromLTRB(16, 10, 16, 18),
@@ -713,7 +713,7 @@ class _EmployeePickerSheetState extends State<_EmployeePickerSheet> {
             const SizedBox(height: 14),
             Row(
               children: [
-                const Expanded(
+                Expanded(
                   child: Text(
                     'Choose employee',
                     style: TextStyle(
@@ -819,7 +819,7 @@ class _EmployeeTile extends StatelessWidget {
               height: 36,
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: selected ? AppTheme.primary : Colors.white,
+                color: selected ? AppTheme.primary : AppTheme.surface,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
@@ -839,7 +839,7 @@ class _EmployeeTile extends StatelessWidget {
                     employee.name,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: AppTheme.textPrimary,
                       fontSize: 13.5,
                       fontWeight: FontWeight.w900,
@@ -850,7 +850,7 @@ class _EmployeeTile extends StatelessWidget {
                     employee.identifierLabel,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: AppTheme.textMuted,
                       fontSize: 11,
                       fontWeight: FontWeight.w700,

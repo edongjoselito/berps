@@ -99,7 +99,7 @@ class AdminGreetingCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppTheme.surface,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: AppTheme.border),
         boxShadow: AppTheme.shadowSoft,
@@ -125,7 +125,7 @@ class AdminGreetingCard extends StatelessWidget {
                     const SizedBox(width: 6),
                     Text(
                       _greeting(),
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: AppTheme.textSecondary,
                         fontWeight: FontWeight.w700,
                         fontSize: 12,
@@ -167,7 +167,7 @@ class AdminGreetingCard extends StatelessWidget {
                       width: 3,
                       height: 3,
                       margin: const EdgeInsets.symmetric(horizontal: 6),
-                      decoration: const BoxDecoration(
+                      decoration: BoxDecoration(
                         color: AppTheme.textMuted,
                         shape: BoxShape.circle,
                       ),
@@ -177,7 +177,7 @@ class AdminGreetingCard extends StatelessWidget {
                         today,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: AppTheme.textMuted,
                           fontSize: 11.5,
                           fontWeight: FontWeight.w600,
@@ -217,7 +217,7 @@ class AdminSectionHeader extends StatelessWidget {
         Expanded(
           child: Text(
             title,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 14.5,
               fontWeight: FontWeight.w900,
               color: AppTheme.textPrimary,
@@ -285,7 +285,7 @@ class _AdminMetricCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppTheme.surface,
           borderRadius: BorderRadius.circular(18),
           border: Border.all(color: AppTheme.border),
           boxShadow: AppTheme.shadowSoft,
@@ -332,7 +332,7 @@ class _AdminMetricCard extends StatelessWidget {
               data.label,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
+              style: TextStyle(
                 color: AppTheme.textSecondary,
                 fontWeight: FontWeight.w700,
                 fontSize: 12,
@@ -360,7 +360,7 @@ class AdminErrorView extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppTheme.surface,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: AppTheme.border),
         boxShadow: AppTheme.shadowSoft,
@@ -381,7 +381,7 @@ class AdminErrorView extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 14),
-          const Text(
+          Text(
             'Something went wrong',
             style: TextStyle(
               fontWeight: FontWeight.w800,
@@ -393,7 +393,7 @@ class AdminErrorView extends StatelessWidget {
           Text(
             message,
             textAlign: TextAlign.center,
-            style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13),
+            style: TextStyle(color: AppTheme.textSecondary, fontSize: 13),
           ),
           const SizedBox(height: 16),
           OutlinedButton.icon(
@@ -425,7 +425,7 @@ class AdminEmptyView extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(26),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppTheme.surface,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: AppTheme.border),
         boxShadow: AppTheme.shadowSoft,
@@ -445,7 +445,7 @@ class AdminEmptyView extends StatelessWidget {
           Text(
             title,
             textAlign: TextAlign.center,
-            style: const TextStyle(
+            style: TextStyle(
               fontWeight: FontWeight.w800,
               fontSize: 15.5,
               color: AppTheme.textPrimary,
@@ -456,7 +456,7 @@ class AdminEmptyView extends StatelessWidget {
             Text(
               message!,
               textAlign: TextAlign.center,
-              style: const TextStyle(
+              style: TextStyle(
                 color: AppTheme.textSecondary,
                 fontSize: 13,
               ),
@@ -497,7 +497,7 @@ class AdminFilterBar extends StatelessWidget {
                 alignment: Alignment.center,
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 decoration: BoxDecoration(
-                  color: active ? AppTheme.primary : Colors.white,
+                  color: active ? AppTheme.primary : AppTheme.surface,
                   borderRadius: BorderRadius.circular(999),
                   border: Border.all(
                     color: active ? AppTheme.primary : AppTheme.border,
@@ -571,7 +571,7 @@ class AccomplishmentCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppTheme.surface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppTheme.border),
         boxShadow: AppTheme.shadowSoft,
@@ -593,7 +593,7 @@ class AccomplishmentCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   item.title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.w800,
                     fontSize: 14.5,
                     color: AppTheme.textPrimary,
@@ -627,7 +627,7 @@ class AccomplishmentCard extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               item.note,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 12.5,
                 color: AppTheme.textSecondary,
                 height: 1.4,
@@ -663,7 +663,7 @@ class AccomplishmentCard extends StatelessWidget {
         const SizedBox(width: 4),
         Text(
           text,
-          style: const TextStyle(fontSize: 11.5, color: AppTheme.textSecondary),
+          style: TextStyle(fontSize: 11.5, color: AppTheme.textSecondary),
         ),
       ],
     );
@@ -697,8 +697,8 @@ class MonthYearButton extends StatelessWidget {
       backgroundColor: Colors.transparent,
       builder: (context) => StatefulBuilder(
         builder: (context, setSheet) => Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
+          decoration: BoxDecoration(
+            color: AppTheme.surface,
             borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
           ),
           padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
@@ -706,7 +706,7 @@ class MonthYearButton extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 'Select period',
                 style: TextStyle(
                   fontWeight: FontWeight.w900,
@@ -786,7 +786,7 @@ class MonthYearButton extends StatelessWidget {
       children: [
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             fontWeight: FontWeight.w700,
             fontSize: 12.5,
             color: AppTheme.textSecondary,
@@ -823,7 +823,7 @@ class MonthYearButton extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppTheme.surface,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(color: AppTheme.border),
           boxShadow: AppTheme.shadowSoft,
@@ -841,7 +841,7 @@ class MonthYearButton extends StatelessWidget {
               child: Text(
                 label,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.w800,
                   fontSize: 13,
                   color: AppTheme.textPrimary,
@@ -849,7 +849,7 @@ class MonthYearButton extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 6),
-            const Icon(
+            Icon(
               PhosphorIconsBold.caretDown,
               size: 13,
               color: AppTheme.textMuted,

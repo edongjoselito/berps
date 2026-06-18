@@ -202,7 +202,7 @@ class _AdminClientsTabState extends State<AdminClientsTab> {
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppTheme.surface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppTheme.border),
         boxShadow: AppTheme.shadowSoft,
@@ -231,7 +231,7 @@ class _AdminClientsTabState extends State<AdminClientsTab> {
           c.customer,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: const TextStyle(
+          style: TextStyle(
             fontWeight: FontWeight.w800,
             fontSize: 14.5,
             color: AppTheme.textPrimary,
@@ -244,7 +244,7 @@ class _AdminClientsTabState extends State<AdminClientsTab> {
           ].join(' · '),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+          style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
         ),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
@@ -383,8 +383,8 @@ class _ClientFormSheetState extends State<_ClientFormSheet> {
     return Padding(
       padding: EdgeInsets.only(bottom: bottom),
       child: Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
+        decoration: BoxDecoration(
+          color: AppTheme.surface,
           borderRadius: BorderRadius.vertical(top: Radius.circular(26)),
         ),
         padding: const EdgeInsets.fromLTRB(20, 14, 20, 24),
@@ -406,7 +406,7 @@ class _ClientFormSheetState extends State<_ClientFormSheet> {
               const SizedBox(height: 16),
               Text(
                 _isEdit ? 'Edit client' : 'Add client',
-                style: const TextStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.w900,
                   fontSize: 20,
                   color: AppTheme.textPrimary,
@@ -416,7 +416,7 @@ class _ClientFormSheetState extends State<_ClientFormSheet> {
                 const SizedBox(height: 4),
                 Text(
                   'New ID: ${widget.nextCustId}',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12.5,
                     color: AppTheme.textSecondary,
                   ),
@@ -481,7 +481,7 @@ class _ClientFormSheetState extends State<_ClientFormSheet> {
         padding: const EdgeInsets.only(bottom: 6),
         child: Text(
           text,
-          style: const TextStyle(
+          style: TextStyle(
             fontWeight: FontWeight.w700,
             fontSize: 13,
             color: AppTheme.textSecondary,

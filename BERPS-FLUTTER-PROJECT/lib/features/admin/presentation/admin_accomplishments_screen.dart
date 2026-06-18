@@ -84,7 +84,7 @@ class _AdminAccomplishmentsScreenState
                     if (snapshot.hasData)
                       Text(
                         '${snapshot.data!.length} total',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.w700,
                           fontSize: 12.5,
                           color: AppTheme.textSecondary,
