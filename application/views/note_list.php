@@ -1128,16 +1128,17 @@ $notesJson = json_encode(
                 </button>
             </div>
 
-            <form class="needs-validation" method="post" action="<?= base_url('Page/noteList'); ?>" novalidate>
+            <form class="needs-validation" method="post" action="<?= base_url('Page/noteList'); ?>" id="newNoteForm">
+                <input type="hidden" name="addnote" value="1">
                 <div class="modal-body">
                     <div class="form-group">
                         <label for="noteTitle">Title</label>
-                        <input type="text" class="form-control" name="noteTitle" id="noteTitle" placeholder="Enter a note title" required>
+                        <input type="text" class="form-control" name="noteTitle" id="noteTitle" required>
                     </div>
 
                     <div class="form-group">
                         <label for="noteTags">Tags</label>
-                        <input type="text" class="form-control" name="noteTags" id="noteTags" placeholder="Example: meeting, finance, reminder">
+                        <input type="text" class="form-control" name="noteTags" id="noteTags">
                     </div>
 
                     <div class="form-group mb-0">
@@ -1153,13 +1154,13 @@ $notesJson = json_encode(
                         <div class="notes-editor-shell">
                             <div id="noteDescriptionEditor"></div>
                         </div>
-                        <input type="hidden" name="noteDescription" id="noteDescription" required>
+                        <input type="hidden" name="noteDescription" id="noteDescription">
                     </div>
                 </div>
 
                 <div class="modal-footer">
-                    <button type="submit" name="addnote" class="notes-btn notes-btn--solid">Save Note</button>
-                    <button type="button" class="notes-btn notes-btn--neutral" data-dismiss="modal">Close</button>
+                    <button type="submit" id="saveNoteBtn" class="notes-btn notes-btn--solid">Save Note</button>
+                    <button type="button" class="notes-btn notes-btn--neutral" data-dismiss="modal">Cancel</button>
                 </div>
             </form>
         </div>
@@ -1182,12 +1183,12 @@ $notesJson = json_encode(
 
                     <div class="form-group">
                         <label for="editNoteTitle">Title</label>
-                        <input type="text" class="form-control" name="noteTitle" id="editNoteTitle" placeholder="Enter a note title" required>
+                        <input type="text" class="form-control" name="noteTitle" id="editNoteTitle" required>
                     </div>
 
                     <div class="form-group">
                         <label for="editNoteTags">Tags</label>
-                        <input type="text" class="form-control" name="noteTags" id="editNoteTags" placeholder="Example: meeting, finance, reminder">
+                        <input type="text" class="form-control" name="noteTags" id="editNoteTags">
                     </div>
 
                     <div class="form-group mb-0">
@@ -1583,8 +1584,10 @@ $notesJson = json_encode(
             }
         });
 
-        $('#newnotes form').on('submit', function() {
-            $('#noteDescription').val(noteDescriptionEditor.root.innerHTML);
+        $('#newNoteForm').on('submit', function() {
+            if (noteDescriptionEditor) {
+                $('#noteDescription').val(noteDescriptionEditor.root.innerHTML);
+            }
         });
 
         $('#editnotes form').on('submit', function() {

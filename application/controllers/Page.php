@@ -15562,11 +15562,7 @@ class Page extends CI_Controller
     $user = $this->session->userdata('username');
     $settingsID = $this->session->userdata('settingsID');
 
-
     $this->load->helper('text');
-
-    $result['data'] = $this->CashModel->noteList($user, $settingsID);
-    $this->load->view('note_list', $result);
 
     if ($this->input->post('addnote')) {
       $noteTitle = $this->input->post('noteTitle');
@@ -15604,6 +15600,9 @@ class Page extends CI_Controller
 
       redirect('Page/noteList');
     }
+
+    $result['data'] = $this->CashModel->noteList($user, $settingsID);
+    $this->load->view('note_list', $result);
   }
 
 
