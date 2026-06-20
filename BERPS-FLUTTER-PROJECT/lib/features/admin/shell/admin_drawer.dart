@@ -23,6 +23,7 @@ class AdminDrawer extends StatelessWidget {
     required this.onSelectEmployeeAccomplishment,
     required this.onSelectAttendance,
     required this.onSelectDtr,
+    required this.onSelectCalendar,
     required this.onSignOut,
   });
 
@@ -37,6 +38,7 @@ class AdminDrawer extends StatelessWidget {
   final VoidCallback onSelectEmployeeAccomplishment;
   final VoidCallback onSelectAttendance;
   final VoidCallback onSelectDtr;
+  final VoidCallback onSelectCalendar;
   final Future<void> Function() onSignOut;
 
   @override
@@ -125,6 +127,15 @@ class AdminDrawer extends StatelessWidget {
                     label: 'Employee DTR',
                     activeItemId: activeItemId,
                     onTap: onSelectDtr,
+                  ),
+                  const _SectionLabel('Workspace', PhosphorIconsBold.buildings),
+                  _NavItem(
+                    id: 'calendar',
+                    icon: PhosphorIconsRegular.calendarBlank,
+                    iconActive: PhosphorIconsFill.calendarBlank,
+                    label: 'Calendar',
+                    activeItemId: activeItemId,
+                    onTap: onSelectCalendar,
                   ),
                 ],
               ),
@@ -344,8 +355,9 @@ class _NavItem extends StatelessWidget {
                   child: Icon(
                     isActive ? iconActive : icon,
                     size: 17,
-                    color:
-                        isActive ? AppTheme.primaryDark : AppTheme.textSecondary,
+                    color: isActive
+                        ? AppTheme.primaryDark
+                        : AppTheme.textSecondary,
                   ),
                 ),
                 const SizedBox(width: 12),

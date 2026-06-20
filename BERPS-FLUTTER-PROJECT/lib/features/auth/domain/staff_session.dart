@@ -12,6 +12,7 @@ class StaffSession {
     required this.avatarUrl,
     required this.settingsId,
     this.features = const <String>[],
+    this.dashboardMode = 'default',
   });
 
   final String baseUrl;
@@ -30,6 +31,13 @@ class StaffSession {
   /// gating (`company_features`). An empty list means "no restrictions" — the
   /// account has full access to every module.
   final List<String> features;
+
+  /// Mobile home dashboard mode for this workspace. `'calendar'` replaces the
+  /// snapshot dashboard with a full-month calendar; anything else = default.
+  final String dashboardMode;
+
+  /// Whether the home dashboard should render as a full-month calendar.
+  bool get dashboardIsCalendar => dashboardMode == 'calendar';
 
   // ── Feature gating ─────────────────────────────────────────────────────────
 
@@ -112,6 +120,7 @@ class StaffSession {
       avatarUrl: (user['avatar_url'] ?? '').toString(),
       settingsId: int.tryParse((user['settings_id'] ?? '0').toString()) ?? 0,
       features: _parseFeatures(user['features']),
+      dashboardMode: (user['dashboard_mode'] ?? 'default').toString(),
     );
   }
 
@@ -129,6 +138,7 @@ class StaffSession {
       avatarUrl: (json['avatarUrl'] ?? '').toString(),
       settingsId: int.tryParse((json['settingsId'] ?? '0').toString()) ?? 0,
       features: _parseFeatures(json['features']),
+      dashboardMode: (json['dashboardMode'] ?? 'default').toString(),
     );
   }
 
@@ -153,21 +163,23 @@ class StaffSession {
       avatarUrl: avatarUrl ?? this.avatarUrl,
       settingsId: settingsId,
       features: features,
+      dashboardMode: dashboardMode,
     );
   }
 
   Map<String, dynamic> toJson() => {
-        'baseUrl': baseUrl,
-        'token': token,
-        'userId': userId,
-        'username': username,
-        'fullName': fullName,
-        'firstName': firstName,
-        'lastName': lastName,
-        'email': email,
-        'position': position,
-        'avatarUrl': avatarUrl,
-        'settingsId': settingsId,
-        'features': features,
-      };
+    'baseUrl': baseUrl,
+    'token': token,
+    'userId': userId,
+    'username': username,
+    'fullName': fullName,
+    'firstName': firstName,
+    'lastName': lastName,
+    'email': email,
+    'position': position,
+    'avatarUrl': avatarUrl,
+    'settingsId': settingsId,
+    'features': features,
+    'dashboardMode': dashboardMode,
+  };
 }

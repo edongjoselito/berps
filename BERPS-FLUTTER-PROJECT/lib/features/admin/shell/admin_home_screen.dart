@@ -6,6 +6,7 @@ import '../../../core/utils/haptics.dart';
 import '../../auth/data/session_store.dart';
 import '../../auth/domain/mobile_config.dart';
 import '../../auth/domain/staff_session.dart';
+import '../../calendar/presentation/calendar_screen.dart';
 import '../presentation/admin_accomplishments_screen.dart';
 import '../presentation/admin_attendance_screen.dart';
 import '../presentation/admin_clients_tab.dart';
@@ -158,6 +159,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
         onSelectAttendance: () =>
             _push(AdminAttendanceScreen(session: widget.session)),
         onSelectDtr: () => _push(EmpDtrScreen(session: widget.session)),
+        onSelectCalendar: () => _push(CalendarScreen(session: widget.session)),
         onSignOut: _confirmSignOut,
       ),
       body: AnimatedSwitcher(

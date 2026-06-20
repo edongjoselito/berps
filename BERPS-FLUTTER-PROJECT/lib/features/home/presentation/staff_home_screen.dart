@@ -322,9 +322,7 @@ class _StaffHomeScreenState extends State<StaffHomeScreen> {
           selectedIndex: selectedIndex,
           onDestinationSelected: _onDestinationSelected,
           labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-          destinations: [
-            for (final tab in tabs) _destinationFor(tab),
-          ],
+          destinations: [for (final tab in tabs) _destinationFor(tab)],
         ),
       ),
     );
@@ -362,6 +360,15 @@ class _StaffHomeScreenState extends State<StaffHomeScreen> {
   Widget _buildCurrentPage() {
     switch (_currentTab) {
       case _StaffTab.dashboard:
+        // Workspaces configured for the calendar dashboard get a pure
+        // full-month calendar in place of the snapshot widgets.
+        if (widget.session.dashboardIsCalendar) {
+          return CalendarDashboardTab(
+            key: ValueKey('calendar-dashboard-$_dashboardReopenKey'),
+            session: widget.session,
+            onMenu: () => _scaffoldKey.currentState?.openDrawer(),
+          );
+        }
         return StaffDashboardTab(
           key: ValueKey('dashboard-$_dashboardReopenKey'),
           session: widget.session,

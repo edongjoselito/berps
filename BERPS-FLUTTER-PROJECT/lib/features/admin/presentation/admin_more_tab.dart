@@ -7,6 +7,7 @@ import '../../../core/utils/responsive.dart';
 import '../../../core/widgets/mobile_header.dart';
 import '../../auth/domain/mobile_config.dart';
 import '../../auth/domain/staff_session.dart';
+import '../../calendar/presentation/calendar_screen.dart';
 import 'admin_accomplishments_screen.dart';
 import 'admin_attendance_screen.dart';
 import 'admin_widgets.dart';
@@ -92,6 +93,18 @@ class AdminMoreTab extends StatelessWidget {
             title: 'Employee DTR',
             subtitle: 'Monthly daily time record',
             onTap: () => _push(context, EmpDtrScreen(session: session)),
+          ),
+        ]),
+        const SizedBox(height: 22),
+        const MobileSectionLabel('Workspace'),
+        const SizedBox(height: 10),
+        _menuCard([
+          _MenuItem(
+            icon: PhosphorIconsFill.calendarBlank,
+            color: AppTheme.primaryDark,
+            title: 'Calendar',
+            subtitle: 'Your events & schedule',
+            onTap: () => _push(context, CalendarScreen(session: session)),
           ),
         ]),
         const SizedBox(height: 22),

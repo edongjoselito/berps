@@ -2861,7 +2861,7 @@ class MobileStaff extends CI_Controller
             return mobile_json(['ok' => false, 'message' => 'Method not allowed.'], 405);
         }
 
-        $claims = $this->_require_staff_claims();
+        $claims = $this->_require_member_claims();
         if ($claims === null) return;
 
         $this->_ensure_calendar_schema();
@@ -2908,7 +2908,7 @@ class MobileStaff extends CI_Controller
             return mobile_json(['ok' => false, 'message' => 'Method not allowed.'], 405);
         }
 
-        $claims = $this->_require_staff_claims();
+        $claims = $this->_require_member_claims();
         if ($claims === null) return;
 
         $this->_ensure_calendar_schema();
@@ -2957,7 +2957,7 @@ class MobileStaff extends CI_Controller
             return mobile_json(['ok' => false, 'message' => 'Method not allowed.'], 405);
         }
 
-        $claims = $this->_require_staff_claims();
+        $claims = $this->_require_member_claims();
         if ($claims === null) return;
 
         $this->_ensure_calendar_schema();
@@ -2995,7 +2995,7 @@ class MobileStaff extends CI_Controller
             return mobile_json(['ok' => false, 'message' => 'Method not allowed.'], 405);
         }
 
-        $claims = $this->_require_staff_claims();
+        $claims = $this->_require_member_claims();
         if ($claims === null) return;
 
         $this->_ensure_calendar_schema();
@@ -3042,7 +3042,7 @@ class MobileStaff extends CI_Controller
             return mobile_json(['ok' => false, 'message' => 'Method not allowed.'], 405);
         }
 
-        $claims = $this->_require_staff_claims();
+        $claims = $this->_require_member_claims();
         if ($claims === null) return;
 
         $this->_ensure_calendar_schema();
@@ -4175,6 +4175,24 @@ class MobileStaff extends CI_Controller
         }
         if (trim((string) ($claims['level'] ?? '')) !== 'Staff') {
             mobile_json(['ok' => false, 'message' => 'Staff access required.'], 403);
+            return null;
+        }
+        return $claims;
+    }
+
+    /**
+     * Claims guard for endpoints shared by Staff and Admin members (e.g. the
+     * personal calendar, which is always scoped by user_id + settingsID).
+     */
+    private function _require_member_claims()
+    {
+        $claims = mobile_require_claims();
+        if ($claims === null) {
+            return null;
+        }
+        $level = trim((string) ($claims['level'] ?? ''));
+        if ($level !== 'Staff' && $level !== 'Admin') {
+            mobile_json(['ok' => false, 'message' => 'Member access required.'], 403);
             return null;
         }
         return $claims;

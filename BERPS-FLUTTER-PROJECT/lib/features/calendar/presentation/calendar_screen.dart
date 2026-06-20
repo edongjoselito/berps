@@ -5,6 +5,7 @@ import '../../../core/network/api_exception.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/haptics.dart';
 import '../../../core/widgets/app_toast.dart';
+import '../../../core/widgets/mobile_header.dart';
 import '../../auth/domain/staff_session.dart';
 import '../../home/data/staff_api.dart';
 import '../domain/calendar_event.dart';
@@ -15,13 +16,33 @@ import 'calendar_event_editor.dart';
 const Color kAppleRed = Color(0xFFFF3B30);
 
 const List<String> _monthNamesFull = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December',
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
 ];
 
 const List<String> _monthNamesShort = [
-  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
 ];
 
 const List<String> _weekdayLetters = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
@@ -41,9 +62,7 @@ List<List<int>> _monthWeeks(int year, int month) {
   while (cells.length % 7 != 0) {
     cells.add(0);
   }
-  return [
-    for (var i = 0; i < cells.length; i += 7) cells.sublist(i, i + 7),
-  ];
+  return [for (var i = 0; i < cells.length; i += 7) cells.sublist(i, i + 7)];
 }
 
 Color _eventColor(CalendarEvent e) {
@@ -152,6 +171,292 @@ class _CalendarScreenState extends State<CalendarScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// A full-month calendar built to be embedded as a home tab. Used as the staff
+/// dashboard for workspaces configured with `dashboardMode == 'calendar'`.
+///
+/// Unlike [CalendarScreen] (which opens as its own route with a back button),
+/// this shows a hamburger header so it can live inside the bottom-nav shell,
+/// and it highlights every day that has an event so they stand out at a glance.
+class CalendarDashboardTab extends StatefulWidget {
+  const CalendarDashboardTab({
+    super.key,
+    required this.session,
+    required this.onMenu,
+  });
+
+  final StaffSession session;
+  final VoidCallback onMenu;
+
+  @override
+  State<CalendarDashboardTab> createState() => _CalendarDashboardTabState();
+}
+
+class _CalendarDashboardTabState extends State<CalendarDashboardTab> {
+  final StaffApi _api = StaffApi();
+  late int _year = DateTime.now().year;
+  late int _month = DateTime.now().month;
+  Future<List<CalendarEvent>>? _future;
+
+  @override
+  void initState() {
+    super.initState();
+    _reload();
+  }
+
+  void _reload() {
+    setState(() {
+      _future = _api.fetchCalendarEvents(
+        baseUrl: widget.session.baseUrl,
+        token: widget.session.token,
+      );
+    });
+  }
+
+  void _shiftMonth(int delta) {
+    Haptics.light();
+    final next = DateTime(_year, _month + delta, 1);
+    setState(() {
+      _year = next.year;
+      _month = next.month;
+    });
+  }
+
+  void _goToday() {
+    Haptics.light();
+    final now = DateTime.now();
+    setState(() {
+      _year = now.year;
+      _month = now.month;
+    });
+  }
+
+  Future<void> _openCreate() async {
+    Haptics.light();
+    final created = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (_) => CalendarEventEditor(session: widget.session),
+      ),
+    );
+    if (created == true) _reload();
+  }
+
+  Future<void> _openEdit(CalendarEvent event) async {
+    Haptics.light();
+    final updated = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (_) =>
+            CalendarEventEditor(session: widget.session, existing: event),
+      ),
+    );
+    if (updated == true) _reload();
+  }
+
+  Future<void> _confirmDelete(CalendarEvent event) async {
+    Haptics.warn();
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text(
+          'Delete event?',
+          style: TextStyle(
+            fontWeight: FontWeight.w900,
+            color: AppTheme.textPrimary,
+          ),
+        ),
+        content: Text(
+          '"${event.title}" will be permanently removed.',
+          style: const TextStyle(color: AppTheme.textSecondary),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: AppTheme.danger),
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    try {
+      await _api.deleteCalendarEvent(
+        baseUrl: widget.session.baseUrl,
+        token: widget.session.token,
+        id: event.id,
+      );
+      if (!mounted) return;
+      AppToast.success(context, 'Event deleted.');
+      Navigator.of(context).maybePop(); // close the day sheet
+      _reload();
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      AppToast.error(context, e.message);
+    }
+  }
+
+  void _openDay(DateTime day, List<CalendarEvent> events) {
+    Haptics.light();
+    final dayEvents = events.where((e) => _eventCoversDay(e, day)).toList()
+      ..sort((a, b) => a.start.compareTo(b.start));
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: AppTheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (sheetContext) => _DaySheet(
+        day: day,
+        events: dayEvents,
+        onAdd: () {
+          Navigator.of(sheetContext).pop();
+          _openCreate();
+        },
+        onEdit: (e) {
+          Navigator.of(sheetContext).pop();
+          _openEdit(e);
+        },
+        onDelete: (e) => _confirmDelete(e),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final now = DateTime.now();
+    return Scaffold(
+      backgroundColor: AppTheme.background,
+      floatingActionButton: FloatingActionButton.extended(
+        backgroundColor: AppTheme.primaryDark,
+        foregroundColor: Colors.white,
+        onPressed: _openCreate,
+        icon: const Icon(PhosphorIconsBold.plus, size: 18),
+        label: const Text(
+          'New event',
+          style: TextStyle(fontWeight: FontWeight.w800),
+        ),
+      ),
+      body: SafeArea(
+        bottom: false,
+        child: FutureBuilder<List<CalendarEvent>>(
+          future: _future,
+          builder: (context, snapshot) {
+            final events = snapshot.data ?? const <CalendarEvent>[];
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+                  child: MobileHeader(
+                    title: 'Calendar',
+                    subtitle: '${_monthNamesFull[_month - 1]} $_year',
+                    leadingIcon: PhosphorIconsBold.list,
+                    onLeadingTap: () {
+                      Haptics.light();
+                      widget.onMenu();
+                    },
+                    trailingIcon: PhosphorIconsBold.arrowClockwise,
+                    onTrailingTap: () {
+                      Haptics.light();
+                      _reload();
+                    },
+                  ),
+                ),
+                _DashboardMonthBar(
+                  title: '${_monthNamesFull[_month - 1]} $_year',
+                  onPrev: () => _shiftMonth(-1),
+                  onNext: () => _shiftMonth(1),
+                  onToday: _goToday,
+                ),
+                const _WeekdayHeader(),
+                Expanded(
+                  child: _MonthGrid(
+                    year: _year,
+                    month: _month,
+                    today: now,
+                    events: events,
+                    onDayTap: (day) => _openDay(day, events),
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+/// Month navigation row for [CalendarDashboardTab]: previous / next arrows, the
+/// current month title, and a quick "Today" jump.
+class _DashboardMonthBar extends StatelessWidget {
+  const _DashboardMonthBar({
+    required this.title,
+    required this.onPrev,
+    required this.onNext,
+    required this.onToday,
+  });
+
+  final String title;
+  final VoidCallback onPrev;
+  final VoidCallback onNext;
+  final VoidCallback onToday;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 4, 8, 6),
+      child: Row(
+        children: [
+          IconButton(
+            onPressed: onPrev,
+            icon: const Icon(
+              PhosphorIconsBold.caretLeft,
+              color: AppTheme.textSecondary,
+              size: 18,
+            ),
+          ),
+          Expanded(
+            child: Text(
+              title,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontWeight: FontWeight.w900,
+                fontSize: 17,
+                letterSpacing: -0.3,
+                color: AppTheme.textPrimary,
+              ),
+            ),
+          ),
+          IconButton(
+            onPressed: onNext,
+            icon: const Icon(
+              PhosphorIconsBold.caretRight,
+              color: AppTheme.textSecondary,
+              size: 18,
+            ),
+          ),
+          TextButton(
+            onPressed: onToday,
+            style: TextButton.styleFrom(
+              foregroundColor: kAppleRed,
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              minimumSize: const Size(0, 36),
+            ),
+            child: const Text(
+              'Today',
+              style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13.5),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -291,7 +596,8 @@ class _MiniMonth extends StatelessWidget {
                     Expanded(
                       child: _MiniDayCell(
                         day: day,
-                        isToday: day != 0 &&
+                        isToday:
+                            day != 0 &&
                             today.year == year &&
                             today.month == month &&
                             today.day == day,
@@ -647,10 +953,12 @@ class _MonthGrid extends StatelessWidget {
                           ? const SizedBox.shrink()
                           : _MonthDayCell(
                               date: DateTime(year, month, day),
-                              isToday: today.year == year &&
+                              isToday:
+                                  today.year == year &&
                                   today.month == month &&
                                   today.day == day,
                               dotColors: _dotsFor(DateTime(year, month, day)),
+                              hasEvents: _hasEvents(DateTime(year, month, day)),
                               onTap: onDayTap,
                             ),
                     ),
@@ -666,6 +974,8 @@ class _MonthGrid extends StatelessWidget {
     final matches = events.where((e) => _eventCoversDay(e, day)).toList();
     return [for (final e in matches.take(3)) _eventColor(e)];
   }
+
+  bool _hasEvents(DateTime day) => events.any((e) => _eventCoversDay(e, day));
 }
 
 class _MonthDayCell extends StatelessWidget {
@@ -673,16 +983,27 @@ class _MonthDayCell extends StatelessWidget {
     required this.date,
     required this.isToday,
     required this.dotColors,
+    required this.hasEvents,
     required this.onTap,
   });
 
   final DateTime date;
   final bool isToday;
   final List<Color> dotColors;
+  final bool hasEvents;
   final ValueChanged<DateTime> onTap;
 
   @override
   Widget build(BuildContext context) {
+    // Days with events get a soft red highlight so they're easy to spot at a
+    // glance; "today" keeps its solid red marker and takes precedence.
+    final Color background = isToday
+        ? kAppleRed
+        : (hasEvents ? kAppleRed.withValues(alpha: 0.14) : Colors.transparent);
+    final Color textColor = isToday
+        ? Colors.white
+        : (hasEvents ? kAppleRed : AppTheme.textPrimary);
+
     return InkWell(
       borderRadius: BorderRadius.circular(12),
       onTap: () => onTap(date),
@@ -694,15 +1015,17 @@ class _MonthDayCell extends StatelessWidget {
             height: 34,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: isToday ? kAppleRed : Colors.transparent,
+              color: background,
               borderRadius: BorderRadius.circular(10),
             ),
             child: Text(
               '${date.day}',
               style: TextStyle(
                 fontSize: 15,
-                fontWeight: isToday ? FontWeight.w800 : FontWeight.w600,
-                color: isToday ? Colors.white : AppTheme.textPrimary,
+                fontWeight: (isToday || hasEvents)
+                    ? FontWeight.w800
+                    : FontWeight.w600,
+                color: textColor,
               ),
             ),
           ),
@@ -747,7 +1070,13 @@ class _DaySheet extends StatelessWidget {
   final ValueChanged<CalendarEvent> onDelete;
 
   static const List<String> _weekdaysFull = [
-    'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday',
+    'Monday',
+    'Tuesday',
+    'Wednesday',
+    'Thursday',
+    'Friday',
+    'Saturday',
+    'Sunday',
   ];
 
   @override
@@ -935,8 +1264,10 @@ class _DayEventRow extends StatelessWidget {
               if (event.isPublic)
                 Container(
                   margin: const EdgeInsets.only(left: 8),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 7,
+                    vertical: 3,
+                  ),
                   decoration: BoxDecoration(
                     color: color.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(999),

@@ -37,8 +37,8 @@ class MobileAuth extends CI_Controller
             'app_name'      => 'BERPS',
             'tagline'       => 'Tasks · Invoices · Job Orders',
             'description'   => 'Business Resource Planning System built for task management, '
-                             . 'invoicing, and job order processing so every team stays '
-                             . 'aligned from request to delivery.',
+                . 'invoicing, and job order processing so every team stays '
+                . 'aligned from request to delivery.',
             'allowed_roles' => self::ALLOWED_LEVELS,
             'base_url'      => $baseUrl,
             'api_base_url'  => $baseUrl . '/api/mobile',
@@ -444,7 +444,22 @@ class MobileAuth extends CI_Controller
             'acct_stat'   => (string) ($user->acctStat ?? ''),
             'settings_id' => (int) ($user->settingsID ?? 0),
             'features'    => $this->_company_features((int) ($user->settingsID ?? 0)),
+            'dashboard_mode' => $this->_mobile_dashboard_mode((int) ($user->settingsID ?? 0)),
         ];
+    }
+
+    /**
+     * Mobile home dashboard mode for a workspace (settingsID).
+     *
+     * Most companies see the default "snapshot" dashboard. Companies listed
+     * here instead get a pure full-month calendar as their dashboard.
+     */
+    private function _mobile_dashboard_mode($settingsID)
+    {
+        $calendarDashboardWorkspaces = [5];
+        return in_array((int) $settingsID, $calendarDashboardWorkspaces, true)
+            ? 'calendar'
+            : 'default';
     }
 
     /**
