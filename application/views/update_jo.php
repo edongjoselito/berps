@@ -139,6 +139,39 @@ $serviceCategories = array_values($serviceCategories);
       balance();
       syncInvoiceItemPrice();
 
+      var recurringFrequencySelect = document.querySelector('select[name="recurringFrequency"]');
+      var coverageOptionRow = document.getElementById('coverage-option-row');
+      var coverageOptionSelect = document.getElementById('coverage-option');
+      var coverageOptionHelp = document.getElementById('coverage-option-help');
+
+      function syncCoverageOptionState() {
+        if (!coverageOptionRow || !coverageOptionSelect) {
+          return;
+        }
+
+        var isRecurring = recurringFrequencySelect && recurringFrequencySelect.value !== 'none';
+        var isGeneratedCoverageField = coverageOptionSelect.getAttribute('data-generated-lock') === '1';
+
+        coverageOptionRow.style.display = 'flex';
+        coverageOptionSelect.disabled = isGeneratedCoverageField;
+
+        if (coverageOptionHelp) {
+          if (isGeneratedCoverageField) {
+            coverageOptionHelp.textContent = 'This billing period is inherited from the recurring template.';
+          } else if (isRecurring) {
+            coverageOptionHelp.textContent = 'Select whether this invoice covers the previous period or the upcoming period relative to the schedule date.';
+          } else {
+            coverageOptionHelp.textContent = 'You can choose the billing period now. It will apply once you set a recurring frequency.';
+          }
+        }
+      }
+
+      if (recurringFrequencySelect) {
+        recurringFrequencySelect.addEventListener('change', syncCoverageOptionState);
+      }
+
+      syncCoverageOptionState();
+
       var customerSelect = document.getElementById('validationCustomer');
       var addressField = document.getElementById('validationAddress');
       var serviceCategoryField = document.getElementById('serviceCategory');
@@ -423,21 +456,40 @@ $serviceCategories = array_values($serviceCategories);
                   <?php if ($isInvoicePage): ?>
                     <div class="form-row">
                       <div class="col-md-6 mb-2">
-                        <label>Recurring</label>
+                        <label>Recurring Frequency</label>
                         <select class="form-control" name="recurringFrequency" <?= $isGeneratedRecurring ? 'disabled' : ''; ?>>
-                          <option value="none" <?= (($record->recurringFrequency ?? 'none') === 'none') ? 'selected' : ''; ?>>No</option>
+                          <option value="none" <?= (($record->recurringFrequency ?? 'none') === 'none') ? 'selected' : ''; ?>>No (One-time)</option>
                           <option value="daily" <?= (($record->recurringFrequency ?? 'none') === 'daily') ? 'selected' : ''; ?>>Daily</option>
                           <option value="weekly" <?= (($record->recurringFrequency ?? 'none') === 'weekly') ? 'selected' : ''; ?>>Weekly</option>
                           <option value="monthly" <?= (($record->recurringFrequency ?? 'none') === 'monthly') ? 'selected' : ''; ?>>Monthly</option>
                           <option value="quarterly" <?= (($record->recurringFrequency ?? 'none') === 'quarterly') ? 'selected' : ''; ?>>Quarterly</option>
                           <option value="yearly" <?= (($record->recurringFrequency ?? 'none') === 'yearly') ? 'selected' : ''; ?>>Yearly</option>
                         </select>
+                        <small class="form-text text-muted">Select <strong>No</strong> for a one-time invoice. Choose any frequency to make the invoice recurring.</small>
                       </div>
                       <div class="col-md-6 mb-2">
                         <label>Schedule Date</label>
                         <input type="date" class="form-control" name="recurringScheduleDate" value="<?= htmlspecialchars((string) ($record->recurringScheduleDate ?? ''), ENT_QUOTES, 'UTF-8'); ?>" <?= $isGeneratedRecurring ? 'readonly' : ''; ?>>
                         <small class="form-text text-muted">
                           <?= $isGeneratedRecurring ? 'This invoice was generated from a recurring template.' : 'Recurring invoices generate 10 days before the schedule date for daily, weekly, monthly, quarterly, or yearly schedules.'; ?>
+                        </small>
+                      </div>
+                    </div>
+                    <div class="row" id="coverage-option-row">
+                      <div class="col-md-12 mb-2">
+                        <label>Coverage Period</label>
+                        <select class="form-control" id="coverage-option" name="coverageOption" data-generated-lock="<?= $isGeneratedRecurring ? '1' : '0'; ?>" <?= $isGeneratedRecurring ? 'disabled' : ''; ?>>
+                          <option value="coming" <?= (($record->coverageOption ?? 'coming') === 'coming') ? 'selected' : ''; ?>>Upcoming Period</option>
+                          <option value="previous" <?= (($record->coverageOption ?? 'coming') === 'previous') ? 'selected' : ''; ?>>Previous Period</option>
+                        </select>
+                        <small class="form-text text-muted" id="coverage-option-help">
+                          <?php if ($isGeneratedRecurring): ?>
+                            This billing period is inherited from the recurring template.
+                          <?php elseif (($record->recurringFrequency ?? 'none') !== 'none'): ?>
+                            Select whether this invoice covers the previous period or the upcoming period relative to the schedule date.
+                          <?php else: ?>
+                            You can choose the billing period now. It will apply once you set a recurring frequency.
+                          <?php endif; ?>
                         </small>
                       </div>
                     </div>

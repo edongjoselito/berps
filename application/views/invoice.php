@@ -87,6 +87,7 @@ function getInvoiceCoveredMonths($invoiceData)
 {
     $frequency = $invoiceData->recurringFrequency ?? 'none';
     $scheduleDate = $invoiceData->recurringScheduleDate ?? '';
+    $coverageOption = $invoiceData->coverageOption ?? 'coming';
 
     if ($frequency === 'none' || empty($scheduleDate)) {
         return '';
@@ -104,25 +105,59 @@ function getInvoiceCoveredMonths($invoiceData)
 
         case 'weekly':
             // Weekly: 7 days from schedule date
-            $endDate->modify('+6 days');
+            if ($coverageOption === 'previous') {
+                $startDate->modify('-6 days');
+                $endDate = clone $startDate;
+                $endDate->modify('+6 days');
+            } else {
+                $endDate->modify('+6 days');
+            }
             break;
 
         case 'monthly':
             // Monthly: from schedule date to schedule date + 1 month - 1 day
-            $endDate->modify('+1 month');
-            $endDate->modify('-1 day');
+            if ($coverageOption === 'previous') {
+                $startDate->modify('-1 month');
+                $endDate = clone $startDate;
+                $endDate->modify('+1 month')->modify('-1 day');
+            } else {
+                $endDate->modify('+1 month')->modify('-1 day');
+            }
             break;
 
         case 'quarterly':
-            // Quarterly: from schedule date to schedule date + 3 months - 1 day
-            $endDate->modify('+3 months');
-            $endDate->modify('-1 day');
+            // Quarterly: use calendar quarters based on coverageOption
+            $year = (int)$startDate->format('Y');
+            $month = (int)$startDate->format('n');
+            $quarter = ceil($month / 3);
+
+            if ($coverageOption === 'previous') {
+                // Previous quarter
+                $quarter--;
+                if ($quarter < 1) {
+                    $quarter = 4;
+                    $year--;
+                }
+            }
+
+            // Calculate start and end of the quarter
+            $startMonth = ($quarter - 1) * 3 + 1;
+            $endMonth = $quarter * 3;
+
+            $startDate = new DateTime("$year-$startMonth-01");
+            $endDate = new DateTime("$year-$endMonth-01");
+            $endDate->modify('+1 month')->modify('-1 day');
             break;
 
         case 'yearly':
             // Yearly: from schedule date to schedule date + 1 year - 1 day
-            $endDate->modify('+1 year');
-            $endDate->modify('-1 day');
+            if ($coverageOption === 'previous') {
+                $startDate->modify('-1 year');
+                $endDate = clone $startDate;
+                $endDate->modify('+1 year')->modify('-1 day');
+            } else {
+                $endDate->modify('+1 year')->modify('-1 day');
+            }
             break;
 
         default:

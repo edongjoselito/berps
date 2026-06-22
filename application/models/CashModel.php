@@ -37,6 +37,7 @@ class CashModel extends CI_Model
 			"{$alias}.invoiceSource",
 			"{$alias}.invoiceBy",
 			"COALESCE({$alias}.recurringFrequency, 'none') AS recurringFrequency",
+			"COALESCE({$alias}.coverageOption, ri.coverageOption, 'coming') AS coverageOption",
 			"{$alias}.recurringScheduleDate",
 			"{$alias}.recurringTerminationDate",
 			"{$alias}.invoiceExpirationDate",
@@ -71,6 +72,7 @@ class CashModel extends CI_Model
 	{
 		$this->db->select($this->invoiceSelect('i'), false);
 		$this->db->from('invoice i');
+		$this->db->join('invoice ri', 'ri.orderID = i.recurringTemplateID AND ri.settingsID = i.settingsID', 'left');
 		$this->db->join('customers c', $this->invoiceCustomerJoin('i'), 'left');
 		if ($settingsID !== null) {
 			$this->db->where('i.settingsID', $settingsID);

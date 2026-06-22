@@ -82,6 +82,7 @@ class Page extends CI_Controller
     $this->_ensureInvoiceRecurringTerminationDateColumn();
     $this->_ensureInvoiceExpirationDateColumn();
     $this->_ensureInvoiceDueDateColumn();
+    $this->_ensureCoverageOptionColumn();
     $this->_ensureTaskChecklistTable();
     $this->_ensureEmployeeEmailColumn();
     $this->_ensureUserSupportPermissionColumns();
@@ -1386,6 +1387,42 @@ class Page extends CI_Controller
     }
 
     $this->db->query("UPDATE `invoice` SET `DueDate` = NULL WHERE `DueDate` IS NOT NULL AND (`DueDate` + 0) = 0");
+  }
+
+  private function _ensureCoverageOptionColumn()
+  {
+    if (!$this->db->field_exists('coverageOption', 'invoice')) {
+      $this->db->query("ALTER TABLE `invoice` ADD COLUMN `coverageOption` varchar(20) DEFAULT 'coming' AFTER `recurringFrequency`");
+    }
+
+    $this->db->query("
+      UPDATE `invoice`
+      SET `coverageOption` = 'coming'
+      WHERE (`coverageOption` IS NULL OR TRIM(`coverageOption`) = '')
+        AND (
+          COALESCE(`recurringFrequency`, 'none') = 'none'
+          OR COALESCE(`recurringTemplateID`, 0) = 0
+        )
+    ");
+
+    // Generated recurring invoices should inherit the template coverage direction.
+    $this->db->query("
+      UPDATE `invoice` AS `generated`
+      INNER JOIN `invoice` AS `template`
+        ON `template`.`orderID` = `generated`.`recurringTemplateID`
+       AND `template`.`settingsID` = `generated`.`settingsID`
+      SET `generated`.`coverageOption` = COALESCE(NULLIF(TRIM(`template`.`coverageOption`), ''), 'coming')
+      WHERE `generated`.`recurringTemplateID` IS NOT NULL
+        AND `generated`.`recurringTemplateID` > 0
+        AND (
+          `generated`.`coverageOption` IS NULL
+          OR TRIM(`generated`.`coverageOption`) = ''
+          OR (
+            COALESCE(NULLIF(TRIM(`template`.`coverageOption`), ''), 'coming') = 'previous'
+            AND `generated`.`coverageOption` = 'coming'
+          )
+        )
+    ");
   }
 
   private function _ensureTaskChecklistTable()
@@ -11380,6 +11417,7 @@ class Page extends CI_Controller
       $InvoiceDateInput = $this->_normalizeDateInput($this->input->post('TransDate'));
       $DueDateInput = $this->_normalizeDateInput($this->input->post('ReceiveDate'));
       $RecurringFrequency = $this->_normalizeRecurringFrequency($this->input->post('recurringFrequency'));
+      $CoverageOption = $this->_normalizeCoverageOption($this->input->post('coverageOption'));
       $RecurringScheduleDate = $this->_normalizeDateInput($this->input->post('recurringScheduleDate'));
       $RecurringTerminationDate = $this->_normalizeDateInput($this->input->post('recurringTerminationDate'));
       $InvoiceExpirationDate = $this->_normalizeDateInput($this->input->post('invoiceExpirationDate'));
@@ -11458,6 +11496,7 @@ class Page extends CI_Controller
         'invoiceSource' => 'Others',
         'invoiceBy' => $Encoder,
         'recurringFrequency' => $RecurringFrequency,
+        'coverageOption' => $RecurringFrequency !== 'none' ? $CoverageOption : null,
         'recurringScheduleDate' => $RecurringFrequency !== 'none' ? $RecurringScheduleDate : null,
         'recurringTerminationDate' => $RecurringFrequency !== 'none' ? $RecurringTerminationDate : null,
         'invoiceExpirationDate' => $InvoiceExpirationDate,
@@ -11545,6 +11584,9 @@ class Page extends CI_Controller
       'invoiceSource' => 'Others',
       'invoiceBy' => $encoder,
       'recurringFrequency' => $this->_normalizeRecurringFrequency($invoice->recurringFrequency ?? 'none'),
+      'coverageOption' => $this->_normalizeRecurringFrequency($invoice->recurringFrequency ?? 'none') !== 'none'
+        ? $this->_normalizeCoverageOption($invoice->coverageOption ?? 'coming')
+        : null,
       'recurringScheduleDate' => $this->_normalizeDateInput($invoice->recurringScheduleDate ?? ''),
       'recurringTerminationDate' => $this->_normalizeDateInput($invoice->recurringTerminationDate ?? ''),
       'invoiceExpirationDate' => $this->_normalizeDateInput($invoice->invoiceExpirationDate ?? ''),
@@ -11632,6 +11674,9 @@ class Page extends CI_Controller
       $RecurringFrequency = $invoice->invoiceSource === 'Others'
         ? $this->_normalizeRecurringFrequency($this->input->post('recurringFrequency'))
         : 'none';
+      $CoverageOption = $invoice->invoiceSource === 'Others'
+        ? $this->_normalizeCoverageOption($this->input->post('coverageOption'))
+        : 'coming';
       $RecurringScheduleDate = $invoice->invoiceSource === 'Others'
         ? $this->_normalizeDateInput($this->input->post('recurringScheduleDate'))
         : null;
@@ -11752,6 +11797,7 @@ class Page extends CI_Controller
           || ($RecurringScheduleDate !== $existingRecurringScheduleDate);
 
         $invoiceUpdate['recurringFrequency'] = $RecurringFrequency;
+        $invoiceUpdate['coverageOption'] = $RecurringFrequency !== 'none' ? $CoverageOption : null;
         $invoiceUpdate['recurringScheduleDate'] = $RecurringScheduleDate;
         $invoiceUpdate['recurringTerminationDate'] = $RecurringFrequency !== 'none' ? $RecurringTerminationDate : null;
         if ($RecurringFrequency === 'none') {
@@ -12933,23 +12979,59 @@ class Page extends CI_Controller
     if ($recurringFrequency !== '' && $recurringFrequency !== 'none' && $recurringScheduleRaw !== '') {
       $startDate = new DateTime($recurringScheduleRaw);
       $endDate = clone $startDate;
+      $coverageOption = $invoice->coverageOption ?? 'coming';
       switch ($recurringFrequency) {
         case 'daily':
           break;
         case 'weekly':
-          $endDate->modify('+6 days');
+          if ($coverageOption === 'previous') {
+            $startDate->modify('-6 days');
+            $endDate = clone $startDate;
+            $endDate->modify('+6 days');
+          } else {
+            $endDate->modify('+6 days');
+          }
           break;
         case 'monthly':
-          $endDate->modify('+1 month');
-          $endDate->modify('-1 day');
+          if ($coverageOption === 'previous') {
+            $startDate->modify('-1 month');
+            $endDate = clone $startDate;
+            $endDate->modify('+1 month')->modify('-1 day');
+          } else {
+            $endDate->modify('+1 month')->modify('-1 day');
+          }
           break;
         case 'quarterly':
-          $endDate->modify('+3 months');
-          $endDate->modify('-1 day');
+          // Quarterly: use calendar quarters based on coverageOption
+          $year = (int)$startDate->format('Y');
+          $month = (int)$startDate->format('n');
+          $quarter = ceil($month / 3);
+
+          if ($coverageOption === 'previous') {
+            // Previous quarter
+            $quarter--;
+            if ($quarter < 1) {
+              $quarter = 4;
+              $year--;
+            }
+          }
+
+          // Calculate start and end of the quarter
+          $startMonth = ($quarter - 1) * 3 + 1;
+          $endMonth = $quarter * 3;
+
+          $startDate = new DateTime("$year-$startMonth-01");
+          $endDate = new DateTime("$year-$endMonth-01");
+          $endDate->modify('+1 month')->modify('-1 day');
           break;
         case 'yearly':
-          $endDate->modify('+1 year');
-          $endDate->modify('-1 day');
+          if ($coverageOption === 'previous') {
+            $startDate->modify('-1 year');
+            $endDate = clone $startDate;
+            $endDate->modify('+1 year')->modify('-1 day');
+          } else {
+            $endDate->modify('+1 year')->modify('-1 day');
+          }
           break;
         default:
           $endDate = null;
@@ -20058,6 +20140,11 @@ class Page extends CI_Controller
     return in_array($value, array('daily', 'weekly', 'monthly', 'quarterly', 'yearly'), true) ? $value : 'none';
   }
 
+  private function _normalizeCoverageOption($value)
+  {
+    return strtolower(trim((string) $value)) === 'previous' ? 'previous' : 'coming';
+  }
+
   private function _normalizeInvoiceItemQuantity($value)
   {
     if ($value === null) {
@@ -20273,6 +20360,7 @@ class Page extends CI_Controller
             'invoiceSource' => (string) $template->invoiceSource,
             'invoiceBy' => trim((string) $template->invoiceBy) !== '' ? (string) $template->invoiceBy : $this->_currentUserDisplayName(),
             'recurringFrequency' => $frequency,
+            'coverageOption' => $this->_normalizeCoverageOption($template->coverageOption ?? 'coming'),
             'recurringScheduleDate' => $nextScheduleDate,
             'recurringTerminationDate' => $this->_normalizeDateInput($template->recurringTerminationDate ?? ''),
             'invoiceExpirationDate' => $this->_normalizeDateInput($template->invoiceExpirationDate ?? ''),

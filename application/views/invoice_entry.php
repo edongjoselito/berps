@@ -9,6 +9,7 @@ $customerId = $record ? trim((string) ($record->CustID ?? '')) : '';
 $customerAddress = $record ? trim((string) ($record->CustAddress ?? '')) : '';
 $notes = $record ? trim((string) ($record->Notes ?? '')) : '';
 $recurringFrequency = $record ? trim((string) ($record->recurringFrequency ?? 'none')) : 'none';
+$coverageOption = $record ? trim((string) ($record->coverageOption ?? 'coming')) : 'coming';
 $recurringScheduleDate = $record ? trim((string) ($record->recurringScheduleDate ?? '')) : '';
 $recurringTerminationDate = $record ? trim((string) ($record->recurringTerminationDate ?? '')) : '';
 $invoiceExpirationDate = $record ? trim((string) ($record->invoiceExpirationDate ?? '')) : '';
@@ -637,7 +638,7 @@ if (empty($invoiceItems)) {
                                                     </button>
                                                 </label>
                                                 <div class="customer-select-wrap">
-                                                    <select class="custom-select" id="invoice-customer" name="CustID" required>
+                                                    <select class="custom-select js-customer-select2" id="invoice-customer" name="CustID" required>
                                                         <option value="" data-address="">Select customer</option>
                                                         <?php foreach ($clients as $client): ?>
                                                             <option value="<?= htmlspecialchars((string) $client->CustID, ENT_QUOTES, 'UTF-8'); ?>" data-address="<?= htmlspecialchars((string) ($client->Address ?? ''), ENT_QUOTES, 'UTF-8'); ?>" <?= $customerId === (string) $client->CustID ? 'selected' : ''; ?>>
@@ -715,7 +716,7 @@ if (empty($invoiceItems)) {
                                         <div class="form-row">
                                             <div class="form-group col-md-6">
                                                 <label for="invoice-recurring" class="label-with-tip">
-                                                    <span>Recurring</span>
+                                                    <span>Recurring Frequency</span>
                                                     <button
                                                         type="button"
                                                         class="field-tooltip"
@@ -726,17 +727,44 @@ if (empty($invoiceItems)) {
                                                     </button>
                                                 </label>
                                                 <select class="custom-select" id="invoice-recurring" name="recurringFrequency" <?= $isGeneratedRecurring ? 'disabled' : ''; ?>>
-                                                    <option value="none" <?= $recurringFrequency === 'none' ? 'selected' : ''; ?>>No</option>
+                                                    <option value="none" <?= $recurringFrequency === 'none' ? 'selected' : ''; ?>>No (One-time)</option>
                                                     <option value="daily" <?= $recurringFrequency === 'daily' ? 'selected' : ''; ?>>Daily</option>
                                                     <option value="weekly" <?= $recurringFrequency === 'weekly' ? 'selected' : ''; ?>>Weekly</option>
                                                     <option value="monthly" <?= $recurringFrequency === 'monthly' ? 'selected' : ''; ?>>Monthly</option>
                                                     <option value="quarterly" <?= $recurringFrequency === 'quarterly' ? 'selected' : ''; ?>>Quarterly</option>
                                                     <option value="yearly" <?= $recurringFrequency === 'yearly' ? 'selected' : ''; ?>>Yearly</option>
                                                 </select>
+                                                <small class="text-muted d-block mt-2">
+                                                    Select <strong>No</strong> for a one-time invoice. Choose any frequency below to make the invoice recurring.
+                                                </small>
                                             </div>
                                             <div class="form-group col-md-6">
                                                 <label for="invoice-schedule-date">Schedule Date</label>
                                                 <input type="date" class="form-control" id="invoice-schedule-date" name="recurringScheduleDate" value="<?= htmlspecialchars($recurringScheduleDate, ENT_QUOTES, 'UTF-8'); ?>" <?= $isGeneratedRecurring ? 'readonly' : ''; ?>>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-row" id="coverage-option-row">
+                                            <div class="form-group col-md-12">
+                                                <label for="coverage-option" class="label-with-tip">
+                                                    <span>Coverage Period</span>
+                                                    <button type="button" class="field-tooltip" data-toggle="tooltip" data-placement="top" title="For recurring invoices, select whether this invoice covers the previous period or the upcoming period relative to the schedule date.">
+                                                        <i class="fa fa-info"></i>
+                                                    </button>
+                                                </label>
+                                                <select class="custom-select" id="coverage-option" name="coverageOption" data-generated-lock="<?= $isGeneratedRecurring ? '1' : '0'; ?>" <?= $isGeneratedRecurring ? 'disabled' : ''; ?>>
+                                                    <option value="coming" <?= $coverageOption === 'coming' ? 'selected' : ''; ?>>Upcoming Period</option>
+                                                    <option value="previous" <?= $coverageOption === 'previous' ? 'selected' : ''; ?>>Previous Period</option>
+                                                </select>
+                                                <small class="text-muted d-block mt-2" id="coverage-option-help">
+                                                    <?php if ($isGeneratedRecurring): ?>
+                                                        This billing period is inherited from the recurring template.
+                                                    <?php elseif ($isRecurringInvoice): ?>
+                                                        Select whether this invoice covers the previous period or the upcoming period relative to the schedule date.
+                                                    <?php else: ?>
+                                                        You can choose the billing period now. It will apply once you set a recurring frequency.
+                                                    <?php endif; ?>
+                                                </small>
                                             </div>
                                         </div>
 
@@ -813,8 +841,8 @@ if (empty($invoiceItems)) {
     <?php include('includes/themecustomizer.php'); ?>
 
     <script src="<?= base_url(); ?>assets/js/vendor.min.js"></script>
-    <script src="<?= base_url(); ?>assets/js/app.min.js"></script>
     <script src="<?= base_url(); ?>assets/libs/select2/select2.min.js"></script>
+    <script src="<?= base_url(); ?>assets/js/app.min.js"></script>
     <script>
         (function() {
             var form = document.getElementById('invoiceEntryForm');
@@ -823,6 +851,8 @@ if (empty($invoiceItems)) {
             var invoiceDateField = document.getElementById('invoice-date');
             var dueDateField = document.getElementById('invoice-due-date');
             var recurringField = document.getElementById('invoice-recurring');
+            var coverageOptionField = document.getElementById('coverage-option');
+            var coverageOptionHelp = document.getElementById('coverage-option-help');
             var invoiceDateLabel = document.getElementById('invoice-date-label');
             var scheduleDateField = document.getElementById('invoice-schedule-date');
             var terminationDateField = document.getElementById('invoice-termination-date');
@@ -1088,6 +1118,67 @@ if (empty($invoiceItems)) {
                 addressField.value = address;
             }
 
+            function initializeCustomerSelect2(attempt) {
+                attempt = attempt || 0;
+
+                if (!customerSelect) {
+                    return;
+                }
+
+                if (!window.jQuery || !window.jQuery.fn || typeof window.jQuery.fn.select2 !== 'function') {
+                    if (attempt < 20) {
+                        window.setTimeout(function() {
+                            initializeCustomerSelect2(attempt + 1);
+                        }, 100);
+                    }
+                    return;
+                }
+
+                var $customerSelect = window.jQuery(customerSelect);
+
+                if ($customerSelect.hasClass('select2-hidden-accessible')) {
+                    $customerSelect.off('.invoiceEntryCustomerSelect2');
+                    $customerSelect.select2('destroy');
+                }
+
+                $customerSelect.select2({
+                    width: '100%',
+                    placeholder: 'Search customer, company, or CustID',
+                    allowClear: true,
+                    minimumResultsForSearch: 0
+                });
+
+                $customerSelect.on('change.invoiceEntryCustomerSelect2 select2:select.invoiceEntryCustomerSelect2 select2:clear.invoiceEntryCustomerSelect2', syncCustomerAddress);
+                $customerSelect.on('select2:open.invoiceEntryCustomerSelect2', function() {
+                    window.jQuery('.select2-container--open .select2-dropdown').addClass('invoice-entry-select2-dropdown');
+                });
+                syncCustomerAddress();
+            }
+
+            function ensureCustomerSelect2() {
+                if (!customerSelect || !window.jQuery || !window.jQuery.fn) {
+                    return;
+                }
+
+                if (typeof window.jQuery.fn.select2 === 'function') {
+                    initializeCustomerSelect2();
+                    return;
+                }
+
+                var existingLoader = document.getElementById('invoice-entry-select2-loader');
+                if (existingLoader) {
+                    return;
+                }
+
+                var loader = document.createElement('script');
+                loader.id = 'invoice-entry-select2-loader';
+                loader.src = '<?= base_url(); ?>assets/libs/select2/select2.min.js?v=invoice-entry-force';
+                loader.onload = function() {
+                    initializeCustomerSelect2();
+                };
+                document.body.appendChild(loader);
+            }
+
             function syncDueDate(force) {
                 if (!invoiceDateField || !dueDateField) {
                     return;
@@ -1132,6 +1223,8 @@ if (empty($invoiceItems)) {
 
             function syncRecurringLabels() {
                 var isRecurring = recurringField && recurringField.value !== 'none';
+                var coverageOptionRow = document.getElementById('coverage-option-row');
+                var isGeneratedCoverageField = coverageOptionField && coverageOptionField.getAttribute('data-generated-lock') === '1';
 
                 if (invoiceDateLabel) {
                     invoiceDateLabel.textContent = isRecurring ? 'Covered Period Start' : 'Invoice Date';
@@ -1143,6 +1236,24 @@ if (empty($invoiceItems)) {
 
                 if (openDateLabel) {
                     openDateLabel.textContent = isRecurring ? 'Open-ended coverage' : 'Open-dated invoice';
+                }
+
+                if (coverageOptionField) {
+                    coverageOptionField.disabled = isGeneratedCoverageField;
+                }
+
+                if (coverageOptionHelp) {
+                    if (isGeneratedCoverageField) {
+                        coverageOptionHelp.textContent = 'This billing period is inherited from the recurring template.';
+                    } else if (isRecurring) {
+                        coverageOptionHelp.textContent = 'Select whether this invoice covers the previous period or the upcoming period relative to the schedule date.';
+                    } else {
+                        coverageOptionHelp.textContent = 'You can choose the billing period now. It will apply once you set a recurring frequency.';
+                    }
+                }
+
+                if (coverageOptionRow) {
+                    coverageOptionRow.style.display = 'flex';
                 }
             }
 
@@ -1193,15 +1304,8 @@ if (empty($invoiceItems)) {
                 });
             }
 
-            if (window.jQuery && window.jQuery.fn && typeof window.jQuery.fn.select2 === 'function') {
-                window.jQuery(customerSelect).select2({
-                    width: '100%',
-                    placeholder: 'Search customer, company, or CustID',
-                    allowClear: true,
-                    minimumResultsForSearch: 0,
-                    dropdownCssClass: 'invoice-entry-select2-dropdown'
-                });
-                window.jQuery(customerSelect).on('change select2:select select2:clear', syncCustomerAddress);
+            if (window.jQuery && window.jQuery.fn) {
+                ensureCustomerSelect2();
             } else {
                 customerSelect.addEventListener('change', syncCustomerAddress);
             }
@@ -1255,6 +1359,11 @@ if (empty($invoiceItems)) {
             syncRecurringLabels();
             syncOpenDateOption();
             renderRows(initialItems);
+
+            document.addEventListener('DOMContentLoaded', ensureCustomerSelect2);
+            window.addEventListener('load', ensureCustomerSelect2);
+            window.setTimeout(ensureCustomerSelect2, 250);
+            window.setTimeout(ensureCustomerSelect2, 1000);
         })();
     </script>
 
