@@ -8996,6 +8996,41 @@ class Page extends CI_Controller
     redirect('Page/recurringInvoices');
   }
 
+  function generateNextRecurringInvoice()
+  {
+    if ($this->session->userdata('level') !== 'Admin') {
+      $this->session->set_flashdata('danger', 'Access denied. Only admins can generate recurring invoices.');
+      redirect('Page/recurringInvoices');
+      return;
+    }
+
+    if (strtolower((string) $this->input->method()) !== 'post') {
+      $this->session->set_flashdata('danger', 'Invalid request method.');
+      redirect('Page/recurringInvoices');
+      return;
+    }
+
+    $settingsID = (int) $this->session->userdata('settingsID');
+    $templateID = (int) $this->input->post('id', true);
+    if ($templateID <= 0) {
+      $this->session->set_flashdata('danger', 'Invalid recurring invoice template.');
+      redirect('Page/recurringInvoices');
+      return;
+    }
+
+    $result = $this->_generateNextRecurringInvoiceForTemplate($settingsID, $templateID);
+    if (($result['status'] ?? '') === 'generated') {
+      $this->session->set_flashdata(
+        'success',
+        'Invoice #' . ($result['invoiceNo'] ?? '') . ' was generated for ' . date('F j, Y', strtotime((string) $result['scheduleDate'])) . '.'
+      );
+    } else {
+      $this->session->set_flashdata('danger', (string) ($result['message'] ?? 'The next recurring invoice could not be generated.'));
+    }
+
+    redirect('Page/recurringInvoices');
+  }
+
   function deleteRecurringInvoice()
   {
     if ($this->session->userdata('level') !== 'Admin') {
@@ -9510,6 +9545,14 @@ class Page extends CI_Controller
         : null;
       $latestGeneratedInvoice = !empty($generatedByTemplate[$templateId]) ? $generatedByTemplate[$templateId][0] : null;
       $frequencyLabel = $this->_formatRecurringFrequencyLabel($frequency);
+      $lastGeneratedFor = $this->_normalizeDateInput($template->lastRecurringGeneratedFor ?? '');
+      if ($lastGeneratedFor === null || strtotime($lastGeneratedFor) < strtotime($baseScheduleDate)) {
+        $lastGeneratedFor = $baseScheduleDate;
+      }
+      $nextGenerationDate = $this->_advanceRecurringDate($lastGeneratedFor, $frequency);
+      if ($seriesEndDate !== null && $nextGenerationDate !== null && strtotime($nextGenerationDate) > strtotime($seriesEndDate)) {
+        $nextGenerationDate = null;
+      }
 
       $templateRows[] = array(
         'orderID' => $templateId,
@@ -9532,6 +9575,8 @@ class Page extends CI_Controller
         'balance' => round((float) ($template->Balance ?? 0), 2),
         'invoiceBy' => (string) ($template->invoiceBy ?? ''),
         'lastGeneratedFor' => $this->_normalizeDateInput($template->lastRecurringGeneratedFor ?? ''),
+        'nextGenerationDate' => $nextGenerationDate,
+        'canGenerateNext' => $nextGenerationDate !== null,
         'generatedChildCount' => count($generatedByTemplate[$templateId] ?? array()),
         'latestGeneratedInvoiceNo' => $latestGeneratedInvoice ? (string) ($latestGeneratedInvoice->InvoiceNo ?? '') : '',
         'latestGeneratedScheduleDate' => $latestGeneratedInvoice
@@ -18452,12 +18497,6 @@ class Page extends CI_Controller
           }
         }
 
-        // Also include the task creator if they're not already in the list (for admin assigning to others)
-        $creatorUserId = (int) $this->session->userdata('user_id');
-        if ($creatorUserId > 0 && !in_array($creatorUserId, $userIds, false)) {
-          $userIds[] = $creatorUserId;
-        }
-
         // Create a calendar event for each assigned user
         foreach ($userIds as $userId) {
           if ($userId > 0) {
@@ -18608,12 +18647,6 @@ class Page extends CI_Controller
               $userIds[] = (int) $user->user_id;
             }
           }
-        }
-
-        // Also include the task creator if they're not already in the list (for admin assigning to others)
-        $creatorUserId = (int) $this->session->userdata('user_id');
-        if ($creatorUserId > 0 && !in_array($creatorUserId, $userIds, false)) {
-          $userIds[] = $creatorUserId;
         }
 
         // Delete existing calendar events for this task
@@ -20261,6 +20294,177 @@ class Page extends CI_Controller
     return date('Y-m-d', strtotime($modifier, strtotime($normalizedDate)));
   }
 
+  private function _createRecurringInvoiceOccurrence($template, $settingsID, $frequency, $scheduleDate)
+  {
+    $existingOccurrence = $this->db
+      ->select('orderID, InvoiceNo')
+      ->from('invoice')
+      ->where('settingsID', $settingsID)
+      ->group_start()
+      ->where('orderID', (int) $template->orderID)
+      ->or_where('recurringTemplateID', (int) $template->orderID)
+      ->group_end()
+      ->where('recurringScheduleDate', $scheduleDate)
+      ->limit(1)
+      ->get()
+      ->row();
+
+    if ($existingOccurrence) {
+      return array(
+        'status' => 'existing',
+        'orderID' => (int) ($existingOccurrence->orderID ?? 0),
+        'invoiceNo' => (string) ($existingOccurrence->InvoiceNo ?? ''),
+        'scheduleDate' => $scheduleDate,
+      );
+    }
+
+    $nextInvoiceNo = $this->_nextInvoiceNumber($settingsID);
+    $generatedPayload = array(
+      'InvoiceNo' => $nextInvoiceNo,
+      'CustID' => trim((string) $template->CustID) !== '' ? $template->CustID : null,
+      'Customer' => (string) $template->Customer,
+      'CustAddress' => (string) $template->CustAddress,
+      'TransDate' => $scheduleDate,
+      'JobDescription' => (string) $template->JobDescription,
+      'itemQuantity' => isset($template->itemQuantity) ? $template->itemQuantity : null,
+      'itemDurationUnit' => isset($template->itemDurationUnit) ? $template->itemDurationUnit : null,
+      'itemUnitPrice' => isset($template->itemUnitPrice) ? $template->itemUnitPrice : null,
+      'TotalDue' => (float) $template->TotalDue,
+      'AmountPaid' => 0,
+      'Balance' => (float) $template->TotalDue,
+      'ReceiveDate' => $scheduleDate,
+      'Notes' => (string) $template->Notes,
+      'settingsID' => $settingsID,
+      'invoiceStat' => 'active',
+      'invoiceSource' => (string) $template->invoiceSource,
+      'invoiceBy' => trim((string) $template->invoiceBy) !== '' ? (string) $template->invoiceBy : $this->_currentUserDisplayName(),
+      'recurringFrequency' => $frequency,
+      'coverageOption' => $this->_normalizeCoverageOption($template->coverageOption ?? 'coming'),
+      'recurringScheduleDate' => $scheduleDate,
+      'recurringTerminationDate' => $this->_normalizeDateInput($template->recurringTerminationDate ?? ''),
+      'invoiceExpirationDate' => $this->_normalizeDateInput($template->invoiceExpirationDate ?? ''),
+      'recurringTemplateID' => (int) $template->orderID,
+      'lastRecurringGeneratedFor' => null,
+    );
+
+    if (!$this->db->insert('invoice', $generatedPayload)) {
+      return array('status' => 'error', 'message' => 'The invoice record could not be saved.');
+    }
+
+    $generatedOrderID = (int) $this->db->insert_id();
+    if ($generatedOrderID <= 0) {
+      return array('status' => 'error', 'message' => 'The generated invoice could not be identified.');
+    }
+
+    $this->_persistInvoiceItems($generatedOrderID, $settingsID, $this->_loadInvoiceItems($template, $settingsID));
+
+    return array(
+      'status' => 'generated',
+      'orderID' => $generatedOrderID,
+      'invoiceNo' => $nextInvoiceNo,
+      'scheduleDate' => $scheduleDate,
+    );
+  }
+
+  private function _generateNextRecurringInvoiceForTemplate($settingsID, $templateID)
+  {
+    $template = $this->CashModel->getInvoiceByOrderID((int) $templateID, $settingsID);
+    if (!$template) {
+      return array('status' => 'error', 'message' => 'Recurring invoice template not found.');
+    }
+
+    if (
+      (string) ($template->invoiceStat ?? '') !== 'active'
+      || (string) ($template->invoiceSource ?? '') !== 'Others'
+      || (int) ($template->recurringTemplateID ?? 0) !== 0
+    ) {
+      return array('status' => 'error', 'message' => 'This invoice is not an active recurring template.');
+    }
+
+    $frequency = $this->_normalizeRecurringFrequency($template->recurringFrequency ?? 'none');
+    if ($frequency === 'none') {
+      return array('status' => 'error', 'message' => 'This template does not have a valid recurring frequency.');
+    }
+
+    $this->_ensureInvoiceItemsTable();
+    $this->db->trans_begin();
+    $lockedTemplate = $this->db->query(
+      'SELECT orderID FROM invoice WHERE orderID = ? AND settingsID = ? FOR UPDATE',
+      array((int) $templateID, (int) $settingsID)
+    )->row();
+    if (!$lockedTemplate) {
+      $this->db->trans_rollback();
+      return array('status' => 'error', 'message' => 'Recurring invoice template not found.');
+    }
+
+    $template = $this->CashModel->getInvoiceByOrderID((int) $templateID, $settingsID);
+    if (!$template) {
+      $this->db->trans_rollback();
+      return array('status' => 'error', 'message' => 'Recurring invoice template not found.');
+    }
+
+    $frequency = $this->_normalizeRecurringFrequency($template->recurringFrequency ?? 'none');
+    if (
+      (string) ($template->invoiceStat ?? '') !== 'active'
+      || (string) ($template->invoiceSource ?? '') !== 'Others'
+      || (int) ($template->recurringTemplateID ?? 0) !== 0
+      || $frequency === 'none'
+    ) {
+      $this->db->trans_rollback();
+      return array('status' => 'error', 'message' => 'This invoice is no longer an active recurring template.');
+    }
+
+    $baseScheduleDate = $this->_normalizeDateInput($template->recurringScheduleDate ?? '')
+      ?: $this->_normalizeDateInput($template->TransDate ?? '');
+    if ($baseScheduleDate === null) {
+      $this->db->trans_rollback();
+      return array('status' => 'error', 'message' => 'This template does not have a valid schedule date.');
+    }
+
+    $lastGeneratedFor = $this->_normalizeDateInput($template->lastRecurringGeneratedFor ?? '');
+    if ($lastGeneratedFor === null || strtotime($lastGeneratedFor) < strtotime($baseScheduleDate)) {
+      $lastGeneratedFor = $baseScheduleDate;
+    }
+
+    $seriesEndDate = $this->_resolveRecurringSeriesEndDate($template);
+    $nextScheduleDate = $this->_advanceRecurringDate($lastGeneratedFor, $frequency);
+    $guard = 0;
+
+    while ($nextScheduleDate !== null && $guard < 4000) {
+      if ($seriesEndDate !== null && strtotime($nextScheduleDate) > strtotime($seriesEndDate)) {
+        $this->db->trans_rollback();
+        return array('status' => 'ended', 'message' => 'This recurring schedule has no remaining invoice dates.');
+      }
+
+      $result = $this->_createRecurringInvoiceOccurrence($template, $settingsID, $frequency, $nextScheduleDate);
+      if (($result['status'] ?? '') === 'error') {
+        $this->db->trans_rollback();
+        return $result;
+      }
+
+      $this->db
+        ->where('orderID', (int) $template->orderID)
+        ->where('settingsID', $settingsID)
+        ->update('invoice', array('lastRecurringGeneratedFor' => $nextScheduleDate));
+
+      if (($result['status'] ?? '') === 'generated') {
+        if ($this->db->trans_status() === false) {
+          $this->db->trans_rollback();
+          return array('status' => 'error', 'message' => 'The generated invoice could not be committed.');
+        }
+
+        $this->db->trans_commit();
+        return $result;
+      }
+
+      $nextScheduleDate = $this->_advanceRecurringDate($nextScheduleDate, $frequency);
+      $guard++;
+    }
+
+    $this->db->trans_rollback();
+    return array('status' => 'error', 'message' => 'The next recurring invoice date could not be determined.');
+  }
+
   private function _generateRecurringInvoices($settingsID)
   {
     date_default_timezone_set('Asia/Manila');
@@ -20325,54 +20529,13 @@ class Page extends CI_Controller
         && ($seriesEndDate === null || strtotime($nextScheduleDate) <= strtotime($seriesEndDate))
         && strtotime($today) >= strtotime($nextScheduleDate . ' -10 days')
       ) {
-        $existingOccurrence = $this->db
-          ->select('orderID')
-          ->from('invoice')
-          ->where('settingsID', $settingsID)
-          ->group_start()
-          ->where('orderID', (int) $template->orderID)
-          ->or_where('recurringTemplateID', (int) $template->orderID)
-          ->group_end()
-          ->where('recurringScheduleDate', $nextScheduleDate)
-          ->limit(1)
-          ->get()
-          ->row();
-
-        if (!$existingOccurrence) {
-          $nextInvoiceNo = $this->_nextInvoiceNumber($settingsID);
-          $generatedPayload = array(
-            'InvoiceNo' => $nextInvoiceNo,
-            'CustID' => trim((string) $template->CustID) !== '' ? $template->CustID : null,
-            'Customer' => (string) $template->Customer,
-            'CustAddress' => (string) $template->CustAddress,
-            'TransDate' => $nextScheduleDate,
-            'JobDescription' => (string) $template->JobDescription,
-            'itemQuantity' => isset($template->itemQuantity) ? $template->itemQuantity : null,
-            'itemDurationUnit' => isset($template->itemDurationUnit) ? $template->itemDurationUnit : null,
-            'itemUnitPrice' => isset($template->itemUnitPrice) ? $template->itemUnitPrice : null,
-            'TotalDue' => (float) $template->TotalDue,
-            'AmountPaid' => 0,
-            'Balance' => (float) $template->TotalDue,
-            'ReceiveDate' => $nextScheduleDate,
-            'Notes' => (string) $template->Notes,
-            'settingsID' => $settingsID,
-            'invoiceStat' => 'active',
-            'invoiceSource' => (string) $template->invoiceSource,
-            'invoiceBy' => trim((string) $template->invoiceBy) !== '' ? (string) $template->invoiceBy : $this->_currentUserDisplayName(),
-            'recurringFrequency' => $frequency,
-            'coverageOption' => $this->_normalizeCoverageOption($template->coverageOption ?? 'coming'),
-            'recurringScheduleDate' => $nextScheduleDate,
-            'recurringTerminationDate' => $this->_normalizeDateInput($template->recurringTerminationDate ?? ''),
-            'invoiceExpirationDate' => $this->_normalizeDateInput($template->invoiceExpirationDate ?? ''),
-            'recurringTemplateID' => (int) $template->orderID,
-            'lastRecurringGeneratedFor' => null,
-          );
-          $this->db->insert('invoice', $generatedPayload);
-          $generatedOrderID = (int) $this->db->insert_id();
-          $this->_persistInvoiceItems($generatedOrderID, $settingsID, $this->_loadInvoiceItems($template, $settingsID));
+        $generationResult = $this->_createRecurringInvoiceOccurrence($template, $settingsID, $frequency, $nextScheduleDate);
+        if (($generationResult['status'] ?? '') === 'generated') {
           $summary['generatedCount']++;
-        } else {
+        } elseif (($generationResult['status'] ?? '') === 'existing') {
           $summary['existingCount']++;
+        } else {
+          break;
         }
 
         $this->db

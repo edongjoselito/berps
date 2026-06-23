@@ -234,7 +234,7 @@ class MobileAdmin extends CI_Controller
             return mobile_json(['ok' => false, 'message' => 'Unable to create task.'], 500);
         }
 
-        $this->_create_task_calendar_events($taskId, $task, $reportedDate, $dueDate, $priority, $assignedTo, $creatorId, $settingsID);
+        $this->_create_task_calendar_events($taskId, $task, $reportedDate, $dueDate, $priority, $assignedTo, $settingsID);
         $this->_save_task_checklist($taskId, $settingsID, $checklist);
 
         return mobile_json([
@@ -1085,7 +1085,7 @@ class MobileAdmin extends CI_Controller
         return $next;
     }
 
-    private function _create_task_calendar_events($taskId, $task, $reportedDate, $dueDate, $priority, $assignedTo, $creatorId, $settingsID)
+    private function _create_task_calendar_events($taskId, $task, $reportedDate, $dueDate, $priority, $assignedTo, $settingsID)
     {
         if ($taskId <= 0 || !$this->db->table_exists('calendar_events')) {
             return;
@@ -1109,10 +1109,6 @@ class MobileAdmin extends CI_Controller
                 }
             }
         }
-        if ($creatorId > 0 && !in_array($creatorId, $userIds, false)) {
-            $userIds[] = $creatorId;
-        }
-
         $color = $priority == '1' ? '#dc3545' : ($priority == '2' ? '#ffc107' : '#28a745');
         foreach ($userIds as $userId) {
             if ($userId <= 0) {

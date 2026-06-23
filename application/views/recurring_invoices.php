@@ -445,6 +445,11 @@ $generatedThisRun = (int) ($generationSummary['generatedCount'] ?? 0);
                             flex-wrap: wrap;
                         }
 
+                        .recurring-page .table-actions form {
+                            display: inline-flex;
+                            margin: 0;
+                        }
+
                         .recurring-page .table-btn {
                             display: inline-flex;
                             align-items: center;
@@ -457,6 +462,7 @@ $generatedThisRun = (int) ($generationSummary['generatedCount'] ?? 0);
                             font-size: 0.8rem;
                             font-weight: 700;
                             text-decoration: none;
+                            cursor: pointer;
                         }
 
                         .recurring-page .table-btn:hover {
@@ -585,6 +591,7 @@ $generatedThisRun = (int) ($generationSummary['generatedCount'] ?? 0);
                                                 <?php
                                                 $templateInvoiceUrl = base_url() . 'Page/invoice?id=' . rawurlencode((string) ($row['orderID'] ?? '0'));
                                                 $editTemplateUrl = base_url() . 'Page/invoiceEntry?id=' . rawurlencode((string) ($row['orderID'] ?? '0'));
+                                                $generateNextUrl = base_url() . 'Page/generateNextRecurringInvoice';
                                                 $readyInvoiceUrl = !empty($row['preparedInvoiceOrderID'])
                                                     ? base_url() . 'Page/invoice?id=' . rawurlencode((string) $row['preparedInvoiceOrderID'])
                                                     : '';
@@ -648,6 +655,14 @@ $generatedThisRun = (int) ($generationSummary['generatedCount'] ?? 0);
                                                                 <i class="fa fa-edit"></i> Edit
                                                             </a>
                                                             <?php if ($this->session->userdata('level') === 'Admin'): ?>
+                                                            <?php if (!empty($row['canGenerateNext'])): ?>
+                                                            <form method="post" action="<?= htmlspecialchars($generateNextUrl, ENT_QUOTES, 'UTF-8'); ?>" onsubmit="return confirm('Generate the next invoice for <?= htmlspecialchars(date('F j, Y', strtotime((string) $row['nextGenerationDate'])), ENT_QUOTES, 'UTF-8'); ?>?');">
+                                                                <input type="hidden" name="id" value="<?= (int) ($row['orderID'] ?? 0); ?>">
+                                                                <button type="submit" class="table-btn" style="color: var(--success); border-color: #a7f3d0;">
+                                                                    <i class="fa fa-file-invoice"></i> Generate Next
+                                                                </button>
+                                                            </form>
+                                                            <?php endif; ?>
                                                             <?php $deleteUrl = base_url() . 'Page/deleteRecurringInvoice?id=' . rawurlencode((string) ($row['orderID'] ?? '0')); ?>
                                                             <a class="table-btn" href="<?= htmlspecialchars($deleteUrl, ENT_QUOTES, 'UTF-8'); ?>" onclick="return confirm('Delete this recurring template? This will void the template invoice.\n\nTo also delete all generated child invoices, click OK then check the option on the next page.');" style="color: var(--danger); border-color: var(--danger-soft);">
                                                                 <i class="fa fa-trash"></i> Delete

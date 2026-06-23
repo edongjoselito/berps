@@ -75,6 +75,7 @@ class Calendar extends CI_Controller {
         $start = $this->input->get('start');
         $end = $this->input->get('end');
         $event_type_filter = $this->input->get('event_type');
+        $username = trim((string) $this->session->userdata('username'));
 
         // Check if user is logged in
         if (!$user_id) {
@@ -89,25 +90,52 @@ class Calendar extends CI_Controller {
         }
 
         try {
-            // Build: only own events (public+private)
-            $date_filter_start = $start ? "AND start_date >= '$start'" : '';
-            $date_filter_end   = $end   ? "AND end_date <= '$end'"     : '';
+            $params = array(
+                $user_id,
+                $settingsID,
+                (string) $user_id,
+                $username,
+            );
+            $filters = '';
 
-            // Event type filter
-            $type_filter = '';
+            if ($start) {
+                $filters .= ' AND ce.start_date >= ?';
+                $params[] = $start;
+            }
+            if ($end) {
+                $filters .= ' AND ce.end_date <= ?';
+                $params[] = $end;
+            }
             if ($event_type_filter && $event_type_filter !== 'all') {
-                $type_filter = "AND event_type = '$event_type_filter'";
+                $filters .= ' AND ce.event_type = ?';
+                $params[] = $event_type_filter;
             }
 
             $sql = "
-                SELECT *, 1 AS own FROM calendar_events
-                WHERE user_id = ? AND settingsID = ? AND status = 'active'
-                $date_filter_start $date_filter_end $type_filter
-
-                ORDER BY start_date ASC
+                SELECT ce.*, 1 AS own
+                FROM calendar_events ce
+                LEFT JOIN projects_task pt
+                    ON pt.taskID = ce.task_id
+                    AND pt.settingsID = ce.settingsID
+                WHERE ce.user_id = ?
+                    AND ce.settingsID = ?
+                    AND ce.status = 'active'
+                    AND (
+                        (COALESCE(ce.task_id, 0) = 0 AND COALESCE(ce.event_type, '') != 'task')
+                        OR (
+                            (COALESCE(ce.task_id, 0) > 0 OR ce.event_type = 'task')
+                            AND pt.taskID IS NOT NULL
+                            AND (
+                                FIND_IN_SET(?, REPLACE(COALESCE(pt.assignedPerson, ''), ' ', '')) > 0
+                                OR FIND_IN_SET(?, REPLACE(COALESCE(pt.assignedPerson, ''), ' ', '')) > 0
+                            )
+                        )
+                    )
+                    $filters
+                ORDER BY ce.start_date ASC
             ";
 
-            $query  = $this->db->query($sql, array($user_id, $settingsID));
+            $query  = $this->db->query($sql, $params);
             $events = $query->result();
 
             $calendar_events = array();
