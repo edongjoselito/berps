@@ -68,7 +68,7 @@ $filterQueryString = http_build_query(array(
 
 <?php include('includes/head.php'); ?>
 
-<body>
+<body class="payment-list-body">
 
     <div id="wrapper">
 
@@ -113,9 +113,9 @@ $filterQueryString = http_build_query(array(
                                 radial-gradient(circle at top left, rgba(37, 99, 235, 0.08), transparent 28%),
                                 radial-gradient(circle at top right, rgba(16, 185, 129, 0.08), transparent 24%),
                                 linear-gradient(180deg, #f8fbff 0%, #f4f7fb 100%);
-                            min-height: 100vh;
-                            padding-bottom: 20px;
-                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
+                      min-height: auto;
+padding-bottom: 20px;
+font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                         }
 
                         .payment-list-page * {
@@ -709,6 +709,39 @@ $filterQueryString = http_build_query(array(
                                 display: inline-flex;
                             }
                         }
+/* Sticky footer */
+html,
+body.payment-list-body {
+    min-height: 100%;
+}
+
+.payment-list-body #wrapper {
+    min-height: 100vh;
+}
+
+.payment-list-body .content-page {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.payment-list-body .content-page > .content {
+    width: 100%;
+    flex: 1 0 auto;
+}
+
+.payment-list-body .content-page > footer,
+.payment-list-body .content-page > .footer {
+    position: static !important;
+    top: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    left: auto !important;
+    width: 100%;
+    margin-top: auto;
+    margin-left: 0 !important;
+    flex: 0 0 auto;
+}
                     </style>
 
                     <div class="page-header">
@@ -980,9 +1013,9 @@ $filterQueryString = http_build_query(array(
                         </div>
                     </div>
 
-                    <?php include('includes/footer.php'); ?>
                 </div>
             </div>
+            <?php include('includes/footer.php'); ?>
         </div>
     </div>
 

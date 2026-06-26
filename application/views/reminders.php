@@ -601,6 +601,44 @@ if (!function_exists('page_reminders_preview')) {
             max-width: none;
         }
     }
+
+    /*
+     * Sticky footer layout
+     * Keeps the footer at the bottom of the viewport when the page has
+     * little content, while allowing it to move down normally on long pages.
+     */
+    html,
+    body.notes-modern-page {
+        min-height: 100%;
+    }
+
+    .notes-modern-page #wrapper {
+        min-height: 100vh;
+    }
+
+    .notes-modern-page .content-page {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .notes-modern-page .content-page > .content {
+        width: 100%;
+        flex: 1 0 auto;
+    }
+
+    .notes-modern-page .content-page > footer,
+    .notes-modern-page .content-page > .footer {
+        position: static !important;
+        top: auto !important;
+        right: auto !important;
+        bottom: auto !important;
+        left: auto !important;
+        width: 100%;
+        margin-top: auto;
+        flex: 0 0 auto;
+    }
+
 </style>
 
 <body class="notes-modern-page">

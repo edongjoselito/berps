@@ -44,6 +44,19 @@ switch ($footerLevel) {
         padding-top: var(--page-content-top-gap);
     }
 
+    /* render the footer in normal document flow so it stays below the content */
+    .content-page {
+        position: relative;
+        padding-bottom: 0;
+    }
+
+    .footer {
+        position: relative;
+        left: 0;
+        right: 0;
+        bottom: auto;
+    }
+
     @media (max-width: 576px) {
         :root {
             --page-content-top-gap: 18px;
