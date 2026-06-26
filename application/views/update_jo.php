@@ -318,6 +318,7 @@ $serviceCategories = array_values($serviceCategories);
       }
     });
   </script>
+    <link rel="stylesheet" href="<?= base_url('assets/css/fonts.css'); ?>">
 </head>
 
 <body class="ms-body ms-aside-left-open ms-primary-theme ms-has-quickbar">

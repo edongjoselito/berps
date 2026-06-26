@@ -43,7 +43,6 @@ foreach ($jobOrders as $jobOrder) {
                 <div class="container-fluid job-order-page">
 
                     <style>
-                        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap');
 
                         .job-order-page {
                             --bg: #f5f7fb;
@@ -69,10 +68,10 @@ foreach ($jobOrders as $jobOrder) {
                             --radius-lg: 12px;
                             --radius-md: 10px;
                             --radius-sm: 8px;
-                            --font-body: 'DM Sans', 'Segoe UI', Arial, sans-serif;
-                            --font-head: 'DM Sans', 'Segoe UI', Arial, sans-serif;
-                            --font-mono: 'DM Sans', 'SFMono-Regular', Consolas, monospace;
-                            font-family: var(--font-body);
+                            --font-body: var(--font-primary);
+                            --font-head: var(--font-primary);
+                            --font-mono: var(--font-primary);
+                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                             background:
                                 radial-gradient(circle at top left, rgba(37, 99, 235, 0.08), transparent 28%),
                                 radial-gradient(circle at top right, rgba(16, 185, 129, 0.08), transparent 24%),
@@ -120,7 +119,7 @@ foreach ($jobOrders as $jobOrder) {
 
                         .job-order-page .jo-title {
                             margin: 0;
-                            font-family: var(--font-head);
+                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                             font-size: 1.5rem;
                             font-weight: 700;
                             letter-spacing: -0.02em;
@@ -199,7 +198,7 @@ foreach ($jobOrders as $jobOrder) {
                             line-height: 1.2;
                             letter-spacing: -0.02em;
                             margin-bottom: 4px;
-                            font-family: var(--font-head);
+                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                         }
 
                         .job-order-page .stat-meta {
@@ -408,7 +407,7 @@ foreach ($jobOrders as $jobOrder) {
                         }
 
                         .job-order-page .num-cell {
-                            font-family: var(--font-head);
+                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                             font-variant-numeric: tabular-nums;
                         }
 

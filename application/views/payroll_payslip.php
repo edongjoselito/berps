@@ -28,7 +28,6 @@ $dateLabel = function ($value, $fallback = '-') {
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Payroll Payslip</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&display=swap');
 
         :root {
             --text: #111827;
@@ -47,7 +46,7 @@ $dateLabel = function ($value, $fallback = '-') {
             margin: 0;
             background: #eef4fb;
             color: var(--text);
-            font-family: 'DM Sans', 'Segoe UI', Arial, sans-serif;
+            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
             padding: 28px;
         }
 
@@ -302,6 +301,7 @@ $dateLabel = function ($value, $fallback = '-') {
             }
         }
     </style>
+    <link rel="stylesheet" href="<?= base_url('assets/css/fonts.css'); ?>">
 </head>
 <body>
 

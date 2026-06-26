@@ -126,13 +126,13 @@ $priorityClasses = array('1' => 'priority-high', '2' => 'priority-medium', '3' =
                             --r-md: 8px;
                             --r-sm: 5px;
 
-                            --font-body: 'DM Sans', 'Helvetica Neue', Arial, sans-serif;
-                            --font-mono: 'DM Mono', 'SFMono-Regular', Consolas, monospace;
+                            --font-body: var(--font-primary);
+                            --font-mono: var(--font-primary);
 
                             --shadow-sm: 0 1px 3px rgba(26, 26, 24, .06), 0 1px 2px rgba(26, 26, 24, .04);
                             --shadow-md: 0 4px 12px rgba(26, 26, 24, .08), 0 2px 6px rgba(26, 26, 24, .04);
 
-                            font-family: var(--font-body);
+                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                             color: var(--c-ink);
                             background: var(--c-bg);
                             min-height: 100vh;
@@ -219,7 +219,7 @@ $priorityClasses = array('1' => 'priority-high', '2' => 'priority-medium', '3' =
                             text-decoration: none;
                             cursor: pointer;
                             line-height: 1;
-                            font-family: var(--font-body);
+                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                             letter-spacing: 0.01em;
                         }
 
@@ -326,7 +326,7 @@ $priorityClasses = array('1' => 'priority-high', '2' => 'priority-medium', '3' =
                             font-weight: 600;
                             line-height: 1;
                             letter-spacing: -0.03em;
-                            font-family: var(--font-mono);
+                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                         }
 
                         .task-workspace-page .stat-value.is-danger {
@@ -535,7 +535,7 @@ $priorityClasses = array('1' => 'priority-high', '2' => 'priority-medium', '3' =
                         .task-workspace-page .cell-muted {
                             color: var(--c-ink-3);
                             font-size: 0.78rem;
-                            font-family: var(--font-mono);
+                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                         }
 
                         /* ─── Due date ──────────────────────────────────────────── */
@@ -672,7 +672,7 @@ $priorityClasses = array('1' => 'priority-high', '2' => 'priority-medium', '3' =
                             background: none;
                             width: 100%;
                             text-align: left;
-                            font-family: var(--font-body);
+                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                         }
 
                         .task-workspace-page .action-dropdown-item:hover {
@@ -792,7 +792,7 @@ $priorityClasses = array('1' => 'priority-high', '2' => 'priority-medium', '3' =
                             font-size: 0.78rem;
                             color: var(--c-ink);
                             background: var(--c-surface);
-                            font-family: var(--font-body);
+                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                         }
 
                         .task-workspace-page .dataTables_wrapper .dataTables_filter input:focus,
@@ -809,7 +809,7 @@ $priorityClasses = array('1' => 'priority-high', '2' => 'priority-medium', '3' =
                             border: 1px solid transparent !important;
                             background: transparent !important;
                             color: var(--c-ink-2) !important;
-                            font-family: var(--font-body) !important;
+                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                         }
 
                         .task-workspace-page .dataTables_wrapper .dataTables_paginate .paginate_button.current,
@@ -877,7 +877,7 @@ $priorityClasses = array('1' => 'priority-high', '2' => 'priority-medium', '3' =
                             box-shadow: none;
                             font-size: 0.85rem;
                             color: var(--c-ink);
-                            font-family: var(--font-body);
+                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                         }
 
                         .task-workspace-page .theme-modal textarea.form-control {
@@ -896,7 +896,7 @@ $priorityClasses = array('1' => 'priority-high', '2' => 'priority-medium', '3' =
                             font-weight: 600;
                             font-size: 0.8rem;
                             padding: 8px 16px;
-                            font-family: var(--font-body);
+                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                         }
 
                         .task-workspace-page .theme-modal .btn-primary,
@@ -925,7 +925,6 @@ $priorityClasses = array('1' => 'priority-high', '2' => 'priority-medium', '3' =
                     </style>
 
                     <style>
-                        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
                         .task-workspace-page {
                             --c-bg: #f8fafc;
@@ -940,8 +939,8 @@ $priorityClasses = array('1' => 'priority-high', '2' => 'priority-medium', '3' =
                             --c-accent-green: #16a34a;
                             --c-accent-amber: #d97706;
                             --c-accent-red: #dc2626;
-                            --font-body: 'Plus Jakarta Sans', sans-serif;
-                            --font-mono: 'Plus Jakarta Sans', sans-serif;
+                            --font-body: var(--font-primary);
+                            --font-mono: var(--font-primary);
                             --shadow-sm: 0 1px 3px rgba(15, 23, 42, .06), 0 1px 2px rgba(15, 23, 42, .05);
                             --shadow-md: 0 8px 24px rgba(15, 23, 42, .08), 0 2px 8px rgba(15, 23, 42, .05);
                             padding-top: 30px;
@@ -1046,7 +1045,7 @@ $priorityClasses = array('1' => 'priority-high', '2' => 'priority-medium', '3' =
                         .task-workspace-page .stat-value {
                             font-size: 1.5rem;
                             font-weight: 800;
-                            font-family: var(--font-body);
+                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                         }
 
                         .task-workspace-page .theme-banner {

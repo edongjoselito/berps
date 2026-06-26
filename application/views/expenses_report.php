@@ -63,7 +63,7 @@ $backUrl = base_url() . 'Page/expensesList';
 
         /* ── Base ────────────────────────────────────────────────────────── */
         body {
-            font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
             font-size: 13px;
             line-height: 1.6;
             color: var(--ink);
@@ -313,7 +313,7 @@ $backUrl = base_url() . 'Page/expensesList';
         .col-amt  { width: 110px; }
 
         .amount-cell {
-            font-family: "SF Mono", Consolas, "Courier New", monospace;
+            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
             font-weight: 600;
             color: var(--danger);
             -webkit-print-color-adjust: exact;
@@ -402,7 +402,7 @@ $backUrl = base_url() . 'Page/expensesList';
             font-size: 1.5rem;
             font-weight: 800;
             color: var(--danger);
-            font-family: "SF Mono", Consolas, "Courier New", monospace;
+            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
             font-variant-numeric: tabular-nums;
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
@@ -411,7 +411,7 @@ $backUrl = base_url() . 'Page/expensesList';
         .print-timestamp {
             font-size: 0.75rem;
             color: var(--muted-light);
-            font-family: "SF Mono", Consolas, "Courier New", monospace;
+            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
         }
 
         /* ── Empty state ─────────────────────────────────────────────────── */
@@ -514,6 +514,7 @@ $backUrl = base_url() . 'Page/expensesList';
             .col-cat, .col-resp { display: table-cell !important; }
         }
     </style>
+    <link rel="stylesheet" href="<?= base_url('assets/css/fonts.css'); ?>">
 </head>
 <body>
 <div class="page-shell">

@@ -72,9 +72,9 @@ $generatedThisRun = (int) ($generationSummary['generatedCount'] ?? 0);
                             --radius-lg: 16px;
                             --radius-md: 12px;
                             --radius-sm: 10px;
-                            --font-body: 'Inter', 'Poppins', 'Segoe UI', Arial, sans-serif;
-                            --font-head: 'Inter', 'Montserrat', 'Segoe UI', Arial, sans-serif;
-                            font-family: var(--font-body);
+                            --font-body: var(--font-primary);
+                            --font-head: var(--font-primary);
+                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                             background:
                                 radial-gradient(circle at top left, rgba(37, 99, 235, 0.08), transparent 28%),
                                 radial-gradient(circle at top right, rgba(16, 185, 129, 0.08), transparent 24%),
@@ -122,7 +122,7 @@ $generatedThisRun = (int) ($generationSummary['generatedCount'] ?? 0);
 
                         .recurring-page .rp-title {
                             margin: 0;
-                            font-family: var(--font-head);
+                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                             font-size: 2rem;
                             font-weight: 800;
                             letter-spacing: -0.04em;

@@ -127,7 +127,7 @@ foreach ($users as $user) {
                                 <i class="mdi mdi-lock-reset" style="font-size: 24px; color: #f59e0b;"></i>
                                 <div style="flex: 1;">
                                     <strong style="color: #92400e;">Password Reset Successful</strong>
-                                    <div style="margin-top: 8px; padding: 12px; background: #fffbeb; border-radius: 6px; font-family: monospace; font-size: 14px;">
+                                    <div style="margin-top: 8px; padding: 12px; background: #fffbeb; border-radius: 6px; font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif); font-size: 14px;">
                                         <div><strong>User:</strong> <?= $resetUserName; ?></div>
                                         <div><strong>Username:</strong> <?= $resetUsername; ?></div>
                                         <div style="margin-top: 8px; padding: 10px; background: #fff; border: 1px dashed #f59e0b; border-radius: 4px;">
@@ -166,7 +166,6 @@ foreach ($users as $user) {
                     <?php endif; ?>
 
                     <style>
-                        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap');
 
                         .users-management-page {
                             --bg: #f5f7fb;
@@ -193,15 +192,15 @@ foreach ($users as $user) {
                             --radius-lg: 12px;
                             --radius-md: 10px;
                             --radius-sm: 8px;
-                            --font-body: 'DM Sans', 'Segoe UI', Arial, sans-serif;
-                            --font-head: 'DM Sans', 'Segoe UI', Arial, sans-serif;
+                            --font-body: var(--font-primary);
+                            --font-head: var(--font-primary);
                             background:
                                 radial-gradient(circle at top left, rgba(37, 99, 235, 0.08), transparent 28%),
                                 radial-gradient(circle at top right, rgba(16, 185, 129, 0.08), transparent 24%),
                                 linear-gradient(180deg, #f8fbff 0%, #f4f7fb 100%);
                             min-height: 100vh;
                             padding-bottom: 100px;
-                            font-family: var(--font-body);
+                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                         }
 
                         .users-management-page .content {
@@ -247,7 +246,7 @@ foreach ($users as $user) {
 
                         .users-management-page .page-title {
                             margin: 0;
-                            font-family: var(--font-head);
+                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                             font-size: 2.1rem;
                             line-height: 1.05;
                             letter-spacing: -0.05em;

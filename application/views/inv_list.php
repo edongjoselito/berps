@@ -46,7 +46,6 @@
                          ?>
 
                          <style>
-                              @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap');
 
                               .invoice-list-page {
                                    --bg: #f5f7fb;
@@ -73,16 +72,16 @@
                                    --radius-lg: 12px;
                                    --radius-md: 10px;
                                    --radius-sm: 8px;
-                                   --font-body: 'DM Sans', 'Segoe UI', Arial, sans-serif;
-                                   --font-head: 'DM Sans', 'Segoe UI', Arial, sans-serif;
-                                   --font-mono: 'DM Sans', 'SFMono-Regular', Consolas, monospace;
+                                   --font-body: var(--font-primary);
+                                   --font-head: var(--font-primary);
+                                   --font-mono: var(--font-primary);
                                    background:
                                         radial-gradient(circle at top left, rgba(37, 99, 235, 0.08), transparent 28%),
                                         radial-gradient(circle at top right, rgba(16, 185, 129, 0.08), transparent 24%),
                                         linear-gradient(180deg, #f8fbff 0%, #f4f7fb 100%);
                                    min-height: 100vh;
                                    padding-bottom: 100px;
-                                   font-family: var(--font-body);
+                                   font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                               }
 
                               .invoice-list-page * {
@@ -128,7 +127,7 @@
 
                               .invoice-list-page .page-title {
                                    margin: 0;
-                                   font-family: var(--font-head);
+                                   font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                                    font-size: 1.5rem;
                                    line-height: 1.2;
                                    letter-spacing: -0.02em;
@@ -204,7 +203,7 @@
                                    font-weight: 700;
                                    line-height: 1.2;
                                    letter-spacing: -0.02em;
-                                   font-family: var(--font-head);
+                                   font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                               }
 
                               .invoice-list-page .stat-meta {
@@ -508,7 +507,7 @@
                                    color: var(--primary-2);
                                    font-weight: 800;
                                    text-decoration: none;
-                                   font-family: var(--font-mono);
+                                   font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                                    font-size: 0.87rem;
                               }
 
@@ -527,7 +526,7 @@
                               }
 
                               .invoice-list-page .num-cell {
-                                   font-family: var(--font-mono);
+                                   font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                                    font-weight: 700;
                                    color: var(--text);
                               }
@@ -905,7 +904,7 @@
                               }
 
                               .invoice-list-page .item-row-total {
-                                   font-family: var(--font-mono);
+                                   font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                                    font-size: 0.88rem;
                                    font-weight: 700;
                                    color: var(--text);
@@ -1365,7 +1364,7 @@
                                                                            </a>
                                                                       </td>
                                                                       <td><?= $row->Customer; ?></td>
-                                                                      <td style="font-family:var(--font-mono);font-size:0.8rem;color:var(--text-soft);"><?= $row->TransDate; ?></td>
+                                                                      <td style="font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);font-size:0.8rem;color:var(--text-soft);"><?= $row->TransDate; ?></td>
                                                                       <td style="max-width:260px;">
                                                                            <div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"><?= htmlspecialchars($descriptionLabel, ENT_QUOTES, 'UTF-8'); ?></div>
                                                                            <?php if ($showItemBreakdown): ?>
@@ -1858,7 +1857,7 @@
                                    <label style="display: block; margin-bottom: 8px; color: #334155; font-size: 0.85rem; font-weight: 700;">
                                         Invoice Number
                                    </label>
-                                   <input type="text" id="voidInvoiceNo" class="form-control" readonly style="background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px 14px; font-family: monospace;">
+                                   <input type="text" id="voidInvoiceNo" class="form-control" readonly style="background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px 14px; font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);">
                               </div>
 
                               <div class="form-group" style="margin-top: 16px;">
@@ -1902,7 +1901,7 @@
                                    <label style="display: block; margin-bottom: 8px; color: #334155; font-size: 0.85rem; font-weight: 700;">
                                         Invoice Number
                                    </label>
-                                   <input type="text" id="emailInvoiceNo" class="form-control" readonly style="background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px 14px; font-family: monospace;">
+                                   <input type="text" id="emailInvoiceNo" class="form-control" readonly style="background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px 14px; font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);">
                               </div>
 
                               <div class="form-group" style="margin-top: 16px;">

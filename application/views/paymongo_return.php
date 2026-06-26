@@ -13,7 +13,7 @@ $invoiceUrl = $row
 <title><?= $isPaid ? 'Payment Received' : 'Payment Status'; ?> | BERPS</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
-body { font-family: "Segoe UI", system-ui, sans-serif; background: #eef2f7; margin: 0; padding: 60px 20px; color: #0f172a; }
+body { font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif); background: #eef2f7; margin: 0; padding: 60px 20px; color: #0f172a; }
 .card { max-width: 520px; margin: 0 auto; background: #fff; border-radius: 14px; padding: 40px; box-shadow: 0 10px 30px rgba(15,23,42,.08); text-align: center; }
 .icon { width: 72px; height: 72px; border-radius: 50%; margin: 0 auto 18px; display: flex; align-items: center; justify-content: center; font-size: 38px; color: #fff; }
 .icon.ok { background: #059669; }
@@ -26,6 +26,7 @@ p { color: #475569; line-height: 1.6; margin: 4px 0; }
 .btn:hover { background: #1d3fa5; }
 .muted { font-size: 0.8rem; color: #94a3b8; margin-top: 20px; }
 </style>
+    <link rel="stylesheet" href="<?= base_url('assets/css/fonts.css'); ?>">
 </head>
 <body>
 <div class="card">

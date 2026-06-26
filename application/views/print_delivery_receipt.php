@@ -167,7 +167,7 @@ if (isset($deliveries) && !empty($deliveries)) {
             padding: 0;
             background: var(--surface-soft);
             color: var(--ink);
-            font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
             line-height: 1.6;
         }
 
@@ -675,7 +675,7 @@ if (isset($deliveries) && !empty($deliveries)) {
             }
 
             body {
-                font-family: "Segoe UI", system-ui, -apple-system, sans-serif !important;
+                font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                 line-height: 1.45 !important;
             }
 
@@ -1007,6 +1007,7 @@ if (isset($deliveries) && !empty($deliveries)) {
             }
         }
     </style>
+    <link rel="stylesheet" href="<?= base_url('assets/css/fonts.css'); ?>">
 </head>
 
 <body>

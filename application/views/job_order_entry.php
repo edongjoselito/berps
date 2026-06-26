@@ -140,16 +140,16 @@ $serviceCategories = array_values($serviceCategories);
                             --radius-lg: 18px;
                             --radius-md: 14px;
                             --radius-sm: 10px;
-                            --font-body: 'Inter', 'Poppins', 'Segoe UI', Arial, sans-serif;
-                            --font-head: 'Inter', 'Montserrat', 'Segoe UI', Arial, sans-serif;
-                            --font-mono: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+                            --font-body: var(--font-primary);
+                            --font-head: var(--font-primary);
+                            --font-mono: var(--font-primary);
                             background:
                                 radial-gradient(circle at top left, rgba(37, 99, 235, 0.08), transparent 28%),
                                 radial-gradient(circle at top right, rgba(16, 185, 129, 0.08), transparent 24%),
                                 linear-gradient(180deg, #f8fbff 0%, #f4f7fb 100%);
                             min-height: 100vh;
                             padding-bottom: 28px;
-                            font-family: var(--font-body);
+                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                         }
 
                         .job-order-entry-page * {
@@ -191,7 +191,7 @@ $serviceCategories = array_values($serviceCategories);
 
                         .job-order-entry-page .entry-title {
                             margin: 0;
-                            font-family: var(--font-head);
+                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                             font-size: 2.1rem;
                             line-height: 1.05;
                             letter-spacing: -0.05em;

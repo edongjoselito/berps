@@ -12,7 +12,7 @@
     <link rel="icon" type="image/png" href="<?= base_url('assets/images/logo-sm1.png'); ?>">
     <link rel="apple-touch-icon" sizes="180x180" href="<?= base_url('assets/images/logo-sm1.png'); ?>">
     <link rel="stylesheet" href="<?= base_url('assets/css/fonts.css'); ?>">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="<?= base_url('assets/plugins/fontawesome-free/css/all.min.css'); ?>">
 
     <style>
         :root {
@@ -36,7 +36,7 @@
         }
 
         body {
-            font-family: var(--font-primary, 'Montserrat', 'Poppins', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif);
+            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
             background: linear-gradient(135deg, #fefefe, var(--bg));
             color: var(--text);
             line-height: 1.6;

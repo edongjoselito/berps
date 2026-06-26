@@ -10,7 +10,7 @@
         body {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
         }
         
         .support-container {
@@ -214,6 +214,7 @@
             }
         }
     </style>
+    <link rel="stylesheet" href="<?= base_url('assets/css/fonts.css'); ?>">
 </head>
 <body>
     <div class="support-container">

@@ -68,7 +68,6 @@ $printUrl = base_url() . 'Page/accountingReports?' . http_build_query($printQuer
                 <div class="container-fluid accounting-reports-page">
 
                     <style>
-                        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap');
 
                         .accounting-reports-page {
                             --bg: #f5f7fb;
@@ -97,10 +96,10 @@ $printUrl = base_url() . 'Page/accountingReports?' . http_build_query($printQuer
                             --radius-lg: 12px;
                             --radius-md: 10px;
                             --radius-sm: 8px;
-                            --font-body: 'DM Sans', 'Segoe UI', Arial, sans-serif;
-                            --font-head: 'DM Sans', 'Segoe UI', Arial, sans-serif;
-                            --font-mono: 'DM Sans', 'SFMono-Regular', Consolas, monospace;
-                            font-family: var(--font-body);
+                            --font-body: var(--font-primary);
+                            --font-head: var(--font-primary);
+                            --font-mono: var(--font-primary);
+                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                             background:
                                 radial-gradient(circle at top left, rgba(37, 99, 235, 0.08), transparent 28%),
                                 radial-gradient(circle at top right, rgba(16, 185, 129, 0.08), transparent 24%),
@@ -148,7 +147,7 @@ $printUrl = base_url() . 'Page/accountingReports?' . http_build_query($printQuer
 
                         .accounting-reports-page .ar-title {
                             margin: 0;
-                            font-family: var(--font-head);
+                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                             font-size: 2.15rem;
                             font-weight: 800;
                             color: var(--text);
@@ -271,7 +270,7 @@ $printUrl = base_url() . 'Page/accountingReports?' . http_build_query($printQuer
                             font-weight: 800;
                             line-height: 1.1;
                             letter-spacing: -0.03em;
-                            font-family: var(--font-mono);
+                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                             min-width: 0;
                             word-break: break-word;
                             overflow-wrap: anywhere;
@@ -453,7 +452,7 @@ $printUrl = base_url() . 'Page/accountingReports?' . http_build_query($printQuer
 
                         .accounting-reports-page .statement-amount,
                         .accounting-reports-page .metric-amount {
-                            font-family: var(--font-mono);
+                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                             font-weight: 800;
                             color: var(--text);
                             text-align: right;
@@ -673,7 +672,7 @@ $printUrl = base_url() . 'Page/accountingReports?' . http_build_query($printQuer
                             color: var(--text);
                             font-size: clamp(0.92rem, 0.95vw + 0.4rem, 1.08rem);
                             font-weight: 800;
-                            font-family: var(--font-mono);
+                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                             min-width: 0;
                             word-break: break-word;
                             overflow-wrap: anywhere;
@@ -739,7 +738,7 @@ $printUrl = base_url() . 'Page/accountingReports?' . http_build_query($printQuer
 
                         .accounting-reports-page .table.dataTable tbody td.statement-amount,
                         .accounting-reports-page .table tbody td.amount-cell {
-                            font-family: var(--font-mono);
+                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                             font-weight: 700;
                             white-space: nowrap;
                         }

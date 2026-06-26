@@ -33,7 +33,7 @@
         body {
             min-height: 100vh;
             margin: 0;
-            font-family: var(--font-primary, 'Montserrat', 'Poppins', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif);
+            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
             background: linear-gradient(135deg, #fefefe, var(--bg));
             color: var(--text);
             display: flex;

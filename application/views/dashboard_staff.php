@@ -79,11 +79,10 @@ $currentMonthLabel    = date('F Y');
 <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
 
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
     .staff-dashboard-admin,
     .staff-dashboard-admin .content-page {
-        font-family: 'Plus Jakarta Sans', sans-serif !important;
+        font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
     }
 
     .staff-dashboard-admin {
@@ -849,7 +848,7 @@ $currentMonthLabel    = date('F Y');
         bottom: 20px;
         right: 20px;
         z-index: 9999;
-        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
     }
 
     .sticky-notes-toggle {
@@ -950,7 +949,7 @@ $currentMonthLabel    = date('F Y');
         border-radius: 10px;
         padding: 12px;
         font-size: 0.9rem;
-        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
         resize: vertical;
         outline: none;
         transition: border-color 0.2s ease;

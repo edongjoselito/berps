@@ -56,6 +56,7 @@
   </style>
 
   <link rel="icon" type="image/png" sizes="32x32" href="<?= base_url(); ?>favicon.ico">
+    <link rel="stylesheet" href="<?= base_url('assets/css/fonts.css'); ?>">
 </head>
 
 <body class="ms-body ms-aside-left-open ms-primary-theme ms-has-quickbar">

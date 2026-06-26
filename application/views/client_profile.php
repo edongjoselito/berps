@@ -108,7 +108,6 @@ $customerHistoryUrl = $custID !== ''
                 <div class="container-fluid client-profile-page">
 
                     <style>
-                        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@600;700;800&display=swap');
 
                         .client-profile-page {
                             --bg: #f5f7fb;
@@ -134,10 +133,10 @@ $customerHistoryUrl = $custID !== ''
                             --radius-lg: 12px;
                             --radius-md: 10px;
                             --radius-sm: 8px;
-                            --font-body: 'Inter', 'Poppins', 'Segoe UI', Arial, sans-serif;
-                            --font-head: 'Inter', 'Montserrat', 'Segoe UI', Arial, sans-serif;
-                            --font-mono: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
-                            font-family: var(--font-body);
+                            --font-body: var(--font-primary);
+                            --font-head: var(--font-primary);
+                            --font-mono: var(--font-primary);
+                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                             background:
                                 radial-gradient(circle at top left, rgba(37, 99, 235, 0.08), transparent 28%),
                                 radial-gradient(circle at top right, rgba(16, 185, 129, 0.08), transparent 24%),
@@ -185,7 +184,7 @@ $customerHistoryUrl = $custID !== ''
 
                         .client-profile-page .cp-title {
                             margin: 0;
-                            font-family: var(--font-head);
+                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                             font-size: 2.15rem;
                             font-weight: 800;
                             color: var(--text);
@@ -353,7 +352,7 @@ $customerHistoryUrl = $custID !== ''
                             font-weight: 800;
                             line-height: 1;
                             letter-spacing: -0.04em;
-                            font-family: var(--font-mono);
+                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                             margin-bottom: 0;
                         }
 
@@ -588,7 +587,7 @@ $customerHistoryUrl = $custID !== ''
                         }
 
                         .client-profile-page .num-cell {
-                            font-family: var(--font-mono);
+                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                             font-variant-numeric: tabular-nums;
                         }
 
@@ -1668,7 +1667,7 @@ $customerHistoryUrl = $custID !== ''
         }
 
         .pm-mono {
-            font-family: 'Courier New', monospace;
+            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
             font-size: 0.85rem;
         }
 

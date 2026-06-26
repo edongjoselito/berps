@@ -57,7 +57,7 @@ $paddedId       = str_pad($expenseId, 6, '0', STR_PAD_LEFT);
 
         /* ── Base ────────────────────────────────────────────────────────── */
         body {
-            font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
             font-size: 14px;
             line-height: 1.6;
             color: var(--ink);
@@ -213,7 +213,7 @@ $paddedId       = str_pad($expenseId, 6, '0', STR_PAD_LEFT);
         .ev-id {
             font-size: 0.85rem;
             color: var(--muted);
-            font-family: "SF Mono", Consolas, "Courier New", monospace;
+            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
         }
 
         /* ── Detail grid ─────────────────────────────────────────────────── */
@@ -310,7 +310,7 @@ $paddedId       = str_pad($expenseId, 6, '0', STR_PAD_LEFT);
         .print-timestamp {
             font-size: 0.78rem;
             color: var(--muted-light);
-            font-family: "SF Mono", Consolas, "Courier New", monospace;
+            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
         }
 
         /* ── Screen-only print hint ──────────────────────────────────────── */
@@ -407,6 +407,7 @@ $paddedId       = str_pad($expenseId, 6, '0', STR_PAD_LEFT);
             }
         }
     </style>
+    <link rel="stylesheet" href="<?= base_url('assets/css/fonts.css'); ?>">
 </head>
 <body>
 <div class="page-shell">

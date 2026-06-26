@@ -187,6 +187,7 @@
             margin-bottom: 20px;
         }
     </style>
+    <link rel="stylesheet" href="<?= base_url('assets/css/fonts.css'); ?>">
 </head>
 <body>
     <div class="booking-container">

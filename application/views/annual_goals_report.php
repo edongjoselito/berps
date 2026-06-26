@@ -30,7 +30,7 @@
                             --purple: #7c3aed;
                             --purple-soft: #f5f3ff;
                             --shadow: 0 20px 50px rgba(15, 23, 42, 0.08);
-                            font-family: 'Inter', 'Poppins', 'Segoe UI', Arial, sans-serif;
+                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                             background: radial-gradient(circle at top left, rgba(37, 99, 235, 0.08), transparent 28%),
                                 radial-gradient(circle at top right, rgba(124, 58, 237, 0.08), transparent 24%),
                                 linear-gradient(180deg, #f8fbff 0%, #f4f7fb 100%);
@@ -207,7 +207,7 @@
 
                         .month-stat-value {
                             font-weight: 700;
-                            font-family: monospace;
+                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                         }
 
                         .no-goal-alert {

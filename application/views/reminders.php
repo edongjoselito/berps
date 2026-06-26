@@ -51,11 +51,10 @@ if (!function_exists('page_reminders_preview')) {
 <html lang="en">
 <?php include('includes/head.php'); ?>
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
     .notes-modern-page,
     .notes-modern-page .content-page {
-        font-family: 'Plus Jakarta Sans', sans-serif !important;
+        font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
     }
 
     .notes-modern-page {

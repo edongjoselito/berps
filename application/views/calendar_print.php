@@ -8,7 +8,7 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      font-family: "Segoe UI", Arial, sans-serif;
+      font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
       font-size: 13px;
       color: #1a1a1a;
       background: #f4f5f7;
@@ -277,6 +277,7 @@
       .event-row { page-break-inside: avoid; }
     }
   </style>
+    <link rel="stylesheet" href="<?= base_url('assets/css/fonts.css'); ?>">
 </head>
 <body>
 

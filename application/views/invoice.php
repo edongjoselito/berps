@@ -303,7 +303,7 @@ $backLabel = isset($backLabel) && trim((string) $backLabel) !== ''
         }
 
         body {
-            font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
             font-size: 14px;
             line-height: 1.6;
             color: var(--ink);
@@ -941,7 +941,7 @@ $backLabel = isset($backLabel) && trim((string) $backLabel) !== ''
             }
 
             body {
-                font-family: "Segoe UI", system-ui, -apple-system, sans-serif !important;
+                font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                 line-height: 1.45 !important;
             }
 
@@ -1467,7 +1467,7 @@ $backLabel = isset($backLabel) && trim((string) $backLabel) !== ''
         }
 
         .pm-mono {
-            font-family: 'Courier New', monospace;
+            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
             font-size: 0.85rem;
         }
 
@@ -1602,6 +1602,7 @@ $backLabel = isset($backLabel) && trim((string) $backLabel) !== ''
             }
         }
     </style>
+    <link rel="stylesheet" href="<?= base_url('assets/css/fonts.css'); ?>">
 </head>
 
 <body>

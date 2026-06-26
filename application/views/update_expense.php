@@ -61,16 +61,16 @@ ksort($expenseCategoryOptions, SORT_NATURAL | SORT_FLAG_CASE);
                                    --radius-lg: 18px;
                                    --radius-md: 14px;
                                    --radius-sm: 10px;
-                                   --font-body: 'Inter', 'Poppins', 'Segoe UI', Arial, sans-serif;
-                                   --font-head: 'Inter', 'Montserrat', 'Segoe UI', Arial, sans-serif;
-                                   --font-mono: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+                                   --font-body: var(--font-primary);
+                                   --font-head: var(--font-primary);
+                                   --font-mono: var(--font-primary);
                                    background:
                                        radial-gradient(circle at top left, rgba(37, 99, 235, 0.08), transparent 28%),
                                        radial-gradient(circle at top right, rgba(16, 185, 129, 0.08), transparent 24%),
                                        linear-gradient(180deg, #f8fbff 0%, #f4f7fb 100%);
                                    min-height: 100vh;
                                    padding-bottom: 28px;
-                                   font-family: var(--font-body);
+                                   font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                                    color: var(--text);
                               }
 
@@ -110,7 +110,7 @@ ksort($expenseCategoryOptions, SORT_NATURAL | SORT_FLAG_CASE);
 
                               .update-expense-page .page-title {
                                    margin: 0;
-                                   font-family: var(--font-head);
+                                   font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                                    font-size: 2.15rem;
                                    line-height: 1.05;
                                    letter-spacing: -0.05em;
@@ -282,7 +282,7 @@ ksort($expenseCategoryOptions, SORT_NATURAL | SORT_FLAG_CASE);
 
                               .update-expense-page .summary-value.amount {
                                    color: var(--danger);
-                                   font-family: var(--font-mono);
+                                   font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                                    font-size: 1.1rem;
                               }
 
@@ -502,7 +502,7 @@ ksort($expenseCategoryOptions, SORT_NATURAL | SORT_FLAG_CASE);
                                              </div>
                                              <div class="summary-item">
                                                   <span class="summary-label">Expense ID</span>
-                                                  <span class="summary-value" style="font-family: var(--font-mono); font-size: 0.85rem; color: var(--text-faint);">#<?= $data[0]->expensesid; ?></span>
+                                                  <span class="summary-value" style="font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif); font-size: 0.85rem; color: var(--text-faint);">#<?= $data[0]->expensesid; ?></span>
                                              </div>
                                         </div>
                                    </div>

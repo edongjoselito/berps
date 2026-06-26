@@ -61,7 +61,6 @@ if ($current_type_filter === 'article') {
                 <?php endif; ?>
 
                 <style>
-                    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap');
 
                     .content-page.knowledge-base-shell {
                         padding-top: 0 !important;
@@ -97,9 +96,9 @@ if ($current_type_filter === 'article') {
                         --radius-lg: 12px;
                         --radius-md: 10px;
                         --radius-sm: 8px;
-                        --font-body: 'DM Sans', 'Segoe UI', Arial, sans-serif;
-                        --font-head: 'DM Sans', 'Segoe UI', Arial, sans-serif;
-                        --font-mono: 'DM Sans', 'SFMono-Regular', Consolas, monospace;
+                        --font-body: var(--font-primary);
+                        --font-head: var(--font-primary);
+                        --font-mono: var(--font-primary);
                         background:
                             radial-gradient(circle at top left, rgba(37, 99, 235, 0.08), transparent 28%),
                             radial-gradient(circle at top right, rgba(16, 185, 129, 0.08), transparent 24%),
@@ -108,7 +107,7 @@ if ($current_type_filter === 'article') {
                         min-height: 100vh;
                         padding-top: 0;
                         padding-bottom: 100px;
-                        font-family: var(--font-body);
+                        font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                     }
 
                     .knowledge-base-page * {
@@ -152,7 +151,7 @@ if ($current_type_filter === 'article') {
 
                     .knowledge-base-page .kb-page-title {
                         margin: 0;
-                        font-family: var(--font-head);
+                        font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                         font-size: 1.5rem;
                         line-height: 1.2;
                         letter-spacing: -0.02em;
@@ -249,7 +248,7 @@ if ($current_type_filter === 'article') {
                         font-weight: 700;
                         line-height: 1.2;
                         letter-spacing: -0.02em;
-                        font-family: var(--font-head);
+                        font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                     }
 
                     .knowledge-base-page .stat-meta {

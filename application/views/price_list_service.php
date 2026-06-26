@@ -14,7 +14,6 @@
                <div class="content">
                     <div class="container-fluid service-price-list-page">
                          <style>
-                              @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap');
 
                               .service-price-list-page {
                                    --bg: #f5f7fb;
@@ -41,9 +40,9 @@
                                    --radius-lg: 12px;
                                    --radius-md: 10px;
                                    --radius-sm: 8px;
-                                   --font-body: 'DM Sans', 'Segoe UI', Arial, sans-serif;
-                                   --font-head: 'DM Sans', 'Segoe UI', Arial, sans-serif;
-                                   font-family: var(--font-body);
+                                   --font-body: var(--font-primary);
+                                   --font-head: var(--font-primary);
+                                   font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                                    min-height: 100vh;
                                    padding-bottom: 100px;
                               }

@@ -38,7 +38,6 @@ $dateLabel = function ($value, $fallback = '-') {
                 <div class="container-fluid payroll-run-page">
 
                     <style>
-                        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap');
 
                         .payroll-run-page {
                             --surface: rgba(255, 255, 255, 0.96);
@@ -53,9 +52,9 @@ $dateLabel = function ($value, $fallback = '-') {
                             --warning: #d97706;
                             --shadow-soft: 0 8px 24px rgba(15, 23, 42, 0.05);
                             --radius-xl: 16px;
-                            --font-body: 'DM Sans', 'Segoe UI', Arial, sans-serif;
-                            --font-mono: 'DM Sans', 'SFMono-Regular', Consolas, monospace;
-                            font-family: var(--font-body);
+                            --font-body: var(--font-primary);
+                            --font-mono: var(--font-primary);
+                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                             background:
                                 radial-gradient(circle at top left, rgba(37, 99, 235, 0.08), transparent 28%),
                                 radial-gradient(circle at top right, rgba(16, 185, 129, 0.08), transparent 24%),
@@ -182,7 +181,7 @@ $dateLabel = function ($value, $fallback = '-') {
                             font-size: 1.35rem;
                             font-weight: 800;
                             line-height: 1.1;
-                            font-family: var(--font-mono);
+                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                         }
 
                         .payroll-run-page .stat-meta {
@@ -270,7 +269,7 @@ $dateLabel = function ($value, $fallback = '-') {
                         }
 
                         .payroll-run-page .num-cell {
-                            font-family: var(--font-mono);
+                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                             font-weight: 800;
                             color: var(--text);
                             white-space: nowrap;

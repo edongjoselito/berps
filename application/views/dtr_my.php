@@ -71,7 +71,6 @@ $currentDateLabel = date('l, F j, Y');
                 <div class="container-fluid my-dtr-page">
 
                     <style>
-                        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap');
 
                         .my-dtr-page {
                             --bg: #f4f7fb;
@@ -101,16 +100,16 @@ $currentDateLabel = date('l, F j, Y');
                             --radius-xl: 16px;
                             --radius-lg: 12px;
                             --radius-md: 10px;
-                            --font-body: 'DM Sans', 'Segoe UI', Arial, sans-serif;
-                            --font-head: 'DM Sans', 'Segoe UI', Arial, sans-serif;
-                            --font-mono: 'DM Sans', 'SFMono-Regular', Consolas, monospace;
+                            --font-body: var(--font-primary);
+                            --font-head: var(--font-primary);
+                            --font-mono: var(--font-primary);
                             background:
                                 radial-gradient(circle at top left, rgba(37, 99, 235, 0.08), transparent 26%),
                                 radial-gradient(circle at top right, rgba(16, 185, 129, 0.07), transparent 22%),
                                 linear-gradient(180deg, #f9fbff 0%, #f4f7fb 100%);
                             min-height: 100vh;
                             padding: 16px 0 48px;
-                            font-family: var(--font-body);
+                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                         }
 
                         .my-dtr-page * {
@@ -158,7 +157,7 @@ $currentDateLabel = date('l, F j, Y');
 
                         .my-dtr-page .page-title {
                             margin: 0;
-                            font-family: var(--font-head);
+                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                             font-size: 1.5rem;
                             line-height: 1.2;
                             letter-spacing: -0.02em;
@@ -323,7 +322,7 @@ $currentDateLabel = date('l, F j, Y');
                             font-weight: 700;
                             line-height: 1.2;
                             letter-spacing: -0.02em;
-                            font-family: var(--font-head);
+                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                         }
 
                         .my-dtr-page .stat-meta {
@@ -428,7 +427,7 @@ $currentDateLabel = date('l, F j, Y');
 
                         .my-dtr-page .mini-stat-pill strong {
                             color: var(--text);
-                            font-family: var(--font-mono);
+                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                         }
 
                         .my-dtr-page .table-responsive {
@@ -530,7 +529,7 @@ $currentDateLabel = date('l, F j, Y');
                         .my-dtr-page .total-label {
                             font-weight: 800;
                             color: var(--text);
-                            font-family: var(--font-mono);
+                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                             font-size: 0.95rem;
                             padding-top: 4px;
                         }

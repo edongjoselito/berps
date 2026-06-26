@@ -75,7 +75,7 @@ if ($balance <= 0) {
         }
 
         body {
-            font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
             font-size: 14px;
             line-height: 1.6;
             color: var(--ink);
@@ -558,7 +558,7 @@ if ($balance <= 0) {
             }
 
             body {
-                font-family: "Segoe UI", system-ui, -apple-system, sans-serif !important;
+                font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                 line-height: 1.45 !important;
             }
 
@@ -866,6 +866,7 @@ if ($balance <= 0) {
             }
         }
     </style>
+    <link rel="stylesheet" href="<?= base_url('assets/css/fonts.css'); ?>">
 </head>
 
 <body>

@@ -219,7 +219,7 @@ $paymentModes = is_array($payment_modes ?? null) ? $payment_modes : ['Cash', 'GC
         .product-card .product-sku {
             font-size: 11px;
             color: #868e96;
-            font-family: monospace;
+            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
             background: #f8f9fa;
             padding: 2px 6px;
             border-radius: 4px;

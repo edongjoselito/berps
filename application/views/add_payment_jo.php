@@ -84,10 +84,10 @@ $progressPercentage = $totalDue > 0 ? max(0, min(100, ($previousPayments / $tota
                             --radius-lg: 16px;
                             --radius-md: 12px;
                             --radius-sm: 10px;
-                            --font-body: 'Inter', 'Poppins', 'Segoe UI', Arial, sans-serif;
-                            --font-head: 'Inter', 'Montserrat', 'Segoe UI', Arial, sans-serif;
-                            --font-mono: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
-                            font-family: var(--font-body);
+                            --font-body: var(--font-primary);
+                            --font-head: var(--font-primary);
+                            --font-mono: var(--font-primary);
+                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                             background:
                                 radial-gradient(circle at top left, rgba(37, 99, 235, 0.08), transparent 28%),
                                 radial-gradient(circle at top right, rgba(16, 185, 129, 0.08), transparent 24%),
@@ -135,7 +135,7 @@ $progressPercentage = $totalDue > 0 ? max(0, min(100, ($previousPayments / $tota
 
                         .add-payment-page .ap-title {
                             margin: 0;
-                            font-family: var(--font-head);
+                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                             font-size: 2rem;
                             font-weight: 800;
                             letter-spacing: -0.04em;
@@ -492,7 +492,7 @@ $progressPercentage = $totalDue > 0 ? max(0, min(100, ($previousPayments / $tota
                         }
 
                         .add-payment-page .money-box {
-                            font-family: var(--font-mono);
+                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                             font-variant-numeric: tabular-nums;
                         }
 
@@ -561,7 +561,7 @@ $progressPercentage = $totalDue > 0 ? max(0, min(100, ($previousPayments / $tota
                             font-size: 1.05rem;
                             font-weight: 800;
                             line-height: 1.3;
-                            font-family: var(--font-mono);
+                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                             font-variant-numeric: tabular-nums;
                         }
 

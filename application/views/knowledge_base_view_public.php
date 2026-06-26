@@ -46,6 +46,7 @@ $attachment_name = trim((string) ($article->attachment_name ?? ''));
             text-decoration: underline;
         }
     </style>
+    <link rel="stylesheet" href="<?= base_url('assets/css/fonts.css'); ?>">
 </head>
 <body>
 

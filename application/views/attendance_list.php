@@ -15,7 +15,6 @@
 
           <style>
             /* ─── Google Font Import ─────────────────────────────────── */
-            @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:wght@400;500&display=swap');
 
             /* ─── Reset ─────────────────────────────────────────────── */
             .attendance-page * {
@@ -54,14 +53,14 @@
               --r-md: 8px;
               --r-sm: 5px;
 
-              --font-body: 'DM Sans', 'Helvetica Neue', Arial, sans-serif;
-              --font-mono: 'DM Mono', 'SFMono-Regular', Consolas, monospace;
+              --font-body: var(--font-primary);
+              --font-mono: var(--font-primary);
 
               --shadow-sm: 0 1px 3px rgba(26, 26, 24, 0.06), 0 1px 2px rgba(26, 26, 24, 0.04);
               --shadow-md: 0 4px 12px rgba(26, 26, 24, 0.08), 0 2px 6px rgba(26, 26, 24, 0.04);
               --shadow-lg: 0 16px 40px rgba(26, 26, 24, 0.12), 0 4px 12px rgba(26, 26, 24, 0.06);
 
-              font-family: var(--font-body);
+              font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
               color: var(--c-ink);
               background: var(--c-bg);
               min-height: 100vh;
@@ -152,7 +151,7 @@
               border-radius: var(--r-md);
               font-size: 0.78rem;
               font-weight: 600;
-              font-family: var(--font-body);
+              font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
               padding: 7px 13px;
               transition: all 0.15s ease;
               text-decoration: none;
@@ -294,7 +293,7 @@
               white-space: nowrap;
               flex-shrink: 0;
               transition: all 0.13s;
-              font-family: var(--font-body);
+              font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
               letter-spacing: 0.01em;
             }
 
@@ -413,14 +412,14 @@
             .attendance-page .cell-muted {
               color: var(--c-ink-3);
               font-size: 0.78rem;
-              font-family: var(--font-mono);
+              font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
               font-weight: 400;
               letter-spacing: -0.01em;
             }
 
             /* ─── Hours display ─────────────────────────────────────── */
             .attendance-page .hours-badge {
-              font-family: var(--font-mono);
+              font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
               font-size: 0.78rem;
               font-weight: 500;
               color: var(--c-ink);
@@ -461,7 +460,7 @@
               gap: 5px;
               font-size: 0.75rem;
               color: var(--c-ink-2);
-              font-family: var(--font-mono);
+              font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
               padding: 1px 0;
               line-height: 1.5;
             }
@@ -482,7 +481,7 @@
               color: var(--c-accent-blue);
               font-weight: 500;
               text-decoration: none;
-              font-family: var(--font-body);
+              font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
             }
 
             .attendance-page .see-more:hover {
@@ -535,7 +534,7 @@
 
             .attendance-page .total-bar strong {
               color: var(--c-ink);
-              font-family: var(--font-mono);
+              font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
               font-size: 0.82rem;
               font-weight: 500;
             }
@@ -565,7 +564,7 @@
               font-size: 0.76rem;
               color: var(--c-ink-2);
               font-weight: 400;
-              font-family: var(--font-body);
+              font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
             }
 
             .attendance-page .dataTables_wrapper .dataTables_filter input,
@@ -578,7 +577,7 @@
               font-size: 0.78rem;
               color: var(--c-ink);
               background: var(--c-surface);
-              font-family: var(--font-body);
+              font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
             }
 
             .attendance-page .dataTables_wrapper .dataTables_filter input:focus,
@@ -595,7 +594,7 @@
               border: 1px solid transparent !important;
               background: transparent !important;
               color: var(--c-ink-2) !important;
-              font-family: var(--font-body) !important;
+              font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
             }
 
             .attendance-page .dataTables_wrapper .dataTables_paginate .paginate_button.current,
@@ -671,7 +670,7 @@
               box-shadow: none;
               font-size: 0.82rem;
               color: var(--c-ink);
-              font-family: var(--font-body);
+              font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
               background: var(--c-surface);
             }
 
@@ -686,7 +685,7 @@
               font-weight: 600;
               font-size: 0.8rem;
               padding: 7px 15px;
-              font-family: var(--font-body);
+              font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
               border: none;
               cursor: pointer;
               transition: all 0.13s;

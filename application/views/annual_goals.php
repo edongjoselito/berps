@@ -56,9 +56,9 @@
                             --radius-xl: 24px;
                             --radius-lg: 18px;
                             --radius-md: 14px;
-                            --font-body: 'Inter', 'Poppins', 'Segoe UI', Arial, sans-serif;
-                            --font-head: 'Inter', 'Montserrat', 'Segoe UI', Arial, sans-serif;
-                            font-family: var(--font-body);
+                            --font-body: var(--font-primary);
+                            --font-head: var(--font-primary);
+                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                             background: radial-gradient(circle at top left, rgba(37, 99, 235, 0.08), transparent 28%),
                                 radial-gradient(circle at top right, rgba(124, 58, 237, 0.08), transparent 24%),
                                 linear-gradient(180deg, #f8fbff 0%, #f4f7fb 100%);
@@ -96,7 +96,7 @@
 
                         .annual-goals-page .ag-title {
                             margin: 0;
-                            font-family: var(--font-head);
+                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                             font-size: 2rem;
                             font-weight: 800;
                             letter-spacing: -0.04em;
@@ -321,7 +321,7 @@
                         .annual-goals-page .target-income {
                             color: var(--success);
                             font-weight: 700;
-                            font-family: 'SFMono-Regular', monospace;
+                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                         }
 
                         .annual-goals-page .action-btns {

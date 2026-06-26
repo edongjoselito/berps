@@ -41,7 +41,7 @@ $pageTitle = $scopeLabels[$scope] ?? 'Support Tickets';
                         --danger-soft: #fff1f2;
                         --shadow: 0 14px 40px rgba(15, 23, 42, 0.08);
                         --radius-xl: 22px;
-                        font-family: 'Inter', 'Poppins', 'Segoe UI', Arial, sans-serif;
+                        font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                         background:
                             radial-gradient(circle at top left, rgba(37, 99, 235, 0.08), transparent 28%),
                             radial-gradient(circle at top right, rgba(16, 185, 129, 0.08), transparent 24%),

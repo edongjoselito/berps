@@ -102,15 +102,12 @@ $notesJson = json_encode(
 <html lang="en">
 
 <?php include('includes/head.php'); ?>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
 
 <style>
     .notes-modern-page,
     .notes-modern-page .content-page {
-        font-family: 'Plus Jakarta Sans', sans-serif !important;
+        font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
     }
 
     .notes-modern-page {
@@ -919,7 +916,7 @@ $notesJson = json_encode(
 
     .notes-modern-page .ql-container.ql-snow {
         border: 0;
-        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
         min-height: 260px;
     }
 

@@ -6,9 +6,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title><?= htmlspecialchars($page_title ?? 'Reset Password - BERPS', ENT_QUOTES, 'UTF-8') ?></title>
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="shortcut icon" href="<?= base_url('assets/images/logo-sm1.png') ?>" />
   <link rel="stylesheet" href="<?= base_url('assets/css/icons.min.css') ?>">
 
@@ -30,7 +27,7 @@
     html,body{height:100%}
     body{
       margin:0;
-      font-family:"Manrope",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;
+      font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
       background:var(--bg);
       color:var(--ink);
       display:flex;
@@ -165,6 +162,7 @@
       50%{box-shadow:var(--shadow),0 0 0 12px rgba(37,99,235,0.06)}
     }
   </style>
+    <link rel="stylesheet" href="<?= base_url('assets/css/fonts.css'); ?>">
 </head>
 <body>
   <div class="wrap">

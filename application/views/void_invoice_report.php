@@ -56,10 +56,10 @@
                                    --radius-lg: 16px;
                                    --radius-md: 12px;
                                    --radius-sm: 10px;
-                                   --font-body: 'Inter', 'Poppins', 'Segoe UI', Arial, sans-serif;
-                                   --font-head: 'Inter', 'Montserrat', 'Segoe UI', Arial, sans-serif;
-                                   --font-mono: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
-                                   font-family: var(--font-body);
+                                   --font-body: var(--font-primary);
+                                   --font-head: var(--font-primary);
+                                   --font-mono: var(--font-primary);
+                                   font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                                    background:
                                         radial-gradient(circle at top left, rgba(37, 99, 235, 0.08), transparent 28%),
                                         radial-gradient(circle at top right, rgba(220, 38, 38, 0.06), transparent 24%),
@@ -107,7 +107,7 @@
 
                               .void-invoice-report-page .vir-title {
                                    margin: 0;
-                                   font-family: var(--font-head);
+                                   font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                                    font-size: 2rem;
                                    font-weight: 800;
                                    letter-spacing: -0.04em;
@@ -209,7 +209,7 @@
                               }
 
                               .void-invoice-report-page .inv-no {
-                                   font-family: var(--font-mono);
+                                   font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                                    font-weight: 700;
                                    color: var(--danger);
                               }
@@ -247,7 +247,7 @@
                               }
 
                               .void-invoice-report-page .num-cell {
-                                   font-family: var(--font-mono);
+                                   font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                                    font-weight: 600;
                               }
 

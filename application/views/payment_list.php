@@ -80,7 +80,6 @@ $filterQueryString = http_build_query(array(
                 <div class="container-fluid payment-list-page">
 
                     <style>
-                        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap');
 
                         .payment-list-page {
                             --bg: #f5f7fb;
@@ -107,16 +106,16 @@ $filterQueryString = http_build_query(array(
                             --radius-lg: 12px;
                             --radius-md: 10px;
                             --radius-sm: 8px;
-                            --font-body: 'DM Sans', 'Segoe UI', Arial, sans-serif;
-                            --font-head: 'DM Sans', 'Segoe UI', Arial, sans-serif;
-                            --font-mono: 'DM Sans', 'SFMono-Regular', Consolas, monospace;
+                            --font-body: var(--font-primary);
+                            --font-head: var(--font-primary);
+                            --font-mono: var(--font-primary);
                             background:
                                 radial-gradient(circle at top left, rgba(37, 99, 235, 0.08), transparent 28%),
                                 radial-gradient(circle at top right, rgba(16, 185, 129, 0.08), transparent 24%),
                                 linear-gradient(180deg, #f8fbff 0%, #f4f7fb 100%);
                             min-height: 100vh;
                             padding-bottom: 20px;
-                            font-family: var(--font-body);
+                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                         }
 
                         .payment-list-page * {
@@ -158,7 +157,7 @@ $filterQueryString = http_build_query(array(
 
                         .payment-list-page .page-title {
                             margin: 0;
-                            font-family: var(--font-head);
+                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                             font-size: 1.5rem;
                             line-height: 1.2;
                             letter-spacing: -0.02em;
@@ -272,7 +271,7 @@ $filterQueryString = http_build_query(array(
                             font-weight: 700;
                             line-height: 1.2;
                             letter-spacing: -0.02em;
-                            font-family: var(--font-head);
+                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                         }
 
                         .payment-list-page .stat-meta {
@@ -957,7 +956,7 @@ $filterQueryString = http_build_query(array(
                                             <label style="display: block; margin-bottom: 8px; color: #334155; font-size: 0.85rem; font-weight: 700;">
                                                 OR Number
                                             </label>
-                                            <input type="text" id="voidORNo" class="form-control" readonly style="background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px 14px; font-family: monospace;">
+                                            <input type="text" id="voidORNo" class="form-control" readonly style="background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px 14px; font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);">
                                         </div>
 
                                         <div class="form-group" style="margin-top: 16px;">

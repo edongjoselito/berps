@@ -112,10 +112,10 @@ $showAddPayment = !$clientMode && $addPaymentUrl !== '' && ($totalDue <= 0 || $b
                             --radius-lg: 16px;
                             --radius-md: 12px;
                             --radius-sm: 10px;
-                            --font-body: 'Inter', 'Poppins', 'Segoe UI', Arial, sans-serif;
-                            --font-head: 'Inter', 'Montserrat', 'Segoe UI', Arial, sans-serif;
-                            --font-mono: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
-                            font-family: var(--font-body);
+                            --font-body: var(--font-primary);
+                            --font-head: var(--font-primary);
+                            --font-mono: var(--font-primary);
+                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                             background:
                                 radial-gradient(circle at top left, rgba(37, 99, 235, 0.08), transparent 28%),
                                 radial-gradient(circle at top right, rgba(16, 185, 129, 0.08), transparent 24%),
@@ -163,7 +163,7 @@ $showAddPayment = !$clientMode && $addPaymentUrl !== '' && ($totalDue <= 0 || $b
 
                         .payment-history-page .ph-title {
                             margin: 0;
-                            font-family: var(--font-head);
+                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                             font-size: 2rem;
                             font-weight: 800;
                             letter-spacing: -0.04em;
@@ -392,7 +392,7 @@ $showAddPayment = !$clientMode && $addPaymentUrl !== '' && ($totalDue <= 0 || $b
                         }
 
                         .payment-history-page .context-mono {
-                            font-family: var(--font-mono);
+                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                             font-size: 0.9rem;
                             color: var(--text-soft);
                         }
@@ -472,7 +472,7 @@ $showAddPayment = !$clientMode && $addPaymentUrl !== '' && ($totalDue <= 0 || $b
                         }
 
                         .payment-history-page .num-cell {
-                            font-family: var(--font-mono);
+                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                             font-variant-numeric: tabular-nums;
                         }
 

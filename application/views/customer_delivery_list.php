@@ -19,7 +19,6 @@ $data2 = isset($data2) ? $data2 : array();
                 <div class="container-fluid invoice-list-page">
 
                     <style>
-                         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap');
 
                          .invoice-list-page {
                               --bg: #f5f7fb;
@@ -37,8 +36,8 @@ $data2 = isset($data2) ? $data2 : array();
                               --success: #059669;
                               --warning: #d97706;
                               --danger: #dc2626;
-                              --font-head: 'DM Sans', system-ui, -apple-system, sans-serif;
-                              --font-body: 'DM Sans', system-ui, -apple-system, sans-serif;
+                              --font-head: var(--font-primary);
+                              --font-body: var(--font-primary);
                          }
 
                          .invoice-list-page * {
@@ -82,7 +81,7 @@ $data2 = isset($data2) ? $data2 : array();
 
                          .invoice-list-page .page-title {
                               margin: 0;
-                              font-family: var(--font-head);
+                              font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                               font-size: 1.5rem;
                               font-weight: 700;
                               color: var(--text);

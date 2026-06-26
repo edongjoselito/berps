@@ -57,9 +57,9 @@
                             --radius-lg: 16px;
                             --radius-md: 12px;
                             --radius-sm: 10px;
-                            --font-body: 'Inter', 'Poppins', 'Segoe UI', Arial, sans-serif;
-                            --font-head: 'Inter', 'Montserrat', 'Segoe UI', Arial, sans-serif;
-                            font-family: var(--font-body);
+                            --font-body: var(--font-primary);
+                            --font-head: var(--font-primary);
+                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                             background:
                                 radial-gradient(circle at top left, rgba(37, 99, 235, 0.08), transparent 28%),
                                 radial-gradient(circle at top right, rgba(16, 185, 129, 0.08), transparent 24%),
@@ -96,7 +96,7 @@
                         }
 
                         .knowledge-base-page .kb-title {
-                            font-family: var(--font-head);
+                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                             font-size: 1.75rem;
                             font-weight: 700;
                             color: var(--text);
@@ -124,7 +124,7 @@
                         }
 
                         .knowledge-base-page .kb-card-title {
-                            font-family: var(--font-head);
+                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                             font-size: 1.15rem;
                             font-weight: 600;
                             color: var(--text);

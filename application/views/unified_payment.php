@@ -71,16 +71,16 @@ $settingsID = $this->session->userdata('settingsID');
                             --radius-lg: 18px;
                             --radius-md: 14px;
                             --radius-sm: 10px;
-                            --font-body: 'Inter', 'Poppins', 'Segoe UI', Arial, sans-serif;
-                            --font-head: 'Inter', 'Montserrat', 'Segoe UI', Arial, sans-serif;
-                            --font-mono: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+                            --font-body: var(--font-primary);
+                            --font-head: var(--font-primary);
+                            --font-mono: var(--font-primary);
                             background:
                                 radial-gradient(circle at top left, rgba(37, 99, 235, 0.08), transparent 28%),
                                 radial-gradient(circle at top right, rgba(16, 185, 129, 0.08), transparent 24%),
                                 linear-gradient(180deg, #f8fbff 0%, #f4f7fb 100%);
                             min-height: 100vh;
                             padding-bottom: 28px;
-                            font-family: var(--font-body);
+                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                         }
 
                         .unified-payment-page * {
@@ -122,7 +122,7 @@ $settingsID = $this->session->userdata('settingsID');
 
                         .unified-payment-page .entry-title {
                             margin: 0;
-                            font-family: var(--font-head);
+                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                             font-size: 2.1rem;
                             line-height: 1.05;
                             letter-spacing: -0.05em;
@@ -213,7 +213,7 @@ $settingsID = $this->session->userdata('settingsID');
 
                         .unified-payment-page .entry-card-title {
                             margin: 0;
-                            font-family: var(--font-head);
+                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
                             font-size: 1.25rem;
                             font-weight: 700;
                             color: var(--text);
@@ -493,7 +493,7 @@ $settingsID = $this->session->userdata('settingsID');
                                             
                                             // Show debug info on page
                                             $CI =& get_instance();
-                                            echo '<div style="background: #f8f9fa; border: 1px solid #dee2e6; padding: 10px; margin-bottom: 15px; font-family: monospace; font-size: 12px;">';
+                                            echo '<div style="background: #f8f9fa; border: 1px solid #dee2e6; padding: 10px; margin-bottom: 15px; font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif); font-size: 12px;">';
                                             echo '<strong>Debug Info:</strong><br>';
                                             echo 'Invoices found: ' . count($allInvoices) . '<br>';
                                             echo 'Job Orders found: ' . count($allJobOrders) . '<br>';

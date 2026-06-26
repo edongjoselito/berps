@@ -69,7 +69,7 @@ $backUrl       = base_url() . 'Page/reports';
 
         /* ── Base ────────────────────────────────────────────────────────── */
         body {
-            font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
             font-size: 13px;
             line-height: 1.6;
             color: var(--ink);
@@ -456,6 +456,7 @@ $backUrl       = base_url() . 'Page/reports';
             }
         }
     </style>
+    <link rel="stylesheet" href="<?= base_url('assets/css/fonts.css'); ?>">
 </head>
 <body>
     <div class="page-shell">

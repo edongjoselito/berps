@@ -20,7 +20,7 @@ $priorityClasses = array('1' => 'priority-high', '2' => 'priority-medium', '3' =
                 <style>
                     .client-profile-page {
                         --bg:#f5f7fb; --surface:rgba(255,255,255,.92); --surface-2:#fff; --line:#e7ecf3; --text:#122033; --text-soft:#5e7188; --text-faint:#8ea0b5; --success:#059669; --success-soft:#ecfdf5; --warning:#d97706; --warning-soft:#fff7ed; --danger:#e11d48; --danger-soft:#fff1f2; --shadow:0 14px 40px rgba(15,23,42,.08); --radius-xl:22px;
-                        font-family:'Inter','Poppins','Segoe UI',Arial,sans-serif; background:radial-gradient(circle at top left, rgba(37,99,235,.08), transparent 28%), radial-gradient(circle at top right, rgba(16,185,129,.08), transparent 24%), linear-gradient(180deg,#f8fbff 0%,#f4f7fb 100%); min-height:100vh; padding-bottom:24px;
+                        font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif); background:radial-gradient(circle at top left, rgba(37,99,235,.08), transparent 28%), radial-gradient(circle at top right, rgba(16,185,129,.08), transparent 24%), linear-gradient(180deg,#f8fbff 0%,#f4f7fb 100%); min-height:100vh; padding-bottom:24px;
                     }
                     .client-profile-page .cp-header { margin:24px 0 22px; display:flex; justify-content:space-between; align-items:flex-end; gap:16px; flex-wrap:wrap; }
                     .client-profile-page .cp-eyebrow { display:inline-flex; align-items:center; padding:7px 12px; border-radius:999px; background:rgba(37,99,235,.08); color:#1d4ed8; font-size:.76rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; margin-bottom:10px; }
