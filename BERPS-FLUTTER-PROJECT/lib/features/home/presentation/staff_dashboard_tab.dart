@@ -13,7 +13,10 @@ import '../../../core/widgets/mobile_header.dart';
 import '../../../core/widgets/skeleton.dart';
 import '../../../core/widgets/staff_avatar.dart';
 import '../../auth/domain/staff_session.dart';
+import '../../calendar/domain/calendar_event.dart';
 import '../../notifications/presentation/notification_bell.dart';
+import '../../notes/data/notes_api.dart';
+import '../../notes/domain/note.dart';
 import '../data/staff_api.dart';
 import '../domain/staff_dashboard.dart';
 import '../domain/staff_ranking.dart';
@@ -52,14 +55,19 @@ class StaffDashboardTab extends StatefulWidget {
 
 class _StaffDashboardTabState extends State<StaffDashboardTab> {
   final StaffApi _api = StaffApi();
+  final NotesApi _notesApi = NotesApi();
   late Future<StaffDashboard> _future;
   late Future<StaffRanking> _rankingFuture;
+  late Future<List<CalendarEvent>> _eventsFuture;
+  late Future<List<Note>> _notesFuture;
 
   @override
   void initState() {
     super.initState();
     _future = _loadDashboard();
     _rankingFuture = _loadRanking();
+    _eventsFuture = _loadEvents();
+    _notesFuture = _loadNotes();
   }
 
   Future<StaffDashboard> _loadDashboard() {
@@ -76,11 +84,27 @@ class _StaffDashboardTabState extends State<StaffDashboardTab> {
     );
   }
 
+  Future<List<CalendarEvent>> _loadEvents() {
+    return _api.fetchCalendarEvents(
+      baseUrl: widget.session.baseUrl,
+      token: widget.session.token,
+    );
+  }
+
+  Future<List<Note>> _loadNotes() {
+    return _notesApi.fetchNotes(
+      baseUrl: widget.session.baseUrl,
+      token: widget.session.token,
+    );
+  }
+
   void _reload() {
     Haptics.light();
     setState(() {
       _future = _loadDashboard();
       _rankingFuture = _loadRanking();
+      _eventsFuture = _loadEvents();
+      _notesFuture = _loadNotes();
     });
   }
 
@@ -108,8 +132,12 @@ class _StaffDashboardTabState extends State<StaffDashboardTab> {
         setState(() {
           _future = _loadDashboard();
           _rankingFuture = _loadRanking();
+          _eventsFuture = _loadEvents();
+          _notesFuture = _loadNotes();
         });
         await _future;
+        await _eventsFuture;
+        await _notesFuture;
       },
       child: FutureBuilder<StaffDashboard>(
         future: _future,
@@ -159,6 +187,8 @@ class _StaffDashboardTabState extends State<StaffDashboardTab> {
                   data: snapshot.data!,
                   session: widget.session,
                   rankingFuture: _rankingFuture,
+                  eventsFuture: _eventsFuture,
+                  notesFuture: _notesFuture,
                   onOpenTasks: widget.onOpenTasks,
                   onOpenMyDtr: widget.onOpenMyDtr,
                   onOpenForwardedTasks: widget.onOpenForwardedTasks,
@@ -320,6 +350,8 @@ class _DashboardContent extends StatelessWidget {
     required this.data,
     required this.session,
     required this.rankingFuture,
+    required this.eventsFuture,
+    required this.notesFuture,
     required this.onOpenTasks,
     required this.onOpenMyDtr,
     required this.onOpenForwardedTasks,
@@ -333,6 +365,8 @@ class _DashboardContent extends StatelessWidget {
   final StaffDashboard data;
   final StaffSession session;
   final Future<StaffRanking> rankingFuture;
+  final Future<List<CalendarEvent>> eventsFuture;
+  final Future<List<Note>> notesFuture;
   final VoidCallback onOpenTasks;
   final VoidCallback onOpenMyDtr;
   final VoidCallback onOpenForwardedTasks;
@@ -367,14 +401,6 @@ class _DashboardContent extends StatelessWidget {
               ? '${data.remindersDueTodayCount}'
               : null,
           onTap: onOpenReminders,
-        ),
-      if (session.hasCalendar)
-        _QuickAction(
-          label: 'Calendar',
-          sublabel: 'Events',
-          icon: PhosphorIconsBold.calendarBlank,
-          accent: AppTheme.primary,
-          onTap: onOpenCalendar,
         ),
       if (session.hasNotes)
         _QuickAction(
@@ -489,6 +515,29 @@ class _DashboardContent extends StatelessWidget {
             ),
           ),
         ],
+        if (session.hasCalendar || session.hasNotes) ...[
+          const SizedBox(height: 20),
+          FadeSlide(
+            delay: const Duration(milliseconds: 260),
+            child: _SectionHeader(
+              title: 'Events & Notes',
+              action: session.hasCalendar
+                  ? _ViewAllLink(onTap: onOpenCalendar)
+                  : null,
+            ),
+          ),
+          const SizedBox(height: 12),
+          FadeSlide(
+            delay: const Duration(milliseconds: 280),
+            child: _EventsNotesSnapshot(
+              eventsFuture: eventsFuture,
+              notesFuture: notesFuture,
+              onOpenCalendar: onOpenCalendar,
+              onOpenNotes: onOpenNotes,
+              session: session,
+            ),
+          ),
+        ],
         if (session.hasRanking) ...[
           const SizedBox(height: 20),
           FadeSlide(
@@ -543,36 +592,23 @@ class _QuickActionsStrip extends StatelessWidget {
   Widget build(BuildContext context) {
     final items = actions;
 
-    return Container(
-      padding: const EdgeInsets.fromLTRB(8, 8, 8, 8),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppTheme.border),
-        boxShadow: AppTheme.shadowSoft,
-      ),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final perRow = constraints.maxWidth >= 520 ? 4 : 2;
-          final spacing = 8.0;
-          final tileWidth =
-              (constraints.maxWidth - spacing * (perRow - 1) - 8) / perRow;
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-            child: Wrap(
-              spacing: spacing,
-              runSpacing: 10,
-              children: [
-                for (final item in items)
-                  SizedBox(
-                    width: tileWidth,
-                    child: _QuickActionTile(action: item),
-                  ),
-              ],
-            ),
-          );
-        },
-      ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final perRow = constraints.maxWidth >= 520 ? 4 : 2;
+        final spacing = 12.0;
+        final tileWidth = (constraints.maxWidth - spacing * (perRow - 1)) / perRow;
+        return Wrap(
+          spacing: spacing,
+          runSpacing: 12,
+          children: [
+            for (final item in items)
+              SizedBox(
+                width: tileWidth,
+                child: _QuickActionTile(action: item),
+              ),
+          ],
+        );
+      },
     );
   }
 }
@@ -606,11 +642,11 @@ class _QuickActionTile extends StatelessWidget {
         action.onTap();
       },
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 10),
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 10),
         decoration: BoxDecoration(
-          color: AppTheme.surfaceMuted,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: AppTheme.border),
+          color: AppTheme.surface,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: AppTheme.shadowSoft,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -1787,6 +1823,335 @@ class _OngoingTaskTile extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+// ── Events & Notes snapshot ────────────────────────────────────────────────
+
+class _EventsNotesSnapshot extends StatelessWidget {
+  const _EventsNotesSnapshot({
+    required this.eventsFuture,
+    required this.notesFuture,
+    required this.onOpenCalendar,
+    required this.onOpenNotes,
+    required this.session,
+  });
+
+  final Future<List<CalendarEvent>> eventsFuture;
+  final Future<List<Note>> notesFuture;
+  final VoidCallback onOpenCalendar;
+  final VoidCallback onOpenNotes;
+  final StaffSession session;
+
+  static bool _eventCoversDay(CalendarEvent event, DateTime day) {
+    final dayStart = DateTime(day.year, day.month, day.day);
+    final start = DateTime(event.start.year, event.start.month, event.start.day);
+    final end = DateTime(event.end.year, event.end.month, event.end.day);
+    return !dayStart.isBefore(start) && !dayStart.isAfter(end);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<List<CalendarEvent>>(
+      future: eventsFuture,
+      builder: (context, eventsSnapshot) {
+        return FutureBuilder<List<Note>>(
+          future: notesFuture,
+          builder: (context, notesSnapshot) {
+            final now = DateTime.now();
+            final today = DateTime(now.year, now.month, now.day);
+            final events = (eventsSnapshot.data ?? const <CalendarEvent>[])
+                .where((e) => _eventCoversDay(e, today) || e.start.isAfter(today))
+                .toList()
+              ..sort((a, b) => a.start.compareTo(b.start));
+            final notes = (notesSnapshot.data ?? const <Note>[])
+                .where((n) => n.date == _formatDate(today))
+                .toList();
+
+            final hasEvents = events.isNotEmpty;
+            final hasNotes = notes.isNotEmpty;
+            final loading = eventsSnapshot.connectionState == ConnectionState.waiting ||
+                notesSnapshot.connectionState == ConnectionState.waiting;
+
+            if (loading && !hasEvents && !hasNotes) {
+              return const _SnapshotSkeleton();
+            }
+
+            if (!hasEvents && !hasNotes) {
+              return _EmptySnapshot(
+                onOpenCalendar: session.hasCalendar ? onOpenCalendar : null,
+                onOpenNotes: session.hasNotes ? onOpenNotes : null,
+              );
+            }
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (hasEvents) ...[
+                  _SnapshotSubHeader(icon: PhosphorIconsBold.calendarBlank, title: 'Today & upcoming events'),
+                  const SizedBox(height: 8),
+                  for (final event in events.take(3)) _EventSnapshotRow(event: event),
+                ],
+                if (hasEvents && hasNotes) const SizedBox(height: 16),
+                if (hasNotes) ...[
+                  _SnapshotSubHeader(icon: PhosphorIconsBold.notebook, title: 'Notes for today'),
+                  const SizedBox(height: 8),
+                  for (final note in notes.take(3)) _NoteSnapshotRow(note: note),
+                ],
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  static String _formatDate(DateTime d) {
+    final y = d.year.toString().padLeft(4, '0');
+    final m = d.month.toString().padLeft(2, '0');
+    final day = d.day.toString().padLeft(2, '0');
+    return '$y-$m-$day';
+  }
+}
+
+class _SnapshotSubHeader extends StatelessWidget {
+  const _SnapshotSubHeader({required this.icon, required this.title});
+  final IconData icon;
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(icon, size: 14, color: AppTheme.primaryDark),
+        const SizedBox(width: 8),
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 12.5,
+            fontWeight: FontWeight.w900,
+            color: AppTheme.textPrimary,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _EventSnapshotRow extends StatelessWidget {
+  const _EventSnapshotRow({required this.event});
+  final CalendarEvent event;
+
+  Color get _color {
+    try {
+      final hex = event.color.replaceAll('#', '');
+      if (hex.length == 6) return Color(int.parse('FF$hex', radix: 16));
+    } catch (_) {}
+    return AppTheme.primaryDark;
+  }
+
+  String _timeLabel(CalendarEvent e) {
+    if (e.allDay) return 'All day';
+    final h = e.start.hour == 0 ? 12 : (e.start.hour > 12 ? e.start.hour - 12 : e.start.hour);
+    final m = e.start.minute.toString().padLeft(2, '0');
+    final ampm = e.start.hour >= 12 ? 'PM' : 'AM';
+    return '$h:$m $ampm';
+  }
+
+  String _dayLabel(CalendarEvent e) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final start = DateTime(e.start.year, e.start.month, e.start.day);
+    if (start == today) return 'Today';
+    const names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return '${names[start.month - 1]} ${start.day}';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      margin: const EdgeInsets.only(bottom: 8),
+      decoration: BoxDecoration(
+        color: AppTheme.surface,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: AppTheme.shadowSoft,
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 10,
+            height: 10,
+            decoration: BoxDecoration(color: _color, shape: BoxShape.circle),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  event.title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 13.5,
+                    color: AppTheme.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '${_dayLabel(event)} · ${_timeLabel(event)}',
+                  style: const TextStyle(
+                    color: AppTheme.textSecondary,
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _NoteSnapshotRow extends StatelessWidget {
+  const _NoteSnapshotRow({required this.note});
+  final Note note;
+
+  @override
+  Widget build(BuildContext context) {
+    final title = note.title.trim();
+    final description = note.description.trim();
+    return Container(
+      padding: const EdgeInsets.all(12),
+      margin: const EdgeInsets.only(bottom: 8),
+      decoration: BoxDecoration(
+        color: AppTheme.surface,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: AppTheme.shadowSoft,
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 10,
+            height: 10,
+            decoration: const BoxDecoration(
+              color: AppTheme.primary,
+              shape: BoxShape.circle,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (title.isNotEmpty)
+                  Text(
+                    title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 13.5,
+                      color: AppTheme.textPrimary,
+                    ),
+                  ),
+                if (description.isNotEmpty) ...[
+                  if (title.isNotEmpty) const SizedBox(height: 2),
+                  Text(
+                    description,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: AppTheme.textSecondary,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+                if (title.isEmpty && description.isEmpty)
+                  const Text(
+                    'Empty note',
+                    style: TextStyle(
+                      color: AppTheme.textMuted,
+                      fontSize: 12,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _EmptySnapshot extends StatelessWidget {
+  const _EmptySnapshot({this.onOpenCalendar, this.onOpenNotes});
+  final VoidCallback? onOpenCalendar;
+  final VoidCallback? onOpenNotes;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppTheme.surface,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: AppTheme.shadowSoft,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const Text(
+            'No events or notes for today yet.',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: AppTheme.textSecondary,
+              fontSize: 13.5,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 12),
+          if (onOpenCalendar != null)
+            FilledButton.icon(
+              style: FilledButton.styleFrom(backgroundColor: AppTheme.primaryDark),
+              onPressed: onOpenCalendar,
+              icon: const Icon(PhosphorIconsBold.calendarBlank, size: 16),
+              label: const Text('Open calendar'),
+            ),
+          if (onOpenCalendar != null && onOpenNotes != null) const SizedBox(height: 8),
+          if (onOpenNotes != null)
+            OutlinedButton.icon(
+              onPressed: onOpenNotes,
+              icon: const Icon(PhosphorIconsBold.notebook, size: 16),
+              label: const Text('Open notes'),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SnapshotSkeleton extends StatelessWidget {
+  const _SnapshotSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: const [
+        Skeleton(width: 140, height: 12),
+        SizedBox(height: 8),
+        Skeleton(height: 56, radius: 14),
+        SizedBox(height: 8),
+        Skeleton(height: 56, radius: 14),
+      ],
     );
   }
 }

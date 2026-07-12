@@ -11,6 +11,7 @@ import '../../../core/widgets/mobile_header.dart';
 import '../../auth/domain/staff_session.dart';
 import '../../home/data/staff_api.dart';
 import '../domain/calendar_event.dart';
+import 'calendar_day_note_editor.dart';
 
 class CalendarEventEditor extends StatefulWidget {
   const CalendarEventEditor({super.key, required this.session, this.existing});
@@ -123,6 +124,18 @@ class _CalendarEventEditorState extends State<CalendarEventEditor> {
         _end = combined;
       }
     });
+  }
+
+  Future<void> _openAddNote() async {
+    Haptics.light();
+    await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (_) => CalendarDayNoteEditor(
+          session: widget.session,
+          date: DateTime(_start.year, _start.month, _start.day),
+        ),
+      ),
+    );
   }
 
   Future<void> _save() async {
@@ -462,18 +475,17 @@ class _CalendarEventEditorState extends State<CalendarEventEditor> {
                 ),
               ),
               const SizedBox(height: 18),
-              _SectionHeader(icon: PhosphorIconsBold.notebook, title: 'Notes'),
+              _SectionHeader(icon: PhosphorIconsBold.notebook, title: 'Day notes'),
               const SizedBox(height: 10),
-              MobileSurfaceCard(
-                child: TextFormField(
-                  controller: _notes,
-                  enabled: _canEdit,
-                  decoration: const InputDecoration(
-                    labelText: 'Notes',
-                    hintText: 'Anything else to remember',
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppTheme.primaryDark,
                   ),
-                  minLines: 3,
-                  maxLines: 6,
+                  onPressed: _canEdit ? _openAddNote : null,
+                  icon: const Icon(PhosphorIconsBold.plus, size: 16),
+                  label: const Text('Add note'),
                 ),
               ),
               const SizedBox(height: 18),

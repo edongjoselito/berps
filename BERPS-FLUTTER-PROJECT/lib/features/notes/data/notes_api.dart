@@ -15,9 +15,19 @@ class NotesApi {
     required String baseUrl,
     required String token,
   }) async {
+    return fetchNotesByDate(baseUrl: baseUrl, token: token);
+  }
+
+  Future<List<Note>> fetchNotesByDate({
+    required String baseUrl,
+    required String token,
+    String? date,
+  }) async {
+    final query = <String, String>{};
+    if ((date ?? '').isNotEmpty) query['date'] = date!;
     final response = await _request(
       () => _client.get(
-        _uri(baseUrl, '/api/mobile/staff/notes'),
+        _uri(baseUrl, '/api/mobile/staff/notes', query),
         headers: _headers(token),
       ),
     );
@@ -36,6 +46,7 @@ class NotesApi {
     required String title,
     required String description,
     required List<String> tags,
+    String? date,
   }) async {
     final response = await _request(
       () => _client.post(
@@ -45,6 +56,7 @@ class NotesApi {
           'title': title,
           'description': description,
           'tags': tags,
+          if ((date ?? '').isNotEmpty) 'date': date,
         }),
       ),
     );
@@ -58,6 +70,7 @@ class NotesApi {
     required String title,
     required String description,
     required List<String> tags,
+    String? date,
   }) async {
     final response = await _request(
       () => _client.post(
@@ -67,6 +80,7 @@ class NotesApi {
           'title': title,
           'description': description,
           'tags': tags,
+          if ((date ?? '').isNotEmpty) 'date': date,
         }),
       ),
     );
@@ -106,9 +120,11 @@ class NotesApi {
 
   // ── Internals ──────────────────────────────────────────────────────────────
 
-  Uri _uri(String baseUrl, String path) {
+  Uri _uri(String baseUrl, String path, [Map<String, String>? query]) {
     final normalized = baseUrl.replaceFirst(RegExp(r'/+$'), '');
-    return Uri.parse('$normalized$path');
+    final uri = Uri.parse('$normalized$path');
+    if (query == null || query.isEmpty) return uri;
+    return uri.replace(queryParameters: query);
   }
 
   Map<String, String> _headers(String token) => {

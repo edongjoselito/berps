@@ -3716,8 +3716,9 @@ class MobileStaff extends CI_Controller
 
         $settingsID = (int) ($claims['settingsID'] ?? 0);
         $username   = trim((string) ($claims['username'] ?? ''));
+        $date       = trim((string) $this->input->get('date'));
 
-        $rows = $this->CashModel->noteList($username, $settingsID);
+        $rows = $this->CashModel->noteList($username, $settingsID, $date);
         $notes = [];
         foreach ((array) $rows as $row) {
             $notes[] = $this->_note_payload($row);
@@ -3752,6 +3753,10 @@ class MobileStaff extends CI_Controller
         $title       = trim((string) ($payload['title'] ?? ''));
         $description = trim((string) ($payload['description'] ?? $payload['noteDescription'] ?? ''));
         $tags        = $this->_normalize_tags($payload['tags'] ?? '');
+        $noteDate    = $this->_normalize_note_date($payload['date'] ?? $payload['note_date'] ?? '');
+        if ($noteDate === '') {
+            $noteDate = date('Y-m-d');
+        }
 
         if ($title === '' && $description === '') {
             return mobile_json(['ok' => false, 'message' => 'Please enter a note title or description.'], 422);
@@ -3762,7 +3767,7 @@ class MobileStaff extends CI_Controller
         }
 
         $this->db->insert('notes', [
-            'noteDate'        => date('Y-m-d'),
+            'noteDate'        => $noteDate,
             'title'           => $title,
             'noteDescription' => $description,
             'tags'            => $tags,
@@ -3809,6 +3814,7 @@ class MobileStaff extends CI_Controller
         $title       = trim((string) ($payload['title'] ?? ''));
         $description = trim((string) ($payload['description'] ?? $payload['noteDescription'] ?? ''));
         $tags        = $this->_normalize_tags($payload['tags'] ?? '');
+        $noteDate    = $this->_normalize_note_date($payload['date'] ?? $payload['note_date'] ?? '');
 
         if ($title === '' && $description === '') {
             return mobile_json(['ok' => false, 'message' => 'Please enter a note title or description.'], 422);
@@ -3818,14 +3824,19 @@ class MobileStaff extends CI_Controller
             $this->db->query("ALTER TABLE notes ADD COLUMN tags VARCHAR(255) DEFAULT NULL");
         }
 
+        $update = [
+            'title'           => $title,
+            'noteDescription' => $description,
+            'tags'            => $tags,
+        ];
+        if ($noteDate !== '') {
+            $update['noteDate'] = $noteDate;
+        }
+
         $this->db
             ->where('noteID', (int) $noteId)
             ->where('settingsID', $settingsID)
-            ->update('notes', [
-                'title'           => $title,
-                'noteDescription' => $description,
-                'tags'            => $tags,
-            ]);
+            ->update('notes', $update);
 
         return mobile_json(['ok' => true, 'message' => 'Note updated successfully.']);
     }
@@ -4102,6 +4113,19 @@ class MobileStaff extends CI_Controller
             return $t !== '';
         });
         return implode(', ', $parts);
+    }
+
+    private function _normalize_note_date($value)
+    {
+        $value = trim((string) $value);
+        if ($value === '') {
+            return '';
+        }
+        $ts = strtotime($value);
+        if ($ts === false || $ts < 0) {
+            return '';
+        }
+        return date('Y-m-d', $ts);
     }
 
     private function _reminder_payload($row)

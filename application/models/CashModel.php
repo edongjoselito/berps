@@ -1500,10 +1500,18 @@ class CashModel extends CI_Model
 	}
 
 
-	function noteList($user, $settingsID)
+	function noteList($user, $settingsID, $date = null)
 	{
-		$query = $this->db->query("select * from notes where notedBy='" . $user . "' and settingsID='" . $settingsID . "' and noteStat='Active' order by noteDate DESC");
-		return $query->result();
+		$this->db->from('notes');
+		$this->db->where('notedBy', $user);
+		$this->db->where('settingsID', $settingsID);
+		$this->db->where('noteStat', 'Active');
+		if (!empty($date)) {
+			$this->db->where('noteDate', $date);
+		}
+		$this->db->order_by('noteDate', 'DESC');
+		$this->db->order_by('noteID', 'DESC');
+		return $this->db->get()->result();
 	}
 
 	function priceList($settingsID)

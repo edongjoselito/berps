@@ -8,7 +8,10 @@ import '../../../core/widgets/app_toast.dart';
 import '../../../core/widgets/mobile_header.dart';
 import '../../auth/domain/staff_session.dart';
 import '../../home/data/staff_api.dart';
+import '../../notes/data/notes_api.dart';
+import '../../notes/domain/note.dart';
 import '../domain/calendar_event.dart';
+import 'calendar_day_note_editor.dart';
 import 'calendar_event_editor.dart';
 
 /// Apple Calendar signature red — used for the year, the current month and
@@ -314,6 +317,7 @@ class _CalendarDashboardTabState extends State<CalendarDashboardTab> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (sheetContext) => _DaySheet(
+        session: widget.session,
         day: day,
         events: dayEvents,
         onAdd: () {
@@ -772,6 +776,7 @@ class _MonthDetailScreenState extends State<_MonthDetailScreen> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (sheetContext) => _DaySheet(
+        session: widget.session,
         day: day,
         events: dayEvents,
         onAdd: () {
@@ -1054,8 +1059,9 @@ class _MonthDayCell extends StatelessWidget {
   }
 }
 
-class _DaySheet extends StatelessWidget {
+class _DaySheet extends StatefulWidget {
   const _DaySheet({
+    required this.session,
     required this.day,
     required this.events,
     required this.onAdd,
@@ -1063,11 +1069,20 @@ class _DaySheet extends StatelessWidget {
     required this.onDelete,
   });
 
+  final StaffSession session;
   final DateTime day;
   final List<CalendarEvent> events;
   final VoidCallback onAdd;
   final ValueChanged<CalendarEvent> onEdit;
   final ValueChanged<CalendarEvent> onDelete;
+
+  @override
+  State<_DaySheet> createState() => _DaySheetState();
+}
+
+class _DaySheetState extends State<_DaySheet> {
+  final NotesApi _notesApi = NotesApi();
+  Future<List<Note>>? _notesFuture;
 
   static const List<String> _weekdaysFull = [
     'Monday',
@@ -1080,100 +1095,479 @@ class _DaySheet extends StatelessWidget {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    _loadNotes();
+  }
+
+  void _loadNotes() {
+    setState(() {
+      _notesFuture = _notesApi.fetchNotesByDate(
+        baseUrl: widget.session.baseUrl,
+        token: widget.session.token,
+        date: _dateApiValue(widget.day),
+      );
+    });
+  }
+
+  String _dateApiValue(DateTime d) {
+    final y = d.year.toString().padLeft(4, '0');
+    final m = d.month.toString().padLeft(2, '0');
+    final day = d.day.toString().padLeft(2, '0');
+    return '$y-$m-$day';
+  }
+
+  Future<void> _openNoteEditor({Note? existing}) async {
+    Haptics.light();
+    final saved = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (_) => CalendarDayNoteEditor(
+          session: widget.session,
+          date: widget.day,
+          existing: existing,
+        ),
+      ),
+    );
+    if (saved == true) _loadNotes();
+  }
+
+  Future<void> _confirmDeleteNote(Note note) async {
+    Haptics.warn();
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text(
+          'Delete note?',
+          style: TextStyle(
+            fontWeight: FontWeight.w900,
+            color: AppTheme.textPrimary,
+          ),
+        ),
+        content: const Text(
+          'This note will be permanently removed.',
+          style: TextStyle(color: AppTheme.textSecondary),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: AppTheme.danger),
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+
+    try {
+      await _notesApi.deleteNote(
+        baseUrl: widget.session.baseUrl,
+        token: widget.session.token,
+        noteId: note.id,
+      );
+      if (!mounted) return;
+      _loadNotes();
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      AppToast.error(context, e.message);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final weekday = _weekdaysFull[day.weekday - 1];
+    final weekday = _weekdaysFull[widget.day.weekday - 1];
+    final maxSheetHeight = MediaQuery.of(context).size.height * 0.82;
+
     return SafeArea(
       top: false,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 14, 20, 18),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: AppTheme.border,
-                  borderRadius: BorderRadius.circular(99),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              weekday.toUpperCase(),
-              style: const TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 1.4,
-                color: kAppleRed,
-              ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              '${_monthNamesFull[day.month - 1]} ${day.day}, ${day.year}',
-              style: const TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.w900,
-                letterSpacing: -0.4,
-                color: AppTheme.textPrimary,
-              ),
-            ),
-            const SizedBox(height: 14),
-            if (events.isEmpty)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 18),
-                child: Row(
-                  children: [
-                    const Icon(
-                      PhosphorIconsBold.calendarBlank,
-                      size: 18,
-                      color: AppTheme.textMuted,
-                    ),
-                    const SizedBox(width: 10),
-                    Text(
-                      'No events on this day',
-                      style: TextStyle(
-                        color: AppTheme.textSecondary,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-              )
-            else
-              ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxHeight: MediaQuery.of(context).size.height * 0.45,
-                ),
-                child: ListView.separated(
-                  shrinkWrap: true,
-                  itemCount: events.length,
-                  separatorBuilder: (_, _) => const SizedBox(height: 8),
-                  itemBuilder: (_, i) => _DayEventRow(
-                    event: events[i],
-                    onTap: () => onEdit(events[i]),
-                    onDelete: events[i].canDelete
-                        ? () => onDelete(events[i])
-                        : null,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxHeight: maxSheetHeight),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 14, 20, 18),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: AppTheme.border,
+                    borderRadius: BorderRadius.circular(99),
                   ),
                 ),
               ),
-            const SizedBox(height: 14),
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton.icon(
-                style: FilledButton.styleFrom(
-                  backgroundColor: AppTheme.primaryDark,
+              const SizedBox(height: 16),
+              Text(
+                weekday.toUpperCase(),
+                style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 1.4,
+                  color: kAppleRed,
                 ),
-                onPressed: onAdd,
-                icon: const Icon(PhosphorIconsBold.plus, size: 16),
-                label: const Text('Add event'),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                '${_monthNamesFull[widget.day.month - 1]} ${widget.day.day}, ${widget.day.year}',
+                style: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: -0.4,
+                  color: AppTheme.textPrimary,
+                ),
+              ),
+              const SizedBox(height: 14),
+              Expanded(
+                child: FutureBuilder<List<Note>>(
+                  future: _notesFuture,
+                  builder: (context, snapshot) {
+                    final notes = snapshot.data ?? const <Note>[];
+                    final error = snapshot.error;
+                    final hasError = error != null && snapshot.data == null;
+                    return CustomScrollView(
+                      slivers: [
+                        // Events section
+                        SliverToBoxAdapter(
+                          child: _EventsSection(
+                            events: widget.events,
+                            onEdit: widget.onEdit,
+                            onDelete: widget.onDelete,
+                          ),
+                        ),
+                        const SliverToBoxAdapter(child: SizedBox(height: 20)),
+                        // Notes section header
+                        SliverToBoxAdapter(
+                          child: Row(
+                            children: [
+                              const Icon(
+                                PhosphorIconsBold.notebook,
+                                size: 15,
+                                color: AppTheme.primaryDark,
+                              ),
+                              const SizedBox(width: 8),
+                              const Expanded(
+                                child: Text(
+                                  'Notes',
+                                  style: TextStyle(
+                                    fontSize: 13.5,
+                                    fontWeight: FontWeight.w900,
+                                    color: AppTheme.textPrimary,
+                                  ),
+                                ),
+                              ),
+                              TextButton.icon(
+                                onPressed: () => _openNoteEditor(),
+                                icon: const Icon(
+                                  PhosphorIconsBold.plus,
+                                  size: 14,
+                                ),
+                                label: const Text('Add note'),
+                                style: TextButton.styleFrom(
+                                  foregroundColor: AppTheme.primaryDark,
+                                  padding: EdgeInsets.zero,
+                                  textStyle: const TextStyle(
+                                    fontWeight: FontWeight.w800,
+                                    fontSize: 13,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SliverToBoxAdapter(child: SizedBox(height: 10)),
+                        // Notes list
+                        if (hasError)
+                          SliverToBoxAdapter(
+                            child: _NotesErrorState(
+                              message: error is ApiException
+                                  ? error.message
+                                  : 'Unable to load notes.',
+                              onRetry: _loadNotes,
+                            ),
+                          )
+                        else if (notes.isEmpty)
+                          SliverToBoxAdapter(
+                            child: _EmptyNotesState(onAdd: () => _openNoteEditor()),
+                          )
+                        else
+                          SliverList(
+                            delegate: SliverChildBuilderDelegate(
+                              (context, i) => Padding(
+                                padding: const EdgeInsets.only(bottom: 8),
+                                child: _DayNoteRow(
+                                  note: notes[i],
+                                  onTap: () => _openNoteEditor(existing: notes[i]),
+                                  onDelete: () => _confirmDeleteNote(notes[i]),
+                                ),
+                              ),
+                              childCount: notes.length,
+                            ),
+                          ),
+                        const SliverToBoxAdapter(child: SizedBox(height: 14)),
+                        // Add event button
+                        SliverToBoxAdapter(
+                          child: SizedBox(
+                            width: double.infinity,
+                            child: FilledButton.icon(
+                              style: FilledButton.styleFrom(
+                                backgroundColor: AppTheme.primaryDark,
+                              ),
+                              onPressed: widget.onAdd,
+                              icon: const Icon(PhosphorIconsBold.plus, size: 16),
+                              label: const Text('Add event'),
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _EventsSection extends StatelessWidget {
+  const _EventsSection({
+    required this.events,
+    required this.onEdit,
+    required this.onDelete,
+  });
+
+  final List<CalendarEvent> events;
+  final ValueChanged<CalendarEvent> onEdit;
+  final ValueChanged<CalendarEvent> onDelete;
+
+  @override
+  Widget build(BuildContext context) {
+    if (events.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        child: Row(
+          children: [
+            const Icon(
+              PhosphorIconsBold.calendarBlank,
+              size: 18,
+              color: AppTheme.textMuted,
+            ),
+            const SizedBox(width: 10),
+            Text(
+              'No events on this day',
+              style: TextStyle(
+                color: AppTheme.textSecondary,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ],
+        ),
+      );
+    }
+    return ListView.separated(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: events.length,
+      separatorBuilder: (_, _) => const SizedBox(height: 8),
+      itemBuilder: (_, i) => _DayEventRow(
+        event: events[i],
+        onTap: () => onEdit(events[i]),
+        onDelete: events[i].canDelete ? () => onDelete(events[i]) : null,
+      ),
+    );
+  }
+}
+
+class _EmptyNotesState extends StatelessWidget {
+  const _EmptyNotesState({required this.onAdd});
+
+  final VoidCallback onAdd;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                PhosphorIconsBold.notebook,
+                size: 18,
+                color: AppTheme.textMuted,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  'No notes yet',
+                  style: TextStyle(
+                    color: AppTheme.textSecondary,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          FilledButton.icon(
+            style: FilledButton.styleFrom(
+              backgroundColor: AppTheme.primaryDark,
+            ),
+            onPressed: onAdd,
+            icon: const Icon(PhosphorIconsBold.plus, size: 16),
+            label: const Text('Add note'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _NotesErrorState extends StatelessWidget {
+  const _NotesErrorState({required this.message, required this.onRetry});
+
+  final String message;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 14),
+      child: Row(
+        children: [
+          const Icon(
+            PhosphorIconsBold.warningCircle,
+            size: 18,
+            color: AppTheme.danger,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              message,
+              style: const TextStyle(
+                color: AppTheme.danger,
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                height: 1.4,
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: onRetry,
+            child: const Text(
+              'Retry',
+              style: TextStyle(fontWeight: FontWeight.w800),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DayNoteRow extends StatelessWidget {
+  const _DayNoteRow({
+    required this.note,
+    required this.onTap,
+    required this.onDelete,
+  });
+
+  final Note note;
+  final VoidCallback onTap;
+  final VoidCallback onDelete;
+
+  @override
+  Widget build(BuildContext context) {
+    final title = note.title.trim();
+    final description = note.description.trim();
+    final hasBody = title.isNotEmpty || description.isNotEmpty;
+
+    return Material(
+      color: AppTheme.surfaceMuted,
+      borderRadius: BorderRadius.circular(14),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(14),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 10,
+                height: 10,
+                margin: const EdgeInsets.only(top: 4),
+                decoration: const BoxDecoration(
+                  color: AppTheme.primary,
+                  shape: BoxShape.circle,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (title.isNotEmpty)
+                      Text(
+                        title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 14.5,
+                          color: AppTheme.textPrimary,
+                        ),
+                      ),
+                    if (description.isNotEmpty) ...[
+                      if (title.isNotEmpty) const SizedBox(height: 3),
+                      Text(
+                        description,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: AppTheme.textSecondary,
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w600,
+                          height: 1.35,
+                        ),
+                      ),
+                    ],
+                    if (!hasBody)
+                      const Text(
+                        'Empty note',
+                        style: TextStyle(
+                          color: AppTheme.textMuted,
+                          fontSize: 12.5,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              IconButton(
+                visualDensity: VisualDensity.compact,
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+                icon: const Icon(
+                  PhosphorIconsBold.trash,
+                  size: 16,
+                  color: AppTheme.danger,
+                ),
+                onPressed: onDelete,
+              ),
+            ],
+          ),
         ),
       ),
     );
