@@ -110,7 +110,7 @@ $__showAttendanceMenu = !$__hasCompanyFeatureRestrictions || $__showPayrollMenu;
 
                     <li>
                         <a href="<?= base_url(); ?>Page/superAdminCompanies" class="waves-effect">
-                            <i class="ph ph-domain"></i>
+                            <i class="ph ph-buildings"></i>
                             <span> Manage Companies </span>
                         </a>
                     </li>
@@ -124,7 +124,7 @@ $__showAttendanceMenu = !$__hasCompanyFeatureRestrictions || $__showPayrollMenu;
 
                     <li>
                         <a href="<?= base_url(); ?>Page/superAdminAdmins" class="waves-effect">
-                            <i class="ph ph-account-key"></i>
+                            <i class="ph ph-user-gear"></i>
                             <span> Company Admins </span>
                         </a>
                     </li>

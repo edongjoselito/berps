@@ -5123,7 +5123,19 @@ class Page extends CI_Controller
     }
 
     $settingsID = $this->input->get('settingsID');
-    $result['companies'] = $this->db->get('pos_settings')->result();
+
+    // Exclude the letterHead longblob: it is binary (invalid UTF-8), and the
+    // view json_encode()s $companies into an inline <script>. json_encode()
+    // returns false on that blob, which echoes as an empty string and produces
+    // "const companies = ;" -- a syntax error that kills every click handler.
+    $result['companies'] = $this->db
+      ->select('settingsID, CompName, CompAddress, CompTin, Proprietor, CompType, BusinessCategory, package_id, package_ids, offline_first_enabled')
+      ->get('pos_settings')->result();
+
+    // Only select the columns the view actually needs. Selecting * here would
+    // leak each admin's password hash and confirmation_token into the page
+    // source (the view json_encode()s $admins too).
+    $this->db->select('user_id, settingsID, username, email, fName, lName');
 
     // Filter admins by settingsID if provided
     if ($settingsID) {

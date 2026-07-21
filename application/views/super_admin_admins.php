@@ -285,8 +285,8 @@
             const $featuresForm = $('#featuresForm');
             const $featuresCheckboxes = $('#featuresCheckboxes');
 
-            const admins = <?php echo json_encode($admins); ?>;
-            const companies = <?php echo json_encode($companies); ?>;
+            const admins = <?php echo json_encode($admins) ?: '[]'; ?>;
+            const companies = <?php echo json_encode($companies) ?: '[]'; ?>;
 
             // Define available features
             const availableFeatures = [
