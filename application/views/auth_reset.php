@@ -11,17 +11,14 @@
 
   <style>
     :root{
-      --ink:#0f172a;
-      --muted:#5b6475;
-      --border:#d9deeb;
-      --card:#ffffff;
-      --accent:#2563eb;
-      --accent-2:#7c3aed;
-      --bg:radial-gradient(circle at 15% 20%, rgba(37,99,235,.14), transparent 35%),
-           radial-gradient(circle at 85% 0%, rgba(124,58,237,.16), transparent 32%),
-           linear-gradient(150deg,#f7f9ff,#eef2f7);
-      --shadow:0 30px 70px rgba(15,23,42,0.15);
-      --radius:20px;
+      --ink:var(--berps-text);
+      --muted:var(--berps-text-muted);
+      --border:var(--berps-border);
+      --card:var(--berps-surface);
+      --accent:var(--berps-primary);
+      --bg:var(--berps-bg);
+      --shadow:var(--berps-shadow-md);
+      --radius:var(--berps-radius-lg);
     }
     *{box-sizing:border-box}
     html,body{height:100%}
@@ -40,31 +37,11 @@
       background:var(--card);
       border:1px solid var(--border);
       border-radius:var(--radius);
-      box-shadow:var(--shadow), 0 0 0 0 rgba(37,99,235,0.12);
+      box-shadow:var(--shadow);
       padding:26px;
       position:relative;
       overflow:hidden;
-      animation:pulseGlow 8s ease-in-out infinite;
     }
-    .wrap::after{
-      content:'';
-      position:absolute;
-      inset:-2px;
-      border-radius:calc(var(--radius) + 2px);
-      padding:2px;
-      background:linear-gradient(120deg, rgba(37,99,235,0.9), rgba(124,58,237,0.8), rgba(37,99,235,0.9));
-      background-size:320% 320%;
-      animation:borderflow 4s linear infinite;
-      mask:
-        linear-gradient(#fff 0 0) content-box,
-        linear-gradient(#fff 0 0);
-      mask-composite: exclude;
-      -webkit-mask-composite: xor;
-      pointer-events:none;
-      opacity:0.78;
-      transition:opacity .25s ease, filter .25s ease;
-    }
-    .wrap:hover::after{opacity:1;filter:brightness(1.05);animation-duration:3s;}
     .heading{
       display:flex;
       align-items:center;
@@ -72,11 +49,11 @@
       margin-bottom:6px;
     }
     .heading .icon{
-      width:42px;height:42px;border-radius:14px;
-      background:linear-gradient(135deg,var(--accent),var(--accent-2));
-      color:#fff;
+      width:42px;height:42px;border-radius:var(--berps-radius-md);
+      background:var(--berps-primary-soft);
+      color:var(--accent);
       display:grid;place-items:center;
-      box-shadow:0 12px 28px rgba(37,99,235,0.35);
+      box-shadow:none;
     }
     .heading h1{margin:0;font-size:22px;letter-spacing:-0.01em}
     .sub{margin:4px 0 16px;color:var(--muted);line-height:1.5}
@@ -92,7 +69,7 @@
     .input{
       width:100%;
       padding:13px 46px 13px 14px;
-      border-radius:12px;
+      border-radius:var(--berps-radius-md);
       border:1px solid var(--border);
       background:#f8faff;
       font-size:15px;
@@ -122,18 +99,17 @@
       justify-content:center;
       gap:10px;
       border:none;
-      border-radius:12px;
+      border-radius:var(--berps-radius-md);
       padding:13px 14px;
       font-weight:700;
       font-size:15px;
       color:#fff;
-      background:linear-gradient(135deg,var(--accent),var(--accent-2));
+      background:var(--accent);
       cursor:pointer;
-      box-shadow:0 16px 35px rgba(37,99,235,0.35);
-      transition:transform .15s ease, box-shadow .15s ease;
+      box-shadow:none;
+      transition:background-color .15s ease;
     }
-    .btn:hover{transform:translateY(-1px);box-shadow:0 18px 40px rgba(37,99,235,0.4)}
-    .btn:active{transform:translateY(0);box-shadow:0 12px 24px rgba(37,99,235,0.3)}
+    .btn:hover,.btn:active{background:var(--berps-primary-hover)}
     .link{
       display:inline-flex;
       align-items:center;
@@ -152,17 +128,9 @@
       border:1px solid;
     }
     .alert--err{background:#fef2f2;border-color:#fecaca;color:#991b1b}
-    @keyframes borderflow{
-      0%{background-position:0% 50%}
-      50%{background-position:100% 50%}
-      100%{background-position:0% 50%}
-    }
-    @keyframes pulseGlow{
-      0%,100%{box-shadow:var(--shadow),0 0 0 0 rgba(37,99,235,0.12)}
-      50%{box-shadow:var(--shadow),0 0 0 12px rgba(37,99,235,0.06)}
-    }
   </style>
     <link rel="stylesheet" href="<?= base_url('assets/css/fonts.css'); ?>">
+    <link rel="stylesheet" href="<?= base_url('assets/css/berps-design-system.css'); ?>?v=20260722">
 </head>
 <body>
   <div class="wrap">
@@ -194,7 +162,7 @@
       <div>
         <label for="password">New password</label>
         <div class="field">
-          <input id="password" class="input" type="password" name="password" minlength="8" required>
+          <input id="password" class="input" type="password" name="password" minlength="8" autocomplete="new-password" required>
           <button type="button" class="toggle" data-toggle="#password" aria-label="Show password">
             <i class="mdi mdi-eye-outline"></i>
           </button>
@@ -205,7 +173,7 @@
       <div>
         <label for="password2">Confirm password</label>
         <div class="field">
-          <input id="password2" class="input" type="password" name="password2" required>
+          <input id="password2" class="input" type="password" name="password2" autocomplete="new-password" required>
           <button type="button" class="toggle" data-toggle="#password2" aria-label="Show password">
             <i class="mdi mdi-eye-outline"></i>
           </button>

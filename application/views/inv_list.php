@@ -448,6 +448,62 @@
 
                               .invoice-list-page .table-responsive {
                                    border-radius: 18px;
+                                   overflow-x: auto;
+                              }
+
+                              .invoice-list-page .table {
+                                   margin-bottom: 0;
+                                   width: 100% !important;
+                              }
+
+                              .invoice-list-page .table thead th {
+                                   background: #f8fafc;
+                                   border-top: none;
+                                   border-bottom: 2px solid #e5e7eb;
+                                   color: #374151;
+                                   font-weight: 700;
+                                   font-size: 12px;
+                                   letter-spacing: .04em;
+                                   text-transform: uppercase;
+                                   white-space: nowrap;
+                                   padding: 14px 16px;
+                              }
+
+                              .invoice-list-page .table tbody td {
+                                   vertical-align: middle;
+                                   padding: 14px 16px;
+                                   border-top: 1px solid #f1f5f9;
+                                   color: #1f2937;
+                              }
+
+                              .invoice-list-page .table tbody tr:hover td {
+                                   background: #f8fafc;
+                              }
+
+                              .invoice-list-page .dataTables_wrapper .dataTables_filter,
+                              .invoice-list-page .dataTables_wrapper .dataTables_length,
+                              .invoice-list-page .dataTables_wrapper .dataTables_info,
+                              .invoice-list-page .dataTables_wrapper .dataTables_paginate {
+                                   font-size: 13px;
+                                   color: #4b5563;
+                              }
+
+                              .invoice-list-page .dataTables_wrapper .dataTables_filter input {
+                                   border: 1px solid #d1d5db;
+                                   border-radius: 8px;
+                                   padding: 6px 12px;
+                                   margin-left: 8px;
+                              }
+
+                              .invoice-list-page .dataTables_wrapper .dataTables_filter input:focus {
+                                   outline: none;
+                                   border-color: #6366f1;
+                                   box-shadow: 0 0 0 2px rgba(99, 102, 241, .15);
+                              }
+
+                              .invoice-list-page .dataTables_wrapper .dataTables_paginate .paginate_button {
+                                   border-radius: 6px !important;
+                                   margin: 0 2px;
                               }
 
                               .invoice-list-page #invoice-table {
@@ -542,55 +598,22 @@
                                    text-decoration: none;
                               }
 
-                              .invoice-list-page .payment-state {
-                                   display: inline-flex;
-                                   align-items: center;
-                                   gap: 6px;
-                                   padding: 6px 10px;
-                                   border-radius: 999px;
-                                   font-size: 0.72rem;
-                                   font-weight: 700;
-                                   letter-spacing: 0.03em;
-                                   border: 1px solid transparent;
+                              .invoice-list-page .payment-state-text {
+                                   font-size: 12px;
+                                   font-weight: 600;
                                    white-space: nowrap;
                               }
 
-                              .invoice-list-page .payment-state::before {
-                                   content: '';
-                                   width: 7px;
-                                   height: 7px;
-                                   border-radius: 50%;
-                                   flex-shrink: 0;
-                              }
-
                               .invoice-list-page .payment-state--paid {
-                                   background: var(--success-soft);
                                    color: var(--success);
-                                   border-color: #b7f0d9;
-                              }
-
-                              .invoice-list-page .payment-state--paid::before {
-                                   background: var(--success);
                               }
 
                               .invoice-list-page .payment-state--partial {
-                                   background: var(--warning-soft);
                                    color: var(--warning);
-                                   border-color: #fed7aa;
-                              }
-
-                              .invoice-list-page .payment-state--partial::before {
-                                   background: var(--warning);
                               }
 
                               .invoice-list-page .payment-state--unpaid {
-                                   background: var(--danger-soft);
                                    color: var(--danger);
-                                   border-color: #fecdd3;
-                              }
-
-                              .invoice-list-page .payment-state--unpaid::before {
-                                   background: var(--danger);
                               }
 
                               .invoice-list-page .tbl-actions {
@@ -1398,9 +1421,9 @@
                                                                            <?php endif; ?>
                                                                       </td>
                                                                       <td class="text-right">
-                                                                           <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+                                                                           <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
                                                                                 <span class="num-cell"><?= number_format(max($balance, 0), 2); ?></span>
-                                                                                <span class="payment-state <?= $paymentStateClass; ?>"><?= $paymentStateLabel; ?></span>
+                                                                                <span class="payment-state-text <?= $paymentStateClass; ?>"><?= $paymentStateLabel; ?></span>
                                                                            </div>
                                                                       </td>
                                                                       <td class="text-center">
@@ -2386,17 +2409,17 @@
                          responsive: true,
                          autoWidth: false,
                          order: [],
-                         searching: true,
-                         paging: true,
-                         info: true,
-                         lengthChange: true,
-                         dom: '<"row align-items-center mb-2"<"col-sm-6"l><"col-sm-6"f>>' +
+                         pageLength: 10,
+                         lengthMenu: [10, 25, 50, 100],
+                         dom: '<"row align-items-center mb-3"<"col-sm-6"l><"col-sm-6 text-sm-right"f>>' +
                               'rt' +
-                              '<"row align-items-center mt-2"<"col-sm-6"i><"col-sm-6"p>>',
+                              '<"row align-items-center mt-3"<"col-sm-6"i><"col-sm-6"p>>',
                          language: {
                               emptyTable: 'No invoices found.',
                               search: 'Search:',
-                              searchPlaceholder: 'Invoice number or description...'
+                              searchPlaceholder: 'Invoice number or description...',
+                              lengthMenu: 'Show _MENU_ entries',
+                              info: 'Showing _START_ to _END_ of _TOTAL_ invoices'
                          },
                          columnDefs: [{
                               targets: [4, 5, 6],

@@ -365,25 +365,70 @@ $data2 = isset($data2) ? $data2 : array();
                          }
 
                          .invoice-list-page #delivery-table thead th {
-                              background: var(--surface-soft);
-                              color: var(--text);
-                              font-weight: 600;
-                              font-size: 0.875rem;
+                              background: #f8fafc;
+                              color: #374151;
+                              font-weight: 700;
+                              font-size: 12px;
                               padding: 14px 16px;
                               border-bottom: 2px solid var(--line);
                               text-transform: uppercase;
-                              letter-spacing: 0.05em;
+                              letter-spacing: .04em;
+                              white-space: nowrap;
                          }
 
                          .invoice-list-page #delivery-table tbody td {
-                              padding: 13px 12px !important;
-                              border-bottom: 1px solid var(--line);
+                              padding: 14px 16px !important;
+                              border-bottom: 1px solid #f1f5f9;
                               vertical-align: middle;
                               color: var(--text);
                          }
 
                          .invoice-list-page #delivery-table tbody tr:hover {
-                              background: rgba(37, 99, 235, 0.02);
+                              background: #f8fafc;
+                         }
+
+                         .invoice-list-page .dataTables_wrapper .dataTables_filter,
+                         .invoice-list-page .dataTables_wrapper .dataTables_length,
+                         .invoice-list-page .dataTables_wrapper .dataTables_info,
+                         .invoice-list-page .dataTables_wrapper .dataTables_paginate {
+                              font-size: 13px;
+                              color: #4b5563;
+                         }
+
+                         .invoice-list-page .dataTables_wrapper .dataTables_filter input {
+                              border: 1px solid #d1d5db;
+                              border-radius: 8px;
+                              padding: 6px 12px;
+                              margin-left: 8px;
+                         }
+
+                         .invoice-list-page .dataTables_wrapper .dataTables_filter input:focus {
+                              outline: none;
+                              border-color: #6366f1;
+                              box-shadow: 0 0 0 2px rgba(99, 102, 241, .15);
+                         }
+
+                         .invoice-list-page .dataTables_wrapper .dataTables_paginate .paginate_button {
+                              border-radius: 6px !important;
+                              margin: 0 2px;
+                         }
+
+                         .invoice-list-page .delivery-status-text {
+                              font-size: 12px;
+                              font-weight: 600;
+                              text-transform: capitalize;
+                         }
+
+                         .invoice-list-page .delivery-status--delivered {
+                              color: var(--success);
+                         }
+
+                         .invoice-list-page .delivery-status--cancelled {
+                              color: var(--danger);
+                         }
+
+                         .invoice-list-page .delivery-status--pending {
+                              color: var(--warning);
                          }
 
                          /* Minimal sidebar fix - only for this page */
@@ -601,7 +646,7 @@ $data2 = isset($data2) ? $data2 : array();
                                                             <?= number_format($delivery->total_balance, 2); ?>
                                                         </td>
                                                         <td>
-                                                            <span class="badge badge-<?= $delivery->deliveryStatus === 'delivered' ? 'success' : ($delivery->deliveryStatus === 'cancelled' ? 'danger' : 'warning'); ?>">
+                                                            <span class="delivery-status-text delivery-status--<?= $delivery->deliveryStatus === 'delivered' ? 'delivered' : ($delivery->deliveryStatus === 'cancelled' ? 'cancelled' : 'pending'); ?>">
                                                                 <?= ucfirst($delivery->deliveryStatus); ?>
                                                             </span>
                                                         </td>
@@ -682,7 +727,20 @@ $data2 = isset($data2) ? $data2 : array();
         // Initialize DataTables
         $('#delivery-table').DataTable({
             responsive: true,
+            autoWidth: false,
             order: [[0, 'desc']],
+            pageLength: 10,
+            lengthMenu: [10, 25, 50, 100],
+            dom: '<"row align-items-center mb-3"<"col-sm-6"l><"col-sm-6 text-sm-right"f>>' +
+                 'rt' +
+                 '<"row align-items-center mt-3"<"col-sm-6"i><"col-sm-6"p>>',
+            language: {
+                emptyTable: 'No deliveries found.',
+                search: 'Search:',
+                searchPlaceholder: 'Delivery no, customer...',
+                lengthMenu: 'Show _MENU_ entries',
+                info: 'Showing _START_ to _END_ of _TOTAL_ deliveries'
+            },
             columnDefs: [
                 { orderable: false, targets: 7 }
             ]

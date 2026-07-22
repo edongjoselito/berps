@@ -1,0 +1,550 @@
+/*
+ * BERPS shared design system
+ *
+ * This file is the visual baseline for every screen that loads fonts.css.
+ * Keep reusable tokens and components here. Page views should only contain
+ * layout rules that are genuinely unique to that page.
+ */
+
+:root {
+  --berps-primary: #1f5bc6;
+  --berps-primary-hover: #174aa6;
+  --berps-primary-soft: #edf4ff;
+  --berps-primary-border: #c9d9f3;
+
+  --berps-bg: #f5f7fa;
+  --berps-surface: #ffffff;
+  --berps-surface-soft: #f8fafc;
+  --berps-surface-muted: #eef2f6;
+
+  --berps-text: #142033;
+  --berps-text-muted: #607086;
+  --berps-text-subtle: #8491a3;
+  --berps-border: #dfe5ec;
+  --berps-border-strong: #cbd5e1;
+
+  --berps-success: #147a54;
+  --berps-success-soft: #eaf7f1;
+  --berps-warning: #a86112;
+  --berps-warning-soft: #fff5e7;
+  --berps-danger: #c73545;
+  --berps-danger-soft: #fff0f2;
+  --berps-info: #176b87;
+  --berps-info-soft: #eaf7fb;
+
+  --berps-radius-xs: 4px;
+  --berps-radius-sm: 6px;
+  --berps-radius-md: 8px;
+  --berps-radius-lg: 12px;
+  --berps-radius-pill: 999px;
+
+  --berps-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05);
+  --berps-shadow-md: 0 8px 24px rgba(15, 23, 42, 0.08);
+  --berps-shadow-lg: 0 20px 50px rgba(15, 23, 42, 0.14);
+
+  --berps-space-1: 4px;
+  --berps-space-2: 8px;
+  --berps-space-3: 12px;
+  --berps-space-4: 16px;
+  --berps-space-5: 20px;
+  --berps-space-6: 24px;
+  --berps-space-8: 32px;
+  --berps-space-10: 40px;
+
+  --berps-control-height: 40px;
+  --berps-content-top-gap: 24px;
+  --berps-content-bottom-gap: 40px;
+  --berps-sidebar-width: 240px;
+  --berps-topbar-height: 70px;
+
+  /* Compatibility aliases for existing page-level themes. */
+  --primary: var(--berps-primary);
+  --primary-dark: var(--berps-primary-hover);
+  --primary-soft: var(--berps-primary-soft);
+  --surface: var(--berps-surface);
+  --surface-soft: var(--berps-surface-soft);
+  --line: var(--berps-border);
+  --text: var(--berps-text);
+  --text-soft: var(--berps-text-muted);
+}
+
+html {
+  color: var(--berps-text);
+  background: var(--berps-bg);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  min-height: 100vh;
+  color: var(--berps-text);
+  background: var(--berps-bg);
+}
+
+::selection {
+  color: #fff;
+  background: var(--berps-primary);
+}
+
+a {
+  color: var(--berps-primary);
+}
+
+a:hover {
+  color: var(--berps-primary-hover);
+}
+
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 3px solid rgba(31, 91, 198, 0.24) !important;
+  outline-offset: 2px;
+}
+
+@media screen {
+  /* Application shell --------------------------------------------------- */
+  #wrapper {
+    min-height: 100vh;
+    background: var(--berps-bg);
+  }
+
+  .navbar-custom {
+    border-bottom: 1px solid var(--berps-border);
+    background: rgba(255, 255, 255, 0.98);
+    box-shadow: none;
+  }
+
+  .navbar-custom .topnav-menu .nav-link {
+    color: var(--berps-text-muted);
+  }
+
+  .navbar-custom .topnav-menu .nav-link:hover,
+  .navbar-custom .topnav-menu .nav-link:focus,
+  .navbar-custom .dropdown.show .nav-link {
+    color: var(--berps-primary);
+    background: var(--berps-primary-soft);
+  }
+
+  .navbar-custom .app-search .form-control,
+  .navbar-custom .app-search .btn {
+    border-color: var(--berps-border);
+    background: var(--berps-surface-soft);
+  }
+
+  .left-side-menu,
+  .logo-box {
+    background: #17243a;
+  }
+
+  #sidebar-menu .menu-title {
+    color: #8190a7;
+    font-size: 0.68rem;
+    letter-spacing: 0.09em;
+  }
+
+  #sidebar-menu > ul > li > a,
+  .nav-second-level li a,
+  .nav-thrid-level li a {
+    color: #aab6c8;
+  }
+
+  #sidebar-menu > ul > li > a:hover,
+  #sidebar-menu > ul > li > a:focus,
+  #sidebar-menu > ul > li > a.active,
+  #sidebar-menu li.mm-active > a,
+  .nav-second-level li a:hover,
+  .nav-second-level li a:focus {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.07);
+  }
+
+  #sidebar-menu > ul > li > a.active {
+    box-shadow: inset 3px 0 0 var(--berps-primary);
+  }
+
+  .content-page {
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100vh - var(--berps-topbar-height));
+    padding-bottom: 0;
+    background: var(--berps-bg);
+  }
+
+  .content-page > .content {
+    flex: 1 0 auto;
+    width: 100%;
+    padding-top: var(--berps-content-top-gap);
+    padding-bottom: var(--berps-content-bottom-gap);
+  }
+
+  .content-page > .footer,
+  .content-page .berps-app-footer {
+    flex: 0 0 auto;
+    margin-top: auto !important;
+  }
+
+  .content-page .container-fluid > :first-child {
+    margin-top: 0;
+  }
+
+  /* Type hierarchy ------------------------------------------------------ */
+  .page-title,
+  .berps-page-title {
+    margin: 0;
+    color: var(--berps-text);
+    font-size: clamp(1.5rem, 2vw, 2rem);
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.025em;
+  }
+
+  .page-subtitle,
+  .berps-page-subtitle {
+    margin: var(--berps-space-2) 0 0;
+    color: var(--berps-text-muted);
+    font-size: 0.92rem;
+    line-height: 1.6;
+  }
+
+  .text-muted {
+    color: var(--berps-text-muted) !important;
+  }
+
+  /* Surfaces ------------------------------------------------------------ */
+  .card,
+  .theme-card,
+  .panel-card {
+    border: 1px solid var(--berps-border);
+    border-radius: var(--berps-radius-lg);
+    background: var(--berps-surface);
+    box-shadow: var(--berps-shadow-sm);
+  }
+
+  .card-header,
+  .theme-card-head,
+  .panel-header {
+    border-bottom: 1px solid var(--berps-border);
+    background: var(--berps-surface);
+  }
+
+  .card-footer,
+  .theme-card-footer,
+  .panel-footer {
+    border-top: 1px solid var(--berps-border);
+    background: var(--berps-surface-soft);
+  }
+
+  /* Buttons ------------------------------------------------------------- */
+  .btn,
+  .btn-action,
+  .btn-submit,
+  .btn-solid,
+  .btn-soft {
+    min-height: var(--berps-control-height);
+    border-radius: var(--berps-radius-md);
+    font-weight: 600;
+    box-shadow: none;
+    transition: color 0.16s ease, background-color 0.16s ease,
+      border-color 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease;
+  }
+
+  .btn:hover,
+  .btn-action:hover,
+  .btn-submit:hover,
+  .btn-solid:hover,
+  .btn-soft:hover {
+    transform: none;
+  }
+
+  .btn-primary,
+  .btn-submit,
+  .btn-solid {
+    border-color: var(--berps-primary);
+    background-color: var(--berps-primary);
+    background-image: none;
+    color: #fff;
+  }
+
+  .btn-primary:hover,
+  .btn-primary:focus,
+  .btn-submit:hover,
+  .btn-submit:focus,
+  .btn-solid:hover,
+  .btn-solid:focus {
+    border-color: var(--berps-primary-hover);
+    background-color: var(--berps-primary-hover);
+    color: #fff;
+  }
+
+  .btn-secondary,
+  .btn-light,
+  .btn-soft,
+  .btn-action {
+    border-color: var(--berps-border-strong);
+    background: var(--berps-surface);
+    color: var(--berps-text);
+  }
+
+  .btn-secondary:hover,
+  .btn-light:hover,
+  .btn-soft:hover,
+  .btn-action:hover {
+    border-color: var(--berps-primary-border);
+    background: var(--berps-primary-soft);
+    color: var(--berps-primary-hover);
+  }
+
+  .btn-danger {
+    border-color: var(--berps-danger);
+    background: var(--berps-danger);
+  }
+
+  .btn-sm {
+    min-height: 34px;
+    border-radius: var(--berps-radius-sm);
+  }
+
+  /* Forms --------------------------------------------------------------- */
+  .form-control,
+  .custom-select,
+  .select2-container .select2-selection--single,
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="date"],
+  input[type="time"],
+  select,
+  textarea {
+    border-color: var(--berps-border-strong);
+    border-radius: var(--berps-radius-md);
+    background-color: var(--berps-surface);
+    color: var(--berps-text);
+    box-shadow: none;
+  }
+
+  .form-control:focus,
+  .custom-select:focus,
+  input:focus,
+  select:focus,
+  textarea:focus {
+    border-color: var(--berps-primary);
+    box-shadow: 0 0 0 3px rgba(31, 91, 198, 0.12);
+  }
+
+  .form-group label,
+  .control-label {
+    color: var(--berps-text);
+    font-size: 0.84rem;
+    font-weight: 600;
+  }
+
+  .form-text,
+  .help-block {
+    color: var(--berps-text-muted);
+    font-size: 0.8rem;
+  }
+
+  /* Tables -------------------------------------------------------------- */
+  .table {
+    color: var(--berps-text);
+    background: var(--berps-surface);
+  }
+
+  .table thead th {
+    border-top: 0;
+    border-bottom: 1px solid var(--berps-border-strong);
+    background: var(--berps-surface-soft);
+    color: var(--berps-text-muted);
+    font-size: 0.76rem;
+    font-weight: 700;
+    letter-spacing: 0.035em;
+    text-transform: uppercase;
+  }
+
+  .table td,
+  .table th {
+    border-color: var(--berps-border);
+    vertical-align: middle;
+  }
+
+  .table-hover tbody tr:hover {
+    background: #f7faff;
+  }
+
+  .table-responsive {
+    border-radius: var(--berps-radius-md);
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .dataTables_wrapper .dataTables_filter input,
+  .dataTables_wrapper .dataTables_length select {
+    min-height: 36px;
+    border: 1px solid var(--berps-border-strong);
+    border-radius: var(--berps-radius-sm);
+    background: var(--berps-surface);
+  }
+
+  .page-item .page-link {
+    border-color: var(--berps-border);
+    color: var(--berps-text-muted);
+  }
+
+  .page-item.active .page-link {
+    border-color: var(--berps-primary);
+    background: var(--berps-primary);
+  }
+
+  /* Feedback and overlays --------------------------------------------- */
+  .alert {
+    border: 1px solid var(--berps-border);
+    border-radius: var(--berps-radius-md);
+    box-shadow: none;
+  }
+
+  .alert-success {
+    border-color: #b9dfce;
+    background: var(--berps-success-soft);
+    color: var(--berps-success);
+  }
+
+  .alert-warning {
+    border-color: #efd2a9;
+    background: var(--berps-warning-soft);
+    color: var(--berps-warning);
+  }
+
+  .alert-danger {
+    border-color: #efc2c8;
+    background: var(--berps-danger-soft);
+    color: var(--berps-danger);
+  }
+
+  .badge {
+    border-radius: var(--berps-radius-pill);
+    font-weight: 600;
+  }
+
+  .dropdown-menu {
+    border: 1px solid var(--berps-border);
+    border-radius: var(--berps-radius-lg);
+    box-shadow: var(--berps-shadow-md);
+  }
+
+  .dropdown-item:hover,
+  .dropdown-item:focus {
+    background: var(--berps-primary-soft);
+    color: var(--berps-primary-hover);
+  }
+
+  .modal-content {
+    border: 1px solid var(--berps-border);
+    border-radius: var(--berps-radius-lg);
+    box-shadow: var(--berps-shadow-lg);
+  }
+
+  .modal-header,
+  .modal-footer {
+    border-color: var(--berps-border);
+  }
+
+  /* Shared application footer ----------------------------------------- */
+  .berps-app-footer {
+    position: relative;
+    right: auto;
+    bottom: auto;
+    left: auto;
+    width: auto;
+    min-height: auto;
+    padding: 0;
+    border-top: 1px solid var(--berps-border);
+    background: var(--berps-surface);
+    color: var(--berps-text-muted);
+    font-size: 0.8rem;
+  }
+
+  .berps-app-footer__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--berps-space-4) var(--berps-space-6);
+    min-height: 68px;
+    padding: var(--berps-space-4) 0;
+  }
+
+  .berps-app-footer__brand,
+  .berps-app-footer__links,
+  .berps-app-footer__social {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--berps-space-2) var(--berps-space-4);
+  }
+
+  .berps-app-footer__brand strong {
+    color: var(--berps-text);
+    font-size: 0.88rem;
+  }
+
+  .berps-app-footer a {
+    color: var(--berps-text-muted);
+    text-decoration: none;
+  }
+
+  .berps-app-footer a:hover,
+  .berps-app-footer a:focus {
+    color: var(--berps-primary);
+    text-decoration: none;
+  }
+
+  .berps-app-footer__links a,
+  .berps-app-footer__links span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .berps-app-footer__social a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--berps-border);
+    border-radius: var(--berps-radius-md);
+    background: var(--berps-surface-soft);
+    color: var(--berps-text-muted);
+  }
+}
+
+@media screen and (max-width: 767.98px) {
+  :root {
+    --berps-content-top-gap: 18px;
+    --berps-content-bottom-gap: 32px;
+  }
+
+  .content-page {
+    min-height: calc(100vh - var(--berps-topbar-height));
+  }
+
+  .berps-app-footer__inner {
+    align-items: flex-start;
+    flex-direction: column;
+    min-height: auto;
+    padding: var(--berps-space-5) 0;
+  }
+
+  .berps-app-footer__links {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

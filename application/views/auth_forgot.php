@@ -12,17 +12,14 @@
 
   <style>
     :root {
-      --ink: #0f172a;
-      --muted: #5b6475;
-      --border: #d9deeb;
-      --card: #ffffff;
-      --accent: #2563eb;
-      --accent-2: #7c3aed;
-      --bg: radial-gradient(circle at 20% 20%, rgba(124, 58, 237, .12), transparent 35%),
-        radial-gradient(circle at 80% 0%, rgba(37, 99, 235, .16), transparent 30%),
-        linear-gradient(135deg, #f7f9ff, #eef2f7);
-      --shadow: 0 30px 70px rgba(15, 23, 42, 0.15);
-      --radius: 20px;
+      --ink: var(--berps-text);
+      --muted: var(--berps-text-muted);
+      --border: var(--berps-border);
+      --card: var(--berps-surface);
+      --accent: var(--berps-primary);
+      --bg: var(--berps-bg);
+      --shadow: var(--berps-shadow-md);
+      --radius: var(--berps-radius-lg);
     }
 
     * {
@@ -62,12 +59,12 @@
       align-items: center;
       gap: 10px;
       padding: 10px 14px;
-      border-radius: 999px;
-      background: rgba(37, 99, 235, 0.12);
+      border-radius: var(--berps-radius-pill);
+      background: var(--berps-primary-soft);
       color: var(--accent);
       font-weight: 700;
       font-size: 14px;
-      border: 1px solid rgba(37, 99, 235, 0.22);
+      border: 1px solid var(--berps-primary-border);
     }
 
     .hero h1 {
@@ -88,31 +85,11 @@
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      box-shadow: var(--shadow), 0 0 0 0 rgba(37, 99, 235, 0.12);
+      box-shadow: var(--shadow);
       padding: 26px;
       position: relative;
       overflow: hidden;
-      animation: pulseGlow 8s ease-in-out infinite;
     }
-    .card::after {
-      content: '';
-      position: absolute;
-      inset: -2px;
-      border-radius: calc(var(--radius) + 2px);
-      padding: 2px;
-      background: linear-gradient(120deg, rgba(37, 99, 235, 0.9), rgba(124, 58, 237, 0.8), rgba(37, 99, 235, 0.9));
-      background-size: 320% 320%;
-      animation: borderflow 4s linear infinite;
-      mask:
-        linear-gradient(#fff 0 0) content-box,
-        linear-gradient(#fff 0 0);
-      mask-composite: exclude;
-      -webkit-mask-composite: xor;
-      pointer-events: none;
-      opacity: 0.78;
-      transition: opacity .25s ease, filter .25s ease;
-    }
-    .card:hover::after { opacity: 1; filter: brightness(1.05); animation-duration: 3s; }
 
     .card h2 {
       margin: 0 0 6px;
@@ -142,7 +119,7 @@
     .input {
       width: 100%;
       padding: 13px 14px;
-      border-radius: 12px;
+      border-radius: var(--berps-radius-md);
       border: 1px solid var(--border);
       background: #f8faff;
       font-size: 15px;
@@ -163,25 +140,23 @@
       justify-content: center;
       gap: 10px;
       border: none;
-      border-radius: 12px;
+      border-radius: var(--berps-radius-md);
       padding: 13px 14px;
       font-weight: 700;
       font-size: 15px;
       color: #fff;
-      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      background: var(--accent);
       cursor: pointer;
-      box-shadow: 0 16px 35px rgba(37, 99, 235, 0.35);
-      transition: transform .15s ease, box-shadow .15s ease;
+      box-shadow: none;
+      transition: background-color .15s ease;
     }
 
     .btn:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 18px 40px rgba(37, 99, 235, 0.4)
+      background: var(--berps-primary-hover);
     }
 
     .btn:active {
-      transform: translateY(0);
-      box-shadow: 0 12px 24px rgba(37, 99, 235, 0.3)
+      background: var(--berps-primary-hover);
     }
 
     .link {
@@ -230,17 +205,9 @@
         padding: 22px
       }
     }
-    @keyframes borderflow{
-      0%{background-position:0% 50%}
-      50%{background-position:100% 50%}
-      100%{background-position:0% 50%}
-    }
-    @keyframes pulseGlow{
-      0%,100%{box-shadow:var(--shadow),0 0 0 0 rgba(37,99,235,0.12)}
-      50%{box-shadow:var(--shadow),0 0 0 12px rgba(37,99,235,0.06)}
-    }
   </style>
     <link rel="stylesheet" href="<?= base_url('assets/css/fonts.css'); ?>">
+    <link rel="stylesheet" href="<?= base_url('assets/css/berps-design-system.css'); ?>?v=20260722">
 </head>
 
 <body>
@@ -274,14 +241,14 @@
       <?php endif; ?>
 
       <div>
-        <label>Username</label>
-        <input class="input" type="text" name="username" value="<?= set_value('username'); ?>" autocomplete="username" required>
+        <label for="forgotUsername">Username</label>
+        <input class="input" id="forgotUsername" type="text" name="username" value="<?= set_value('username'); ?>" autocomplete="username" required>
         <?= form_error('username', '<div class="alert alert--err" style="margin-top:8px">', '</div>'); ?>
       </div>
 
       <div>
-        <label>Email </label>
-        <input class="input" type="email" name="email" value="<?= set_value('email'); ?>" required>
+        <label for="forgotEmail">Email</label>
+        <input class="input" id="forgotEmail" type="email" name="email" value="<?= set_value('email'); ?>" autocomplete="email" required>
         <?= form_error('email', '<div class="alert alert--err" style="margin-top:8px">', '</div>'); ?>
       </div>
 

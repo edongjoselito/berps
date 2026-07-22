@@ -377,22 +377,58 @@ font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
 
                         .payment-list-page .table {
                             margin-bottom: 0;
+                            width: 100% !important;
                         }
 
                         .payment-list-page .table thead th {
                             border-top: none;
-                            border-bottom: 1px solid var(--line);
-                            color: var(--text-faint);
-                            font-size: 0.72rem;
-                            font-weight: 800;
-                            letter-spacing: 0.08em;
+                            border-bottom: 2px solid var(--line);
+                            background: #f8fafc;
+                            color: #374151;
+                            font-size: 12px;
+                            font-weight: 700;
+                            letter-spacing: .04em;
                             text-transform: uppercase;
                             white-space: nowrap;
+                            padding: 14px 16px;
                         }
 
                         .payment-list-page .table td {
                             vertical-align: middle;
                             border-color: var(--line);
+                            padding: 14px 16px;
+                            border-top: 1px solid #f1f5f9;
+                            color: #1f2937;
+                        }
+
+                        .payment-list-page .table tbody tr:hover td {
+                            background: #f8fafc;
+                        }
+
+                        .payment-list-page .dataTables_wrapper .dataTables_filter,
+                        .payment-list-page .dataTables_wrapper .dataTables_length,
+                        .payment-list-page .dataTables_wrapper .dataTables_info,
+                        .payment-list-page .dataTables_wrapper .dataTables_paginate {
+                            font-size: 13px;
+                            color: #4b5563;
+                        }
+
+                        .payment-list-page .dataTables_wrapper .dataTables_filter input {
+                            border: 1px solid #d1d5db;
+                            border-radius: 8px;
+                            padding: 6px 12px;
+                            margin-left: 8px;
+                        }
+
+                        .payment-list-page .dataTables_wrapper .dataTables_filter input:focus {
+                            outline: none;
+                            border-color: #6366f1;
+                            box-shadow: 0 0 0 2px rgba(99, 102, 241, .15);
+                        }
+
+                        .payment-list-page .dataTables_wrapper .dataTables_paginate .paginate_button {
+                            border-radius: 6px !important;
+                            margin: 0 2px;
                         }
 
                         .payment-list-page .invoice-link {
@@ -1101,8 +1137,33 @@ body.payment-list-body {
 
                 if ($paymentTable.length && $paymentTable.find('tbody tr').not(':has(td[colspan])').length > 0) {
                     try {
+                        if ($.fn.DataTable.isDataTable('#payment-table')) {
+                            $paymentTable.DataTable().destroy();
+                        }
                         var table = $paymentTable.DataTable({
-                            pageLength: 25
+                            responsive: true,
+                            autoWidth: false,
+                            order: [],
+                            pageLength: 10,
+                            lengthMenu: [10, 25, 50, 100],
+                            dom: '<"row align-items-center mb-3"<"col-sm-6"l><"col-sm-6 text-sm-right"f>>' +
+                                 'rt' +
+                                 '<"row align-items-center mt-3"<"col-sm-6"i><"col-sm-6"p>>',
+                            language: {
+                                emptyTable: 'No payments found.',
+                                search: 'Search:',
+                                searchPlaceholder: 'Invoice no, payor, OR no...',
+                                lengthMenu: 'Show _MENU_ entries',
+                                info: 'Showing _START_ to _END_ of _TOTAL_ payments'
+                            },
+                            columnDefs: [{
+                                targets: [3, 4, 5],
+                                className: 'text-right'
+                            }, {
+                                targets: -1,
+                                orderable: false,
+                                searchable: false
+                            }]
                         });
                     } catch (e) {
                         console.error('DataTables initialization error:', e);

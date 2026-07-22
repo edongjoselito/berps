@@ -345,30 +345,57 @@ foreach ($jobOrders as $jobOrder) {
 
                         .job-order-page .table {
                             margin-bottom: 0;
+                            width: 100% !important;
                         }
 
                         .job-order-page .table thead th {
                             border-top: 0;
-                            border-bottom: 1px solid var(--line);
-                            color: var(--text-faint);
-                            font-size: 0.74rem;
-                            font-weight: 800;
+                            border-bottom: 2px solid var(--line);
+                            color: #374151;
+                            font-size: 12px;
+                            font-weight: 700;
                             text-transform: uppercase;
-                            letter-spacing: 0.08em;
-                            background: #f9fbfe;
-                            padding-top: 14px;
-                            padding-bottom: 14px;
+                            letter-spacing: .04em;
+                            background: #f8fafc;
+                            padding: 14px 16px;
                             white-space: nowrap;
                         }
 
                         .job-order-page .table td {
                             vertical-align: middle;
-                            border-top: 1px solid #eef3f8;
+                            border-top: 1px solid #f1f5f9;
                             color: var(--text);
+                            padding: 14px 16px;
                         }
 
                         .job-order-page .table tbody tr:hover {
                             background: rgba(37, 99, 235, 0.03);
+                        }
+
+                        .job-order-page .dataTables_wrapper .dataTables_filter,
+                        .job-order-page .dataTables_wrapper .dataTables_length,
+                        .job-order-page .dataTables_wrapper .dataTables_info,
+                        .job-order-page .dataTables_wrapper .dataTables_paginate {
+                            font-size: 13px;
+                            color: #4b5563;
+                        }
+
+                        .job-order-page .dataTables_wrapper .dataTables_filter input {
+                            border: 1px solid var(--line-strong);
+                            border-radius: 8px;
+                            padding: 6px 12px;
+                            margin-left: 8px;
+                        }
+
+                        .job-order-page .dataTables_wrapper .dataTables_filter input:focus {
+                            outline: none;
+                            border-color: var(--primary);
+                            box-shadow: 0 0 0 2px rgba(37, 99, 235, .12);
+                        }
+
+                        .job-order-page .dataTables_wrapper .dataTables_paginate .paginate_button {
+                            border-radius: 6px !important;
+                            margin: 0 2px;
                         }
 
                         .job-order-page .inv-no-link {
@@ -421,30 +448,21 @@ foreach ($jobOrders as $jobOrder) {
                             text-decoration: underline;
                         }
 
-                        .job-order-page .payment-state {
-                            display: inline-flex;
-                            align-items: center;
-                            justify-content: center;
-                            padding: 4px 10px;
-                            border-radius: 999px;
-                            font-size: 0.74rem;
-                            font-weight: 700;
-                            letter-spacing: 0.01em;
+                        .job-order-page .payment-state-text {
+                            font-size: 12px;
+                            font-weight: 600;
                             white-space: nowrap;
                         }
 
                         .job-order-page .payment-state--paid {
-                            background: var(--success-soft);
                             color: var(--success);
                         }
 
                         .job-order-page .payment-state--partial {
-                            background: var(--warning-soft);
                             color: var(--warning);
                         }
 
                         .job-order-page .payment-state--unpaid {
-                            background: var(--danger-soft);
                             color: var(--danger);
                         }
 
@@ -744,9 +762,9 @@ foreach ($jobOrders as $jobOrder) {
                                                         <?php endif; ?>
                                                     </td>
                                                     <td class="text-right">
-                                                        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+                                                        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
                                                             <span class="num-cell"><?= number_format(max($balance, 0), 2); ?></span>
-                                                            <span class="payment-state <?= $paymentStateClass; ?>"><?= $paymentStateLabel; ?></span>
+                                                            <span class="payment-state-text <?= $paymentStateClass; ?>"><?= $paymentStateLabel; ?></span>
                                                         </div>
                                                     </td>
                                                     <td class="text-center">
@@ -839,10 +857,18 @@ foreach ($jobOrders as $jobOrder) {
                     responsive: true,
                     autoWidth: false,
                     stateSave: true,
-                    pageLength: 25,
+                    pageLength: 10,
+                    lengthMenu: [10, 25, 50, 100],
                     order: [],
+                    dom: '<"row align-items-center mb-3"<"col-sm-6"l><"col-sm-6 text-sm-right"f>>' +
+                         'rt' +
+                         '<"row align-items-center mt-3"<"col-sm-6"i><"col-sm-6"p>>',
                     language: {
-                        emptyTable: 'No job orders found.'
+                        emptyTable: 'No job orders found.',
+                        search: 'Search:',
+                        searchPlaceholder: 'Invoice no, customer, description...',
+                        lengthMenu: 'Show _MENU_ entries',
+                        info: 'Showing _START_ to _END_ of _TOTAL_ job orders'
                     },
                     columnDefs: [{
                         targets: [4, 5, 6],

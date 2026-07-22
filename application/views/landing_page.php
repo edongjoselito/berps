@@ -12,21 +12,22 @@
     <link rel="icon" type="image/png" href="<?= base_url('assets/images/logo-sm1.png'); ?>">
     <link rel="apple-touch-icon" sizes="180x180" href="<?= base_url('assets/images/logo-sm1.png'); ?>">
     <link rel="stylesheet" href="<?= base_url('assets/css/fonts.css'); ?>">
+    <link rel="stylesheet" href="<?= base_url('assets/css/berps-design-system.css'); ?>?v=20260722">
     <link rel="stylesheet" href="<?= base_url('assets/plugins/fontawesome-free/css/all.min.css'); ?>">
 
     <style>
         :root {
-            --bg: #e8f1fb;
-            --panel: rgba(255, 255, 255, 0.96);
-            --bg-card: #ffffff;
-            --border: rgba(15, 54, 111, 0.16);
-            --primary: #1b5ed6;
-            --primary-dark: #114cb3;
-            --primary-light: #4a8dff;
-            --text: #0b1d3d;
-            --muted: rgba(11, 29, 61, 0.65);
-            --error: #c62828;
-            --success: #2e7d32;
+            --bg: var(--berps-bg);
+            --panel: var(--berps-surface);
+            --bg-card: var(--berps-surface);
+            --border: var(--berps-border);
+            --primary: var(--berps-primary);
+            --primary-dark: var(--berps-primary-hover);
+            --primary-light: #4b7fd7;
+            --text: var(--berps-text);
+            --muted: var(--berps-text-muted);
+            --error: var(--berps-danger);
+            --success: var(--berps-success);
         }
 
         * {
@@ -37,7 +38,7 @@
 
         body {
             font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
-            background: linear-gradient(135deg, #fefefe, var(--bg));
+            background: var(--berps-surface);
             color: var(--text);
             line-height: 1.6;
         }
@@ -48,10 +49,9 @@
             top: 0;
             left: 0;
             right: 0;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.98);
             border-bottom: 1px solid var(--border);
-            padding: 16px 32px;
+            padding: 12px clamp(20px, 4vw, 56px);
             z-index: 1000;
             display: flex;
             justify-content: space-between;
@@ -67,9 +67,8 @@
         }
 
         .navbar-brand img {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
+            width: 44px;
+            height: 44px;
         }
 
         .navbar-brand span {
@@ -80,8 +79,23 @@
 
         .navbar-nav {
             display: flex;
-            gap: 24px;
+            gap: 12px;
             align-items: center;
+        }
+
+        .navbar-toggle {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            width: 42px;
+            height: 42px;
+            padding: 0;
+            border: 1px solid var(--border);
+            border-radius: var(--berps-radius-md);
+            background: white;
+            color: var(--text);
+            font-size: 20px;
+            cursor: pointer;
         }
 
         .navbar-nav a {
@@ -99,8 +113,8 @@
         }
 
         .btn-nav {
-            padding: 10px 24px;
-            border-radius: 10px;
+            padding: 9px 18px;
+            border-radius: var(--berps-radius-md);
             background: var(--primary);
             color: white !important;
             font-weight: 600;
@@ -109,32 +123,31 @@
 
         .btn-nav:hover {
             background: var(--primary-dark);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(27, 94, 214, 0.3);
         }
 
         .btn-nav-secondary {
-            padding: 10px 24px;
-            border-radius: 10px;
+            padding: 9px 18px;
+            border-radius: var(--berps-radius-md);
             background: transparent;
             color: var(--primary) !important;
             font-weight: 600;
-            border: 2px solid var(--primary);
+            border: 1px solid var(--primary);
             transition: all 0.3s ease;
         }
 
         .btn-nav-secondary:hover {
-            background: var(--primary);
-            color: white !important;
-            transform: translateY(-2px);
+            background: var(--primary-soft);
+            color: var(--primary-dark) !important;
         }
 
         /* Hero Section */
         .hero {
-            padding: 160px 32px 100px;
+            padding: 156px 32px 96px;
             text-align: center;
             position: relative;
             overflow: hidden;
+            background: var(--berps-surface-soft);
+            border-bottom: 1px solid var(--border);
         }
 
         .hero-content {
@@ -145,17 +158,25 @@
         }
 
         .hero h1 {
-            font-size: clamp(40px, 5vw, 64px);
+            font-size: clamp(38px, 5vw, 60px);
             font-weight: 800;
             margin-bottom: 24px;
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: var(--text);
+            letter-spacing: -0.045em;
+            line-height: 1.08;
+        }
+
+        .hero-label {
+            margin-bottom: 18px;
+            color: var(--primary);
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
         }
 
         .hero p {
-            font-size: clamp(18px, 2vw, 22px);
+            font-size: clamp(17px, 2vw, 20px);
             color: var(--muted);
             margin-bottom: 40px;
             max-width: 700px;
@@ -171,8 +192,8 @@
         }
 
         .btn-hero {
-            padding: 16px 40px;
-            border-radius: 12px;
+            padding: 14px 26px;
+            border-radius: var(--berps-radius-md);
             font-size: 16px;
             font-weight: 700;
             text-decoration: none;
@@ -182,31 +203,28 @@
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            background: var(--primary);
             color: white;
-            box-shadow: 0 12px 30px rgba(27, 94, 214, 0.4);
         }
 
         .btn-primary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 16px 40px rgba(27, 94, 214, 0.5);
+            background: var(--primary-dark);
         }
 
         .btn-secondary {
             background: white;
             color: var(--primary);
-            border: 2px solid var(--primary);
+            border: 1px solid var(--primary);
         }
 
         .btn-secondary:hover {
-            background: var(--primary);
-            color: white;
-            transform: translateY(-3px);
+            background: var(--primary-soft);
+            color: var(--primary-dark);
         }
 
         /* Features Section */
         .features {
-            padding: 100px 32px;
+            padding: 88px 32px;
             background: white;
         }
 
@@ -217,11 +235,11 @@
 
         .section-title {
             text-align: center;
-            margin-bottom: 60px;
+            margin-bottom: 44px;
         }
 
         .section-title h2 {
-            font-size: clamp(32px, 4vw, 48px);
+            font-size: clamp(30px, 4vw, 42px);
             font-weight: 700;
             margin-bottom: 16px;
             color: var(--text);
@@ -236,38 +254,38 @@
 
         .features-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 32px;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 20px;
         }
 
         .feature-card {
-            background: var(--bg);
-            border-radius: 20px;
-            padding: 32px;
+            background: var(--bg-card);
+            border-radius: var(--berps-radius-lg);
+            padding: 28px;
             transition: all 0.3s ease;
             border: 1px solid var(--border);
         }
 
         .feature-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 20px 50px rgba(27, 94, 214, 0.15);
+            border-color: var(--berps-primary-border);
+            box-shadow: var(--berps-shadow-sm);
         }
 
         .feature-icon {
-            width: 64px;
-            height: 64px;
-            border-radius: 16px;
-            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            width: 44px;
+            height: 44px;
+            border-radius: var(--berps-radius-md);
+            background: var(--berps-primary-soft);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 28px;
-            color: white;
+            font-size: 20px;
+            color: var(--primary);
             margin-bottom: 20px;
         }
 
         .feature-card h3 {
-            font-size: 22px;
+            font-size: 20px;
             font-weight: 700;
             margin-bottom: 12px;
             color: var(--text);
@@ -278,10 +296,32 @@
             font-size: 15px;
         }
 
+        .feature-list {
+            display: grid;
+            gap: 10px;
+            margin: 20px 0 0;
+            padding: 18px 0 0;
+            border-top: 1px solid var(--border);
+            list-style: none;
+            color: var(--text);
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .feature-list li {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+        }
+
+        .feature-list i {
+            color: var(--success);
+        }
+
         /* CTA Section */
         .cta {
-            padding: 100px 32px;
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            padding: 80px 32px;
+            background: #17243a;
             text-align: center;
             color: white;
         }
@@ -322,11 +362,11 @@
 
         .login-modal-content {
             background: white;
-            border-radius: 20px;
-            padding: 40px;
+            border-radius: var(--berps-radius-lg);
+            padding: 36px;
             max-width: 450px;
             width: 100%;
-            box-shadow: 0 20px 50px rgba(27, 94, 214, 0.2);
+            box-shadow: var(--berps-shadow-lg);
             border: 1px solid var(--border);
             position: relative;
         }
@@ -377,7 +417,7 @@
         .form-group textarea {
             width: 100%;
             padding: 14px 16px;
-            border-radius: 10px;
+            border-radius: var(--berps-radius-md);
             border: 1px solid var(--border);
             background: #f7f9fc;
             font-size: 15px;
@@ -401,9 +441,9 @@
         .btn-submit {
             width: 100%;
             padding: 14px;
-            border-radius: 10px;
+            border-radius: var(--berps-radius-md);
             border: none;
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            background: var(--primary);
             color: white;
             font-size: 16px;
             font-weight: 700;
@@ -412,8 +452,7 @@
         }
 
         .btn-submit:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 30px rgba(27, 94, 214, 0.3);
+            background: var(--primary-dark);
         }
 
         .auth-divider {
@@ -442,7 +481,7 @@
 
         .alert {
             padding: 16px;
-            border-radius: 10px;
+            border-radius: var(--berps-radius-md);
             margin-bottom: 20px;
             font-size: 14px;
         }
@@ -461,9 +500,9 @@
 
         /* Footer */
         .footer {
-            background: var(--text);
+            background: #101a2a;
             color: white;
-            padding: 60px 32px 32px;
+            padding: 26px 32px;
             text-align: center;
         }
 
@@ -479,11 +518,32 @@
             }
 
             .navbar-nav {
-                gap: 12px;
+                display: none;
+                position: absolute;
+                top: calc(100% + 1px);
+                right: 0;
+                left: 0;
+                align-items: stretch;
+                flex-direction: column;
+                gap: 8px;
+                padding: 16px 20px 20px;
+                border-bottom: 1px solid var(--border);
+                background: white;
+                box-shadow: var(--berps-shadow-md);
             }
 
-            .navbar-nav a:not(.btn-nav) {
-                display: none;
+            .navbar-nav.is-open {
+                display: flex;
+            }
+
+            .navbar-nav a {
+                justify-content: center;
+                min-height: 42px;
+                padding: 9px 16px;
+            }
+
+            .navbar-toggle {
+                display: inline-flex;
             }
 
             .hero {
@@ -501,6 +561,10 @@
             .auth-container {
                 grid-template-columns: 1fr;
             }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
@@ -512,7 +576,10 @@
             <img src="<?= base_url('assets/images/logo-sm1.png'); ?>" alt="BERPS">
             <span>BERPS</span>
         </a>
-        <div class="navbar-nav">
+        <button class="navbar-toggle" type="button" id="navbarToggle" aria-controls="publicNavigation" aria-expanded="false" aria-label="Open navigation">
+            <i class="fas fa-bars" aria-hidden="true"></i>
+        </button>
+        <div class="navbar-nav" id="publicNavigation">
             <a href="#features"><i class="fas fa-star"></i> Features</a>
             <a href="<?= site_url('Login/signup_page'); ?>" class="btn-nav-secondary"><i class="fas fa-user-plus"></i> Sign Up</a>
             <a href="#" class="btn-nav" id="loginBtn"><i class="fas fa-sign-in-alt"></i> Login</a>
@@ -527,12 +594,13 @@
                     <?= htmlspecialchars($this->session->flashdata('msg'), ENT_QUOTES, 'UTF-8'); ?>
                 </div>
             <?php endif; ?>
-            
-            <h1>Transform Your Business with BERPS</h1>
-            <p>A comprehensive Business Resource Planning System designed to streamline your operations, from invoicing and job orders to inventory management and sales tracking.</p>
+
+            <div class="hero-label">Business operations, one workspace</div>
+            <h1>Run billing, projects, support, and people operations in one place.</h1>
+            <p>BERPS brings the everyday work of your team into a clear, connected system—from invoices and job orders to tasks, payroll, and customer support.</p>
             <div class="hero-buttons">
-                <a href="<?= site_url('Login/signup_page'); ?>" class="btn-hero btn-primary">Get Started Free</a>
-                <a href="#features" class="btn-hero btn-secondary">Learn More</a>
+                <a href="<?= site_url('Login/signup_page'); ?>" class="btn-hero btn-primary">Create an account</a>
+                <a href="#features" class="btn-hero btn-secondary">Explore the modules</a>
             </div>
         </div>
     </section>
@@ -541,72 +609,45 @@
     <section class="features" id="features">
         <div class="features-container">
             <div class="section-title">
-                <h2>Powerful Features for Your Business</h2>
-                <p>Everything you need to manage your business efficiently in one integrated platform.</p>
+                <h2>Built around the work your team does</h2>
+                <p>Keep related workflows together, reduce repeated encoding, and give every role a clearer view of what needs attention.</p>
             </div>
             <div class="features-grid">
                 <div class="feature-card">
                     <div class="feature-icon">
                         <i class="fas fa-file-invoice"></i>
                     </div>
-                    <h3>Invoicing</h3>
-                    <p>Create professional invoices, track payments, and manage billing cycles effortlessly.</p>
+                    <h3>Sales and finance</h3>
+                    <p>Move from billing to collection with the transaction history and reports your team needs.</p>
+                    <ul class="feature-list">
+                        <li><i class="fas fa-check" aria-hidden="true"></i> Invoices and recurring billing</li>
+                        <li><i class="fas fa-check" aria-hidden="true"></i> Payments and expenses</li>
+                        <li><i class="fas fa-check" aria-hidden="true"></i> Deliveries and sales reports</li>
+                    </ul>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">
                         <i class="fas fa-clipboard-list"></i>
                     </div>
-                    <h3>Job Order Processing & Tracking</h3>
-                    <p>Process and track job orders from creation to completion. Monitor progress, assign tasks, and manage workflows efficiently.</p>
+                    <h3>Projects and customers</h3>
+                    <p>Keep client work, responsibilities, progress, and support conversations connected.</p>
+                    <ul class="feature-list">
+                        <li><i class="fas fa-check" aria-hidden="true"></i> Job orders and projects</li>
+                        <li><i class="fas fa-check" aria-hidden="true"></i> Tasks and team assignments</li>
+                        <li><i class="fas fa-check" aria-hidden="true"></i> Clients and support tickets</li>
+                    </ul>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">
-                        <i class="fas fa-headset"></i>
+                        <i class="fas fa-users"></i>
                     </div>
-                    <h3>Customer Support</h3>
-                    <p>Provide excellent customer service with integrated support tools. Track inquiries, manage tickets, and resolve issues promptly.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-calendar-alt"></i>
-                    </div>
-                    <h3>Calendar Management</h3>
-                    <p>Organize your schedule with a built-in calendar. Track appointments, set reminders, and manage your time effectively.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-tasks"></i>
-                    </div>
-                    <h3>Task Management</h3>
-                    <p>Create, assign, and track tasks efficiently. Set priorities, deadlines, and monitor task completion across your team.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-money-check-alt"></i>
-                    </div>
-                    <h3>Payroll</h3>
-                    <p>Manage employee payroll efficiently. Calculate salaries, deductions, and generate payslips with automated processing.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-id-badge"></i>
-                    </div>
-                    <h3>HRIS</h3>
-                    <p>Comprehensive Human Resource Information System. Manage employee records, attendance, leave, and performance evaluations.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-cogs"></i>
-                    </div>
-                    <h3>Business Settings</h3>
-                    <p>Customize the system to match your business needs. Configure company details, pricing, and more.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-users-cog"></i>
-                    </div>
-                    <h3>User Management</h3>
-                    <p>Manage user roles and permissions. Control access to different features based on user hierarchy.</p>
+                    <h3>People and planning</h3>
+                    <p>Give managers and employees one place for records, schedules, attendance, and payroll.</p>
+                    <ul class="feature-list">
+                        <li><i class="fas fa-check" aria-hidden="true"></i> Employee records and attendance</li>
+                        <li><i class="fas fa-check" aria-hidden="true"></i> Payroll and payslips</li>
+                        <li><i class="fas fa-check" aria-hidden="true"></i> Calendar, goals, and reminders</li>
+                    </ul>
                 </div>
             </div>
         </div>
@@ -614,16 +655,16 @@
 
     <!-- CTA Section -->
     <section class="cta">
-        <h2>Ready to Transform Your Business?</h2>
-        <p>Join thousands of businesses already using BERPS to streamline their operations and boost productivity.</p>
-        <a href="<?= site_url('Login/signup_page'); ?>" class="btn-hero btn-secondary">Sign Up Now</a>
+        <h2>A clearer way to run daily operations</h2>
+        <p>Start with the modules your team needs and keep one dependable source of information as your work grows.</p>
+        <a href="<?= site_url('Login/signup_page'); ?>" class="btn-hero btn-secondary">Create an account</a>
     </section>
 
     <!-- Login Modal -->
-    <div class="login-modal" id="loginModal">
-        <div class="login-modal-content">
-            <button class="login-modal-close" id="closeLoginModal">&times;</button>
-            <h3>Login to Your Account</h3>
+    <div class="login-modal" id="loginModal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="loginModalTitle">
+        <div class="login-modal-content" tabindex="-1">
+            <button class="login-modal-close" id="closeLoginModal" type="button" aria-label="Close login dialog">&times;</button>
+            <h3 id="loginModalTitle">Login to your account</h3>
             
             <?php if ($this->session->flashdata('msg')): ?>
                 <div class="alert alert-error">
@@ -634,11 +675,11 @@
             <form action="<?= site_url('Login/auth'); ?>" method="post">
                 <div class="form-group">
                     <label for="loginUsername">Username / Email</label>
-                    <input type="text" id="loginUsername" name="username" required>
+                    <input type="text" id="loginUsername" name="username" autocomplete="username" required>
                 </div>
                 <div class="form-group">
                     <label for="loginPassword">Password</label>
-                    <input type="password" id="loginPassword" name="password" required>
+                    <input type="password" id="loginPassword" name="password" autocomplete="current-password" required>
                 </div>
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                     <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 14px;">
@@ -658,6 +699,25 @@
     </footer>
 
     <script>
+        const navbarToggle = document.getElementById('navbarToggle');
+        const publicNavigation = document.getElementById('publicNavigation');
+
+        if (navbarToggle && publicNavigation) {
+            navbarToggle.addEventListener('click', function() {
+                const isOpen = publicNavigation.classList.toggle('is-open');
+                navbarToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+                navbarToggle.setAttribute('aria-label', isOpen ? 'Close navigation' : 'Open navigation');
+            });
+
+            publicNavigation.querySelectorAll('a').forEach(function(link) {
+                link.addEventListener('click', function() {
+                    publicNavigation.classList.remove('is-open');
+                    navbarToggle.setAttribute('aria-expanded', 'false');
+                    navbarToggle.setAttribute('aria-label', 'Open navigation');
+                });
+            });
+        }
+
         // Smooth scrolling for anchor links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
@@ -678,33 +738,76 @@
         const loginBtn = document.getElementById('loginBtn');
         const loginModal = document.getElementById('loginModal');
         const closeLoginModal = document.getElementById('closeLoginModal');
+        const loginModalContent = loginModal ? loginModal.querySelector('.login-modal-content') : null;
+        let loginModalTrigger = null;
+
+        function openLoginModal(trigger) {
+            if (!loginModal) return;
+            loginModalTrigger = trigger || document.activeElement;
+            loginModal.classList.add('active');
+            loginModal.setAttribute('aria-hidden', 'false');
+            document.body.style.overflow = 'hidden';
+            window.requestAnimationFrame(function() {
+                const usernameField = document.getElementById('loginUsername');
+                if (usernameField) usernameField.focus();
+            });
+        }
+
+        function closeLoginDialog() {
+            if (!loginModal) return;
+            loginModal.classList.remove('active');
+            loginModal.setAttribute('aria-hidden', 'true');
+            document.body.style.overflow = '';
+            if (loginModalTrigger && typeof loginModalTrigger.focus === 'function') {
+                loginModalTrigger.focus();
+            }
+        }
 
         if (loginBtn && loginModal) {
             loginBtn.addEventListener('click', function(e) {
                 e.preventDefault();
-                loginModal.classList.add('active');
+                openLoginModal(loginBtn);
             });
         }
 
         if (closeLoginModal && loginModal) {
-            closeLoginModal.addEventListener('click', function() {
-                loginModal.classList.remove('active');
-            });
+            closeLoginModal.addEventListener('click', closeLoginDialog);
         }
 
         // Close modal when clicking outside
         if (loginModal) {
             loginModal.addEventListener('click', function(e) {
                 if (e.target === loginModal) {
-                    loginModal.classList.remove('active');
+                    closeLoginDialog();
                 }
             });
         }
 
-        // Close modal on escape key
+        // Keep keyboard focus inside the login dialog while it is open.
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape' && loginModal && loginModal.classList.contains('active')) {
-                loginModal.classList.remove('active');
+                closeLoginDialog();
+                return;
+            }
+
+            if (e.key === 'Tab' && loginModal && loginModal.classList.contains('active') && loginModalContent) {
+                const focusable = Array.from(loginModalContent.querySelectorAll(
+                    'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+                )).filter(function(element) {
+                    return element.offsetParent !== null;
+                });
+
+                if (!focusable.length) return;
+                const first = focusable[0];
+                const last = focusable[focusable.length - 1];
+
+                if (e.shiftKey && document.activeElement === first) {
+                    e.preventDefault();
+                    last.focus();
+                } else if (!e.shiftKey && document.activeElement === last) {
+                    e.preventDefault();
+                    first.focus();
+                }
             }
         });
 

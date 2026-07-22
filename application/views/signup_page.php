@@ -12,21 +12,22 @@
     <link rel="icon" type="image/png" href="<?= base_url('assets/images/logo-sm1.png'); ?>">
     <link rel="apple-touch-icon" sizes="180x180" href="<?= base_url('assets/images/logo-sm1.png'); ?>">
     <link rel="stylesheet" href="<?= base_url('assets/css/fonts.css'); ?>">
+    <link rel="stylesheet" href="<?= base_url('assets/css/berps-design-system.css'); ?>?v=20260722">
     <link rel="stylesheet" href="<?= base_url('assets/plugins/fontawesome-free/css/all.min.css'); ?>">
 
     <style>
         :root {
-            --bg: #e8f1fb;
-            --panel: rgba(255, 255, 255, 0.96);
-            --bg-card: #ffffff;
-            --border: rgba(15, 54, 111, 0.16);
-            --primary: #1b5ed6;
-            --primary-dark: #114cb3;
-            --primary-light: #4a8dff;
-            --text: #0b1d3d;
-            --muted: rgba(11, 29, 61, 0.65);
-            --error: #c62828;
-            --success: #2e7d32;
+            --bg: var(--berps-bg);
+            --panel: var(--berps-surface);
+            --bg-card: var(--berps-surface);
+            --border: var(--berps-border);
+            --primary: var(--berps-primary);
+            --primary-dark: var(--berps-primary-hover);
+            --primary-light: #4b7fd7;
+            --text: var(--berps-text);
+            --muted: var(--berps-text-muted);
+            --error: var(--berps-danger);
+            --success: var(--berps-success);
         }
 
         * {
@@ -37,7 +38,7 @@
 
         body {
             font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
-            background: linear-gradient(135deg, #fefefe, var(--bg));
+            background: var(--bg);
             color: var(--text);
             line-height: 1.6;
             min-height: 100vh;
@@ -50,9 +51,8 @@
             left: 0;
             right: 0;
             background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
             border-bottom: 1px solid var(--border);
-            padding: 16px 32px;
+            padding: 12px clamp(20px, 4vw, 56px);
             z-index: 1000;
             display: flex;
             justify-content: space-between;
@@ -68,9 +68,8 @@
         }
 
         .navbar-brand img {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
+            width: 44px;
+            height: 44px;
         }
 
         .navbar-brand span {
@@ -97,8 +96,8 @@
         }
 
         .btn-nav {
-            padding: 10px 24px;
-            border-radius: 10px;
+            padding: 9px 18px;
+            border-radius: var(--berps-radius-md);
             background: var(--primary);
             color: white !important;
             font-weight: 600;
@@ -107,13 +106,11 @@
 
         .btn-nav:hover {
             background: var(--primary-dark);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(27, 94, 214, 0.3);
         }
 
         /* Signup Section */
         .signup-section {
-            padding: 160px 32px 100px;
+            padding: 132px 32px 80px;
             background: var(--bg);
             min-height: 100vh;
         }
@@ -125,9 +122,9 @@
 
         .signup-card {
             background: white;
-            border-radius: 20px;
-            padding: 50px;
-            box-shadow: 0 20px 50px rgba(27, 94, 214, 0.1);
+            border-radius: var(--berps-radius-lg);
+            padding: 44px;
+            box-shadow: var(--berps-shadow-sm);
             border: 1px solid var(--border);
         }
 
@@ -137,7 +134,7 @@
         }
 
         .signup-header h1 {
-            font-size: 36px;
+            font-size: clamp(30px, 4vw, 36px);
             font-weight: 700;
             margin-bottom: 12px;
             color: var(--text);
@@ -165,7 +162,7 @@
         .form-group textarea {
             width: 100%;
             padding: 14px 16px;
-            border-radius: 10px;
+            border-radius: var(--berps-radius-md);
             border: 1px solid var(--border);
             background: #f7f9fc;
             font-size: 15px;
@@ -198,9 +195,9 @@
         .btn-submit {
             width: 100%;
             padding: 16px;
-            border-radius: 10px;
+            border-radius: var(--berps-radius-md);
             border: none;
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            background: var(--primary);
             color: white;
             font-size: 16px;
             font-weight: 700;
@@ -210,13 +207,12 @@
         }
 
         .btn-submit:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 30px rgba(27, 94, 214, 0.3);
+            background: var(--primary-dark);
         }
 
         .alert {
             padding: 16px;
-            border-radius: 10px;
+            border-radius: var(--berps-radius-md);
             margin-bottom: 20px;
             font-size: 14px;
         }
@@ -261,11 +257,11 @@
             }
 
             .signup-section {
-                padding: 120px 20px 60px;
+                padding: 104px 20px 48px;
             }
 
             .signup-card {
-                padding: 30px;
+                padding: 24px;
             }
 
             .signup-header h1 {
@@ -283,7 +279,6 @@
             <span>BERPS</span>
         </a>
         <div class="navbar-nav">
-            <a href="<?= site_url('login'); ?>">Back to Home</a>
             <a href="#" class="btn-nav" id="loginBtn">Login</a>
         </div>
     </nav>
@@ -297,8 +292,8 @@
 
             <div class="signup-card">
                 <div class="signup-header">
-                    <h1>Create Your Account</h1>
-                    <p>Fill in your business details to get started with BERPS.</p>
+                    <h1>Create your BERPS account</h1>
+                    <p>Set up your administrator access. You can complete your business settings after signing in.</p>
                 </div>
                 
                 <?php if ($this->session->flashdata('signup_error')): ?>
@@ -357,12 +352,14 @@
                         <div id="packageFeatures" style="margin-top: 10px;"></div>
                     </div>
                     
-                    <?php if (isset($recaptchaEnabled) && $recaptchaEnabled): ?>
+                    <?php if (isset($recaptchaEnabled) && $recaptchaEnabled && ($recaptchaVersion ?? 'v2') === 'v2'): ?>
                         <div class="form-group" style="margin-top: 20px;">
                             <label>Security Verification</label>
                             <div id="recaptcha-container"></div>
                             <div id="recaptcha-error" style="color: #dc3545; font-size: 12px; margin-top: 5px; display: none;">Please complete the reCAPTCHA verification.</div>
                         </div>
+                    <?php elseif (isset($recaptchaEnabled) && $recaptchaEnabled): ?>
+                        <div id="recaptcha-container" aria-hidden="true"></div>
                     <?php endif; ?>
                     
                     <button type="submit" class="btn-submit">Create Account</button>
@@ -372,10 +369,10 @@
     </section>
 
     <!-- Login Modal -->
-    <div class="login-modal" id="loginModal">
-        <div class="login-modal-content">
-            <button class="login-modal-close" id="closeLoginModal">&times;</button>
-            <h3>Login to Your Account</h3>
+    <div class="login-modal" id="loginModal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="signupLoginModalTitle">
+        <div class="login-modal-content" tabindex="-1">
+            <button class="login-modal-close" id="closeLoginModal" type="button" aria-label="Close login dialog">&times;</button>
+            <h3 id="signupLoginModalTitle">Login to your account</h3>
             
             <?php if ($this->session->flashdata('msg')): ?>
                 <div class="alert alert-error">
@@ -386,11 +383,11 @@
             <form action="<?= site_url('Login/auth'); ?>" method="post">
                 <div class="form-group">
                     <label for="loginUsername">Username / Email</label>
-                    <input type="text" id="loginUsername" name="username" required>
+                    <input type="text" id="loginUsername" name="username" autocomplete="username" required>
                 </div>
                 <div class="form-group">
                     <label for="loginPassword">Password</label>
-                    <input type="password" id="loginPassword" name="password" required>
+                    <input type="password" id="loginPassword" name="password" autocomplete="current-password" required>
                 </div>
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                     <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 14px;">
@@ -426,11 +423,11 @@
 
         .login-modal-content {
             background: white;
-            border-radius: 20px;
-            padding: 40px;
+            border-radius: var(--berps-radius-lg);
+            padding: 36px;
             max-width: 450px;
             width: 100%;
-            box-shadow: 0 20px 50px rgba(27, 94, 214, 0.2);
+            box-shadow: var(--berps-shadow-lg);
             border: 1px solid var(--border);
             position: relative;
         }
@@ -457,33 +454,70 @@
         const loginBtn = document.getElementById('loginBtn');
         const loginModal = document.getElementById('loginModal');
         const closeLoginModal = document.getElementById('closeLoginModal');
+        const loginModalContent = loginModal ? loginModal.querySelector('.login-modal-content') : null;
+
+        function openLoginModal() {
+            if (!loginModal) return;
+            loginModal.classList.add('active');
+            loginModal.setAttribute('aria-hidden', 'false');
+            document.body.style.overflow = 'hidden';
+            window.requestAnimationFrame(function() {
+                const username = document.getElementById('loginUsername');
+                if (username) username.focus();
+            });
+        }
+
+        function closeLoginDialog() {
+            if (!loginModal) return;
+            loginModal.classList.remove('active');
+            loginModal.setAttribute('aria-hidden', 'true');
+            document.body.style.overflow = '';
+            if (loginBtn) loginBtn.focus();
+        }
 
         if (loginBtn && loginModal) {
             loginBtn.addEventListener('click', function(e) {
                 e.preventDefault();
-                loginModal.classList.add('active');
+                openLoginModal();
             });
         }
 
         if (closeLoginModal && loginModal) {
-            closeLoginModal.addEventListener('click', function() {
-                loginModal.classList.remove('active');
-            });
+            closeLoginModal.addEventListener('click', closeLoginDialog);
         }
 
         // Close modal when clicking outside
         if (loginModal) {
             loginModal.addEventListener('click', function(e) {
                 if (e.target === loginModal) {
-                    loginModal.classList.remove('active');
+                    closeLoginDialog();
                 }
             });
         }
 
-        // Close modal on escape key
+        // Close on Escape and keep keyboard focus inside the dialog.
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape' && loginModal && loginModal.classList.contains('active')) {
-                loginModal.classList.remove('active');
+                closeLoginDialog();
+                return;
+            }
+
+            if (e.key === 'Tab' && loginModal && loginModal.classList.contains('active') && loginModalContent) {
+                const focusable = Array.from(loginModalContent.querySelectorAll(
+                    'a[href], button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])'
+                )).filter(function(element) {
+                    return element.offsetParent !== null;
+                });
+                if (!focusable.length) return;
+                const first = focusable[0];
+                const last = focusable[focusable.length - 1];
+                if (e.shiftKey && document.activeElement === first) {
+                    e.preventDefault();
+                    last.focus();
+                } else if (!e.shiftKey && document.activeElement === last) {
+                    e.preventDefault();
+                    first.focus();
+                }
             }
         });
 
