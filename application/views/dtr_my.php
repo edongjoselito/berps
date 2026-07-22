@@ -68,9 +68,9 @@ $currentDateLabel = date('l, F j, Y');
 
         <div class="content-page">
             <div class="content">
-                <div class="container-fluid my-dtr-page">
+                <div class="container-fluid my-dtr-page berps-page">
 
-                    <style>
+                    <style media="not all">
 
                         .my-dtr-page {
                             --bg: #f4f7fb;
@@ -839,25 +839,25 @@ $currentDateLabel = date('l, F j, Y');
                         </div>
                     <?php endif; ?>
 
-                    <div class="page-header" id="noPrint">
-                        <div>
-                            <div class="page-eyebrow">Attendance Overview</div>
-                            <h4 class="page-title">My Daily Time Record</h4>
-                            <div class="page-subtitle">
+                    <header class="berps-page-header" id="noPrint">
+                        <div class="berps-page-header__content">
+                            <span class="berps-page-header__eyebrow">Attendance overview</span>
+                            <h1 class="berps-page-title">My Daily Time Record</h1>
+                            <p class="berps-page-subtitle">
                                 Review your attendance, total worked hours, daily punch logs, and linked accomplishments for <?= h($selectedPeriodLabel); ?>.
-                            </div>
+                            </p>
                         </div>
-                        <div class="page-actions">
-                            <button type="button" class="btn-action" data-toggle="modal" data-target="#dtrFilterModal">
-                                <i class="mdi mdi-calendar-month-outline"></i>
+                        <div class="berps-page-header__actions">
+                            <button type="button" class="btn btn-outline-secondary" data-toggle="modal" data-target="#dtrFilterModal">
+                                <i class="mdi mdi-calendar-month-outline" aria-hidden="true"></i>
                                 Change Month
                             </button>
-                            <button id="printTable" type="button" class="btn-submit">
-                                <i class="mdi mdi-printer"></i>
+                            <button id="printTable" type="button" class="btn btn-primary">
+                                <i class="mdi mdi-printer" aria-hidden="true"></i>
                                 Print
                             </button>
                         </div>
-                    </div>
+                    </header>
 
                     <div class="stats-grid">
                         <div class="stat-card stat-hours">
@@ -904,7 +904,7 @@ $currentDateLabel = date('l, F j, Y');
                         </div>
                     </div>
 
-                    <div class="theme-card">
+                    <section class="theme-card dtr-card">
                         <div class="theme-card-head">
                             <div>
                                 <h5 class="theme-card-title">Attendance Ledger</h5>
@@ -1023,7 +1023,7 @@ $currentDateLabel = date('l, F j, Y');
                                 </table>
                             </div>
                         </div>
-                    </div>
+                    </section>
 
                 </div>
             </div>
@@ -1049,12 +1049,15 @@ $currentDateLabel = date('l, F j, Y');
         })(jQuery);
     </script>
 
-    <div class="modal fade theme-modal" id="dtrFilterModal" tabindex="-1" role="dialog" aria-labelledby="dtrFilterModalLabel" aria-hidden="true">
+    <div class="modal fade theme-modal berps-form-modal" id="dtrFilterModal" tabindex="-1" role="dialog" aria-labelledby="dtrFilterModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <form method="get" action="<?= base_url(); ?>Page/myDTR">
                     <div class="modal-header">
-                        <h5 class="modal-title mb-0" id="dtrFilterModalLabel">Select Month</h5>
+                        <div>
+                            <h2 class="modal-title mb-0" id="dtrFilterModalLabel">Select Month</h2>
+                            <p class="berps-modal-subtitle">Choose the reporting period for your time record.</p>
+                        </div>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
@@ -1081,7 +1084,7 @@ $currentDateLabel = date('l, F j, Y');
                     </div>
 
                     <div class="modal-footer">
-                        <a href="<?= base_url(); ?>Page/myDTR" class="btn btn-light">Reset to Current Month</a>
+                        <a href="<?= base_url(); ?>Page/myDTR" class="btn btn-outline-secondary">Reset to Current Month</a>
                         <button type="submit" class="btn btn-primary">
                             <i class="mdi mdi-magnify mr-1"></i>
                             View

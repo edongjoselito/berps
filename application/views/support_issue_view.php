@@ -946,8 +946,8 @@ if (!function_exists('supportMessageLinks')) {
                         </div>
                     </div>
                 </div>
-                <?php include('includes/footer.php'); ?>
             </div>
+            <?php include('includes/footer.php'); ?>
         </div>
     </div>
     <script src="<?= base_url(); ?>assets/js/vendor.min.js"></script>

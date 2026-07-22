@@ -9,173 +9,41 @@
 
         <div class="content-page">
             <div class="content">
-                <div class="container-fluid add-project-page">
-                    <style>
-                        .content-page {
-                            display: flex;
-                            flex-direction: column;
-                            min-height: 100vh;
-                        }
-
-                        .content-page .content {
-                            flex: 1 0 auto;
-                            padding-bottom: 1.25rem;
-                        }
-
-                        .footer {
-                            flex: 0 0 auto;
-                            margin-top: 0 !important;
-                        }
-
-                        .add-project-page .title-wrap {
-                            padding: 1.25rem 1.25rem 0;
-                        }
-
-                        .add-project-page .title-wrap h4 {
-                            margin: 0;
-                            line-height: 1.1;
-                        }
-
-                        .add-project-page .title-sub {
-                            display: inline-block;
-                            margin-top: 4px;
-                        }
-
-                        .add-project-page .title-divider {
-                            border: 0;
-                            height: 2px;
-                            border-radius: 1px;
-                            background: linear-gradient(to right, #4285F4 60%, #FBBC05 80%, #34A853 100%);
-                            margin: 10px 1.25rem 16px;
-                        }
-
-                        .add-project-page .card {
-                            border: 1px solid rgba(15, 23, 42, .08);
-                            border-radius: 14px;
-                        }
-
-                        .add-project-page .card-header {
-                            border-bottom: 1px solid rgba(15, 23, 42, .08);
-                            background: rgba(248, 250, 252, .65);
-                            padding: .85rem 1.25rem;
-                        }
-
-                        .add-project-page .card-body {
-                            padding: 1.25rem;
-                        }
-
-                        .add-project-page .form-label {
-                            font-weight: 600;
-                            color: #5c6b7a;
-                            margin-bottom: .25rem;
-                        }
-
-                        .add-project-page .req::after {
-                            content: " *";
-                            color: #dc3545;
-                        }
-
-                        .add-project-page .form-row {
-                            margin-left: -8px;
-                            margin-right: -8px;
-                        }
-
-                        .add-project-page .form-row>[class^="col"] {
-                            padding-left: 8px;
-                            padding-right: 8px;
-                        }
-
-                        .form-text {
-                            font-size: .8rem;
-                            color: #6c757d;
-                        }
-
-                        .add-project-page .form-actions {
-                            display: flex;
-                            gap: .5rem;
-                            justify-content: flex-end;
-                        }
-
-                        #otherDetails {
-                            min-height: 110px;
-                        }
-
-                        .was-validated .form-control:invalid,
-                        .form-control.is-invalid,
-                        .was-validated .custom-select:invalid,
-                        .custom-select.is-invalid {
-                            border-color: #dc3545;
-                        }
-
-                        .was-validated .form-control:valid,
-                        .form-control.is-valid,
-                        .was-validated .custom-select:valid,
-                        .custom-select.is-valid {
-                            border-color: #198754;
-                        }
-
-                        .select2-container--default .select2-selection--single {
-                            height: calc(2.25rem + 2px);
-                            border: 1px solid #ced4da;
-                            border-radius: .25rem;
-                            padding: .375rem .75rem;
-                        }
-
-                        .select2-container--default .select2-selection--single .select2-selection__rendered {
-                            line-height: 1.4rem;
-                            padding-left: 0;
-                            color: #495057;
-                        }
-
-                        .select2-container--default .select2-selection--single .select2-selection__arrow {
-                            height: calc(2.25rem + 2px);
-                            right: 6px;
-                        }
-
-                        @media (max-width:576px) {
-                            .add-project-page .title-wrap {
-                                padding: 1rem 1rem 0;
-                            }
-
-                            .add-project-page .title-divider {
-                                margin: 8px 1rem 12px;
-                            }
-                        }
-                    </style>
-
-                    <div class="row">
-                        <div class="col-12">
-                            <div class="title-wrap">
-                                <h4 class="page-title">
-                                    Add Project<br>
-                                    <span class="badge badge-purple title-sub">Create a new project record</span>
-                                </h4>
-                            </div>
-                            <hr class="title-divider">
+                <div class="container-fluid add-project-page berps-form-page berps-page">
+                    <header class="berps-page-header">
+                        <div class="berps-page-header__content">
+                            <span class="berps-page-header__eyebrow">Projects</span>
+                            <h1 class="berps-page-title">Add Project</h1>
+                            <p class="berps-page-subtitle">Create a project record and connect it to the correct client and contract details.</p>
                         </div>
-                    </div>
+                        <div class="berps-page-header__actions">
+                            <a href="<?= base_url(); ?>Page/projectList" class="btn btn-outline-secondary">
+                                <i class="mdi mdi-arrow-left mr-1" aria-hidden="true"></i>Back to Project List
+                            </a>
+                        </div>
+                    </header>
 
-                    <div class="row">
-                        <div class="col-12">
-                            <div class="card shadow-sm">
-                                <div class="card-header d-flex align-items-center justify-content-between">
-                                    <h5 class="mb-0">Project Information</h5>
-                                    <div class="d-flex align-items-center" style="gap:.5rem;">
-                                        <a href="<?= base_url(); ?>Page/projectList" class="btn btn-outline-secondary btn-sm">
-                                            <i class="mdi mdi-briefcase-outline mr-1"></i> View Project List
-                                        </a>
+                    <div class="berps-form-card">
+                        <div class="berps-form-card__header">
+                            <div>
+                                <h2 class="berps-form-card__title">Project information</h2>
+                                <p class="berps-form-card__copy">Fields marked with an asterisk are required.</p>
+                            </div>
+                        </div>
+
+                        <div class="berps-form-card__body">
+                            <form class="needs-validation" method="post" novalidate>
+                                <section class="berps-form-section">
+                                    <div class="berps-form-section__header">
+                                        <h3 class="berps-form-section__title">Contract details</h3>
                                     </div>
-                                </div>
+                                    <div class="form-group">
+                                        <label class="form-label req" for="projectDescription">Project</label>
+                                        <input type="text" class="form-control" id="projectDescription" name="projectDescription" required>
+                                        <div class="invalid-feedback">Please enter the project name.</div>
+                                    </div>
 
-                                <div class="card-body">
-                                    <form class="needs-validation" method="post" novalidate>
-                                        <div class="form-group">
-                                            <label class="form-label req" for="projectDescription">Project</label>
-                                            <input type="text" class="form-control" id="projectDescription" name="projectDescription" required>
-                                            <div class="invalid-feedback">Please enter the project name.</div>
-                                        </div>
-
-                                        <div class="form-row">
+                                    <div class="form-row">
                                             <div class="form-group col-md-3">
                                                 <label class="form-label req" for="projectCategory">Category</label>
                                                 <select class="form-control" id="projectCategory" name="projectCategory" required>
@@ -211,8 +79,14 @@
                                                 <label class="form-label" for="contactPerson">Contact Person / Contact Nos.</label>
                                                 <input type="text" class="form-control" id="contactPerson" name="contactPerson">
                                             </div>
-                                        </div>
+                                    </div>
+                                </section>
 
+                                <section class="berps-form-section">
+                                    <div class="berps-form-section__header">
+                                        <h3 class="berps-form-section__title">Client information</h3>
+                                        <p class="berps-form-section__copy">Selecting a client fills the stored address and contact information.</p>
+                                    </div>
                                         <div class="form-row">
                                             <div class="form-group col-md-6">
                                                 <input type="hidden" name="CustID" id="CustID" value="">
@@ -242,21 +116,25 @@
                                                 <input type="text" class="form-control" id="Address" name="Address" placeholder="Street, Barangay, City/Province, ZIP">
                                             </div>
                                         </div>
+                                </section>
 
+                                <section class="berps-form-section">
                                         <div class="form-group">
                                             <label class="form-label" for="otherDetails">Other Details</label>
                                             <textarea class="form-control" id="otherDetails" name="otherDetails" rows="3" placeholder="Key contract terms, deliverables, notes, etc."></textarea>
                                         </div>
+                                </section>
 
-                                        <div class="form-actions">
-                                            <button class="btn btn-warning" type="reset" id="btnResetForm">
-                                                <i class="mdi mdi-refresh mr-1"></i>Reset
-                                            </button>
-                                            <input type="submit" name="submit" class="btn btn-primary" value="Save Project">
-                                        </div>
-                                    </form>
+                                <div class="berps-form-actions">
+                                    <a href="<?= base_url(); ?>Page/projectList" class="btn btn-outline-secondary">Cancel</a>
+                                    <button class="btn btn-outline-secondary" type="reset" id="btnResetForm">
+                                        <i class="mdi mdi-refresh mr-1" aria-hidden="true"></i>Reset
+                                    </button>
+                                    <button type="submit" name="submit" class="btn btn-primary">
+                                        <i class="mdi mdi-content-save-outline mr-1" aria-hidden="true"></i>Save Project
+                                    </button>
                                 </div>
-                            </div>
+                            </form>
                         </div>
                     </div>
                 </div>

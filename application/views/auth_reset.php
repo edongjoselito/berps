@@ -130,7 +130,7 @@
     .alert--err{background:#fef2f2;border-color:#fecaca;color:#991b1b}
   </style>
     <link rel="stylesheet" href="<?= base_url('assets/css/fonts.css'); ?>">
-    <link rel="stylesheet" href="<?= base_url('assets/css/berps-design-system.css'); ?>?v=20260722-2">
+    <link rel="stylesheet" href="<?= base_url('assets/css/berps-design-system.css'); ?>?v=20260722-5">
 </head>
 <body>
   <div class="wrap">

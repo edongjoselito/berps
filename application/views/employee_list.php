@@ -170,7 +170,10 @@ foreach ($payrollEmployees as $payrollEmployee) {
                                                                                      <a href="<?= $editUrl; ?>" class="berps-icon-action" title="Edit employee" aria-label="Edit employee">
                                                                                           <i class="mdi mdi-square-edit-outline" aria-hidden="true"></i>
                                                                                      </a>
-                                                                                     <a href="<?= $deleteUrl; ?>" class="berps-icon-action berps-icon-action--danger" title="Delete employee" aria-label="Delete employee" onclick="return confirm('Are you sure you want to delete this employee?');">
+                                                                                     <a href="<?= $deleteUrl; ?>" class="berps-icon-action berps-icon-action--danger" title="Delete employee" aria-label="Delete employee"
+                                                                                          data-berps-confirm="This permanently removes the employee record. This action cannot be undone."
+                                                                                          data-berps-confirm-title="Delete employee?"
+                                                                                          data-berps-confirm-label="Delete employee">
                                                                                           <i class="mdi mdi-delete-outline" aria-hidden="true"></i>
                                                                                      </a>
                                                                                 </div>
@@ -201,11 +204,14 @@ foreach ($payrollEmployees as $payrollEmployee) {
      <?php include('includes/themecustomizer.php'); ?>
 
      <!-- New Employee Modal -->
-     <div class="modal fade" id="newEmployeeModal" tabindex="-1" role="dialog" aria-hidden="true">
+     <div class="modal fade berps-form-modal" id="newEmployeeModal" tabindex="-1" role="dialog" aria-labelledby="newEmployeeModalTitle" aria-hidden="true">
           <div class="modal-dialog modal-lg modal-dialog-centered">
                <div class="modal-content">
                     <div class="modal-header">
-                         <h4 class="modal-title mb-0">Add New Employee</h4>
+                         <div>
+                              <h2 class="modal-title mb-0" id="newEmployeeModalTitle">Add New Employee</h2>
+                              <p class="berps-modal-subtitle">Create the employee profile, permissions, and payroll defaults.</p>
+                         </div>
                          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                               <span aria-hidden="true">&times;</span>
                          </button>
@@ -311,9 +317,9 @@ foreach ($payrollEmployees as $payrollEmployee) {
                               <input type="hidden" name="payrollStatus" value="active">
                          </div>
                          <div class="modal-footer">
+                              <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Cancel</button>
+                              <button type="reset" name="resettask" class="btn btn-outline-secondary">Reset</button>
                               <button type="submit" name="addemployee" value="1" class="btn btn-primary">Add Employee</button>
-                              <button type="reset" name="resettask" class="btn btn-warning text-white">Reset</button>
-                              <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
                          </div>
                     </form>
                </div>

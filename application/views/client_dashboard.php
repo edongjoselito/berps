@@ -726,8 +726,8 @@ $supportProjects = isset($supportProjects) && is_array($supportProjects) ? array
 
             </div>
 
-            <?php include('includes/footer.php'); ?>
         </div>
+        <?php include('includes/footer.php'); ?>
     </div>
 
     <!-- Outstanding Balance Modal -->

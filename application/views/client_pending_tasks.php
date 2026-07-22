@@ -106,8 +106,8 @@ $priorityClasses = array('1' => 'priority-high', '2' => 'priority-medium', '3' =
                     </div>
                 </div>
             </div>
-            <?php include('includes/footer.php'); ?>
         </div>
+        <?php include('includes/footer.php'); ?>
     </div>
 </div>
 <script src="<?= base_url(); ?>assets/js/vendor.min.js"></script>

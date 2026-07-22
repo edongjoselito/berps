@@ -12,53 +12,7 @@
 
           <div class="content-page">
                <div class="content">
-                    <div class="container-fluid update-employee-page">
-                         <style>
-                              .update-employee-page .breadcrumb {
-                                   background: transparent;
-                                   padding: 0;
-                                   margin-bottom: 1.5rem;
-                              }
-
-                              .update-employee-page .card {
-                                   border: none;
-                                   border-radius: 16px;
-                                   box-shadow: 0 16px 32px rgba(15, 23, 42, 0.08);
-                              }
-
-                              .update-employee-page .card-header {
-                                   border-bottom: 1px solid rgba(15, 23, 42, 0.08);
-                                   background: linear-gradient(130deg, #4c6ef5, #845ef7);
-                                   color: #fff;
-                                   padding: 20px 28px;
-                                   border-top-left-radius: 16px;
-                                   border-top-right-radius: 16px;
-                              }
-
-                              .update-employee-page .card-header h4 {
-                                   margin: 0;
-                                   font-weight: 600;
-                                   font-size: 1.3rem;
-                              }
-
-                              .update-employee-page .card-body {
-                                   padding: 30px 32px;
-                              }
-
-                              .update-employee-page .form-control {
-                                   border-radius: 10px;
-                              }
-
-                              .update-employee-page .form-section-title {
-                                   font-weight: 600;
-                                   margin-bottom: 1rem;
-                                   color: #343a40;
-                              }
-
-                              .update-employee-page .btn + .btn {
-                                   margin-left: 10px;
-                              }
-                         </style>
+                    <div class="container-fluid update-employee-page berps-form-page berps-page">
 
                          <?php
                          $employee = isset($data[0]) ? $data[0] : null;
@@ -68,34 +22,29 @@
                          $statusHistory = isset($statusHistory) ? $statusHistory : array();
                          ?>
 
-                         <div class="row">
-                              <div class="col-12">
-                                   <nav aria-label="breadcrumb">
-                                        <ol class="breadcrumb pl-0">
-                                             <li class="breadcrumb-item">
-                                                  <a href="<?= base_url(); ?>Page/admin">
-                                                       <i class="mdi mdi-home-outline"></i> Home
-                                                  </a>
-                                             </li>
-                                             <li class="breadcrumb-item">
-                                                  <a href="<?= base_url(); ?>Page/employeeList">Employee Directory</a>
-                                             </li>
-                                             <li class="breadcrumb-item active" aria-current="page">Update Employee</li>
-                                        </ol>
-                                   </nav>
+                         <header class="berps-page-header">
+                              <div class="berps-page-header__content">
+                                   <span class="berps-page-header__eyebrow">People operations</span>
+                                   <h1 class="berps-page-title">Update Employee</h1>
+                                   <p class="berps-page-subtitle">Maintain employee, access, status, and payroll information in one workspace.</p>
                               </div>
-                         </div>
+                              <div class="berps-page-header__actions">
+                                   <a href="<?= base_url(); ?>Page/employeeList" class="btn btn-outline-secondary">
+                                        <i class="mdi mdi-arrow-left mr-1" aria-hidden="true"></i>Back to Employee List
+                                   </a>
+                              </div>
+                         </header>
 
                          <div class="row">
                               <div class="col-12">
-                                   <div class="card">
-                                        <div class="card-header d-flex align-items-center justify-content-between">
-                                             <h4>Update Employee</h4>
-                                             <a href="<?= base_url(); ?>Page/employeeList" class="btn btn-light btn-sm text-primary">
-                                                  <i class="mdi mdi-arrow-left"></i> Back to Employee List
-                                             </a>
+                                   <div class="berps-form-card">
+                                        <div class="berps-form-card__header">
+                                             <div>
+                                                  <h2 class="berps-form-card__title">Employee details</h2>
+                                                  <p class="berps-form-card__copy">Required employment and account fields must remain complete.</p>
+                                             </div>
                                         </div>
-                                        <div class="card-body">
+                                        <div class="berps-form-card__body">
                                              <?php if ($this->session->flashdata('success')): ?>
                                                   <div class="alert alert-success"><?= htmlspecialchars((string) $this->session->flashdata('success'), ENT_QUOTES, 'UTF-8'); ?></div>
                                              <?php endif; ?>
@@ -298,12 +247,13 @@
                                                        </div>
                                                        <input type="hidden" name="payrollStatus" value="<?= htmlspecialchars((string) ($payrollProfile->payrollStatus ?? 'active'), ENT_QUOTES, 'UTF-8'); ?>">
 
-                                                       <div class="d-flex flex-wrap">
-                                                            <button type="submit" name="updateemployee" value="1" class="btn btn-primary">
-                                                                 <i class="mdi mdi-content-save-outline"></i> Update Employee
-                                                            </button>
+                                                       <div class="berps-form-actions">
+                                                            <a href="<?= base_url(); ?>Page/employeeList" class="btn btn-outline-secondary">Cancel</a>
                                                             <button type="reset" name="resettask" class="btn btn-outline-secondary">
-                                                                 <i class="mdi mdi-refresh"></i> Reset
+                                                                 <i class="mdi mdi-refresh mr-1" aria-hidden="true"></i>Reset
+                                                            </button>
+                                                            <button type="submit" name="updateemployee" value="1" class="btn btn-primary">
+                                                                 <i class="mdi mdi-content-save-outline mr-1" aria-hidden="true"></i>Update Employee
                                                             </button>
                                                        </div>
                                                   </form>
@@ -320,11 +270,14 @@
                          <?php if (!empty($statusHistory)): ?>
                          <div class="row mt-4">
                               <div class="col-12">
-                                   <div class="card">
-                                        <div class="card-header">
-                                             <h5 class="mb-0">Employee Status History</h5>
+                                   <div class="berps-section-card">
+                                        <div class="berps-section-card__header">
+                                             <div>
+                                                  <h2 class="berps-section-title">Employee status history</h2>
+                                                  <p class="berps-section-copy">A record of status changes and their reasons.</p>
+                                             </div>
                                         </div>
-                                        <div class="card-body">
+                                        <div class="berps-section-card__body">
                                              <div class="table-responsive">
                                                   <table class="table table-bordered table-hover">
                                                        <thead>
@@ -372,8 +325,8 @@
                          <?php endif; ?>
                     </div>
 
-                    <?php include('includes/footer.php'); ?>
                </div>
+               <?php include('includes/footer.php'); ?>
           </div>
      </div>
 

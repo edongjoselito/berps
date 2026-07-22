@@ -138,8 +138,8 @@ $backUrl = $isClientView ? base_url('Page/clientMyTickets') : base_url('Page/sup
                     </div>
                 </div>
             </div>
-            <?php include('includes/footer.php'); ?>
         </div>
+        <?php include('includes/footer.php'); ?>
     </div>
 </div>
 <script src="<?= base_url(); ?>assets/js/vendor.min.js"></script>

@@ -9,139 +9,7 @@
 
           <div class="content-page">
                <div class="content">
-                    <div class="container-fluid update-project-page">
-                         <style>
-                              .content-page {
-                                   display: flex;
-                                   flex-direction: column;
-                                   min-height: 100vh;
-                              }
-
-                              .content-page .content {
-                                   flex: 1 0 auto;
-                                   padding-bottom: 1.25rem;
-                              }
-
-                              .footer {
-                                   flex: 0 0 auto;
-                                   margin-top: 0 !important;
-                              }
-
-                              .update-project-page .title-wrap {
-                                   padding: 1.25rem 1.25rem 0;
-                              }
-
-                              .update-project-page .title-wrap h4 {
-                                   margin: 0;
-                                   line-height: 1.1;
-                              }
-
-                              .update-project-page .title-sub {
-                                   display: inline-block;
-                                   margin-top: 4px;
-                              }
-
-                              .update-project-page .title-divider {
-                                   border: 0;
-                                   height: 2px;
-                                   border-radius: 1px;
-                                   background: linear-gradient(to right, #4285F4 60%, #FBBC05 80%, #34A853 100%);
-                                   margin: 10px 1.25rem 16px;
-                              }
-
-                              .update-project-page .card {
-                                   border: 1px solid rgba(15, 23, 42, .08);
-                                   border-radius: 14px;
-                              }
-
-                              .update-project-page .card-header {
-                                   border-bottom: 1px solid rgba(15, 23, 42, .08);
-                                   background: rgba(248, 250, 252, .65);
-                                   padding: .85rem 1.25rem;
-                              }
-
-                              .update-project-page .card-body {
-                                   padding: 1.25rem;
-                              }
-
-                              .update-project-page .form-label {
-                                   font-weight: 600;
-                                   color: #5c6b7a;
-                                   margin-bottom: .25rem;
-                              }
-
-                              .update-project-page .req::after {
-                                   content: " *";
-                                   color: #dc3545;
-                              }
-
-                              .update-project-page .form-row {
-                                   margin-left: -8px;
-                                   margin-right: -8px;
-                              }
-
-                              .update-project-page .form-row>[class^="col"] {
-                                   padding-left: 8px;
-                                   padding-right: 8px;
-                              }
-
-                              .form-text {
-                                   font-size: .8rem;
-                                   color: #6c757d;
-                              }
-
-                              .was-validated .form-control:invalid,
-                              .form-control.is-invalid,
-                              .was-validated .custom-select:invalid,
-                              .custom-select.is-invalid {
-                                   border-color: #dc3545;
-                              }
-
-                              .was-validated .form-control:valid,
-                              .form-control.is-valid,
-                              .was-validated .custom-select:valid,
-                              .custom-select.is-valid {
-                                   border-color: #198754;
-                              }
-
-                              .update-project-page .form-actions {
-                                   display: flex;
-                                   gap: .5rem;
-                                   justify-content: flex-end;
-                              }
-
-                              #project-other-details {
-                                   min-height: 110px;
-                              }
-
-                              .select2-container--default .select2-selection--single {
-                                   height: calc(2.25rem + 2px);
-                                   border: 1px solid #ced4da;
-                                   border-radius: .25rem;
-                                   padding: .375rem .75rem;
-                              }
-
-                              .select2-container--default .select2-selection--single .select2-selection__rendered {
-                                   line-height: 1.4rem;
-                                   padding-left: 0;
-                                   color: #495057;
-                              }
-
-                              .select2-container--default .select2-selection--single .select2-selection__arrow {
-                                   height: calc(2.25rem + 2px);
-                                   right: 6px;
-                              }
-
-                              @media (max-width:576px) {
-                                   .update-project-page .title-wrap {
-                                        padding: 1rem 1rem 0;
-                                   }
-
-                                   .update-project-page .title-divider {
-                                        margin: 8px 1rem 12px;
-                                   }
-                              }
-                         </style>
+                    <div class="container-fluid update-project-page berps-form-page berps-page">
 
                          <?php
                          $project     = isset($project) && is_object($project) ? $project : null;
@@ -173,29 +41,30 @@
                          }
                          ?>
 
-                         <div class="row">
-                              <div class="col-12">
-                                   <div class="title-wrap">
-                                        <h4 class="page-title">
-                                             Update Project<br>
-                                             <span class="badge badge-purple title-sub">Adjust project metadata</span>
-                                        </h4>
-                                   </div>
-                                   <hr class="title-divider">
+                         <header class="berps-page-header">
+                              <div class="berps-page-header__content">
+                                   <span class="berps-page-header__eyebrow">Projects</span>
+                                   <h1 class="berps-page-title">Update Project</h1>
+                                   <p class="berps-page-subtitle">Adjust the client, contract, cost, and supporting project information.</p>
                               </div>
-                         </div>
+                              <div class="berps-page-header__actions">
+                                   <a href="<?= base_url(); ?>Page/projectList" class="btn btn-outline-secondary">
+                                        <i class="mdi mdi-arrow-left mr-1" aria-hidden="true"></i>Back to Project List
+                                   </a>
+                              </div>
+                         </header>
 
                          <?php if ($project): ?>
                               <div class="row">
                                    <div class="col-lg-8">
-                                        <div class="card shadow-sm">
-                                             <div class="card-header d-flex align-items-center justify-content-between">
-                                                  <h5 class="mb-0">Project Details</h5>
-                                                  <a href="<?= base_url(); ?>Page/projectList" class="btn btn-outline-secondary btn-sm">
-                                                       <i class="mdi mdi-chevron-left mr-1"></i> Back to Projects
-                                                  </a>
+                                        <div class="berps-form-card">
+                                             <div class="berps-form-card__header">
+                                                  <div>
+                                                       <h2 class="berps-form-card__title">Project details</h2>
+                                                       <p class="berps-form-card__copy">Fields marked with an asterisk are required.</p>
+                                                  </div>
                                              </div>
-                                             <div class="card-body">
+                                             <div class="berps-form-card__body">
                                                   <form class="needs-validation" method="post" action="<?= base_url(); ?>Page/updateProject?id=<?= htmlspecialchars($projectID, ENT_QUOTES, 'UTF-8'); ?>" novalidate>
                                                        <input type="hidden" name="id" value="<?= htmlspecialchars($projectID, ENT_QUOTES, 'UTF-8'); ?>">
                                                        <input type="hidden" name="CustID" id="CustID" value="<?= htmlspecialchars($projectCustID, ENT_QUOTES, 'UTF-8'); ?>">
@@ -304,11 +173,14 @@
                                                                  placeholder="Key contract terms, deliverables, notes, etc."><?= htmlspecialchars($otherDetails, ENT_QUOTES, 'UTF-8'); ?></textarea>
                                                        </div>
 
-                                                       <div class="form-actions">
-                                                            <button type="reset" class="btn btn-warning" id="resetUpdateProjectForm">
-                                                                 <i class="mdi mdi-refresh mr-1"></i> Reset
+                                                       <div class="berps-form-actions">
+                                                            <a href="<?= base_url(); ?>Page/projectList" class="btn btn-outline-secondary">Cancel</a>
+                                                            <button type="reset" class="btn btn-outline-secondary" id="resetUpdateProjectForm">
+                                                                 <i class="mdi mdi-refresh mr-1" aria-hidden="true"></i>Reset
                                                             </button>
-                                                            <button type="submit" name="submit" class="btn btn-primary">Save Changes</button>
+                                                            <button type="submit" name="submit" class="btn btn-primary">
+                                                                 <i class="mdi mdi-content-save-outline mr-1" aria-hidden="true"></i>Save Changes
+                                                            </button>
                                                        </div>
                                                   </form>
                                              </div>
@@ -316,30 +188,24 @@
                                    </div>
 
                                    <div class="col-lg-4">
-                                        <div class="card shadow-sm">
-                                             <div class="card-header">
-                                                  <h5 class="mb-0">Summary</h5>
+                                        <aside class="berps-form-card">
+                                             <div class="berps-form-card__header">
+                                                  <div>
+                                                       <h2 class="berps-form-card__title">Project summary</h2>
+                                                       <p class="berps-form-card__copy">Current saved information.</p>
+                                                  </div>
                                              </div>
-                                             <div class="card-body">
-                                                  <p class="mb-1 text-muted">Project</p>
-                                                  <h5><?= htmlspecialchars($projectDescription, ENT_QUOTES, 'UTF-8'); ?></h5>
-
-                                                  <p class="mb-1 text-muted">Client</p>
-                                                  <h6 id="summary-client"><?= htmlspecialchars($projectClient, ENT_QUOTES, 'UTF-8'); ?></h6>
-
-                                                  <p class="mb-1 text-muted">Category</p>
-                                                  <h6><?= htmlspecialchars($projectCategory, ENT_QUOTES, 'UTF-8'); ?></h6>
-
-                                                  <p class="mb-1 text-muted">Contract Date</p>
-                                                  <h6><?= !empty($contractDate) ? date('F d, Y', strtotime($contractDate)) : '-'; ?></h6>
-
-                                                  <p class="mb-1 text-muted">Cost</p>
-                                                  <h5><?= number_format((float)$projectCost, 2); ?></h5>
-
-                                                  <p class="mb-1 text-muted">Address</p>
-                                                  <h6 id="summary-address"><?= htmlspecialchars($projectAddress, ENT_QUOTES, 'UTF-8'); ?></h6>
+                                             <div class="berps-form-card__body">
+                                                  <dl class="berps-detail-list">
+                                                       <div class="berps-detail-list__item"><dt>Project</dt><dd><?= htmlspecialchars($projectDescription, ENT_QUOTES, 'UTF-8'); ?></dd></div>
+                                                       <div class="berps-detail-list__item"><dt>Client</dt><dd id="summary-client"><?= htmlspecialchars($projectClient, ENT_QUOTES, 'UTF-8'); ?></dd></div>
+                                                       <div class="berps-detail-list__item"><dt>Category</dt><dd><?= htmlspecialchars($projectCategory, ENT_QUOTES, 'UTF-8'); ?></dd></div>
+                                                       <div class="berps-detail-list__item"><dt>Contract date</dt><dd><?= !empty($contractDate) ? date('F d, Y', strtotime($contractDate)) : '-'; ?></dd></div>
+                                                       <div class="berps-detail-list__item"><dt>Cost</dt><dd>PHP <?= number_format((float)$projectCost, 2); ?></dd></div>
+                                                       <div class="berps-detail-list__item"><dt>Address</dt><dd id="summary-address"><?= htmlspecialchars($projectAddress, ENT_QUOTES, 'UTF-8'); ?></dd></div>
+                                                  </dl>
                                              </div>
-                                        </div>
+                                        </aside>
                                    </div>
                               </div>
                          <?php else: ?>

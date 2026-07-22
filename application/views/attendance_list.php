@@ -11,9 +11,9 @@
 
     <div class="content-page">
       <div class="content">
-        <div class="container-fluid attendance-page">
+        <div class="container-fluid attendance-page berps-page">
 
-          <style>
+          <style media="not all">
             /* ─── Google Font Import ─────────────────────────────────── */
 
             /* ─── Reset ─────────────────────────────────────────────── */
@@ -821,39 +821,39 @@
           <?php $flash = $this->session->flashdata('msg'); ?>
           <?php if (!empty($flash)): ?>
             <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
-              <?= $flash; ?>
-              <button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>
+              <?= htmlspecialchars((string) $flash, ENT_QUOTES, 'UTF-8'); ?>
+              <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
             </div>
           <?php endif; ?>
 
           <!-- Page header -->
-          <div class="page-header">
-            <div>
-              <div class="page-eyebrow"><span></span>Attendance</div>
-              <h4 class="page-title"><?= htmlspecialchars($pageTitle, ENT_QUOTES, 'UTF-8'); ?></h4>
-              <div class="page-subtitle">
+          <header class="berps-page-header">
+            <div class="berps-page-header__content">
+              <span class="berps-page-header__eyebrow">Attendance</span>
+              <h1 class="berps-page-title"><?= htmlspecialchars($pageTitle, ENT_QUOTES, 'UTF-8'); ?></h1>
+              <p class="berps-page-subtitle">
                 <?= $level === 'Admin' ? 'All employee punch logs' : 'Your daily punch logs'; ?>
                 <?php if (!$isToday): ?>
                   &mdash; <?= htmlspecialchars($selectedLabel, ENT_QUOTES, 'UTF-8'); ?>
                 <?php endif; ?>
-              </div>
+              </p>
             </div>
             <?php if ($level === 'Admin' && !$attendanceOnly && !$presenceOnly): ?>
-              <div class="page-actions">
+              <div class="berps-page-header__actions">
                 <a href="<?= base_url(); ?>Page/dayAccomplishments?from=<?= htmlspecialchars($from, ENT_QUOTES, 'UTF-8'); ?>&to=<?= htmlspecialchars($to, ENT_QUOTES, 'UTF-8'); ?>"
-                  class="btn-submit">
-                  <i class="mdi mdi-trophy-outline"></i>
+                  class="btn btn-primary">
+                  <i class="mdi mdi-trophy-outline" aria-hidden="true"></i>
                   <?= htmlspecialchars($accompBtnText, ENT_QUOTES, 'UTF-8'); ?>
                 </a>
               </div>
             <?php endif; ?>
-          </div>
+          </header>
 
           <!-- Staff Punch Cards -->
           <?php if ($level !== 'Admin'): ?>
             <div class="punch-grid">
               <div class="punch-card punch-in">
-                <div class="punch-icon"><i class="mdi mdi-clock-plus"></i></div>
+                <div class="punch-icon"><i class="mdi mdi-login" aria-hidden="true"></i></div>
                 <div class="punch-info">
                   <div class="punch-label">Time-In</div>
                   <div class="punch-sublabel">Auto-detects AM or PM slot</div>
@@ -861,7 +861,7 @@
                 <a class="punch-btn" href="<?= base_url(); ?>Page/amTimeIn">Time-In</a>
               </div>
               <div class="punch-card punch-out">
-                <div class="punch-icon"><i class="mdi mdi-clock-outline"></i></div>
+                <div class="punch-icon"><i class="mdi mdi-clock-outline" aria-hidden="true"></i></div>
                 <div class="punch-info">
                   <div class="punch-label">Time-Out</div>
                   <div class="punch-sublabel">Closes the latest open punch</div>
@@ -872,7 +872,7 @@
           <?php endif; ?>
 
           <!-- Attendance card -->
-          <div class="theme-card">
+          <section class="theme-card attendance-card">
             <div class="theme-card-head">
               <div>
                 <h5 class="theme-card-title">Attendance Log</h5>
@@ -883,7 +883,7 @@
             </div>
 
             <!-- Toolbar -->
-            <div class="card-toolbar">
+            <div class="card-toolbar" aria-label="Attendance filters and actions">
               <?php
               $fromVal = (string)$this->input->get('from');
               $toVal   = (string)$this->input->get('to');
@@ -933,18 +933,18 @@
 
             <!-- Table -->
             <div class="table-responsive">
-              <table id="attendance-table" class="table att-table" style="width:100%">
+              <table id="attendance-table" class="table att-table w-100">
                 <thead>
                   <?php if ($level === 'Admin' && $attendanceOnly): ?>
                     <tr>
                       <th>Employee</th>
-                      <th style="text-align:center;">Total Hours</th>
-                      <th style="text-align:center;">Actions</th>
+                      <th class="text-center">Total Hours</th>
+                      <th class="text-center">Actions</th>
                     </tr>
                   <?php elseif ($level === 'Admin' && $presenceOnly): ?>
                     <tr>
                       <th>Employee</th>
-                      <th style="text-align:center;">Attendance</th>
+                      <th class="text-center">Attendance</th>
                     </tr>
                   <?php elseif ($level === 'Admin'): ?>
                     <tr>
@@ -952,16 +952,16 @@
                       <th>Employee</th>
                       <th>Status</th>
                       <th>Time Breakdown</th>
-                      <th style="text-align:center;">Per-Day Hours</th>
-                      <th style="text-align:center;">Grand Total</th>
-                      <th style="text-align:center;">Accomplishment</th>
+                      <th class="text-center">Per-Day Hours</th>
+                      <th class="text-center">Grand Total</th>
+                      <th class="text-center">Accomplishment</th>
                     </tr>
                   <?php else: ?>
                     <tr>
                       <th>Date</th>
                       <th>Time Breakdown</th>
-                      <th style="text-align:center;">Per-Day Hours</th>
-                      <th style="text-align:center;">Accomplishment</th>
+                      <th class="text-center">Per-Day Hours</th>
+                      <th class="text-center">Accomplishment</th>
                     </tr>
                   <?php endif; ?>
                 </thead>
@@ -1005,9 +1005,9 @@
                         ?>
                         <tr data-total-seconds="<?= (int)$emp['total_seconds']; ?>">
                           <td class="cell-muted"><?= htmlspecialchars($emp['name'], ENT_QUOTES, 'UTF-8'); ?></td>
-                          <td style="text-align:center;"><span class="hours-badge"><?= human_hours_label($totalLabel); ?></span></td>
-                          <td style="text-align:center;">
-                            <div style="display:inline-flex;align-items:center;gap:4px;">
+                          <td class="text-center"><span class="hours-badge"><?= human_hours_label($totalLabel); ?></span></td>
+                          <td class="text-center">
+                            <div class="attendance-actions">
                               <a class="action-icon act-blue"
                                 href="<?= base_url(); ?>Page/accomplishmentsPerEmployee?name=<?= urlencode($emp['id']); ?>&date=<?= htmlspecialchars($clipboardDate, ENT_QUOTES, 'UTF-8'); ?>"
                                 title="<?= htmlspecialchars($tipDay, ENT_QUOTES, 'UTF-8'); ?>">
@@ -1037,7 +1037,7 @@
                       <?php foreach ($seen as $emp): ?>
                         <tr>
                           <td><?= htmlspecialchars($emp['name'], ENT_QUOTES, 'UTF-8'); ?></td>
-                          <td style="text-align:center;">
+                          <td class="text-center">
                             <span class="status-pill pill-success"><i class="mdi mdi-check"></i> Present</span>
                           </td>
                         </tr>
@@ -1100,21 +1100,21 @@
                                 <a href="#" class="see-more" data-target="more-intervals">+<?= $intCount - $maxVisible; ?> more</a>
                               <?php endif; ?>
                             <?php else: ?>
-                              <span style="color:var(--c-ink-3);font-size:0.75rem;">No punches</span>
+                              <span class="muted-copy">No punches</span>
                             <?php endif; ?>
                           </td>
 
-                          <td style="text-align:center;"><span class="hours-badge"><?= human_hours_label($rowTotalLabel); ?></span></td>
+                          <td class="text-center"><span class="hours-badge"><?= human_hours_label($rowTotalLabel); ?></span></td>
 
                           <?php if ($level === 'Admin'): ?>
-                            <td style="text-align:center;">
+                            <td class="text-center">
                               <?php
                               $gt = !empty($row->grand_total_label) ? $row->grand_total_label : '00:00';
                               echo '<span class="hours-badge">' . human_hours_label($gt) . '</span>';
                               ?>
                             </td>
-                            <td style="text-align:center;">
-                              <div style="display:inline-flex;align-items:center;gap:4px;">
+                            <td class="text-center">
+                              <div class="attendance-actions">
                                 <a class="action-icon act-blue"
                                   href="<?= base_url(); ?>Page/accomplishmentsPerEmployee?name=<?= urlencode($accompKey); ?>&date=<?= htmlspecialchars($orderDate, ENT_QUOTES, 'UTF-8'); ?>"
                                   title="<?= htmlspecialchars($tipDay, ENT_QUOTES, 'UTF-8'); ?>">
@@ -1128,7 +1128,7 @@
                               </div>
                             </td>
                           <?php else: ?>
-                            <td style="text-align:center;">
+                            <td class="text-center">
                               <a class="action-icon act-blue"
                                 href="<?= base_url(); ?>Page/accomplishmentStaff?assignedPerson=<?= urlencode($accompKey); ?>&date=<?= $row->logDate; ?>"
                                 title="View accomplishment">
@@ -1143,8 +1143,7 @@
 
                   <?php else: ?>
                     <tr>
-                      <td colspan="<?= ($level === 'Admin' && $attendanceOnly) ? 3 : (($level === 'Admin' && $presenceOnly) ? 2 : ($level === 'Admin' ? 7 : 4)); ?>"
-                        style="text-align:center;padding:2.5rem;color:var(--c-ink-3);font-size:0.82rem;">
+                      <td colspan="<?= ($level === 'Admin' && $attendanceOnly) ? 3 : (($level === 'Admin' && $presenceOnly) ? 2 : ($level === 'Admin' ? 7 : 4)); ?>" class="attendance-empty">
                         No attendance records found.
                       </td>
                     </tr>
@@ -1169,15 +1168,18 @@
                 Grand total: <strong id="grand-total-filtered">00:00</strong>
               </div>
             <?php endif; ?>
-          </div>
+          </section>
 
           <!-- Filter Range Modal -->
-          <div class="modal fade theme-modal" id="monthFilterModal" tabindex="-1" role="dialog" aria-hidden="true">
+          <div class="modal fade theme-modal berps-form-modal" id="monthFilterModal" tabindex="-1" role="dialog" aria-labelledby="monthFilterModalTitle" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered" role="document">
               <div class="modal-content">
                 <div class="modal-header">
-                  <h5 class="modal-title">Filter Attendance Range</h5>
-                  <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                  <div>
+                    <h2 class="modal-title" id="monthFilterModalTitle">Filter Attendance Range</h2>
+                    <p class="berps-modal-subtitle">Choose the first and last date to include.</p>
+                  </div>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                 </div>
                 <form method="get" action="<?= base_url(); ?>Page/attendanceList">
                   <div class="modal-body">
@@ -1196,7 +1198,7 @@
                     <p><?= htmlspecialchars($rangeFilterHelp, ENT_QUOTES, 'UTF-8'); ?></p>
                   </div>
                   <div class="modal-footer">
-                    <a href="<?= base_url(); ?>Page/attendanceList" class="btn btn-light">Clear</a>
+                    <a href="<?= base_url(); ?>Page/attendanceList" class="btn btn-outline-secondary">Clear</a>
                     <button type="submit" class="btn btn-primary">Apply</button>
                   </div>
                 </form>
@@ -1205,12 +1207,15 @@
           </div>
 
           <!-- View Attendance Modal -->
-          <div class="modal fade theme-modal" id="dayAccompModal" tabindex="-1" role="dialog" aria-hidden="true">
+          <div class="modal fade theme-modal berps-form-modal" id="dayAccompModal" tabindex="-1" role="dialog" aria-labelledby="dayAccompModalTitle" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered" role="document">
               <div class="modal-content">
                 <div class="modal-header">
-                  <h5 class="modal-title">View Attendance (From / To)</h5>
-                  <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                  <div>
+                    <h2 class="modal-title" id="dayAccompModalTitle">View Attendance</h2>
+                    <p class="berps-modal-subtitle">Review totals and accomplishments within a date range.</p>
+                  </div>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                 </div>
                 <form method="get" action="<?= base_url(); ?>Page/attendanceList">
                   <div class="modal-body">
@@ -1230,7 +1235,7 @@
                     <p>Shows employee total hours and accomplishment links for the selected period.</p>
                   </div>
                   <div class="modal-footer">
-                    <button type="button" class="btn btn-light" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-primary">Apply</button>
                   </div>
                 </form>

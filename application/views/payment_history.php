@@ -823,8 +823,8 @@ $showAddPayment = !$clientMode && $addPaymentUrl !== '' && ($totalDue <= 0 || $b
 
                 </div>
 
-                <?php include('includes/footer.php'); ?>
             </div>
+            <?php include('includes/footer.php'); ?>
         </div>
     </div>
 

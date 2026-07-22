@@ -918,8 +918,8 @@ $printUrl = base_url() . 'Page/taxSummaryReport?' . http_build_query($printQuery
                     </div>
                 </div>
 
-                <?php include('includes/footer.php'); ?>
             </div>
+            <?php include('includes/footer.php'); ?>
         </div>
 
     </div>

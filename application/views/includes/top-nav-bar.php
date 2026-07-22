@@ -91,142 +91,103 @@ $showTopNavSupport = $topNavHasFeature(array('support'));
 $showTopNavCalendar = $topNavHasFeature(array('calendar'));
 $showTopNavAnnualGoals = $topNavHasFeature(array('tasks'));
 ?>
-<!-- <script type="text/javascript"> 
-        window.history.forward(); 
-        function noBack() { 
-            window.history.forward(); 
-        } 
-    </script> -->
-
-
 <div class="navbar-custom">
-    <ul class="list-unstyled topnav-menu float-right mb-0">
+    <div class="berps-topbar-left">
+        <button class="berps-menu-toggle" type="button" aria-label="Toggle menu" data-berps-sidebar-toggle>
+            <i class="ph ph-list"></i>
+        </button>
+        <div class="berps-topbar-title" id="berps-topbar-title"><?= isset($page_title) ? htmlspecialchars($page_title, ENT_QUOTES, 'UTF-8') : ''; ?></div>
+    </div>
+
+    <ul class="list-unstyled topnav-menu mb-0">
         <?php if ($this->session->userdata('level') !== 'Student'): ?>
             <?php if (!$isClientPortalUser): ?>
                 <?php $__level = (string) $this->session->userdata('level'); ?>
-                <?php if (!$topNavIsPackage2): ?>
                 <li class="dropdown notification-list">
-                    <a class="nav-link dropdown-toggle waves-effect" data-toggle="dropdown" href="#" role="button" aria-haspopup="false" aria-expanded="false" title="Mail">
-                        <i class="ph ph-envelope"></i>
+                    <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false" title="Apps & Tools">
+                        <i class="ph ph-squares-four"></i>
                     </a>
-                    <div class="dropdown-menu dropdown-menu-right">
-                        <div class="dropdown-item noti-title">
-                            <h6 class="font-14 m-0">Mail</h6>
-                        </div>
-                        <a href="<?= base_url(); ?>ZohoMail/inbox" class="dropdown-item notify-item">
-                            <i class="ph ph-envelope-simple"></i> Inbox
-                        </a>
-                        <a href="<?= base_url(); ?>ZohoMail/compose" class="dropdown-item notify-item">
-                            <i class="ph ph-pencil-simple"></i> Compose
-                        </a>
-                        <a href="<?= base_url(); ?>ZohoMail/settings" class="dropdown-item notify-item">
-                            <i class="ph ph-gear"></i> Zoho Settings
-                        </a>
-                    </div>
-                </li>
-                <li class="dropdown notification-list">
-                    <a class="nav-link dropdown-toggle waves-effect" data-toggle="dropdown" href="#" role="button" aria-haspopup="false" aria-expanded="false" title="Knowledge Base">
-                        <i class="ph ph-book-open"></i>
-                    </a>
-                    <div class="dropdown-menu dropdown-menu-right">
-                        <div class="dropdown-item noti-title">
-                            <h6 class="font-14 m-0">Knowledge Base</h6>
-                        </div>
-                        <a href="<?= base_url(); ?>Page/knowledgeBase" class="dropdown-item notify-item">
-                            <i class="ph ph-list-bullets"></i> View All
-                        </a>
-                        <?php if (!$isClientPortalUser): ?>
+                    <div class="dropdown-menu dropdown-menu-right berps-apps-menu">
+                        <?php if (!$topNavIsPackage2): ?>
+                            <div class="dropdown-item noti-title">
+                                <h6 class="font-14 m-0">Mail</h6>
+                            </div>
+                            <a href="<?= base_url(); ?>ZohoMail/inbox" class="dropdown-item notify-item">
+                                <i class="ph ph-envelope-simple"></i> Inbox
+                            </a>
+                            <a href="<?= base_url(); ?>ZohoMail/compose" class="dropdown-item notify-item">
+                                <i class="ph ph-pencil-simple"></i> Compose
+                            </a>
+                            <a href="<?= base_url(); ?>ZohoMail/settings" class="dropdown-item notify-item">
+                                <i class="ph ph-gear"></i> Zoho Settings
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <div class="dropdown-item noti-title">
+                                <h6 class="font-14 m-0">Knowledge Base</h6>
+                            </div>
+                            <a href="<?= base_url(); ?>Page/knowledgeBase" class="dropdown-item notify-item">
+                                <i class="ph ph-book-open"></i> View All
+                            </a>
                             <a href="<?= base_url(); ?>Page/knowledgeBaseSettings" class="dropdown-item notify-item">
                                 <i class="ph ph-gear"></i> Settings
                             </a>
                         <?php endif; ?>
-                    </div>
-                </li>
-                <?php endif; ?>
-                <?php if ($showTopNavSupport): ?>
-                <li class="dropdown notification-list">
-                    <a class="nav-link dropdown-toggle waves-effect" data-toggle="dropdown" href="#" role="button" aria-haspopup="false" aria-expanded="false" title="Customer Support">
-                        <i class="ph ph-headset"></i>
-                    </a>
-                    <div class="dropdown-menu dropdown-menu-right">
-                        <div class="dropdown-item noti-title">
-                            <h6 class="font-14 m-0">Customer Support</h6>
-                        </div>
-                        <a href="<?= base_url(); ?>Page/supportDashboard" class="dropdown-item notify-item">
-                            <i class="ph ph-chart-line"></i> Dashboard
-                        </a>
-                        <a href="<?= base_url(); ?>Page/supportIssues?scope=unassigned" class="dropdown-item notify-item">
-                            <i class="ph ph-question"></i> Unassigned Tickets
-                        </a>
-                        <a href="<?= base_url(); ?>Page/supportIssues?scope=awaiting_reply" class="dropdown-item notify-item">
-                            <i class="ph ph-chat-dots"></i> Awaiting Reply
-                        </a>
-                        <a href="<?= base_url(); ?>Page/supportIssues?scope=open" class="dropdown-item notify-item">
-                            <i class="ph ph-list-bullets"></i> <?= $__level === 'Admin' ? 'All Open Tickets' : 'Open Tickets'; ?>
-                        </a>
-                        <a href="<?= base_url(); ?>Page/supportIssues?scope=closed" class="dropdown-item notify-item">
-                            <i class="ph ph-check-circle"></i> <?= $__level === 'Admin' ? 'All Closed Tickets' : 'Closed Tickets'; ?>
-                        </a>
-                        <?php if ($__level === 'Admin'): ?>
-                            <a href="<?= base_url(); ?>Page/cancelledTicketLogs" class="dropdown-item notify-item">
-                                <i class="ph ph-x"></i> Cancelled Ticket Logs
+                        <?php if ($showTopNavSupport): ?>
+                            <?php if (!$topNavIsPackage2): ?><div class="dropdown-divider"></div><?php endif; ?>
+                            <div class="dropdown-item noti-title">
+                                <h6 class="font-14 m-0">Customer Support</h6>
+                            </div>
+                            <a href="<?= base_url(); ?>Page/supportDashboard" class="dropdown-item notify-item">
+                                <i class="ph ph-chart-line"></i> Dashboard
                             </a>
-                        <?php else: ?>
-                            <a href="<?= base_url(); ?>Page/supportIssues?scope=all" class="dropdown-item notify-item">
-                                <i class="ph ph-list-bullets"></i> All Tickets
+                            <a href="<?= base_url(); ?>Page/supportIssues?scope=unassigned" class="dropdown-item notify-item">
+                                <i class="ph ph-question"></i> Unassigned Tickets
                             </a>
+                            <a href="<?= base_url(); ?>Page/supportIssues?scope=awaiting_reply" class="dropdown-item notify-item">
+                                <i class="ph ph-chat-dots"></i> Awaiting Reply
+                            </a>
+                            <a href="<?= base_url(); ?>Page/supportIssues?scope=open" class="dropdown-item notify-item">
+                                <i class="ph ph-list-bullets"></i> <?= $__level === 'Admin' ? 'All Open Tickets' : 'Open Tickets'; ?>
+                            </a>
+                            <a href="<?= base_url(); ?>Page/supportIssues?scope=closed" class="dropdown-item notify-item">
+                                <i class="ph ph-check-circle"></i> <?= $__level === 'Admin' ? 'All Closed Tickets' : 'Closed Tickets'; ?>
+                            </a>
+                            <?php if ($__level === 'Admin'): ?>
+                                <a href="<?= base_url(); ?>Page/cancelledTicketLogs" class="dropdown-item notify-item">
+                                    <i class="ph ph-x"></i> Cancelled Ticket Logs
+                                </a>
+                            <?php else: ?>
+                                <a href="<?= base_url(); ?>Page/supportIssues?scope=all" class="dropdown-item notify-item">
+                                    <i class="ph ph-list-bullets"></i> All Tickets
+                                </a>
+                            <?php endif; ?>
+                        <?php endif; ?>
+                        <?php if ($showTopNavCalendar || ($showTopNavAnnualGoals && !$topNavIsPackage2) || !$topNavIsPackage2): ?>
+                            <?php if (!$topNavIsPackage2 || $showTopNavSupport): ?><div class="dropdown-divider"></div><?php endif; ?>
+                            <div class="dropdown-item noti-title">
+                                <h6 class="font-14 m-0">Quick Links</h6>
+                            </div>
+                            <?php if ($showTopNavCalendar): ?>
+                                <a href="<?= base_url(); ?>Calendar" class="dropdown-item notify-item">
+                                    <i class="ph ph-calendar-blank"></i> Calendar
+                                </a>
+                            <?php endif; ?>
+                            <?php if ($showTopNavAnnualGoals && !$topNavIsPackage2): ?>
+                                <a href="<?= base_url(); ?>Page/annualGoals" class="dropdown-item notify-item">
+                                    <i class="ph ph-chart-line-up"></i> Annual Goals
+                                </a>
+                            <?php endif; ?>
+                            <?php if (!$topNavIsPackage2): ?>
+                                <a href="<?= base_url('Page/bday_today'); ?>" class="dropdown-item notify-item">
+                                    <i class="ph ph-gift"></i> Today's Birthdays
+                                </a>
+                                <a href="<?= base_url('Page/bday_month'); ?>" class="dropdown-item notify-item">
+                                    <i class="ph ph-gift"></i> This Month's Birthdays
+                                </a>
+                            <?php endif; ?>
                         <?php endif; ?>
                     </div>
                 </li>
-                <?php endif; ?>
-                <?php if ($showTopNavCalendar): ?>
-                <li class="dropdown notification-list">
-                    <a class="nav-link waves-effect" href="<?= base_url(); ?>Calendar" title="Calendar">
-                        <i class="ph ph-calendar-blank"></i>
-                    </a>
-                </li>
-                <?php endif; ?>
-                <?php if ($showTopNavAnnualGoals && !$topNavIsPackage2): ?>
-                <li class="dropdown notification-list">
-                    <a class="nav-link waves-effect" href="<?= base_url(); ?>Page/annualGoals" title="Annual Goals">
-                        <i class="ph ph-chart-line-up"></i>
-                    </a>
-                </li>
-                <?php endif; ?>
-                <?php if (!$topNavIsPackage2): ?>
-                <li class="dropdown notification-list">
-                    <a class="nav-link dropdown-toggle  waves-effect" data-toggle="dropdown" href="#" role="button" aria-haspopup="false" aria-expanded="false">
-                        <i class="ph ph-gift"></i>
-                    </a>
-
-                    <div class="dropdown-menu dropdown-menu-right dropdown-lg">
-                        <div class="dropdown-item noti-title">
-                            <h5 class="font-16 m-0">
-                                Birthday Celebrants
-                            </h5>
-                        </div>
-
-                        <div class="slimscroll noti-scroll">
-                            <div class="inbox-widget">
-                                <a href="<?= base_url('Page/bday_today'); ?>">
-                                    <div class="inbox-item">
-                                        <div class="inbox-item-img"><img src="<?= base_url(); ?>assets/images/cake.png" class="rounded-circle" alt=""></div>
-                                        <p class="inbox-item-author">Today's</p>
-                                        <p class="inbox-item-text text-truncate">Birthday Celebrants</p>
-                                    </div>
-                                </a>
-                                <a href="<?= base_url('Page/bday_month'); ?>">
-                                    <div class="inbox-item">
-                                        <div class="inbox-item-img"><img src="<?= base_url(); ?>assets/images/cake.png" class="rounded-circle" alt=""></div>
-                                        <p class="inbox-item-author">This Month's</p>
-                                        <p class="inbox-item-text text-truncate">Birthday Celebrants</p>
-                                    </div>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </li>
-                <?php endif; ?>
             <?php endif; ?>
             <?php if (!$topNavIsPackage2): ?>
             <?php include(APPPATH . 'views/includes/req_bell.php'); ?>
@@ -295,57 +256,10 @@ $showTopNavAnnualGoals = $topNavHasFeature(array('tasks'));
 
 
     </ul>
+</div>
 
-    <!-- LOGO -->
-    <div class="logo-box">
-        <a href="<?= htmlspecialchars($homeUrl, ENT_QUOTES, 'UTF-8'); ?>" class="logo text-center logo-dark" aria-label="BERPS Home">
-            <span class="logo-lg">
-                <img src="<?= base_url(); ?>assets/images/srms-logo.png" alt="" height="18">
-                <!-- <span class="logo-lg-text-dark">Velonic</span> -->
-            </span>
-            <span class="logo-sm">
-                <!-- <span class="logo-lg-text-dark">V</span> -->
-                <img src="<?= base_url(); ?>assets/images/logo-sm1.png" alt="" height="22">
-            </span>
-        </a>
-
-        <a href="<?= htmlspecialchars($homeUrl, ENT_QUOTES, 'UTF-8'); ?>" class="logo text-center logo-light" aria-label="BERPS Home">
-            <span class="logo-lg">
-                <img src="<?= base_url(); ?>assets/images/srms-logo.png" alt="" height="45">
-                <!-- <span class="logo-lg-text-dark">Velonic</span> -->
-            </span>
-            <span class="logo-sm">
-                <!-- <span class="logo-lg-text-dark">V</span> -->
-                <img src="<?= base_url(); ?>assets/images/logo-sm1.png" alt="" height="22">
-            </span>
-        </a>
-    </div>
-
-    <!-- LOGO -->
-
-
-    <ul class="list-unstyled topnav-menu topnav-menu-left m-0">
-        <li>
-            <button class="button-menu-mobile waves-effect">
-                <i class="ph ph-list"></i>
-            </button>
-        </li>
-
-        <li class="d-none d-lg-block">
-            <form class="app-search">
-                <div class="app-search-box">
-                    <div class="input-group">
-                        <input type="text" class="form-control" placeholder="Search...">
-                        <div class="input-group-append">
-                            <button class="btn" type="submit">
-                                <i class="ph ph-magnifying-glass"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- <audio id="global-reminder-audio" src="<?= base_url('upload/daj_mi_dziuba_rmx.mp3'); ?>" preload="auto"></audio> -->
-                <script>
+<!-- <audio id="global-reminder-audio" src="<?= base_url('upload/daj_mi_dziuba_rmx.mp3'); ?>" preload="auto"></audio> -->
+<script>
                     (function() {
                         var pollUrl = '<?= base_url('Reminders/dueNowFeed'); ?>';
                         var storageKey = 'reminder_notified_keys';
@@ -431,7 +345,3 @@ $showTopNavAnnualGoals = $topNavHasFeature(array('tasks'));
                         });
                     })();
                 </script>
-            </form>
-        </li>
-    </ul>
-</div>

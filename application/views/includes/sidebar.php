@@ -61,32 +61,40 @@ $__showNotesMenu = $__sidebarHasFeature(array('notes'));
 $__showExpensesMenu = $__sidebarHasFeature(array('expenses'));
 $__showPosMenu = $__sidebarHasFeature(array('pos'));
 $__showAttendanceMenu = !$__hasCompanyFeatureRestrictions || $__showPayrollMenu;
+
+// Brand block: role-specific home link (pageant-style sidebar brand).
+switch ($__sidebarLevel) {
+    case 'system administrator':
+    case 'super admin':
+        $__sidebarHomeUrl = base_url('Page/superAdmin');
+        break;
+    case 'admin':
+        $__sidebarHomeUrl = base_url('Page/admin');
+        break;
+    case 'manager':
+    case 'pos admin':
+        $__sidebarHomeUrl = base_url('Pos/posAdmin');
+        break;
+    case 'cashier':
+    case 'pos staff':
+        $__sidebarHomeUrl = base_url('Pos/posStaff');
+        break;
+    case 'client':
+        $__sidebarHomeUrl = base_url('Page/clientDashboard');
+        break;
+    default:
+        $__sidebarHomeUrl = base_url('Page/staff');
+        break;
+}
 ?>
-<style>
-    .left-side-menu .metismenu li>ul {
-        display: none !important;
-    }
-
-    .left-side-menu .metismenu li.mm-open>ul,
-    .left-side-menu .metismenu li>ul.mm-show {
-        display: block !important;
-    }
-
-    .left-side-menu .metismenu a {
-        transition: background-color 0.18s ease, color 0.18s ease;
-    }
-
-    .left-side-menu .metismenu a:active {
-        transform: translateY(0);
-    }
-
-    .left-side-menu .metismenu .waves-ripple {
-        display: none !important;
-    }
-</style>
 
 <div class="left-side-menu">
-    <div class="slimscroll-menu">
+    <div class="berps-sidebar-brand">
+        <a href="<?= htmlspecialchars($__sidebarHomeUrl, ENT_QUOTES, 'UTF-8'); ?>" aria-label="BERPS Home">
+            <img src="<?= base_url(); ?>assets/images/srms-logo.png" alt="BERPS">
+        </a>
+    </div>
+    <div class="berps-sidebar-scroll">
         <!-- Super Administrator -->
         <?php if ($this->session->userdata('level') === 'Super Admin' || $this->session->userdata('level') === 'System Administrator'): ?>
             <div id="sidebar-menu">
@@ -95,44 +103,37 @@ $__showAttendanceMenu = !$__hasCompanyFeatureRestrictions || $__showPayrollMenu;
                     <li class="menu-title">SYSTEM ADMINISTRATOR</li>
 
                     <li>
-                        <a href="<?= base_url(); ?>Page/superAdmin" class="waves-effect">
+                        <a href="<?= base_url(); ?>Page/superAdmin">
                             <i class="ph ph-chart-line"></i>
                             <span> Dashboard </span>
                         </a>
                     </li>
 
                     <li>
-                        <a href="<?= base_url(); ?>Page/reminders" class="waves-effect">
+                        <a href="<?= base_url(); ?>Page/reminders">
                             <i class="ph ph-bell"></i>
                             <span> Reminders </span>
                         </a>
                     </li>
 
                     <li>
-                        <a href="<?= base_url(); ?>Page/superAdminCompanies" class="waves-effect">
+                        <a href="<?= base_url(); ?>Page/superAdminCompanies">
                             <i class="ph ph-buildings"></i>
                             <span> Manage Companies </span>
                         </a>
                     </li>
 
                     <li>
-                        <a href="<?= base_url(); ?>Page/superAdminBilling" class="waves-effect">
+                        <a href="<?= base_url(); ?>Page/superAdminBilling">
                             <i class="ph ph-credit-card"></i>
                             <span> Billing & Payments </span>
                         </a>
                     </li>
 
                     <li>
-                        <a href="<?= base_url(); ?>Page/superAdminAdmins" class="waves-effect">
+                        <a href="<?= base_url(); ?>Page/superAdminAdmins">
                             <i class="ph ph-user-gear"></i>
                             <span> Company Admins </span>
-                        </a>
-                    </li>
-
-                    <li>
-                        <a href="<?= base_url(); ?>login/logout" class="waves-effect">
-                            <i class="ph ph-sign-out"></i>
-                            <span> Logout </span>
                         </a>
                     </li>
 
@@ -149,14 +150,14 @@ $__showAttendanceMenu = !$__hasCompanyFeatureRestrictions || $__showPayrollMenu;
                     <li class="menu-title">ADMINISTRATION</li>
 
                     <li>
-                        <a href="<?= base_url(); ?>Page/admin" class="waves-effect">
+                        <a href="<?= base_url(); ?>Page/admin">
                             <i class="ph ph-chart-line"></i>
                             <span> Dashboard </span>
                         </a>
                     </li>
 
                     <li>
-                        <a href="<?= base_url(); ?>Page/reminders" class="waves-effect">
+                        <a href="<?= base_url(); ?>Page/reminders">
                             <i class="ph ph-bell"></i>
                             <span> Reminders </span>
                         </a>
@@ -164,7 +165,7 @@ $__showAttendanceMenu = !$__hasCompanyFeatureRestrictions || $__showPayrollMenu;
 
                     <?php if ($__showInvoiceMenu): ?>
                     <li>
-                        <a href="javascript: void(0);" class="waves-effect">
+                        <a href="javascript: void(0);">
                             <i class="ph ph-file-text"></i>
                             <span> Invoice </span>
                             <span class="menu-arrow"></span>
@@ -184,7 +185,7 @@ $__showAttendanceMenu = !$__hasCompanyFeatureRestrictions || $__showPayrollMenu;
 
                     <?php if ($__showDeliveriesMenu): ?>
                     <li>
-                        <a href="javascript: void(0);" class="waves-effect">
+                        <a href="javascript: void(0);">
                             <i class="ph ph-cube"></i>
                             <span> Deliveries </span>
                             <span class="menu-arrow"></span>
@@ -198,7 +199,7 @@ $__showAttendanceMenu = !$__hasCompanyFeatureRestrictions || $__showPayrollMenu;
 
                     <?php if ($__showInvoiceFeature): ?>
                     <li>
-                        <a href="javascript: void(0);" class="waves-effect">
+                        <a href="javascript: void(0);">
                             <i class="ph ph-archive"></i>
                             <span> Collections </span>
                             <span class="menu-arrow"></span>
@@ -219,7 +220,7 @@ $__showAttendanceMenu = !$__hasCompanyFeatureRestrictions || $__showPayrollMenu;
 
                     <?php if ($__showPosMenu): ?>
                     <li>
-                        <a href="javascript: void(0);" class="waves-effect">
+                        <a href="javascript: void(0);">
                             <i class="ph ph-storefront"></i>
                             <span> POS </span>
                             <span class="menu-arrow"></span>
@@ -238,7 +239,7 @@ $__showAttendanceMenu = !$__hasCompanyFeatureRestrictions || $__showPayrollMenu;
 
                     <?php if ($__showExpensesMenu): ?>
                     <li>
-                        <a href="javascript: void(0);" class="waves-effect">
+                        <a href="javascript: void(0);">
                             <i class="ph ph-wallet"></i>
                             <span> Expenses </span>
                             <span class="menu-arrow"></span>
@@ -251,7 +252,7 @@ $__showAttendanceMenu = !$__hasCompanyFeatureRestrictions || $__showPayrollMenu;
 
                     <?php if ($__showProjectsMenu): ?>
                     <li>
-                        <a href="javascript: void(0);" class="waves-effect">
+                        <a href="javascript: void(0);">
                             <i class="ph ph-clipboard"></i>
                             <span> Projects </span>
                             <span class="menu-arrow"></span>
@@ -264,7 +265,7 @@ $__showAttendanceMenu = !$__hasCompanyFeatureRestrictions || $__showPayrollMenu;
 
                     <?php if ($__showTasksMenu): ?>
                     <li>
-                        <a href="javascript: void(0);" class="waves-effect">
+                        <a href="javascript: void(0);">
                             <i class="ph ph-list"></i>
                             <span> Tasks </span>
                             <span class="menu-arrow"></span>
@@ -282,7 +283,7 @@ $__showAttendanceMenu = !$__hasCompanyFeatureRestrictions || $__showPayrollMenu;
                     <?php endif; ?>
                     <?php if ($__showAttendanceMenu || $__showPayrollMenu): ?>
                     <li>
-                        <a href="javascript: void(0);" class="waves-effect">
+                        <a href="javascript: void(0);">
                             <i class="ph ph-briefcase"></i>
                             <span> Human Resource </span>
                             <span class="menu-arrow"></span>
@@ -311,7 +312,7 @@ $__showAttendanceMenu = !$__hasCompanyFeatureRestrictions || $__showPayrollMenu;
 
                     <?php if ($__showClientsMenu): ?>
                     <li>
-                        <a href="javascript: void(0);" class="waves-effect">
+                        <a href="javascript: void(0);">
                             <i class="ph ph-users"></i>
                             <span> Clients </span>
                             <span class="menu-arrow"></span>
@@ -326,7 +327,7 @@ $__showAttendanceMenu = !$__hasCompanyFeatureRestrictions || $__showPayrollMenu;
 
                     <?php if ($__showNotesMenu): ?>
                     <li>
-                        <a href="javascript: void(0);" class="waves-effect">
+                        <a href="javascript: void(0);">
                             <i class="ph ph-notebook"></i>
                             <span> Notes </span>
                             <span class="menu-arrow"></span>
@@ -338,7 +339,7 @@ $__showAttendanceMenu = !$__hasCompanyFeatureRestrictions || $__showPayrollMenu;
                     <?php endif; ?>
 
                     <li>
-                        <a href="javascript: void(0);" class="waves-effect">
+                        <a href="javascript: void(0);">
                             <i class="ph ph-gear"></i>
                             <span> System Configuration </span>
                             <span class="menu-arrow"></span>
@@ -352,7 +353,7 @@ $__showAttendanceMenu = !$__hasCompanyFeatureRestrictions || $__showPayrollMenu;
                     </li>
 
                     <li>
-                        <a href="javascript: void(0);" class="waves-effect">
+                        <a href="javascript: void(0);">
                             <i class="ph ph-user-plus"></i>
                             <span> Manage Users </span>
                             <span class="menu-arrow"></span>
@@ -374,14 +375,14 @@ $__showAttendanceMenu = !$__hasCompanyFeatureRestrictions || $__showPayrollMenu;
                     <li class="menu-title">Navigation</li>
 
                     <li>
-                        <a href="<?= base_url(); ?>Page/staff" class="waves-effect">
+                        <a href="<?= base_url(); ?>Page/staff">
                             <i class="ph ph-chart-line"></i>
                             <span> Dashboard </span>
                         </a>
                     </li>
 
                     <li>
-                        <a href="<?= base_url(); ?>Page/reminders" class="waves-effect">
+                        <a href="<?= base_url(); ?>Page/reminders">
                             <i class="ph ph-bell"></i>
                             <span> Reminders </span>
                         </a>
@@ -389,7 +390,7 @@ $__showAttendanceMenu = !$__hasCompanyFeatureRestrictions || $__showPayrollMenu;
 
                     <?php if ($__showInvoiceMenu): ?>
                     <li>
-                        <a href="javascript: void(0);" class="waves-effect">
+                        <a href="javascript: void(0);">
                             <i class="ph ph-file-text"></i>
                             <span> Invoice </span>
                             <span class="menu-arrow"></span>
@@ -408,7 +409,7 @@ $__showAttendanceMenu = !$__hasCompanyFeatureRestrictions || $__showPayrollMenu;
 
                     <?php if ($__showDeliveriesMenu): ?>
                     <li>
-                        <a href="javascript: void(0);" class="waves-effect">
+                        <a href="javascript: void(0);">
                             <i class="ph ph-cube"></i>
                             <span> Deliveries </span>
                             <span class="menu-arrow"></span>
@@ -422,7 +423,7 @@ $__showAttendanceMenu = !$__hasCompanyFeatureRestrictions || $__showPayrollMenu;
 
                     <?php if ($__showClientsMenu): ?>
                     <li>
-                        <a href="javascript: void(0);" class="waves-effect">
+                        <a href="javascript: void(0);">
                             <i class="ph ph-users"></i>
                             <span> Clients </span>
                             <span class="menu-arrow"></span>
@@ -435,14 +436,14 @@ $__showAttendanceMenu = !$__hasCompanyFeatureRestrictions || $__showPayrollMenu;
 
                     <?php if ($__showAttendanceMenu): ?>
                     <li>
-                        <a href="<?= base_url(); ?>Page/attendanceList" class="waves-effect">
+                        <a href="<?= base_url(); ?>Page/attendanceList">
                             <i class="ph ph-alarm"></i>
                             <span> Attendance </span>
                         </a>
                     </li>
                     <?php if (!$__isPackage2): ?>
                     <li>
-                        <a href="<?= base_url(); ?>Page/myDTR" class="waves-effect">
+                        <a href="<?= base_url(); ?>Page/myDTR">
                             <i class="ph ph-clock"></i>
                             <span> My DTR </span>
                         </a>
@@ -452,7 +453,7 @@ $__showAttendanceMenu = !$__hasCompanyFeatureRestrictions || $__showPayrollMenu;
 
                     <?php if ($__showExpensesMenu): ?>
                     <li>
-                        <a href="<?= base_url(); ?>Page/expensesList" class="waves-effect">
+                        <a href="<?= base_url(); ?>Page/expensesList">
                             <i class="ph ph-wallet"></i>
                             <span> Expenses </span>
                         </a>
@@ -461,7 +462,7 @@ $__showAttendanceMenu = !$__hasCompanyFeatureRestrictions || $__showPayrollMenu;
 
                     <?php if ($__showTasksMenu): ?>
                     <li>
-                        <a href="javascript: void(0);" class="waves-effect">
+                        <a href="javascript: void(0);">
                             <i class="ph ph-clipboard"></i>
                             <span> Task </span>
                             <span class="menu-arrow"></span>
@@ -479,7 +480,7 @@ $__showAttendanceMenu = !$__hasCompanyFeatureRestrictions || $__showPayrollMenu;
 
                     <?php if ($__showProjectsMenu): ?>
                     <li>
-                        <a href="javascript: void(0);" class="waves-effect">
+                        <a href="javascript: void(0);">
                             <i class="ph ph-clipboard"></i>
                             <span> Projects </span>
                             <span class="menu-arrow"></span>
@@ -493,7 +494,7 @@ $__showAttendanceMenu = !$__hasCompanyFeatureRestrictions || $__showPayrollMenu;
 
                     <?php if ($__showTasksMenu && !$__isPackage2): ?>
                     <li>
-                        <a href="<?= base_url(); ?>Page/ranking" class="waves-effect">
+                        <a href="<?= base_url(); ?>Page/ranking">
                             <i class="ph ph-trophy"></i>
                             <span> Ranking </span>
                         </a>
@@ -502,7 +503,7 @@ $__showAttendanceMenu = !$__hasCompanyFeatureRestrictions || $__showPayrollMenu;
 
                     <?php if ($__showCalendarFeature && !$__isPackage2): ?>
                     <li>
-                        <a href="javascript: void(0);" class="waves-effect">
+                        <a href="javascript: void(0);">
                             <i class="ph ph-alarm"></i>
                             <span> Reminders </span>
                             <span class="menu-arrow"></span>
@@ -516,7 +517,7 @@ $__showAttendanceMenu = !$__hasCompanyFeatureRestrictions || $__showPayrollMenu;
 
                     <?php if ($__showNotesMenu): ?>
                     <li>
-                        <a href="javascript: void(0);" class="waves-effect">
+                        <a href="javascript: void(0);">
                             <i class="ph ph-notebook"></i>
                             <span> Notes </span>
                             <span class="menu-arrow"></span>
@@ -606,13 +607,6 @@ $__showAttendanceMenu = !$__hasCompanyFeatureRestrictions || $__showPayrollMenu;
                             <span> Change Password </span>
                         </a>
                     </li>
-
-                    <li>
-                        <a href="<?= base_url(); ?>login/logout">
-                            <i class="ph ph-sign-out"></i>
-                            <span> Logout </span>
-                        </a>
-                    </li>
                 </ul>
             </div>
             <!-- End Sidebar -->
@@ -623,14 +617,14 @@ $__showAttendanceMenu = !$__hasCompanyFeatureRestrictions || $__showPayrollMenu;
                     <li class="menu-title">POS Management</li>
 
                     <li>
-                        <a href="<?= base_url(); ?>Pos/posAdmin" class="waves-effect">
+                        <a href="<?= base_url(); ?>Pos/posAdmin">
                             <i class="ph ph-chart-line"></i>
                             <span> Dashboard </span>
                         </a>
                     </li>
 
                     <li>
-                        <a href="javascript: void(0);" class="waves-effect">
+                        <a href="javascript: void(0);">
                             <i class="ph ph-cash"></i>
                             <span> Sales </span>
                             <span class="menu-arrow"></span>
@@ -644,7 +638,7 @@ $__showAttendanceMenu = !$__hasCompanyFeatureRestrictions || $__showPayrollMenu;
                     </li>
 
                     <li>
-                        <a href="javascript: void(0);" class="waves-effect">
+                        <a href="javascript: void(0);">
                             <i class="ph ph-archive"></i>
                             <span> Inventory </span>
                             <span class="menu-arrow"></span>
@@ -656,7 +650,7 @@ $__showAttendanceMenu = !$__hasCompanyFeatureRestrictions || $__showPayrollMenu;
                     </li>
 
                     <li>
-                        <a href="javascript: void(0);" class="waves-effect">
+                        <a href="javascript: void(0);">
                             <i class="ph ph-clock"></i>
                             <span> Expiry </span>
                             <span class="menu-arrow"></span>
@@ -668,7 +662,7 @@ $__showAttendanceMenu = !$__hasCompanyFeatureRestrictions || $__showPayrollMenu;
                     </li>
 
                     <li>
-                        <a href="javascript: void(0);" class="waves-effect">
+                        <a href="javascript: void(0);">
                             <i class="ph ph-user"></i>
                             <span> Users </span>
                             <span class="menu-arrow"></span>
@@ -680,7 +674,7 @@ $__showAttendanceMenu = !$__hasCompanyFeatureRestrictions || $__showPayrollMenu;
 
                     <?php if (strtolower((string)$this->session->userdata('level')) === 'admin'): ?>
                         <li>
-                            <a href="javascript: void(0);" class="waves-effect">
+                            <a href="javascript: void(0);">
                                 <i class="ph ph-gear"></i>
                                 <span> Settings </span>
                                 <span class="menu-arrow"></span>
@@ -691,12 +685,6 @@ $__showAttendanceMenu = !$__hasCompanyFeatureRestrictions || $__showPayrollMenu;
                         </li>
                     <?php endif; ?>
 
-                    <li>
-                        <a href="<?= base_url(); ?>login/logout" class="waves-effect">
-                            <i class="ph ph-sign-out"></i>
-                            <span> Logout </span>
-                        </a>
-                    </li>
                 </ul>
 
             </div>
@@ -708,14 +696,14 @@ $__showAttendanceMenu = !$__hasCompanyFeatureRestrictions || $__showPayrollMenu;
                     <li class="menu-title">POS Cashier Panel</li>
 
                     <li>
-                        <a href="<?= base_url(); ?>Pos/posStaff" class="waves-effect">
+                        <a href="<?= base_url(); ?>Pos/posStaff">
                             <i class="ph ph-chart-line"></i>
                             <span> Overview </span>
                         </a>
                     </li>
 
                     <li>
-                        <a href="javascript: void(0);" class="waves-effect">
+                        <a href="javascript: void(0);">
                             <i class="ph ph-cube"></i>
                             <span> Product Entry </span>
                             <span class="menu-arrow"></span>
@@ -726,7 +714,7 @@ $__showAttendanceMenu = !$__hasCompanyFeatureRestrictions || $__showPayrollMenu;
                     </li>
 
                     <li>
-                        <a href="javascript: void(0);" class="waves-effect">
+                        <a href="javascript: void(0);">
                             <i class="ph ph-cash"></i>
                             <span> Point of Sale </span>
                             <span class="menu-arrow"></span>
@@ -740,7 +728,7 @@ $__showAttendanceMenu = !$__hasCompanyFeatureRestrictions || $__showPayrollMenu;
                     </li>
 
                     <li>
-                        <a href="javascript: void(0);" class="waves-effect">
+                        <a href="javascript: void(0);">
                             <i class="ph ph-archive"></i>
                             <span> Inventory </span>
                             <span class="menu-arrow"></span>
@@ -752,7 +740,7 @@ $__showAttendanceMenu = !$__hasCompanyFeatureRestrictions || $__showPayrollMenu;
                     </li>
 
                     <li>
-                        <a href="javascript: void(0);" class="waves-effect">
+                        <a href="javascript: void(0);">
                             <i class="ph ph-clock"></i>
                             <span> Expiry Monitoring </span>
                             <span class="menu-arrow"></span>
@@ -764,7 +752,7 @@ $__showAttendanceMenu = !$__hasCompanyFeatureRestrictions || $__showPayrollMenu;
                     </li>
 
                     <li>
-                        <a href="javascript: void(0);" class="waves-effect">
+                        <a href="javascript: void(0);">
                             <i class="ph ph-user"></i>
                             <span> My Account </span>
                             <span class="menu-arrow"></span>
@@ -782,19 +770,21 @@ $__showAttendanceMenu = !$__hasCompanyFeatureRestrictions || $__showPayrollMenu;
 
         <?php endif; ?>
 
-
-
-        <div class="clearfix"></div>
-
     </div>
-    <!-- Sidebar -left -->
+    <!-- End sidebar scroll area -->
+
+    <div class="berps-sidebar-logout">
+        <a href="<?= base_url(); ?>login/logout">
+            <i class="ph ph-sign-out"></i>
+            <span>Logout</span>
+        </a>
+    </div>
+
+    <div class="berps-sidebar-footer">
+        &copy; <?= date('Y'); ?> BERPS
+    </div>
 
 </div>
+<!-- End left sidebar -->
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        document.querySelectorAll('.left-side-menu .waves-effect').forEach(function(link) {
-            link.classList.remove('waves-effect');
-        });
-    });
-</script>
+<div class="berps-sidebar-overlay" data-berps-sidebar-close></div>

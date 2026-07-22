@@ -227,8 +227,8 @@ $pageTitle = $scopeLabels[$scope] ?? 'Support Tickets';
                     </div>
                 </div>
             </div>
-            <?php include('includes/footer.php'); ?>
         </div>
+        <?php include('includes/footer.php'); ?>
     </div>
 </div>
 <script src="<?= base_url(); ?>assets/js/vendor.min.js"></script>
