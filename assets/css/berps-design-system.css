@@ -57,9 +57,9 @@
   --berps-sidebar-width: 240px;
   --berps-topbar-height: 70px;
 
-  /* Sidebar chrome (pageant-style dark navy) */
-  --berps-sidebar-bg-start: #1c1c2e;
-  --berps-sidebar-bg-end: #2d2b45;
+  /* Sidebar chrome (pageant-style dark navy blue) */
+  --berps-sidebar-bg-start: #171f33;
+  --berps-sidebar-bg-end: #1f2b47;
   --berps-sidebar-gradient: linear-gradient(160deg, var(--berps-sidebar-bg-start) 0%, var(--berps-sidebar-bg-end) 100%);
   --berps-sidebar-text: rgba(255, 255, 255, 0.65);
   --berps-sidebar-text-strong: #ffffff;
@@ -224,13 +224,13 @@ a:hover {
     flex: 0 0 auto;
     display: flex;
     align-items: center;
-    gap: 0.65rem;
-    padding: 1.05rem 1.5rem;
+    justify-content: center;
+    padding: 1.35rem 1.5rem;
     border-bottom: 1px solid var(--berps-sidebar-hairline);
   }
 
   .berps-sidebar-brand img {
-    height: 30px;
+    height: 44px;
     max-width: 100%;
   }
 

@@ -27,8 +27,8 @@
     <link href="<?= base_url(); ?>assets/libs/datatables/select.bootstrap4.min.css" rel="stylesheet" type="text/css" />
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-    <link href="<?= base_url(); ?>assets/css/fonts.css?v=20260722-7" rel="stylesheet" type="text/css" />
-    <link href="<?= base_url(); ?>assets/css/berps-design-system.css?v=20260722-7" rel="stylesheet" type="text/css" />
+    <link href="<?= base_url(); ?>assets/css/fonts.css?v=20260722-8" rel="stylesheet" type="text/css" />
+    <link href="<?= base_url(); ?>assets/css/berps-design-system.css?v=20260722-8" rel="stylesheet" type="text/css" />
     <link href="<?= base_url(); ?>assets/css/phosphor-icons-custom.css" rel="stylesheet" type="text/css" />
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script src="<?= base_url(); ?>assets/js/berps-ui.js?v=20260722-7" defer></script>
