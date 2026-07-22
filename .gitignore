@@ -9,3 +9,6 @@ __MACOSX/
 
 # CodeIgniter session files (keep the dir, its .htaccess and index.html)
 application/sessions/ci_session*
+.DS_Store
+.DS_Store
+.DS_Store
