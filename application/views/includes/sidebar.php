@@ -502,17 +502,7 @@ switch ($__sidebarLevel) {
                     <?php endif; ?>
 
                     <?php if ($__showCalendarFeature && !$__isPackage2): ?>
-                    <li>
-                        <a href="javascript: void(0);">
-                            <i class="ph ph-alarm"></i>
-                            <span> Reminders </span>
-                            <span class="menu-arrow"></span>
-                        </a>
-                        <ul class="nav-second-level" aria-expanded="false">
-                            <li> <a href="<?= base_url(); ?>Reminders/">Reminder List</a> </li>
-
-                        </ul>
-                    </li>
+                  
                     <?php endif; ?>
 
                     <?php if ($__showNotesMenu): ?>
