@@ -470,8 +470,8 @@ switch ($__sidebarLevel) {
                         <ul class="nav-second-level" aria-expanded="false">
                             <li> <a href="<?= base_url(); ?>Page/projectAddTask">Task List</a> </li>
                             <?php if (!$__isPackage2): ?>
-                            <li> <a href="<?= base_url(); ?>Page/unassignedTask">Unassigned</a> </li>
-                            <li> <a href="<?= base_url(); ?>Page/forwardedTask">Forwarded Task</a> </li>
+                            <li> <a href="<?= base_url(); ?>Page/supportIssues?scope=unassigned">Unassigned</a> </li>
+                            <li> <a href="<?= base_url(); ?>Page/projectAddTask?status=open&scope=forwarded">Forwarded Task</a> </li>
                             <?php endif; ?>
                             <li> <a href="<?= base_url(); ?>Page/accomplishments">Accomplishments</a> </li>
                         </ul>
@@ -602,7 +602,7 @@ switch ($__sidebarLevel) {
                     </li>
 
                     <li>
-                        <a href="<?= base_url(); ?>Users/changepassword">
+                        <a href="<?= base_url(); ?>Users/changepassword" data-account-modal-open="password">
                             <i class="ph ph-lock"></i>
                             <span> Change Password </span>
                         </a>
@@ -759,7 +759,7 @@ switch ($__sidebarLevel) {
                         </a>
                         <ul class="nav-second-level" aria-expanded="false">
                             <li><a href="<?= base_url(); ?>Page/staffprofile?id=<?= $this->session->userdata('IDNumber'); ?>">Profile</a></li>
-                            <li><a href="<?= base_url(); ?>Users/changepassword">Change Password</a></li>
+                            <li><a href="<?= base_url(); ?>Users/changepassword" data-account-modal-open="password">Change Password</a></li>
                             <li><a href="<?= base_url(); ?>login/logout">Logout</a></li>
                         </ul>
                     </li>

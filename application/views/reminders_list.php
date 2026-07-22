@@ -32,84 +32,23 @@
 
           <div class="content-page">
                <div class="content">
-                    <div class="container-fluid reminders-page">
-                         <style>
-                              .reminders-page .page-title-box {
-                                   margin-bottom: 18px;
-                                   padding: 12px 0;
-                              }
+                    <div class="container-fluid reminders-list-page berps-page">
 
-                              .reminders-page .card-header {
-                                   background: #5dade2;
-                                   border-bottom: none;
-                              }
-
-                              .reminders-page .card-header h4 {
-                                   color: #fff;
-                              }
-
-                              .reminders-page .card-header .btn {
-                                   background: rgba(255, 255, 255, 0.2);
-                                   border: none;
-                                   color: #fff;
-                              }
-
-                              .reminders-page .card-header .btn:hover {
-                                   background: rgba(255, 255, 255, 0.35);
-                              }
-
-                              .reminders-page .table-action-btns {
-                                   display: inline-flex;
-                                   justify-content: center;
-                                   align-items: center;
-                                   gap: 8px;
-                              }
-
-                              .reminders-page .action-icon {
-                                   width: 36px;
-                                   height: 36px;
-                                   border-radius: 999px;
-                                   display: inline-flex;
-                                   align-items: center;
-                                   justify-content: center;
-                                   transition: all 0.2s ease;
-                                   text-decoration: none;
-                                   color: #1f2937;
-                                   background: rgba(15, 23, 42, 0.05);
-                                   box-shadow: 0 4px 10px rgba(15, 23, 42, 0.08);
-                              }
-
-                              .reminders-page .action-icon i {
-                                   font-size: 18px;
-                              }
-
-                              .reminders-page .action-icon-edit {
-                                   color: #2563eb;
-                                   background: rgba(37, 99, 235, 0.12);
-                              }
-
-                              .reminders-page .action-icon-delete {
-                                   color: #d14343;
-                                   background: rgba(209, 67, 67, 0.12);
-                              }
-
-                              .reminders-page .action-icon:hover {
-                                   transform: translateY(-1px);
-                                   box-shadow: 0 8px 16px rgba(15, 23, 42, 0.15);
-                              }
-                         </style>
-
-                         <div class="row">
-                              <div class="col-12">
-                                   <div class="page-title-box">
-                                        <h4 class="page-title">Reminder List<br />
-                                             <span class="badge badge-purple mb-1">Stay on top of important tasks</span>
-                                        </h4>
-                                        <div class="clearfix"></div>
-                                        <hr style="border:0; height:2px; background:linear-gradient(to right, #4285F4 60%, #FBBC05 80%, #34A853 100%); border-radius:1px; margin:10px 0 0;" />
-                                   </div>
+                         <header class="berps-page-header">
+                              <div class="berps-page-header__content">
+                                   <span class="berps-page-header__eyebrow">Productivity</span>
+                                   <h1 class="berps-page-title">Reminder List</h1>
+                                   <p class="berps-page-subtitle">Stay on top of important tasks and due dates.</p>
                               </div>
-                         </div>
+                              <div class="berps-page-header__actions">
+                                   <a href="<?= base_url('Reminders/history'); ?>" class="btn btn-outline-secondary">
+                                        <i class="material-icons align-middle mr-1" style="font-size:18px;">history</i>History
+                                   </a>
+                                   <button class="btn btn-primary" data-toggle="modal" data-target="#addReminderModal">
+                                        <i class="material-icons align-middle mr-1" style="font-size:18px;">add_alert</i>Add Reminder
+                                   </button>
+                              </div>
+                         </header>
 
                          <?php if (!empty($dueToday)): ?>
                               <div class="alert alert-info shadow-sm">
@@ -131,22 +70,17 @@
                               </div>
                          <?php endif; ?>
 
-                         <div class="card">
-                              <div class="card-header d-flex justify-content-between align-items-center">
-                                   <h4 class="mb-0">Reminders</h4>
-                                   <div class="d-flex align-items-center">
-                                        <a href="<?= base_url('Reminders/history'); ?>" class="btn btn-sm mr-2">
-                                             <i class="material-icons align-middle mr-1" style="font-size:18px;">history</i>History
-                                        </a>
-                                        <button class="btn btn-sm" data-toggle="modal" data-target="#addReminderModal">
-                                             <i class="material-icons align-middle mr-1" style="font-size:18px;">add_alert</i>Add Reminder
-                                        </button>
+                         <section class="berps-table-card">
+                              <div class="berps-table-card__header">
+                                   <div>
+                                        <h2 class="berps-section-title">Reminders</h2>
+                                        <p class="berps-section-copy">Upcoming reminders with their notify window and frequency.</p>
                                    </div>
                               </div>
-                              <div class="card-body">
+                              <div class="berps-table-card__body">
                                    <div class="table-responsive">
-                                        <table id="reminders-table" class="table table-hover table-striped table-centered align-middle mb-0">
-                                             <thead class="bg-secondary text-white">
+                                        <table id="reminders-table" class="table table-hover align-middle mb-0">
+                                             <thead>
                                                  <tr class="text-center">
                                                       <th>Title</th>
                                                       <th>Description</th>
@@ -168,11 +102,11 @@
                                                                  </td>
                                                                  <td class="text-center"><?= ucfirst($rem->recurrence); ?></td>
                                                                  <td class="text-center">
-                                                                      <div class="table-action-btns">
-                                                                           <a href="<?= base_url('Reminders/edit/' . $rem->id); ?>" class="action-icon action-icon-edit" data-toggle="tooltip" title="Edit reminder">
+                                                                      <div class="berps-row-actions">
+                                                                           <a href="<?= base_url('Reminders/edit/' . $rem->id); ?>" class="berps-icon-action" data-toggle="tooltip" title="Edit reminder" aria-label="Edit reminder">
                                                                                 <i class="material-icons">edit</i>
                                                                            </a>
-                                                                           <a href="<?= base_url('Reminders/delete/' . $rem->id); ?>" class="action-icon action-icon-delete" data-toggle="tooltip" title="Delete reminder" onclick="return confirm('Are you sure you want to delete this reminder?');">
+                                                                           <a href="<?= base_url('Reminders/delete/' . $rem->id); ?>" class="berps-icon-action berps-icon-action--danger" data-toggle="tooltip" title="Delete reminder" onclick="return confirm('Are you sure you want to delete this reminder?');">
                                                                                 <i class="material-icons">delete</i>
                                                                            </a>
                                                                       </div>
@@ -181,7 +115,12 @@
                                                        <?php endforeach; ?>
                                                   <?php else: ?>
                                                        <tr>
-                                                            <td colspan="5" class="text-center text-muted">No reminders found.</td>
+                                                            <td colspan="6">
+                                                                 <div class="berps-empty-state">
+                                                                      <i class="mdi mdi-bell-off-outline berps-empty-state__icon" aria-hidden="true"></i>
+                                                                      <span>No reminders found.</span>
+                                                                 </div>
+                                                            </td>
                                                        </tr>
                                                   <?php endif; ?>
                                              </tbody>
@@ -247,12 +186,15 @@
           })(jQuery);
      </script>
 
-     <div class="modal fade" id="addReminderModal" tabindex="-1" role="dialog" aria-hidden="true">
-          <div class="modal-dialog modal-lg" role="document">
+     <div class="modal fade berps-form-modal" id="addReminderModal" tabindex="-1" role="dialog" aria-hidden="true">
+          <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
                <div class="modal-content">
-                    <div class="modal-header bg-success text-white">
-                         <h5 class="modal-title mb-0">Add Reminder</h5>
-                         <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <div class="modal-header">
+                         <div>
+                              <h2 class="modal-title mb-0">Add Reminder</h2>
+                              <p class="berps-modal-subtitle">Set the due date, notify window, and frequency.</p>
+                         </div>
+                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                               <span aria-hidden="true">&times;</span>
                          </button>
                     </div>
@@ -304,9 +246,9 @@
                               <input type="hidden" name="save" value="1">
                          </div>
                          <div class="modal-footer">
-                              <button type="submit" class="btn btn-success">Save</button>
-                              <button type="reset" class="btn btn-warning">Reset</button>
-                              <button type="button" class="btn btn-light" data-dismiss="modal">Close</button>
+                              <button type="submit" class="btn btn-primary">Save</button>
+                              <button type="reset" class="btn btn-outline-secondary">Reset</button>
+                              <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Close</button>
                          </div>
                     </form>
                </div>

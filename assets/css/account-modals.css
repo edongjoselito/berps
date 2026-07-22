@@ -1,0 +1,558 @@
+.berps-account-modal[hidden] {
+    display: none !important;
+}
+
+body.berps-account-modal-open {
+    overflow: hidden;
+}
+
+.berps-account-modal {
+    align-items: center;
+    display: flex;
+    inset: 0;
+    justify-content: center;
+    opacity: 0;
+    padding: 24px;
+    position: fixed;
+    transition: opacity 180ms ease;
+    visibility: hidden;
+    z-index: 1090;
+}
+
+.berps-account-modal.is-open {
+    opacity: 1;
+    visibility: visible;
+}
+
+.berps-account-modal__backdrop {
+    background: rgba(9, 18, 36, 0.66);
+    backdrop-filter: blur(5px);
+    inset: 0;
+    position: absolute;
+}
+
+.berps-account-modal__dialog {
+    background: #fff;
+    border: 1px solid rgba(209, 219, 233, 0.9);
+    border-radius: 22px;
+    box-shadow: 0 28px 80px rgba(15, 35, 69, 0.3);
+    max-height: calc(100vh - 48px);
+    max-width: 100%;
+    overflow: auto;
+    position: relative;
+    transform: translateY(16px) scale(0.985);
+    transition: transform 220ms cubic-bezier(0.2, 0.85, 0.32, 1.15);
+    width: 540px;
+}
+
+.berps-account-modal__dialog--password {
+    width: 570px;
+}
+
+.berps-account-modal.is-open .berps-account-modal__dialog {
+    transform: translateY(0) scale(1);
+}
+
+.berps-account-modal__header {
+    align-items: flex-start;
+    background:
+        radial-gradient(circle at 90% 0, rgba(84, 140, 255, 0.34), transparent 38%),
+        linear-gradient(135deg, #14223e 0%, #1c3767 100%);
+    border-radius: 20px 20px 0 0;
+    color: #fff;
+    display: grid;
+    gap: 15px;
+    grid-template-columns: auto 1fr auto;
+    overflow: hidden;
+    padding: 25px 26px 24px;
+    position: relative;
+}
+
+.berps-account-modal__header::after {
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 17px;
+    content: "";
+    inset: 7px;
+    pointer-events: none;
+    position: absolute;
+}
+
+.berps-account-modal__header-icon {
+    align-items: center;
+    background: rgba(255, 255, 255, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 14px;
+    display: flex;
+    flex: 0 0 48px;
+    font-size: 25px;
+    height: 48px;
+    justify-content: center;
+    width: 48px;
+}
+
+.berps-account-modal__eyebrow {
+    color: #a9c6ff;
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.095em;
+    margin-bottom: 3px;
+    text-transform: uppercase;
+}
+
+.berps-account-modal__header h2 {
+    color: #fff;
+    font-size: 1.35rem;
+    font-weight: 750;
+    letter-spacing: -0.025em;
+    line-height: 1.25;
+    margin: 0 0 5px;
+}
+
+.berps-account-modal__header p {
+    color: rgba(231, 239, 255, 0.76);
+    font-size: 0.86rem;
+    line-height: 1.45;
+    margin: 0;
+}
+
+.berps-account-modal__close {
+    align-items: center;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 10px;
+    color: #fff;
+    display: flex;
+    font-size: 18px;
+    height: 36px;
+    justify-content: center;
+    padding: 0;
+    position: relative;
+    transition: background 150ms ease, transform 150ms ease;
+    width: 36px;
+    z-index: 1;
+}
+
+.berps-account-modal__close:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+    transform: rotate(3deg);
+}
+
+.berps-account-modal__body {
+    padding: 24px 26px 20px;
+}
+
+.berps-account-modal__footer {
+    align-items: center;
+    background: #f8faff;
+    border-radius: 0 0 22px 22px;
+    border-top: 1px solid #e7edf6;
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    padding: 16px 26px;
+}
+
+.berps-account-btn {
+    align-items: center;
+    border-radius: 10px;
+    display: inline-flex;
+    font-size: 0.9rem;
+    font-weight: 700;
+    gap: 8px;
+    justify-content: center;
+    min-height: 42px;
+    padding: 9px 17px;
+}
+
+.berps-account-btn--secondary {
+    background: #fff;
+    border: 1px solid #cfdaea;
+    color: #4b5c75;
+}
+
+.berps-account-btn--secondary:hover {
+    background: #f5f8fc;
+    border-color: #b8c7dc;
+    color: #233550;
+}
+
+.berps-account-btn--primary {
+    background: #2467cf;
+    border: 1px solid #2467cf;
+    box-shadow: 0 8px 18px rgba(36, 103, 207, 0.24);
+    color: #fff;
+}
+
+.berps-account-btn--primary:hover,
+.berps-account-btn--primary:focus {
+    background: #1959bb;
+    border-color: #1959bb;
+    color: #fff;
+}
+
+.berps-account-btn[disabled] {
+    box-shadow: none;
+    cursor: wait;
+    opacity: 0.68;
+}
+
+.berps-account-btn.is-loading i {
+    animation: berps-account-spin 750ms linear infinite;
+}
+
+@keyframes berps-account-spin {
+    to { transform: rotate(360deg); }
+}
+
+.berps-profile-photo-editor {
+    align-items: center;
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.berps-profile-photo-editor__avatar-wrap {
+    flex: 0 0 76px;
+    height: 76px;
+    position: relative;
+}
+
+.berps-profile-photo-editor__avatar {
+    background: #eef3fa;
+    border: 4px solid #fff;
+    border-radius: 50%;
+    box-shadow: 0 0 0 1px #d5e0ee, 0 8px 20px rgba(28, 55, 103, 0.13);
+    height: 76px;
+    object-fit: cover;
+    width: 76px;
+}
+
+.berps-profile-photo-editor__badge {
+    align-items: center;
+    background: #2467cf;
+    border: 3px solid #fff;
+    border-radius: 50%;
+    bottom: -2px;
+    color: #fff;
+    display: flex;
+    font-size: 13px;
+    height: 28px;
+    justify-content: center;
+    position: absolute;
+    right: -2px;
+    width: 28px;
+}
+
+.berps-profile-photo-editor__copy {
+    display: flex;
+    flex-direction: column;
+}
+
+.berps-profile-photo-editor__copy strong {
+    color: #17233a;
+    font-size: 1rem;
+}
+
+.berps-profile-photo-editor__copy span {
+    color: #718096;
+    font-size: 0.84rem;
+    margin-top: 2px;
+}
+
+.berps-photo-dropzone {
+    align-items: center;
+    background: #f8fbff;
+    border: 1.5px dashed #a9bdd9;
+    border-radius: 15px;
+    cursor: pointer;
+    display: grid;
+    gap: 13px;
+    grid-template-columns: auto 1fr auto;
+    margin: 0;
+    padding: 19px;
+    transition: background 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.berps-photo-dropzone:hover,
+.berps-photo-dropzone:focus,
+.berps-photo-dropzone.is-dragging {
+    background: #f1f6ff;
+    border-color: #3978da;
+    box-shadow: 0 0 0 4px rgba(57, 120, 218, 0.08);
+    outline: 0;
+}
+
+.berps-photo-dropzone.is-invalid {
+    background: #fff8f8;
+    border-color: #d94a55;
+}
+
+.berps-photo-dropzone__icon {
+    align-items: center;
+    background: #e7f0ff;
+    border-radius: 11px;
+    color: #2467cf;
+    display: flex;
+    font-size: 24px;
+    height: 45px;
+    justify-content: center;
+    width: 45px;
+}
+
+.berps-photo-dropzone__text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.berps-photo-dropzone__text strong {
+    color: #233550;
+    font-size: 0.9rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.berps-photo-dropzone__text small {
+    color: #77869b;
+    font-size: 0.77rem;
+    margin-top: 3px;
+}
+
+.berps-photo-dropzone__action {
+    background: #fff;
+    border: 1px solid #cfdaea;
+    border-radius: 9px;
+    color: #245daf;
+    font-size: 0.8rem;
+    font-weight: 750;
+    padding: 8px 11px;
+}
+
+.berps-account-modal__file {
+    height: 1px;
+    opacity: 0;
+    overflow: hidden;
+    position: absolute;
+    width: 1px;
+}
+
+.berps-account-field {
+    margin-bottom: 16px;
+}
+
+.berps-account-field label {
+    color: #283850;
+    display: block;
+    font-size: 0.83rem;
+    font-weight: 750;
+    margin: 0 0 7px;
+}
+
+.berps-account-input {
+    align-items: center;
+    background: #fff;
+    border: 1px solid #cfd9e7;
+    border-radius: 11px;
+    display: flex;
+    min-height: 47px;
+    transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.berps-account-input:focus-within {
+    border-color: #3b78d8;
+    box-shadow: 0 0 0 4px rgba(59, 120, 216, 0.1);
+}
+
+.berps-account-input.is-invalid {
+    border-color: #d94a55;
+    box-shadow: 0 0 0 3px rgba(217, 74, 85, 0.08);
+}
+
+.berps-account-input > i {
+    color: #8090a6;
+    flex: 0 0 44px;
+    font-size: 19px;
+    text-align: center;
+}
+
+.berps-account-input input {
+    background: transparent;
+    border: 0;
+    color: #17233a;
+    flex: 1 1 auto;
+    font-size: 0.9rem;
+    height: 45px;
+    min-width: 0;
+    outline: 0;
+    padding: 0 6px 0 0;
+}
+
+.berps-account-input input::placeholder {
+    color: #9aa7b8;
+}
+
+.berps-account-input button {
+    align-items: center;
+    align-self: stretch;
+    background: transparent;
+    border: 0;
+    color: #718096;
+    display: flex;
+    flex: 0 0 43px;
+    font-size: 18px;
+    justify-content: center;
+    padding: 0;
+}
+
+.berps-account-input button:hover {
+    color: #2467cf;
+}
+
+.berps-password-strength {
+    align-items: center;
+    display: flex;
+    gap: 10px;
+    margin-top: 7px;
+}
+
+.berps-password-strength__bars {
+    display: grid;
+    flex: 0 0 116px;
+    gap: 4px;
+    grid-template-columns: repeat(4, 1fr);
+}
+
+.berps-password-strength__bars span {
+    background: #dce4ef;
+    border-radius: 999px;
+    height: 4px;
+    transition: background 160ms ease;
+}
+
+.berps-password-strength[data-score="1"] .berps-password-strength__bars span:nth-child(-n+1) { background: #d94a55; }
+.berps-password-strength[data-score="2"] .berps-password-strength__bars span:nth-child(-n+2) { background: #e39a2d; }
+.berps-password-strength[data-score="3"] .berps-password-strength__bars span:nth-child(-n+3) { background: #2f9b78; }
+.berps-password-strength[data-score="4"] .berps-password-strength__bars span { background: #167c5c; }
+
+.berps-password-strength small {
+    color: #77869b;
+    font-size: 0.75rem;
+}
+
+.berps-password-note {
+    align-items: flex-start;
+    background: #f3f7fd;
+    border: 1px solid #dbe7f7;
+    border-radius: 11px;
+    color: #5d6d83;
+    display: flex;
+    font-size: 0.78rem;
+    gap: 9px;
+    line-height: 1.45;
+    padding: 11px 13px;
+}
+
+.berps-password-note > i {
+    color: #2467cf;
+    flex: 0 0 auto;
+    font-size: 17px;
+    margin-top: 1px;
+}
+
+.berps-account-feedback {
+    align-items: flex-start;
+    border: 1px solid transparent;
+    border-radius: 11px;
+    display: flex;
+    font-size: 0.82rem;
+    gap: 9px;
+    line-height: 1.45;
+    margin-top: 15px;
+    padding: 11px 13px;
+}
+
+.berps-account-feedback[hidden] {
+    display: none;
+}
+
+.berps-account-feedback.is-error {
+    background: #fff4f5;
+    border-color: #f2c7cc;
+    color: #a92d3a;
+}
+
+.berps-account-feedback.is-success {
+    background: #effbf6;
+    border-color: #bde7d5;
+    color: #176b50;
+}
+
+.berps-account-feedback i {
+    flex: 0 0 auto;
+    font-size: 18px;
+    margin-top: 1px;
+}
+
+.berps-account-feedback ul {
+    margin: 4px 0 0;
+    padding-left: 18px;
+}
+
+@media (max-width: 575.98px) {
+    .berps-account-modal {
+        align-items: flex-end;
+        padding: 0;
+    }
+
+    .berps-account-modal__dialog,
+    .berps-account-modal__dialog--password {
+        border-radius: 22px 22px 0 0;
+        max-height: calc(100vh - 20px);
+        width: 100%;
+    }
+
+    .berps-account-modal__header {
+        border-radius: 20px 20px 0 0;
+        gap: 11px;
+        grid-template-columns: auto 1fr auto;
+        padding: 20px 18px;
+    }
+
+    .berps-account-modal__header-icon {
+        flex-basis: 42px;
+        font-size: 22px;
+        height: 42px;
+        width: 42px;
+    }
+
+    .berps-account-modal__body {
+        padding: 20px 18px 17px;
+    }
+
+    .berps-account-modal__footer {
+        padding: 14px 18px;
+    }
+
+    .berps-account-modal__footer .berps-account-btn {
+        flex: 1 1 50%;
+    }
+
+    .berps-photo-dropzone {
+        grid-template-columns: auto 1fr;
+    }
+
+    .berps-photo-dropzone__action {
+        display: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .berps-account-modal,
+    .berps-account-modal__dialog,
+    .berps-account-modal__close {
+        transition: none;
+    }
+}

@@ -204,15 +204,15 @@ $showTopNavAnnualGoals = $topNavHasFeature(array('tasks'));
                 <!-- item-->
                 <!-- item-->
                 <?php if (!$isClientPortalUser): ?>
-                    <a href="<?= base_url(); ?>Page/changeDP?id=<?php echo $this->session->userdata('username'); ?>" class="dropdown-item notify-item">
+                    <a href="<?= base_url(); ?>Page/changeDP?id=<?php echo $this->session->userdata('username'); ?>" class="dropdown-item notify-item" data-account-modal-open="profile-photo">
                         <i class="ph ph-gear"></i>
-                        <span>Change Profile Pic</span>
-                    </a>
-                    <a href="<?= base_url(); ?>Users/changepassword" class="dropdown-item notify-item">
-                        <i class="ph ph-lock-key"></i>
-                        <span>Change Password</span>
+                        <span>Change Profile Photo</span>
                     </a>
                 <?php endif; ?>
+                <a href="<?= base_url(); ?>Users/changepassword" class="dropdown-item notify-item" data-account-modal-open="password">
+                    <i class="ph ph-lock-key"></i>
+                    <span>Change Password</span>
+                </a>
 
                 <?php if ($this->session->userdata('level') === 'Student'): ?>
                     <a href="<?= base_url(); ?>Page/studentsprofile" class="dropdown-item notify-item">
@@ -256,6 +256,133 @@ $showTopNavAnnualGoals = $topNavHasFeature(array('tasks'));
 
 
     </ul>
+</div>
+
+<?php if (!$isClientPortalUser): ?>
+    <div class="berps-account-modal" data-account-modal="profile-photo" aria-hidden="true" hidden>
+        <div class="berps-account-modal__backdrop" data-account-modal-close></div>
+        <section class="berps-account-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="profile-photo-modal-title">
+            <header class="berps-account-modal__header">
+                <div class="berps-account-modal__header-icon" aria-hidden="true">
+                    <i class="ph ph-user-circle"></i>
+                </div>
+                <div>
+                    <span class="berps-account-modal__eyebrow">Personalize your account</span>
+                    <h2 id="profile-photo-modal-title">Change profile photo</h2>
+                    <p>Choose a clear photo so your teammates can recognize you.</p>
+                </div>
+                <button type="button" class="berps-account-modal__close" data-account-modal-close aria-label="Close change profile photo dialog">
+                    <i class="ph ph-x" aria-hidden="true"></i>
+                </button>
+            </header>
+
+            <form class="berps-account-modal__form" action="<?= site_url('Page/uploadProfPic'); ?>" method="post" enctype="multipart/form-data" data-account-form="profile-photo" novalidate>
+                <div class="berps-account-modal__body">
+                    <div class="berps-profile-photo-editor">
+                        <div class="berps-profile-photo-editor__avatar-wrap">
+                            <img class="berps-profile-photo-editor__avatar" src="<?= htmlspecialchars($avatarUrl, ENT_QUOTES, 'UTF-8'); ?>" alt="Current profile photo" data-profile-photo-preview data-saved-src="<?= htmlspecialchars($avatarUrl, ENT_QUOTES, 'UTF-8'); ?>">
+                            <span class="berps-profile-photo-editor__badge" aria-hidden="true"><i class="ph ph-camera"></i></span>
+                        </div>
+                        <div class="berps-profile-photo-editor__copy">
+                            <strong><?= htmlspecialchars($displayName, ENT_QUOTES, 'UTF-8'); ?></strong>
+                            <span>Your current profile photo</span>
+                        </div>
+                    </div>
+
+                    <label class="berps-photo-dropzone" for="account-profile-photo-input" data-profile-photo-dropzone role="button" tabindex="0">
+                        <span class="berps-photo-dropzone__icon" aria-hidden="true"><i class="ph ph-image-square"></i></span>
+                        <span class="berps-photo-dropzone__text">
+                            <strong data-profile-photo-label>Choose a new photo</strong>
+                            <small>JPG, PNG, or GIF &middot; Maximum 2 MB</small>
+                        </span>
+                        <span class="berps-photo-dropzone__action">Browse</span>
+                    </label>
+                    <input class="berps-account-modal__file" id="account-profile-photo-input" type="file" name="nonoy" accept="image/jpeg,image/png,image/gif" required>
+
+                    <div class="berps-account-feedback" data-account-feedback role="status" aria-live="polite" hidden></div>
+                </div>
+
+                <footer class="berps-account-modal__footer">
+                    <button type="button" class="btn berps-account-btn berps-account-btn--secondary" data-account-modal-close>Cancel</button>
+                    <button type="submit" class="btn berps-account-btn berps-account-btn--primary" data-account-submit>
+                        <i class="ph ph-upload-simple" aria-hidden="true"></i>
+                        <span>Save photo</span>
+                    </button>
+                </footer>
+            </form>
+        </section>
+    </div>
+<?php endif; ?>
+
+<div class="berps-account-modal" data-account-modal="password" aria-hidden="true" hidden>
+    <div class="berps-account-modal__backdrop" data-account-modal-close></div>
+    <section class="berps-account-modal__dialog berps-account-modal__dialog--password" role="dialog" aria-modal="true" aria-labelledby="password-modal-title">
+        <header class="berps-account-modal__header">
+            <div class="berps-account-modal__header-icon" aria-hidden="true">
+                <i class="ph ph-shield-check"></i>
+            </div>
+            <div>
+                <span class="berps-account-modal__eyebrow">Account security</span>
+                <h2 id="password-modal-title">Change your password</h2>
+                <p>Use a strong password that you do not use anywhere else.</p>
+            </div>
+            <button type="button" class="berps-account-modal__close" data-account-modal-close aria-label="Close change password dialog">
+                <i class="ph ph-x" aria-hidden="true"></i>
+            </button>
+        </header>
+
+        <form class="berps-account-modal__form" action="<?= site_url('Users/update_password'); ?>" method="post" data-account-form="password" novalidate>
+            <div class="berps-account-modal__body">
+                <div class="berps-account-field">
+                    <label for="account-current-password">Current password</label>
+                    <div class="berps-account-input">
+                        <i class="ph ph-lock-key" aria-hidden="true"></i>
+                        <input id="account-current-password" type="password" name="currentpassword" autocomplete="current-password" placeholder="Enter your current password" required>
+                        <button type="button" data-password-toggle aria-label="Show current password" aria-pressed="false"><i class="ph ph-eye" aria-hidden="true"></i></button>
+                    </div>
+                </div>
+
+                <div class="berps-account-field">
+                    <label for="account-new-password">New password</label>
+                    <div class="berps-account-input">
+                        <i class="ph ph-shield-check" aria-hidden="true"></i>
+                        <input id="account-new-password" type="password" name="newpassword" autocomplete="new-password" placeholder="Create a new password" minlength="8" required data-new-password>
+                        <button type="button" data-password-toggle aria-label="Show new password" aria-pressed="false"><i class="ph ph-eye" aria-hidden="true"></i></button>
+                    </div>
+                    <div class="berps-password-strength" aria-live="polite">
+                        <div class="berps-password-strength__bars" aria-hidden="true">
+                            <span></span><span></span><span></span><span></span>
+                        </div>
+                        <small data-password-strength-label>Use 8 or more characters</small>
+                    </div>
+                </div>
+
+                <div class="berps-account-field">
+                    <label for="account-confirm-password">Confirm new password</label>
+                    <div class="berps-account-input">
+                        <i class="ph ph-check-circle" aria-hidden="true"></i>
+                        <input id="account-confirm-password" type="password" name="cnewpassword" autocomplete="new-password" placeholder="Re-enter your new password" minlength="8" required data-confirm-password>
+                        <button type="button" data-password-toggle aria-label="Show confirmed password" aria-pressed="false"><i class="ph ph-eye" aria-hidden="true"></i></button>
+                    </div>
+                </div>
+
+                <div class="berps-password-note">
+                    <i class="ph ph-info" aria-hidden="true"></i>
+                    <span>Allowed symbols: <strong>! @ # $ % ^ &amp; *</strong>. You will remain signed in after the update.</span>
+                </div>
+
+                <div class="berps-account-feedback" data-account-feedback role="status" aria-live="polite" hidden></div>
+            </div>
+
+            <footer class="berps-account-modal__footer">
+                <button type="button" class="btn berps-account-btn berps-account-btn--secondary" data-account-modal-close>Cancel</button>
+                <button type="submit" class="btn berps-account-btn berps-account-btn--primary" data-account-submit>
+                    <i class="ph ph-lock-key" aria-hidden="true"></i>
+                    <span>Update password</span>
+                </button>
+            </footer>
+        </form>
+    </section>
 </div>
 
 <!-- <audio id="global-reminder-audio" src="<?= base_url('upload/daj_mi_dziuba_rmx.mp3'); ?>" preload="auto"></audio> -->

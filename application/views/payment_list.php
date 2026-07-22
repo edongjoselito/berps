@@ -77,751 +77,60 @@ $filterQueryString = http_build_query(array(
 
         <div class="content-page">
             <div class="content">
-                <div class="container-fluid payment-list-page">
+                <div class="container-fluid payment-list-page berps-page">
 
-                    <style>
 
-                        .payment-list-page {
-                            --bg: #f5f7fb;
-                            --surface: rgba(255, 255, 255, 0.96);
-                            --surface-strong: #ffffff;
-                            --surface-soft: #f8fbff;
-                            --line: #e4ebf4;
-                            --line-strong: #cfdbea;
-                            --text: #142235;
-                            --text-soft: #617489;
-                            --text-faint: #8ea0b5;
-                            --primary: #2563eb;
-                            --primary-2: #1d4ed8;
-                            --primary-soft: #eaf2ff;
-                            --success: #059669;
-                            --success-soft: #ecfdf5;
-                            --warning: #d97706;
-                            --warning-soft: #fff7ed;
-                            --danger: #e11d48;
-                            --danger-soft: #fff1f2;
-                            --shadow: 0 16px 40px rgba(15, 23, 42, 0.06);
-                            --shadow-soft: 0 8px 24px rgba(15, 23, 42, 0.04);
-                            --radius-xl: 16px;
-                            --radius-lg: 12px;
-                            --radius-md: 10px;
-                            --radius-sm: 8px;
-                            --font-body: var(--font-primary);
-                            --font-head: var(--font-primary);
-                            --font-mono: var(--font-primary);
-                            background:
-                                radial-gradient(circle at top left, rgba(37, 99, 235, 0.08), transparent 28%),
-                                radial-gradient(circle at top right, rgba(16, 185, 129, 0.08), transparent 24%),
-                                linear-gradient(180deg, #f8fbff 0%, #f4f7fb 100%);
-                      min-height: auto;
-padding-bottom: 20px;
-font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
-                        }
-
-                        .payment-list-page * {
-                            box-sizing: border-box;
-                        }
-
-                        .payment-list-page .page-header {
-                            display: flex;
-                            justify-content: space-between;
-                            align-items: flex-end;
-                            gap: 16px;
-                            margin: 16px 0 16px;
-                            flex-wrap: wrap;
-                        }
-
-                        .payment-list-page .page-eyebrow {
-                            display: inline-flex;
-                            align-items: center;
-                            gap: 8px;
-                            padding: 7px 12px;
-                            border-radius: 999px;
-                            background: rgba(37, 99, 235, 0.08);
-                            color: var(--primary-2);
-                            font-size: 0.74rem;
-                            font-weight: 700;
-                            letter-spacing: 0.08em;
-                            text-transform: uppercase;
-                            margin-bottom: 12px;
-                        }
-
-                        .payment-list-page .page-eyebrow::before {
-                            content: '';
-                            width: 8px;
-                            height: 8px;
-                            border-radius: 50%;
-                            background: linear-gradient(135deg, var(--primary), var(--primary-2));
-                            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.10);
-                        }
-
-                        .payment-list-page .page-title {
-                            margin: 0;
-                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
-                            font-size: 1.5rem;
-                            line-height: 1.2;
-                            letter-spacing: -0.02em;
-                            font-weight: 700;
-                            color: var(--text);
-                        }
-
-                        .payment-list-page .page-subtitle {
-                            margin-top: 6px;
-                            color: var(--text-soft);
-                            font-size: 0.9rem;
-                            max-width: 760px;
-                        }
-
-                        .payment-list-page .page-actions {
-                            display: flex;
-                            gap: 12px;
-                            flex-wrap: wrap;
-                        }
-
-                        .payment-list-page .btn-action,
-                        .payment-list-page .btn-submit {
-                            display: inline-flex;
-                            align-items: center;
-                            justify-content: center;
-                            gap: 8px;
-                            border-radius: 12px;
-                            font-size: 0.92rem;
-                            font-weight: 700;
-                            padding: 11px 18px;
-                            transition: all 0.16s ease;
-                            text-decoration: none;
-                        }
-
-                        .payment-list-page .btn-action {
-                            border: 1px solid var(--line-strong);
-                            color: var(--text);
-                            background: #fff;
-                        }
-
-                        .payment-list-page .btn-action:hover {
-                            color: var(--primary);
-                            border-color: #bfd3ef;
-                            background: #f9fbff;
-                        }
-
-                        .payment-list-page .btn-submit {
-                            border: none;
-                            color: #fff;
-                            background: linear-gradient(135deg, var(--primary), var(--primary-2));
-                            box-shadow: 0 10px 24px rgba(37, 99, 235, 0.24);
-                        }
-
-                        .payment-list-page .btn-submit:hover {
-                            transform: translateY(-1px);
-                            box-shadow: 0 14px 28px rgba(37, 99, 235, 0.28);
-                        }
-
-                        .payment-list-page .stats-grid {
-                            display: grid;
-                            grid-template-columns: repeat(4, minmax(0, 1fr));
-                            gap: 12px;
-                            margin-bottom: 16px;
-                        }
-
-                        .payment-list-page .stat-card {
-                            position: relative;
-                            overflow: hidden;
-                            background: var(--surface);
-                            border: 1px solid rgba(255, 255, 255, 0.72);
-                            border-radius: var(--radius-xl);
-                            box-shadow: var(--shadow-soft);
-                            padding: 14px 16px 14px;
-                        }
-
-                        .payment-list-page .stat-card::before {
-                            content: '';
-                            position: absolute;
-                            inset: 0 0 auto 0;
-                            height: 4px;
-                        }
-
-                        .payment-list-page .stat-today::before {
-                            background: linear-gradient(90deg, #3b82f6, #60a5fa);
-                        }
-
-                        .payment-list-page .stat-filtered::before {
-                            background: linear-gradient(90deg, #10b981, #34d399);
-                        }
-
-                        .payment-list-page .stat-count::before {
-                            background: linear-gradient(90deg, #f59e0b, #fbbf24);
-                        }
-
-                        .payment-list-page .stat-average::before {
-                            background: linear-gradient(90deg, #ef4444, #fb7185);
-                        }
-
-                        .payment-list-page .stat-label {
-                            color: var(--text-faint);
-                            font-size: 0.65rem;
-                            font-weight: 600;
-                            text-transform: uppercase;
-                            letter-spacing: 0.06em;
-                            margin-bottom: 8px;
-                        }
-
-                        .payment-list-page .stat-value {
-                            color: var(--text);
-                            font-size: 1.25rem;
-                            font-weight: 700;
-                            line-height: 1.2;
-                            letter-spacing: -0.02em;
-                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
-                        }
-
-                        .payment-list-page .stat-meta {
-                            color: var(--text-soft);
-                            font-size: 0.72rem;
-                            margin-top: 4px;
-                        }
-
-                        .payment-list-page .card-stack {
-                            display: grid;
-                            gap: 16px;
-                        }
-
-                        .payment-list-page .theme-card {
-                            background: var(--surface);
-                            border: 1px solid rgba(255, 255, 255, 0.72);
-                            border-radius: var(--radius-xl);
-                            box-shadow: var(--shadow-soft);
-                            overflow: hidden;
-                        }
-
-                        .payment-list-page .theme-card-head {
-                            padding: 14px 18px;
-                            border-bottom: 1px solid var(--line);
-                            background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(249, 251, 255, 0.94));
-                        }
-
-                        .payment-list-page .theme-card-title {
-                            margin: 0;
-                            color: var(--text);
-                            font-size: 0.95rem;
-                            font-weight: 700;
-                            letter-spacing: -0.01em;
-                        }
-
-                        .payment-list-page .theme-card-subtitle {
-                            margin-top: 4px;
-                            color: var(--text-soft);
-                            font-size: 0.8rem;
-                        }
-
-                        .payment-list-page .theme-card-body {
-                            padding: 18px;
-                        }
-
-                        .payment-list-page .filter-form .form-group {
-                            margin-bottom: 0;
-                        }
-
-                        .payment-list-page label {
-                            color: var(--text);
-                            font-size: 0.82rem;
-                            font-weight: 700;
-                            letter-spacing: 0.02em;
-                            margin-bottom: 8px;
-                        }
-
-                        .payment-list-page .form-control,
-                        .payment-list-page .custom-select {
-                            border: 1px solid var(--line-strong);
-                            border-radius: var(--radius-sm);
-                            min-height: 46px;
-                            color: var(--text);
-                            box-shadow: none;
-                        }
-
-                        .payment-list-page .form-control:focus,
-                        .payment-list-page .custom-select:focus {
-                            border-color: #9cc0f5;
-                            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
-                        }
-
-                        .payment-list-page .summary-row {
-                            display: flex;
-                            justify-content: space-between;
-                            align-items: center;
-                            gap: 12px;
-                            flex-wrap: wrap;
-                            margin-top: 16px;
-                        }
-
-                        .payment-list-page .summary-chip {
-                            display: inline-flex;
-                            align-items: center;
-                            gap: 8px;
-                            padding: 8px 12px;
-                            border-radius: 999px;
-                            border: 1px solid #dbeafe;
-                            background: var(--primary-soft);
-                            color: var(--primary-2);
-                            font-size: 0.8rem;
-                            font-weight: 700;
-                        }
-
-                        .payment-list-page .summary-note {
-                            color: var(--text-soft);
-                            font-size: 0.84rem;
-                        }
-
-                        .payment-list-page .table-responsive {
-                            overflow-x: auto;
-                        }
-
-                        .payment-list-page .table {
-                            margin-bottom: 0;
-                            width: 100% !important;
-                        }
-
-                        .payment-list-page .table thead th {
-                            border-top: none;
-                            border-bottom: 2px solid var(--line);
-                            background: #f8fafc;
-                            color: #374151;
-                            font-size: 12px;
-                            font-weight: 700;
-                            letter-spacing: .04em;
-                            text-transform: uppercase;
-                            white-space: nowrap;
-                            padding: 14px 16px;
-                        }
-
-                        .payment-list-page .table td {
-                            vertical-align: middle;
-                            border-color: var(--line);
-                            padding: 14px 16px;
-                            border-top: 1px solid #f1f5f9;
-                            color: #1f2937;
-                        }
-
-                        .payment-list-page .table tbody tr:hover td {
-                            background: #f8fafc;
-                        }
-
-                        .payment-list-page .dataTables_wrapper .dataTables_filter,
-                        .payment-list-page .dataTables_wrapper .dataTables_length,
-                        .payment-list-page .dataTables_wrapper .dataTables_info,
-                        .payment-list-page .dataTables_wrapper .dataTables_paginate {
-                            font-size: 13px;
-                            color: #4b5563;
-                        }
-
-                        .payment-list-page .dataTables_wrapper .dataTables_filter input {
-                            border: 1px solid #d1d5db;
-                            border-radius: 8px;
-                            padding: 6px 12px;
-                            margin-left: 8px;
-                        }
-
-                        .payment-list-page .dataTables_wrapper .dataTables_filter input:focus {
-                            outline: none;
-                            border-color: #6366f1;
-                            box-shadow: 0 0 0 2px rgba(99, 102, 241, .15);
-                        }
-
-                        .payment-list-page .dataTables_wrapper .dataTables_paginate .paginate_button {
-                            border-radius: 6px !important;
-                            margin: 0 2px;
-                        }
-
-                        .payment-list-page .invoice-link {
-                            color: var(--primary-2);
-                            font-weight: 600;
-                            text-decoration: none;
-                        }
-
-                        .payment-list-page .invoice-link:hover {
-                            color: var(--primary);
-                            text-decoration: underline;
-                        }
-
-                        .payment-list-page .payment-date {
-                            white-space: nowrap;
-                        }
-
-                        .payment-list-page .payor-link {
-                            color: var(--primary-2);
-                            font-weight: 700;
-                            text-decoration: none;
-                        }
-
-                        .payment-list-page .payor-link:hover {
-                            text-decoration: underline;
-                        }
-
-                        .payment-list-page .payor-sub,
-                        .payment-list-page .description-sub {
-                            color: var(--text-soft);
-                            font-size: 0.82rem;
-                            margin-top: 3px;
-                        }
-
-                        .payment-list-page .payment-actions {
-                            display: inline-flex;
-                            align-items: center;
-                            justify-content: center;
-                            gap: 8px;
-                            flex-wrap: wrap;
-                        }
-
-                        .payment-list-page .payment-actions-desktop {
-                            display: inline-flex;
-                            gap: 6px;
-                            flex-wrap: wrap;
-                            justify-content: center;
-                        }
-
-                        .payment-list-page .payment-actions-mobile {
-                            display: none;
-                        }
-
-                        .payment-list-page .action-overflow-toggle {
-                            display: inline-flex;
-                            align-items: center;
-                            justify-content: center;
-                            width: 36px;
-                            height: 36px;
-                            border: 1px solid var(--line-strong);
-                            border-radius: 999px;
-                            background: #fff;
-                            color: var(--text);
-                            box-shadow: var(--shadow-soft);
-                            transition: all 0.16s ease;
-                        }
-
-                        .payment-list-page .action-overflow-toggle:hover,
-                        .payment-list-page .action-overflow-toggle:focus {
-                            color: var(--primary);
-                            border-color: #bfd3ef;
-                            background: #f9fbff;
-                            outline: none;
-                            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
-                        }
-
-                        .payment-list-page .action-overflow-toggle::after {
-                            display: none;
-                        }
-
-                        .payment-list-page .payment-actions-menu {
-                            min-width: 176px;
-                            padding: 8px;
-                            border: 1px solid var(--line);
-                            border-radius: 14px;
-                            box-shadow: 0 18px 38px rgba(15, 23, 42, 0.14);
-                        }
-
-                        .payment-list-page .payment-actions-menu .dropdown-item {
-                            display: flex;
-                            align-items: center;
-                            gap: 10px;
-                            border-radius: 10px;
-                            padding: 10px 12px;
-                            color: var(--text);
-                            font-size: 0.88rem;
-                            font-weight: 600;
-                        }
-
-                        .payment-list-page .payment-actions-menu .dropdown-item:hover,
-                        .payment-list-page .payment-actions-menu .dropdown-item:focus {
-                            background: #f8fbff;
-                            color: var(--primary-2);
-                        }
-
-                        .payment-list-page .payment-actions-menu .dropdown-item.text-danger {
-                            color: #dc2626 !important;
-                        }
-
-                        .payment-list-page .payment-actions-menu .dropdown-item.text-danger:hover,
-                        .payment-list-page .payment-actions-menu .dropdown-item.text-danger:focus {
-                            background: rgba(220, 38, 38, 0.08);
-                            color: #dc2626 !important;
-                        }
-
-                        .payment-list-page .payment-actions-menu .dropdown-item i {
-                            font-size: 1rem;
-                        }
-
-                        .payment-list-page .action-icon {
-                            position: relative;
-                            display: inline-flex;
-                            align-items: center;
-                            justify-content: center;
-                            width: 34px;
-                            height: 34px;
-                            border-radius: 50%;
-                            text-decoration: none;
-                            font-size: 16px;
-                            transition: all 0.18s ease;
-                        }
-
-                        .payment-list-page .action-icon.edit {
-                            color: var(--primary-2);
-                            background: rgba(37, 99, 235, 0.12);
-                        }
-
-                        .payment-list-page .action-icon.edit:hover {
-                            background: rgba(37, 99, 235, 0.22);
-                            color: var(--primary-2);
-                        }
-
-                        .payment-list-page .action-icon.delete {
-                            color: #dc2626;
-                            background: rgba(220, 38, 38, 0.12);
-                        }
-
-                        .payment-list-page .action-icon.delete:hover {
-                            background: rgba(220, 38, 38, 0.22);
-                            color: #dc2626;
-                        }
-
-                        .payment-list-page .action-icon.void {
-                            color: #d97706;
-                            background: rgba(217, 119, 6, 0.12);
-                        }
-
-                        .payment-list-page .action-icon.void:hover {
-                            background: rgba(217, 119, 6, 0.22);
-                            color: #d97706;
-                        }
-
-                        .payment-list-page .action-icon::after {
-                            content: attr(data-label);
-                            position: absolute;
-                            bottom: -32px;
-                            left: 50%;
-                            transform: translate(-50%, 6px);
-                            background: rgba(15, 23, 42, 0.92);
-                            color: #fff;
-                            padding: 4px 8px;
-                            border-radius: 4px;
-                            font-size: 11px;
-                            white-space: nowrap;
-                            opacity: 0;
-                            pointer-events: none;
-                            transition: all 0.15s ease;
-                        }
-
-                        .payment-list-page .action-icon:hover::after {
-                            opacity: 1;
-                            transform: translate(-50%, 0);
-                        }
-
-                        .payment-list-page .empty-action {
-                            color: var(--text-faint);
-                            font-size: 0.82rem;
-                            font-weight: 600;
-                        }
-
-                        .payment-list-page .table-init-hidden {
-                            opacity: 0;
-                        }
-
-                        .payment-list-page .table-init-ready {
-                            opacity: 1;
-                            transition: opacity 0.2s ease;
-                        }
-
-                        .payment-list-page .data-table-container {
-                            position: relative;
-                        }
-
-                        .payment-list-page .data-table-container.loading::after {
-                            content: 'Loading payments...';
-                            position: absolute;
-                            inset: 0;
-                            background: rgba(255, 255, 255, 0.85);
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            font-size: 0.9rem;
-                            color: var(--text-soft);
-                            z-index: 1;
-                        }
-
-                        .payment-list-page .data-table-container.loading::before {
-                            content: '';
-                            position: absolute;
-                            top: 50%;
-                            left: 50%;
-                            width: 26px;
-                            height: 26px;
-                            margin: -40px 0 0 -13px;
-                            border-radius: 50%;
-                            border: 3px solid rgba(108, 117, 125, 0.3);
-                            border-top-color: rgba(37, 99, 235, 0.8);
-                            animation: payment-spinner 0.7s linear infinite;
-                            z-index: 2;
-                        }
-
-                        .payment-list-page .data-table-container.ready::after,
-                        .payment-list-page .data-table-container.ready::before {
-                            display: none;
-                        }
-
-                        .payment-list-page .dataTables_wrapper .dataTables_filter input,
-                        .payment-list-page .dataTables_wrapper .dataTables_length select {
-                            border: 1px solid var(--line-strong);
-                            border-radius: 10px;
-                            min-height: 38px;
-                            padding: 6px 10px;
-                            background: #fff;
-                        }
-
-                        .payment-list-page .dataTables_wrapper .dataTables_paginate .paginate_button {
-                            border-radius: 8px !important;
-                        }
-
-                        .payment-list-page .modal-content {
-                            border: none;
-                            border-radius: 20px;
-                            overflow: hidden;
-                            box-shadow: 0 24px 60px rgba(15, 23, 42, 0.16);
-                        }
-
-                        .payment-list-page .modal-header {
-                            background: linear-gradient(135deg, var(--primary), var(--primary-2));
-                            color: #fff;
-                            border-bottom: none;
-                            padding: 18px 22px;
-                        }
-
-                        .payment-list-page .modal-header .close {
-                            color: #fff;
-                            opacity: 0.85;
-                        }
-
-                        .payment-list-page .modal-body {
-                            padding: 22px;
-                        }
-
-                        .payment-list-page .modal-footer {
-                            border-top: 1px solid var(--line);
-                            padding: 16px 22px;
-                        }
-
-                        @keyframes payment-spinner {
-                            to {
-                                transform: rotate(360deg);
-                            }
-                        }
-
-                        @media (max-width: 1199px) {
-                            .payment-list-page .stats-grid {
-                                grid-template-columns: repeat(2, minmax(0, 1fr));
-                            }
-                        }
-
-                        @media (max-width: 767px) {
-                            .payment-list-page .page-title {
-                                font-size: 1.75rem;
-                            }
-
-                            .payment-list-page .stats-grid {
-                                grid-template-columns: 1fr;
-                            }
-
-                            .payment-list-page .theme-card-head,
-                            .payment-list-page .theme-card-body,
-                            .payment-list-page .modal-body,
-                            .payment-list-page .modal-footer {
-                                padding-left: 16px;
-                                padding-right: 16px;
-                            }
-                        }
-
-                        @media (max-width: 991px) {
-                            .payment-list-page .payment-actions-desktop {
-                                display: none;
-                            }
-
-                            .payment-list-page .payment-actions-mobile {
-                                display: inline-flex;
-                            }
-                        }
-/* Sticky footer */
-html,
-body.payment-list-body {
-    min-height: 100%;
-}
-
-.payment-list-body #wrapper {
-    min-height: 100vh;
-}
-
-.payment-list-body .content-page {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-}
-
-.payment-list-body .content-page > .content {
-    width: 100%;
-    flex: 1 0 auto;
-}
-
-.payment-list-body .content-page > footer,
-.payment-list-body .content-page > .footer {
-    position: static !important;
-    top: auto !important;
-    right: auto !important;
-    bottom: auto !important;
-    left: auto !important;
-    width: 100%;
-    margin-top: auto;
-    margin-left: 0 !important;
-    flex: 0 0 auto;
-}
-                    </style>
-
-                    <div class="page-header">
-                        <div>
-                            <div class="page-eyebrow">Collections</div>
-                            <h4 class="page-title">Payment Collections</h4>
-                            <!-- <div class="page-subtitle">Review accepted payments, filter collection activity by date range, and quickly add new receipts using the same BERPS workspace style as the rest of the billing screens.</div> -->
+                    <header class="berps-page-header">
+                        <div class="berps-page-header__content">
+                            <span class="berps-page-header__eyebrow">Collections</span>
+                            <h1 class="berps-page-title">Payment Collections</h1>
+                            <p class="berps-page-subtitle">Review accepted payments and filter collection activity by date range.</p>
                         </div>
-                        <div class="page-actions">
-                            <button type="button" class="btn-action" data-toggle="modal" data-target="#searchPaymentModal">
-                                <i class="mdi mdi-magnify"></i>
-                                Find Payment
+                        <div class="berps-page-header__actions">
+                            <button type="button" class="btn btn-outline-secondary" data-toggle="modal" data-target="#searchPaymentModal">
+                                <i class="mdi mdi-magnify mr-1" aria-hidden="true"></i>Find Payment
                             </button>
-                            <button type="button" class="btn-action" data-toggle="modal" data-target="#filterModal">
-                                <i class="mdi mdi-filter-outline"></i>
-                                Filter
+                            <button type="button" class="btn btn-outline-secondary" data-toggle="modal" data-target="#filterModal">
+                                <i class="mdi mdi-filter-outline mr-1" aria-hidden="true"></i>Filter
                             </button>
-                            <a href="<?= base_url(); ?>Page/unifiedPayment" class="btn-submit">
-                                <i class="mdi mdi-credit-card-plus-outline"></i>
-                                Add New Payment
+                            <a href="<?= base_url(); ?>Page/unifiedPayment" class="btn btn-primary">
+                                <i class="mdi mdi-credit-card-plus-outline mr-1" aria-hidden="true"></i>Add New Payment
                             </a>
                         </div>
-                    </div>
+                    </header>
 
-                    <div class="stats-grid">
-                        <div class="stat-card stat-today">
-                            <div class="stat-label">Current Day Collections</div>
-                            <div class="stat-value"><?= number_format($todayTotalValue, 2); ?></div>
-                            <div class="stat-meta"><?= date('F j, Y', strtotime($todayDateValue)); ?></div>
+                    <div class="berps-stat-grid">
+                        <div class="berps-stat-card berps-tone-success">
+                            <div>
+                                <p class="berps-stat-card__value"><?= number_format($todayTotalValue, 2); ?></p>
+                                <p class="berps-stat-card__label">Current Day Collections</p>
+                                <p class="berps-stat-card__meta"><?= date('F j, Y', strtotime($todayDateValue)); ?></p>
+                            </div>
+                            <span class="berps-stat-card__icon" aria-hidden="true"><i class="mdi mdi-cash-multiple"></i></span>
                         </div>
-                        <div class="stat-card stat-filtered">
-                            <div class="stat-label">Filtered Collections</div>
-                            <div class="stat-value"><?= number_format($filteredTotalValue, 2); ?></div>
-                            <div class="stat-meta"><?= htmlspecialchars($rangeSummaryLabel, ENT_QUOTES, 'UTF-8'); ?></div>
+                        <div class="berps-stat-card berps-tone-info">
+                            <div>
+                                <p class="berps-stat-card__value"><?= number_format($filteredTotalValue, 2); ?></p>
+                                <p class="berps-stat-card__label">Filtered Collections</p>
+                                <p class="berps-stat-card__meta"><?= htmlspecialchars($rangeSummaryLabel, ENT_QUOTES, 'UTF-8'); ?></p>
+                            </div>
+                            <span class="berps-stat-card__icon" aria-hidden="true"><i class="mdi mdi-filter-outline"></i></span>
                         </div>
-                        <div class="stat-card stat-count">
-                            <div class="stat-label">Payments Shown</div>
-                            <div class="stat-value"><?= number_format($totalPayments); ?></div>
-                            <div class="stat-meta"><?= $showingToday ? 'Showing today only' : 'Filtered date range'; ?></div>
+                        <div class="berps-stat-card">
+                            <div>
+                                <p class="berps-stat-card__value"><?= number_format($totalPayments); ?></p>
+                                <p class="berps-stat-card__label">Payments Shown</p>
+                                <p class="berps-stat-card__meta"><?= $showingToday ? 'Showing today only' : 'Filtered date range'; ?></p>
+                            </div>
+                            <span class="berps-stat-card__icon" aria-hidden="true"><i class="mdi mdi-receipt"></i></span>
                         </div>
-                        <div class="stat-card stat-average">
-                            <div class="stat-label">Average Credit</div>
-                            <div class="stat-value"><?= number_format($averageCreditValue, 2); ?></div>
-                            <div class="stat-meta">Average total credit per payment entry.</div>
+                        <div class="berps-stat-card berps-tone-warning">
+                            <div>
+                                <p class="berps-stat-card__value"><?= number_format($averageCreditValue, 2); ?></p>
+                                <p class="berps-stat-card__label">Average Credit</p>
+                                <p class="berps-stat-card__meta">Average total credit per payment entry.</p>
+                            </div>
+                            <span class="berps-stat-card__icon" aria-hidden="true"><i class="mdi mdi-chart-line"></i></span>
                         </div>
                     </div>
 
@@ -957,7 +266,7 @@ body.payment-list-body {
                     </div>
 
                     <!-- Filter Modal -->
-                    <div class="modal fade payment-list-page" id="filterModal" tabindex="-1" role="dialog" aria-hidden="true">
+                    <div class="modal fade payment-list-page berps-form-modal" id="filterModal" tabindex="-1" role="dialog" aria-hidden="true">
                         <div class="modal-dialog" role="document">
                             <div class="modal-content">
                                 <div class="modal-header">
@@ -987,7 +296,7 @@ body.payment-list-body {
                                     </div>
                                 </div>
                                 <div class="modal-footer">
-                                    <a href="<?= base_url(); ?>Page/paymentList" class="btn-action">
+                                    <a href="<?= base_url(); ?>Page/paymentList" class="btn btn-outline-secondary">
                                         <i class="mdi mdi-calendar-today"></i>
                                         Today
                                     </a>
@@ -1001,7 +310,7 @@ body.payment-list-body {
                     </div>
 
                     <!-- Void Payment Modal -->
-                    <div class="modal fade" id="voidPaymentModal" tabindex="-1" role="dialog" aria-hidden="true">
+                    <div class="modal fade berps-form-modal" id="voidPaymentModal" tabindex="-1" role="dialog" aria-hidden="true">
                         <div class="modal-dialog" role="document">
                             <div class="modal-content" style="border-radius: 22px; overflow: hidden; box-shadow: 0 28px 60px rgba(15, 23, 42, 0.18);">
                                 <div class="modal-header" style="background: linear-gradient(135deg, #d97706, #f59e0b); border: none; padding: 22px 24px;">
@@ -1057,7 +366,7 @@ body.payment-list-body {
 
     <?php include('includes/themecustomizer.php'); ?>
 
-    <div class="modal fade payment-list-page" id="paymentModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal fade payment-list-page berps-form-modal" id="paymentModal" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -1117,7 +426,7 @@ body.payment-list-body {
                         <i class="mdi mdi-check-circle-outline"></i>
                         Accept Payment
                     </button>
-                    <button type="reset" form="paymentModalForm" class="btn-action">Reset</button>
+                    <button type="reset" form="paymentModalForm" class="btn btn-outline-secondary">Reset</button>
                 </div>
             </div>
         </div>
@@ -1309,7 +618,7 @@ body.payment-list-body {
     </script>
 
     <!-- Special Search Payment Modal -->
-    <div class="modal fade" id="searchPaymentModal" tabindex="-1" role="dialog" aria-labelledby="searchPaymentModalLabel" aria-hidden="true">
+    <div class="modal fade berps-form-modal" id="searchPaymentModal" tabindex="-1" role="dialog" aria-labelledby="searchPaymentModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -1366,73 +675,6 @@ body.payment-list-body {
         </div>
     </div>
 
-    <style>
-        .search-form {
-            margin-bottom: 20px;
-        }
-
-        .search-result-item {
-            border: 1px solid var(--line);
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 10px;
-            background: var(--surface);
-        }
-
-        .search-result-item:hover {
-            border-color: var(--primary);
-            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.1);
-        }
-
-        .search-result-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-
-        .search-result-title {
-            font-weight: 600;
-            color: var(--text);
-            margin: 0;
-        }
-
-        .search-result-details {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 8px;
-            margin-bottom: 10px;
-        }
-
-        .search-result-detail {
-            font-size: 0.9rem;
-            color: var(--text-soft);
-        }
-
-        .search-result-actions {
-            text-align: right;
-        }
-
-        .btn-edit-payment {
-            background: var(--primary-soft);
-            color: var(--primary-2);
-            border: 1px solid var(--primary-soft);
-            padding: 6px 12px;
-            border-radius: 6px;
-            text-decoration: none;
-            font-size: 0.85rem;
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .btn-edit-payment:hover {
-            background: var(--primary);
-            color: white;
-            text-decoration: none;
-        }
-    </style>
 
 </body>
 

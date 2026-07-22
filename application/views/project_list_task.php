@@ -74,21 +74,6 @@ $priorityClasses = array('1' => 'priority-high', '2' => 'priority-medium', '3' =
 
 <?php include('includes/head.php'); ?>
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-<style>
-.select2-container--default .select2-selection--single {
-    height: calc(1.5em + .75rem + 2px);
-    padding: .375rem .75rem;
-    border: 1px solid #d1d3e2;
-    border-radius: .35rem;
-}
-.select2-container--default .select2-selection--single .select2-selection__rendered {
-    line-height: 1.5;
-    padding-left: 0;
-}
-.select2-container--default .select2-selection--single .select2-selection__arrow {
-    height: calc(1.5em + .75rem);
-}
-</style>
 
 <body>
     <div id="wrapper">
@@ -98,1015 +83,9 @@ $priorityClasses = array('1' => 'priority-high', '2' => 'priority-medium', '3' =
 
         <div class="content-page">
             <div class="content">
-                <div class="container-fluid task-workspace-page">
+                <div class="container-fluid task-workspace-page berps-page">
 
-                    <style>
-                        /* ─── Reset & base ─────────────────────────────────────── */
-                        .task-workspace-page * {
-                            box-sizing: border-box;
-                        }
 
-                        /* ─── Page shell (DTR-inspired warm gray aesthetic) ─────── */
-                        .task-workspace-page {
-                            --c-bg: #f7f7f5;
-                            --c-surface: #ffffff;
-                            --c-surface-2: #fafaf8;
-                            --c-border: #e9e9e4;
-                            --c-border-2: #d9d9d2;
-                            --c-ink: #1a1a18;
-                            --c-ink-2: #5a5a52;
-                            --c-ink-3: #9a9a90;
-                            --c-accent-blue: #2a6de8;
-                            --c-accent-green: #2d8a5e;
-                            --c-accent-amber: #c28100;
-                            --c-accent-red: #c54242;
-
-                            --r-xl: 16px;
-                            --r-lg: 12px;
-                            --r-md: 8px;
-                            --r-sm: 5px;
-
-                            --font-body: var(--font-primary);
-                            --font-mono: var(--font-primary);
-
-                            --shadow-sm: 0 1px 3px rgba(26, 26, 24, .06), 0 1px 2px rgba(26, 26, 24, .04);
-                            --shadow-md: 0 4px 12px rgba(26, 26, 24, .08), 0 2px 6px rgba(26, 26, 24, .04);
-
-                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
-                            color: var(--c-ink);
-                            background: var(--c-bg);
-                            min-height: 100vh;
-                            padding-bottom: 64px;
-                            font-size: 14px;
-                            line-height: 1.5;
-                        }
-
-                        /* ─── Flash alerts ──────────────────────────────────────── */
-                        .task-workspace-page .alert {
-                            border: none;
-                            border-radius: var(--r-lg);
-                            font-size: 0.85rem;
-                            font-weight: 500;
-                            padding: 10px 16px;
-                            margin-bottom: 16px;
-                        }
-
-                        /* ─── Page header ───────────────────────────────────────── */
-                        .task-workspace-page .page-header {
-                            display: flex;
-                            align-items: flex-end;
-                            justify-content: space-between;
-                            gap: 16px;
-                            padding: 28px 0 20px;
-                            flex-wrap: wrap;
-                            border-bottom: 1px solid var(--c-border);
-                            margin-bottom: 22px;
-                        }
-
-                        .task-workspace-page .page-eyebrow {
-                            display: inline-flex;
-                            align-items: center;
-                            gap: 6px;
-                            font-size: 0.68rem;
-                            font-weight: 600;
-                            letter-spacing: 0.1em;
-                            text-transform: uppercase;
-                            color: var(--c-ink-3);
-                            margin-bottom: 5px;
-                        }
-
-                        .task-workspace-page .page-eyebrow span {
-                            width: 4px;
-                            height: 4px;
-                            border-radius: 50%;
-                            background: var(--c-accent-blue);
-                            display: inline-block;
-                        }
-
-                        .task-workspace-page .page-title {
-                            font-size: 1.55rem;
-                            font-weight: 500;
-                            letter-spacing: -0.025em;
-                            color: var(--c-ink);
-                            line-height: 1.2;
-                            margin: 0;
-                        }
-
-                        .task-workspace-page .page-subtitle {
-                            margin-top: 3px;
-                            color: var(--c-ink-3);
-                            font-size: 0.8rem;
-                        }
-
-                        .task-workspace-page .page-actions {
-                            display: flex;
-                            gap: 10px;
-                            flex-wrap: wrap;
-                        }
-
-                        /* ─── Buttons ───────────────────────────────────────────── */
-                        .task-workspace-page .btn-action,
-                        .task-workspace-page .btn-submit {
-                            display: inline-flex;
-                            align-items: center;
-                            justify-content: center;
-                            gap: 7px;
-                            border-radius: var(--r-md);
-                            font-size: 0.78rem;
-                            font-weight: 600;
-                            padding: 8px 14px;
-                            transition: all 0.13s ease;
-                            text-decoration: none;
-                            cursor: pointer;
-                            line-height: 1;
-                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
-                            letter-spacing: 0.01em;
-                        }
-
-                        .task-workspace-page .btn-action {
-                            border: 1px solid var(--c-border-2);
-                            color: var(--c-ink-2);
-                            background: var(--c-surface);
-                        }
-
-                        .task-workspace-page .btn-action:hover {
-                            background: var(--c-surface-2);
-                            border-color: var(--c-border);
-                            color: var(--c-ink);
-                            text-decoration: none;
-                        }
-
-                        .task-workspace-page .btn-submit {
-                            border: none;
-                            color: #fff;
-                            background: var(--c-ink);
-                        }
-
-                        .task-workspace-page .btn-submit:hover {
-                            background: var(--c-ink-2);
-                            color: #fff;
-                        }
-
-                        .task-workspace-page .bulk-upload-note {
-                            border: 1px solid var(--c-border);
-                            border-radius: var(--r-lg);
-                            background: #f8fafc;
-                            padding: 14px 16px;
-                            color: var(--c-ink-2);
-                            font-size: 0.8rem;
-                            line-height: 1.55;
-                        }
-
-                        .task-workspace-page .bulk-upload-note ul {
-                            margin: 10px 0 0;
-                            padding-left: 18px;
-                        }
-
-                        /* ─── Stat cards ────────────────────────────────────────── */
-                        .task-workspace-page .stats-grid {
-                            display: grid;
-                            grid-template-columns: repeat(4, minmax(0, 1fr));
-                            gap: 10px;
-                            margin-bottom: 22px;
-                        }
-
-                        .task-workspace-page .stat-card {
-                            position: relative;
-                            overflow: hidden;
-                            background: var(--c-surface);
-                            border: 1px solid var(--c-border);
-                            border-radius: var(--r-xl);
-                            padding: 16px 18px;
-                            box-shadow: var(--shadow-sm);
-                            transition: transform 0.15s ease, box-shadow 0.15s ease;
-                        }
-
-                        .task-workspace-page .stat-card:hover {
-                            transform: translateY(-2px);
-                            box-shadow: var(--shadow-md);
-                        }
-
-                        .task-workspace-page .stat-card::before {
-                            content: '';
-                            position: absolute;
-                            top: 0;
-                            left: 0;
-                            right: 0;
-                            height: 3px;
-                        }
-
-                        .stat-open::before {
-                            background: var(--c-accent-blue);
-                        }
-
-                        .stat-due-today::before {
-                            background: var(--c-accent-amber);
-                        }
-
-                        .stat-overdue::before {
-                            background: var(--c-accent-red);
-                        }
-
-                        .stat-accomplished::before {
-                            background: var(--c-accent-green);
-                        }
-
-                        .task-workspace-page .stat-label {
-                            color: var(--c-ink-3);
-                            font-size: 0.65rem;
-                            font-weight: 600;
-                            text-transform: uppercase;
-                            letter-spacing: 0.08em;
-                            margin-bottom: 6px;
-                        }
-
-                        .task-workspace-page .stat-value {
-                            color: var(--c-ink);
-                            font-size: 1.8rem;
-                            font-weight: 600;
-                            line-height: 1;
-                            letter-spacing: -0.03em;
-                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
-                        }
-
-                        .task-workspace-page .stat-value.is-danger {
-                            color: var(--c-accent-red);
-                        }
-
-                        .task-workspace-page .stat-value.is-warning {
-                            color: var(--c-accent-amber);
-                        }
-
-                        /* ─── Banner strip ──────────────────────────────────────── */
-                        .task-workspace-page .theme-banner {
-                            display: flex;
-                            align-items: center;
-                            gap: 8px;
-                            padding: 10px 14px;
-                            border-radius: var(--r-md);
-                            border: 1px solid transparent;
-                            margin-bottom: 16px;
-                            font-size: 0.78rem;
-                        }
-
-                        .task-workspace-page .banner-warning {
-                            background: #fffbeb;
-                            border-color: #f5deb3;
-                            color: var(--c-accent-amber);
-                        }
-
-                        .task-workspace-page .banner-info {
-                            background: #f0fdf4;
-                            border-color: #c5e8d0;
-                            color: var(--c-accent-green);
-                        }
-
-                        .task-workspace-page .banner-title {
-                            font-weight: 600;
-                            color: inherit;
-                        }
-
-                        .task-workspace-page .banner-copy {
-                            color: var(--c-ink-2);
-                            font-size: 0.78rem;
-                        }
-
-                        .task-workspace-page .banner-date {
-                            margin-left: auto;
-                            color: var(--c-ink-3);
-                            font-size: 0.73rem;
-                            white-space: nowrap;
-                        }
-
-                        /* ─── Main card ─────────────────────────────────────────── */
-                        .task-workspace-page .theme-card {
-                            background: var(--c-surface);
-                            border: 1px solid var(--c-border);
-                            border-radius: var(--r-xl);
-                            overflow: hidden;
-                            box-shadow: var(--shadow-sm);
-                            animation: fadeUp 0.28s ease both;
-                        }
-
-                        .task-workspace-page .theme-card-head {
-                            display: flex;
-                            align-items: center;
-                            justify-content: space-between;
-                            gap: 12px;
-                            padding: 14px 20px;
-                            border-bottom: 1px solid var(--c-border);
-                        }
-
-                        .task-workspace-page .theme-card-title {
-                            margin: 0;
-                            color: var(--c-ink);
-                            font-size: 0.88rem;
-                            font-weight: 600;
-                            letter-spacing: -0.01em;
-                        }
-
-                        .task-workspace-page .theme-card-subtitle {
-                            margin-top: 1px;
-                            color: var(--c-ink-3);
-                            font-size: 0.73rem;
-                        }
-
-                        /* ─── Card toolbar (filters + search) ───────────────────── */
-                        .task-workspace-page .card-toolbar {
-                            display: none;
-                        }
-
-                        /* ─── Table ─────────────────────────────────────────────── */
-                        .task-workspace-page .theme-card-body {
-                            padding: 0;
-                        }
-
-                        .task-workspace-page .task-table {
-                            width: 100% !important;
-                            border-collapse: collapse;
-                        }
-
-                        .task-workspace-page .task-table thead th {
-                            border-top: none;
-                            border-bottom: 1px solid var(--c-border);
-                            color: var(--c-ink-3);
-                            font-size: 0.65rem;
-                            font-weight: 600;
-                            letter-spacing: 0.09em;
-                            text-transform: uppercase;
-                            white-space: nowrap;
-                            padding: 10px 16px;
-                            background: var(--c-surface-2);
-                        }
-
-                        .task-workspace-page .task-table td {
-                            padding: 10px 16px;
-                            border-bottom: 1px solid var(--c-border);
-                            vertical-align: middle;
-                            color: var(--c-ink);
-                            font-size: 0.82rem;
-                        }
-
-                        .task-workspace-page .task-table tbody tr:last-child td {
-                            border-bottom: none;
-                        }
-
-                        .task-workspace-page .task-table tbody tr:hover td {
-                            background: var(--c-surface-2);
-                            transition: background 0.1s;
-                        }
-
-                        /* ─── Task title link ───────────────────────────────────── */
-                        .task-workspace-page .task-title-link {
-                            color: var(--c-ink);
-                            font-size: 0.85rem;
-                            font-weight: 500;
-                            text-decoration: none;
-                            line-height: 1.4;
-                        }
-
-                        .task-workspace-page .task-title-link:hover {
-                            color: var(--c-accent-blue);
-                            text-decoration: underline;
-                        }
-
-                        .task-workspace-page .task-title-link.is-muted {
-                            font-weight: 400;
-                            color: var(--c-ink-2);
-                        }
-
-                        .task-workspace-page .task-title-link.is-muted:hover {
-                            color: var(--c-accent-blue);
-                        }
-
-                        /* ─── Meta row under task title ─────────────────────────── */
-                        .task-workspace-page .task-meta-row {
-                            display: flex;
-                            align-items: center;
-                            gap: 8px;
-                            flex-wrap: wrap;
-                            margin-top: 5px;
-                        }
-
-                        /* ─── Priority badges ───────────────────────────────────── */
-                        .task-workspace-page .priority-badge {
-                            display: inline-flex;
-                            align-items: center;
-                            justify-content: center;
-                            padding: 2px 8px;
-                            border-radius: 999px;
-                            font-size: 0.65rem;
-                            font-weight: 600;
-                            letter-spacing: 0.04em;
-                            text-transform: uppercase;
-                        }
-
-                        .task-workspace-page .priority-high {
-                            background: #fef2f2;
-                            color: var(--c-accent-red);
-                        }
-
-                        .task-workspace-page .priority-medium {
-                            background: #fffbeb;
-                            color: var(--c-accent-amber);
-                        }
-
-                        .task-workspace-page .priority-low {
-                            background: #f0fdf4;
-                            color: var(--c-accent-green);
-                        }
-
-                        /* ─── Attachment link ───────────────────────────────────── */
-                        .task-workspace-page .attachment-link {
-                            display: inline-flex;
-                            align-items: center;
-                            gap: 4px;
-                            color: var(--c-accent-blue);
-                            font-size: 0.73rem;
-                            font-weight: 500;
-                            text-decoration: none;
-                        }
-
-                        .task-workspace-page .attachment-link:hover {
-                            text-decoration: underline;
-                        }
-
-                        /* ─── Cell helpers ──────────────────────────────────────── */
-                        .task-workspace-page .cell-muted {
-                            color: var(--c-ink-3);
-                            font-size: 0.78rem;
-                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
-                        }
-
-                        /* ─── Due date ──────────────────────────────────────────── */
-                        .task-workspace-page .due-date-value {
-                            color: var(--c-ink);
-                            font-size: 0.82rem;
-                            font-weight: 500;
-                            line-height: 1.3;
-                        }
-
-                        .task-workspace-page .due-date-meta {
-                            margin-top: 2px;
-                            font-size: 0.73rem;
-                            line-height: 1.4;
-                        }
-
-                        .task-workspace-page .due-date-meta.is-overdue {
-                            color: var(--c-accent-red);
-                        }
-
-                        .task-workspace-page .due-date-meta.is-due-today {
-                            color: var(--c-accent-amber);
-                        }
-
-                        .task-workspace-page .due-date-meta.is-upcoming {
-                            color: var(--c-ink-3);
-                        }
-
-                        /* ─── Assignee avatar ───────────────────────────────────── */
-                        .task-workspace-page .person-cell {
-                            display: flex;
-                            align-items: center;
-                            gap: 8px;
-                        }
-
-                        .task-workspace-page .person-avatar {
-                            width: 26px;
-                            height: 26px;
-                            border-radius: 50%;
-                            display: inline-flex;
-                            align-items: center;
-                            justify-content: center;
-                            font-size: 9px;
-                            font-weight: 600;
-                            background: var(--c-surface-2);
-                            color: var(--c-ink-2);
-                            border: 1px solid var(--c-border);
-                            flex-shrink: 0;
-                            text-transform: uppercase;
-                        }
-
-                        /* ─── Project tag ───────────────────────────────────────── */
-                        .task-workspace-page .project-tag {
-                            display: inline-flex;
-                            align-items: center;
-                            font-size: 0.73rem;
-                            color: var(--c-ink-2);
-                            background: var(--c-surface-2);
-                            border: 1px solid var(--c-border);
-                            border-radius: var(--r-sm);
-                            padding: 3px 10px;
-                            white-space: nowrap;
-                            text-decoration: none;
-                            transition: all 0.12s;
-                        }
-
-                        .task-workspace-page .project-tag:hover {
-                            border-color: var(--c-border-2);
-                            background: var(--c-surface);
-                            color: var(--c-ink);
-                        }
-
-                        /* ─── Action dropdown ─────────────────────────────────── */
-                        .task-workspace-page .task-actions {
-                            position: relative;
-                            display: inline-block;
-                        }
-
-                        .task-workspace-page .action-menu-btn {
-                            width: 28px;
-                            height: 28px;
-                            border-radius: var(--r-sm);
-                            display: inline-flex;
-                            align-items: center;
-                            justify-content: center;
-                            font-size: 0.85rem;
-                            text-decoration: none;
-                            transition: all 0.12s ease;
-                            color: var(--c-ink-3);
-                            background: transparent;
-                            border: 1px solid var(--c-border);
-                            cursor: pointer;
-                        }
-
-                        .task-workspace-page .action-menu-btn:hover {
-                            background: var(--c-surface-2);
-                            border-color: var(--c-border-2);
-                            color: var(--c-ink);
-                        }
-
-                        .task-workspace-page .action-menu-btn .fa-ellipsis-vertical {
-                            pointer-events: none;
-                        }
-
-                        .task-workspace-page .action-dropdown {
-                            position: absolute;
-                            right: 0;
-                            top: calc(100% + 6px);
-                            min-width: 150px;
-                            background: var(--c-surface);
-                            border: 1px solid var(--c-border);
-                            border-radius: var(--r-md);
-                            box-shadow: var(--shadow-md);
-                            z-index: 9999;
-                            display: none;
-                            overflow: hidden;
-                        }
-
-                        .task-workspace-page .action-dropdown.show {
-                            display: block;
-                        }
-
-                        .task-workspace-page .action-dropdown-item {
-                            display: flex;
-                            align-items: center;
-                            gap: 10px;
-                            padding: 9px 14px;
-                            font-size: 0.78rem;
-                            color: var(--c-ink);
-                            text-decoration: none;
-                            transition: background 0.12s;
-                            cursor: pointer;
-                            border: none;
-                            background: none;
-                            width: 100%;
-                            text-align: left;
-                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
-                        }
-
-                        .task-workspace-page .action-dropdown-item:hover {
-                            background: var(--c-surface-2);
-                        }
-
-                        .task-workspace-page .action-dropdown-item i {
-                            width: 14px;
-                            text-align: center;
-                            font-size: 0.85rem;
-                        }
-
-                        .task-workspace-page .action-dropdown-item.action-view i {
-                            color: var(--c-accent-blue);
-                        }
-
-                        .task-workspace-page .action-dropdown-item.action-update i {
-                            color: var(--c-accent-blue);
-                        }
-
-                        .task-workspace-page .action-dropdown-item.action-status i {
-                            color: var(--c-accent-green);
-                        }
-
-                        .task-workspace-page .action-dropdown-item.action-forward i {
-                            color: #7c3aed;
-                        }
-
-                        .task-workspace-page .action-dropdown-item.action-comment i {
-                            color: var(--c-accent-amber);
-                        }
-
-                        .task-workspace-page .action-dropdown-item.action-delete i {
-                            color: var(--c-accent-red);
-                        }
-
-                        .task-workspace-page .action-dropdown-divider {
-                            height: 1px;
-                            background: var(--c-border);
-                            margin: 4px 0;
-                        }
-
-                        /* ─── Empty state ───────────────────────────────────────── */
-                        .task-workspace-page .empty-state {
-                            padding: 2.5rem 20px;
-                            color: var(--c-ink-3);
-                            font-size: 0.82rem;
-                            text-align: center;
-                        }
-
-                        /* ─── Animations ────────────────────────────────────────── */
-                        @keyframes fadeUp {
-                            from {
-                                opacity: 0;
-                                transform: translateY(8px);
-                            }
-
-                            to {
-                                opacity: 1;
-                                transform: translateY(0);
-                            }
-                        }
-
-                        /* ─── Responsive ────────────────────────────────────────── */
-                        @media (max-width: 991px) {
-                            .task-workspace-page .stats-grid {
-                                grid-template-columns: repeat(2, minmax(0, 1fr));
-                            }
-                        }
-
-                        @media (max-width: 767px) {
-                            .task-workspace-page .page-title {
-                                font-size: 1.3rem;
-                            }
-
-                            .task-workspace-page .stats-grid {
-                                grid-template-columns: repeat(2, minmax(0, 1fr));
-                            }
-
-                            .task-workspace-page .page-header {
-                                flex-direction: column;
-                                align-items: flex-start;
-                            }
-
-                            .task-workspace-page .theme-banner .banner-date {
-                                display: none;
-                            }
-                        }
-
-                        /* ─── DataTables overrides ──────────────────────────────── */
-                        .task-workspace-page .dataTables_wrapper {
-                            padding: 0;
-                        }
-
-                        .task-workspace-page .dataTables_wrapper .dataTables_filter,
-                        .task-workspace-page .dataTables_wrapper .dataTables_length {
-                            padding: 10px 16px 0;
-                        }
-
-                        .task-workspace-page .dataTables_wrapper .dataTables_info,
-                        .task-workspace-page .dataTables_wrapper .dataTables_paginate {
-                            padding: 12px 16px;
-                        }
-
-                        .task-workspace-page .dataTables_wrapper .dataTables_info {
-                            font-size: 0.73rem;
-                            color: var(--c-ink-3);
-                        }
-
-                        .task-workspace-page .dataTables_wrapper .dataTables_filter input,
-                        .task-workspace-page .dataTables_wrapper .dataTables_length select {
-                            border: 1px solid var(--c-border);
-                            border-radius: var(--r-md);
-                            padding: 5px 10px;
-                            min-height: 32px;
-                            box-shadow: none;
-                            font-size: 0.78rem;
-                            color: var(--c-ink);
-                            background: var(--c-surface);
-                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
-                        }
-
-                        .task-workspace-page .dataTables_wrapper .dataTables_filter input:focus,
-                        .task-workspace-page .dataTables_wrapper .dataTables_length select:focus {
-                            outline: none;
-                            border-color: var(--c-ink);
-                            box-shadow: 0 0 0 2px rgba(26, 26, 24, .07);
-                        }
-
-                        .task-workspace-page .dataTables_wrapper .dataTables_paginate .paginate_button {
-                            border-radius: var(--r-md) !important;
-                            padding: 3px 9px !important;
-                            font-size: 0.76rem !important;
-                            border: 1px solid transparent !important;
-                            background: transparent !important;
-                            color: var(--c-ink-2) !important;
-                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
-                        }
-
-                        .task-workspace-page .dataTables_wrapper .dataTables_paginate .paginate_button.current,
-                        .task-workspace-page .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
-                            background: var(--c-ink) !important;
-                            border-color: var(--c-ink) !important;
-                            color: #fff !important;
-                            box-shadow: none !important;
-                        }
-
-                        .task-workspace-page .dataTables_wrapper .dataTables_paginate .paginate_button:hover:not(.current) {
-                            background: var(--c-surface-2) !important;
-                            border-color: var(--c-border) !important;
-                            color: var(--c-ink) !important;
-                        }
-
-                        /* ─── Modals ────────────────────────────────────────────── */
-                        .task-workspace-page .theme-modal .modal-content {
-                            border: none;
-                            border-radius: var(--r-xl);
-                            overflow: hidden;
-                            box-shadow: 0 20px 60px rgba(15, 23, 42, 0.18);
-                        }
-
-                        .task-workspace-page .theme-modal .modal-header {
-                            padding: 16px 20px;
-                            border-bottom: 1px solid var(--c-border);
-                            background: var(--c-surface-2);
-                        }
-
-                        .task-workspace-page .theme-modal .modal-title {
-                            color: var(--c-ink);
-                            font-size: 0.95rem;
-                            font-weight: 600;
-                        }
-
-                        .task-workspace-page .theme-modal .close {
-                            color: var(--c-ink-3);
-                            opacity: 1;
-                            text-shadow: none;
-                        }
-
-                        .task-workspace-page .theme-modal .modal-body {
-                            padding: 20px;
-                        }
-
-                        .task-workspace-page .theme-modal .modal-footer {
-                            padding: 0 20px 20px;
-                            border-top: none;
-                            gap: 10px;
-                        }
-
-                        .task-workspace-page .theme-modal label {
-                            color: var(--c-ink);
-                            font-size: 0.78rem;
-                            font-weight: 600;
-                            margin-bottom: 5px;
-                        }
-
-                        .task-workspace-page .theme-modal .form-control,
-                        .task-workspace-page .theme-modal .custom-select {
-                            border: 1px solid var(--c-border-2);
-                            border-radius: var(--r-md);
-                            min-height: 40px;
-                            box-shadow: none;
-                            font-size: 0.85rem;
-                            color: var(--c-ink);
-                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
-                        }
-
-                        .task-workspace-page .theme-modal textarea.form-control {
-                            min-height: 100px;
-                        }
-
-                        .task-workspace-page .theme-modal .form-control:focus,
-                        .task-workspace-page .theme-modal .custom-select:focus {
-                            border-color: var(--c-ink);
-                            box-shadow: 0 0 0 3px rgba(26, 26, 24, 0.08);
-                            outline: none;
-                        }
-
-                        .task-workspace-page .theme-modal .btn {
-                            border-radius: var(--r-md);
-                            font-weight: 600;
-                            font-size: 0.8rem;
-                            padding: 8px 16px;
-                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
-                        }
-
-                        .task-workspace-page .theme-modal .btn-primary,
-                        .task-workspace-page .theme-modal .btn-info {
-                            border: none;
-                            color: #fff;
-                            background: var(--c-ink);
-                        }
-
-                        .task-workspace-page .theme-modal .btn-primary:hover,
-                        .task-workspace-page .theme-modal .btn-info:hover {
-                            background: var(--c-ink-2);
-                        }
-
-                        .task-workspace-page .theme-modal .btn-light {
-                            border: 1px solid var(--c-border-2);
-                            color: var(--c-ink);
-                            background: var(--c-surface);
-                        }
-
-                        .task-workspace-page .theme-modal .btn-warning {
-                            border: none;
-                            color: #fff;
-                            background: var(--c-accent-amber);
-                        }
-                    </style>
-
-                    <style>
-
-                        .task-workspace-page {
-                            --c-bg: #f8fafc;
-                            --c-surface: #ffffff;
-                            --c-surface-2: #f8fbff;
-                            --c-border: #e2e8f0;
-                            --c-border-2: #cbd5e1;
-                            --c-ink: #0f172a;
-                            --c-ink-2: #475569;
-                            --c-ink-3: #94a3b8;
-                            --c-accent-blue: #2563eb;
-                            --c-accent-green: #16a34a;
-                            --c-accent-amber: #d97706;
-                            --c-accent-red: #dc2626;
-                            --font-body: var(--font-primary);
-                            --font-mono: var(--font-primary);
-                            --shadow-sm: 0 1px 3px rgba(15, 23, 42, .06), 0 1px 2px rgba(15, 23, 42, .05);
-                            --shadow-md: 0 8px 24px rgba(15, 23, 42, .08), 0 2px 8px rgba(15, 23, 42, .05);
-                            padding-top: 30px;
-                            padding-bottom: 40px;
-                        }
-
-                        .task-workspace-page .page-header {
-                            align-items: flex-end;
-                            gap: 14px;
-                            margin-bottom: 1.4rem;
-                            padding: 0 0 1.2rem;
-                            border-bottom: 1px solid var(--c-border);
-                        }
-
-                        .task-workspace-page .page-eyebrow {
-                            gap: 7px;
-                            font-size: 0.72rem;
-                            font-weight: 700;
-                            letter-spacing: .12em;
-                        }
-
-                        .task-workspace-page .page-eyebrow span {
-                            width: 7px;
-                            height: 7px;
-                            background: var(--c-accent-blue);
-                        }
-
-                        .task-workspace-page .page-title {
-                            font-size: 1.5rem;
-                            font-weight: 800;
-                            letter-spacing: -.03em;
-                        }
-
-                        .task-workspace-page .page-subtitle {
-                            margin-top: 4px;
-                            font-size: 0.84rem;
-                            color: var(--c-ink-3);
-                        }
-
-                        .task-workspace-page .page-actions {
-                            gap: 10px;
-                        }
-
-                        .task-workspace-page .btn-action,
-                        .task-workspace-page .btn-submit {
-                            border-radius: 10px;
-                            font-size: 0.82rem;
-                            font-weight: 700;
-                            padding: 10px 16px;
-                            gap: 7px;
-                        }
-
-                        .task-workspace-page .btn-action {
-                            color: var(--c-ink-2);
-                            border: 1px solid var(--c-border);
-                            background: #fff;
-                        }
-
-                        .task-workspace-page .btn-action:hover {
-                            color: var(--c-ink);
-                            border-color: var(--c-border-2);
-                            background: #fff;
-                            box-shadow: var(--shadow-sm);
-                            transform: translateY(-1px);
-                        }
-
-                        .task-workspace-page .btn-submit {
-                            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-                            box-shadow: 0 10px 24px rgba(37, 99, 235, .18);
-                        }
-
-                        .task-workspace-page .btn-submit:hover {
-                            background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
-                            box-shadow: 0 14px 26px rgba(37, 99, 235, .24);
-                            transform: translateY(-1px);
-                        }
-
-                        .task-workspace-page .stats-grid {
-                            gap: 12px;
-                            margin-bottom: 1.25rem;
-                        }
-
-                        .task-workspace-page .stat-card {
-                            border-radius: 14px;
-                            padding: 0.9rem 1rem;
-                        }
-
-                        .task-workspace-page .stat-card::before {
-                            top: 0;
-                            left: 0;
-                            right: auto;
-                            width: 4px;
-                            height: 100%;
-                        }
-
-                        .task-workspace-page .stat-label {
-                            font-size: 0.68rem;
-                            font-weight: 700;
-                            letter-spacing: .07em;
-                        }
-
-                        .task-workspace-page .stat-value {
-                            font-size: 1.5rem;
-                            font-weight: 800;
-                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
-                        }
-
-                        .task-workspace-page .theme-banner {
-                            border-radius: 14px;
-                            padding: 12px 16px;
-                            margin-bottom: 18px;
-                        }
-
-                        .task-workspace-page .theme-card {
-                            border-radius: 18px;
-                            box-shadow: var(--shadow-sm);
-                        }
-
-                        .task-workspace-page .theme-card-head {
-                            padding: 1rem 1.25rem;
-                            background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
-                        }
-
-                        .task-workspace-page .theme-card-title {
-                            font-size: 1rem;
-                            font-weight: 800;
-                            color: var(--c-ink);
-                        }
-
-                        .task-workspace-page .theme-card-subtitle {
-                            font-size: 0.82rem;
-                            color: var(--c-ink-3);
-                        }
-
-                        .task-workspace-page .task-table thead th {
-                            font-size: 0.68rem;
-                            font-weight: 800;
-                            letter-spacing: .08em;
-                            background: #f8fbff;
-                        }
-
-                        .task-workspace-page .task-table td {
-                            padding-top: 12px;
-                            padding-bottom: 12px;
-                            font-size: 0.83rem;
-                        }
-
-                        .task-workspace-page .task-title-link {
-                            font-weight: 700;
-                        }
-
-                        .task-workspace-page .project-tag {
-                            border-radius: 999px;
-                            padding: 4px 10px;
-                        }
-
-                        .task-workspace-page .action-menu-btn {
-                            width: 32px;
-                            height: 32px;
-                            border-radius: 10px;
-                        }
-
-                        .task-workspace-page .theme-modal .modal-header {
-                            background: #f8fbff;
-                        }
-                    </style>
 
                     <?php if ($this->session->flashdata('success')): ?>
                         <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
@@ -1123,48 +102,57 @@ $priorityClasses = array('1' => 'priority-high', '2' => 'priority-medium', '3' =
                     <?php endif; ?>
 
                     <!-- Page header -->
-                    <div class="page-header">
-                        <div>
-                            <div class="page-eyebrow"><span></span>Task Operations</div>
-                            <h4 class="page-title">Task List</h4>
+                    <header class="berps-page-header">
+                        <div class="berps-page-header__content">
+                            <span class="berps-page-header__eyebrow">Task Operations</span>
+                            <h1 class="berps-page-title">Task List</h1>
+                            <p class="berps-page-subtitle">Assign, track, and close out team tasks.</p>
                         </div>
-                        <div class="page-actions">
-                            <button type="button" class="btn-submit" data-toggle="modal" data-target="#addTaskModal">
-                                <i class="mdi mdi-plus-circle-outline"></i>
-                                Add New Task
+                        <div class="berps-page-header__actions">
+                            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addTaskModal">
+                                <i class="mdi mdi-plus-circle-outline mr-1" aria-hidden="true"></i>Add New Task
                             </button>
-                            <button type="button" class="btn-action" data-toggle="modal" data-target="#bulkTaskUploadModal">
-                                <i class="mdi mdi-upload-outline"></i>
-                                Bulk Upload
+                            <button type="button" class="btn btn-outline-secondary" data-toggle="modal" data-target="#bulkTaskUploadModal">
+                                <i class="mdi mdi-upload-outline mr-1" aria-hidden="true"></i>Bulk Upload
                             </button>
-                            <a href="<?= base_url(); ?>Page/downloadTaskBulkTemplate" class="btn-action">
-                                <i class="mdi mdi-download-outline"></i>
-                                Download Template
+                            <a href="<?= base_url(); ?>Page/downloadTaskBulkTemplate" class="btn btn-outline-secondary">
+                                <i class="mdi mdi-download-outline mr-1" aria-hidden="true"></i>Download Template
                             </a>
-                            <a href="<?= base_url(); ?>Page/accomplishments" class="btn-action">
-                                <i class="mdi mdi-trophy-outline"></i>
-                                Accomplishments
+                            <a href="<?= base_url(); ?>Page/accomplishments" class="btn btn-outline-secondary">
+                                <i class="mdi mdi-trophy-outline mr-1" aria-hidden="true"></i>Accomplishments
                             </a>
                         </div>
-                    </div>
+                    </header>
 
                     <!-- Stat cards -->
-                    <div class="stats-grid">
-                        <div class="stat-card stat-open">
-                            <div class="stat-label">Open Tasks</div>
-                            <div class="stat-value"><?= number_format($openTaskCount); ?></div>
+                    <div class="berps-stat-grid">
+                        <div class="berps-stat-card">
+                            <div>
+                                <p class="berps-stat-card__value"><?= number_format($openTaskCount); ?></p>
+                                <p class="berps-stat-card__label">Open Tasks</p>
+                            </div>
+                            <span class="berps-stat-card__icon" aria-hidden="true"><i class="mdi mdi-folder-open-outline"></i></span>
                         </div>
-                        <div class="stat-card stat-due-today">
-                            <div class="stat-label">Due Today</div>
-                            <div class="stat-value is-warning"><?= number_format($dueTodayTaskCount); ?></div>
+                        <div class="berps-stat-card berps-tone-warning">
+                            <div>
+                                <p class="berps-stat-card__value"><?= number_format($dueTodayTaskCount); ?></p>
+                                <p class="berps-stat-card__label">Due Today</p>
+                            </div>
+                            <span class="berps-stat-card__icon" aria-hidden="true"><i class="mdi mdi-calendar-clock"></i></span>
                         </div>
-                        <div class="stat-card stat-overdue">
-                            <div class="stat-label">Overdue</div>
-                            <div class="stat-value is-danger"><?= number_format($overdueTaskCount); ?></div>
+                        <div class="berps-stat-card berps-tone-danger">
+                            <div>
+                                <p class="berps-stat-card__value"><?= number_format($overdueTaskCount); ?></p>
+                                <p class="berps-stat-card__label">Overdue</p>
+                            </div>
+                            <span class="berps-stat-card__icon" aria-hidden="true"><i class="mdi mdi-alert-circle-outline"></i></span>
                         </div>
-                        <div class="stat-card stat-accomplished">
-                            <div class="stat-label">Accomplished</div>
-                            <div class="stat-value"><?= number_format($closedTaskCount); ?></div>
+                        <div class="berps-stat-card berps-tone-success">
+                            <div>
+                                <p class="berps-stat-card__value"><?= number_format($closedTaskCount); ?></p>
+                                <p class="berps-stat-card__label">Accomplished</p>
+                            </div>
+                            <span class="berps-stat-card__icon" aria-hidden="true"><i class="mdi mdi-check-circle-outline"></i></span>
                         </div>
                     </div>
 
@@ -1435,7 +423,7 @@ $priorityClasses = array('1' => 'priority-high', '2' => 'priority-medium', '3' =
     <!-- ───────── MODALS ───────── -->
 
     <!-- Add Status -->
-    <div class="modal fade theme-modal" id="addstatus" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal fade berps-form-modal" id="addstatus" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -1467,7 +455,7 @@ $priorityClasses = array('1' => 'priority-high', '2' => 'priority-medium', '3' =
     </div>
 
     <!-- Add New Task -->
-    <div class="modal fade theme-modal" id="addTaskModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal fade berps-form-modal" id="addTaskModal" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -1594,7 +582,7 @@ $priorityClasses = array('1' => 'priority-high', '2' => 'priority-medium', '3' =
     </div>
 
     <!-- Bulk Upload Tasks -->
-    <div class="modal fade theme-modal" id="bulkTaskUploadModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal fade berps-form-modal" id="bulkTaskUploadModal" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -1641,7 +629,7 @@ $priorityClasses = array('1' => 'priority-high', '2' => 'priority-medium', '3' =
     </div>
 
     <!-- Update Task -->
-    <div class="modal fade theme-modal" id="updateTaskModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal fade berps-form-modal" id="updateTaskModal" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -1748,7 +736,7 @@ $priorityClasses = array('1' => 'priority-high', '2' => 'priority-medium', '3' =
     </div>
 
     <!-- Admin Comment -->
-    <div class="modal fade theme-modal" id="adminCommentModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal fade berps-form-modal" id="adminCommentModal" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -1781,7 +769,7 @@ $priorityClasses = array('1' => 'priority-high', '2' => 'priority-medium', '3' =
     </div>
 
     <!-- Forward Task -->
-    <div class="modal fade theme-modal" id="forwardTaskModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal fade berps-form-modal" id="forwardTaskModal" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header">

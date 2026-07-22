@@ -50,596 +50,6 @@ if (!function_exists('page_reminders_preview')) {
 <!DOCTYPE html>
 <html lang="en">
 <?php include('includes/head.php'); ?>
-<style>
-
-    .notes-modern-page,
-    .notes-modern-page .content-page {
-        font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
-    }
-
-    .notes-modern-page {
-        --notes-surface: rgba(255, 255, 255, 0.88);
-        --notes-surface-strong: #ffffff;
-        --notes-border: rgba(148, 163, 184, 0.2);
-        --notes-border-strong: rgba(148, 163, 184, 0.34);
-        --notes-text: #102033;
-        --notes-text-soft: #5b6b7f;
-        --notes-text-muted: #91a0b3;
-        --notes-primary: #1d4ed8;
-        --notes-primary-deep: #123b9f;
-        --notes-accent: #0f766e;
-        --notes-warning: #d97706;
-        --notes-danger: #dc2626;
-        --notes-shadow: 0 24px 60px rgba(15, 23, 42, 0.08);
-        --notes-shadow-soft: 0 14px 34px rgba(15, 23, 42, 0.06);
-        background:
-            radial-gradient(circle at top left, rgba(37, 99, 235, 0.12), transparent 28%),
-            radial-gradient(circle at top right, rgba(15, 118, 110, 0.12), transparent 24%),
-            linear-gradient(180deg, #f8fbff 0%, #f1f6fb 100%);
-        min-height: 100vh;
-    }
-
-    .notes-modern-page .content {
-        background: transparent;
-    }
-
-    .notes-modern-page .notes-workspace {
-        padding: 8px 0 34px;
-    }
-
-    .notes-modern-page .notes-hero {
-        position: relative;
-        overflow: hidden;
-        padding: 28px;
-        border-radius: 28px;
-        background:
-            linear-gradient(135deg, rgba(13, 26, 51, 0.96) 0%, rgba(16, 86, 169, 0.92) 58%, rgba(15, 118, 110, 0.88) 100%);
-        color: #ffffff;
-        box-shadow: var(--notes-shadow);
-        margin-bottom: 20px;
-    }
-
-    .notes-modern-page .notes-hero::before,
-    .notes-modern-page .notes-hero::after {
-        content: '';
-        position: absolute;
-        border-radius: 999px;
-        pointer-events: none;
-    }
-
-    .notes-modern-page .notes-hero::before {
-        width: 240px;
-        height: 240px;
-        right: -90px;
-        top: -118px;
-        background: rgba(255, 255, 255, 0.1);
-    }
-
-    .notes-modern-page .notes-hero::after {
-        width: 180px;
-        height: 180px;
-        left: 52%;
-        bottom: -108px;
-        background: rgba(255, 255, 255, 0.08);
-    }
-
-    .notes-modern-page .notes-hero__top,
-    .notes-modern-page .notes-hero__bottom {
-        position: relative;
-        z-index: 1;
-    }
-
-    .notes-modern-page .notes-hero__top {
-        display: flex;
-        align-items: flex-start;
-        justify-content: space-between;
-        gap: 18px;
-        flex-wrap: wrap;
-        margin-bottom: 22px;
-    }
-
-    .notes-modern-page .notes-eyebrow {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        margin-bottom: 10px;
-        font-size: 0.76rem;
-        font-weight: 700;
-        letter-spacing: 0.16em;
-        text-transform: uppercase;
-        color: rgba(255, 255, 255, 0.78);
-    }
-
-    .notes-modern-page .notes-eyebrow::before {
-        content: '';
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background: #f8fafc;
-        box-shadow: 0 0 0 6px rgba(248, 250, 252, 0.12);
-    }
-
-    .notes-modern-page .notes-hero h1 {
-        margin: 0;
-        color: #ffffff !important;
-        font-size: 2.3rem;
-        line-height: 1.05;
-        font-weight: 800;
-        letter-spacing: -0.04em;
-        text-shadow: 0 2px 12px rgba(15, 23, 42, 0.28);
-    }
-
-    .notes-modern-page .notes-hero p {
-        max-width: 650px;
-        margin: 12px 0 0;
-        color: rgba(255, 255, 255, 0.9) !important;
-        text-shadow: 0 1px 8px rgba(15, 23, 42, 0.22);
-        font-size: 0.96rem;
-        line-height: 1.7;
-    }
-
-    .notes-modern-page .notes-hero__actions {
-        display: flex;
-        gap: 10px;
-        flex-wrap: wrap;
-    }
-
-    .notes-modern-page .notes-btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        min-height: 46px;
-        padding: 0 16px;
-        border-radius: 14px;
-        border: 1px solid transparent;
-        font-size: 0.88rem;
-        font-weight: 700;
-        text-decoration: none !important;
-        transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease, background 0.18s ease;
-        cursor: pointer;
-    }
-
-    .notes-modern-page .notes-btn:hover,
-    .notes-modern-page .notes-btn:focus {
-        transform: translateY(-1px);
-        text-decoration: none;
-    }
-
-    .notes-modern-page .notes-btn--primary {
-        color: #0f172a;
-        background: #ffffff;
-        box-shadow: 0 14px 28px rgba(15, 23, 42, 0.16);
-    }
-
-    .notes-modern-page .notes-btn--primary:hover,
-    .notes-modern-page .notes-btn--primary:focus {
-        color: #0f172a;
-    }
-
-    .notes-modern-page .notes-metrics {
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 14px;
-    }
-
-    .notes-modern-page .notes-metric {
-        padding: 18px 18px 16px;
-        border-radius: 18px;
-        background: rgba(255, 255, 255, 0.12);
-        border: 1px solid rgba(255, 255, 255, 0.14);
-        backdrop-filter: blur(10px);
-    }
-
-    .notes-modern-page .notes-metric__label {
-        margin-bottom: 8px;
-        color: rgba(255, 255, 255, 0.74);
-        font-size: 0.78rem;
-        font-weight: 700;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-    }
-
-    .notes-modern-page .notes-metric__value {
-        color: #ffffff;
-        font-size: 1.6rem;
-        font-weight: 800;
-        line-height: 1.1;
-    }
-
-    .notes-modern-page .notes-metric__meta {
-        margin-top: 6px;
-        color: rgba(255, 255, 255, 0.72);
-        font-size: 0.82rem;
-    }
-
-    .notes-modern-page .notes-card {
-        background: var(--notes-surface-strong);
-        border: 1px solid var(--notes-border);
-        border-radius: 22px;
-        box-shadow: var(--notes-shadow-soft);
-        overflow: hidden;
-    }
-
-    .notes-modern-page .notes-card__header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 16px;
-        padding: 20px 24px;
-        border-bottom: 1px solid var(--notes-border);
-        background: linear-gradient(180deg, rgba(248, 250, 252, 0.88) 0%, rgba(255, 255, 255, 0.96) 100%);
-    }
-
-    .notes-modern-page .notes-card__title {
-        margin: 0;
-        color: var(--notes-text);
-        font-size: 1.16rem;
-        font-weight: 800;
-    }
-
-    .notes-modern-page .notes-card__subtitle {
-        margin-top: 4px;
-        color: var(--notes-text-soft);
-        font-size: 0.9rem;
-    }
-
-    .notes-modern-page .notes-card__count {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        min-width: 42px;
-        padding: 0 12px;
-        height: 42px;
-        border-radius: 999px;
-        background: rgba(29, 78, 216, 0.1);
-        color: var(--notes-primary);
-        font-size: 0.96rem;
-        font-weight: 800;
-    }
-
-    .notes-modern-page .notes-card__body {
-        padding: 24px;
-    }
-
-    .notes-modern-page .notes-empty {
-        padding: 56px 20px;
-        text-align: center;
-        color: var(--notes-text-muted);
-    }
-
-    .notes-modern-page .notes-empty__icon {
-        width: 88px;
-        height: 88px;
-        margin: 0 auto 16px;
-        border-radius: 24px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: linear-gradient(135deg, rgba(29, 78, 216, 0.12) 0%, rgba(15, 118, 110, 0.1) 100%);
-        color: var(--notes-primary);
-        font-size: 2.3rem;
-    }
-
-    .notes-modern-page .notes-empty h3 {
-        margin: 0 0 8px;
-        color: var(--notes-text);
-        font-size: 1.2rem;
-        font-weight: 800;
-    }
-
-    .notes-modern-page .notes-empty p {
-        max-width: 430px;
-        margin: 0 auto;
-        line-height: 1.7;
-    }
-
-    .notes-modern-page .table-responsive {
-        border-radius: 18px;
-        border: 1px solid rgba(226, 232, 240, 0.9);
-    }
-
-    .notes-modern-page .table {
-        margin-bottom: 0;
-        color: var(--notes-text);
-    }
-
-    .notes-modern-page .table thead th {
-        border-top: 0;
-        border-bottom: 1px solid var(--notes-border-strong);
-        padding: 1rem 1rem 0.95rem;
-        background: #f8fbff;
-        color: var(--notes-text);
-        font-size: 0.82rem;
-        font-weight: 800;
-        letter-spacing: 0.04em;
-        text-transform: uppercase;
-        white-space: nowrap;
-    }
-
-    .notes-modern-page .table tbody td {
-        padding: 1rem;
-        vertical-align: middle;
-        border-top: 1px solid var(--notes-border);
-        color: var(--notes-text-soft);
-    }
-
-    .notes-modern-page .table tbody tr:hover {
-        background: rgba(37, 99, 235, 0.03);
-    }
-
-    .notes-modern-page .notes-title-cell {
-        min-width: 200px;
-    }
-
-    .notes-modern-page .notes-title {
-        margin: 0 0 4px;
-        color: var(--notes-text);
-        font-size: 0.97rem;
-        font-weight: 800;
-    }
-
-    .notes-modern-page .notes-subtle {
-        color: var(--notes-text-muted);
-        font-size: 0.82rem;
-    }
-
-    .notes-modern-page .notes-description {
-        max-width: 280px;
-        line-height: 1.55;
-    }
-
-    .notes-modern-page .notes-frequency {
-        display: inline-flex;
-        align-items: center;
-        padding: 0.38rem 0.7rem;
-        border-radius: 999px;
-        background: rgba(29, 78, 216, 0.1);
-        color: var(--notes-primary);
-        font-size: 0.78rem;
-        font-weight: 700;
-    }
-
-    .notes-modern-page .notes-status {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        padding: 0.38rem 0.7rem;
-        border-radius: 999px;
-        font-size: 0.78rem;
-        font-weight: 700;
-        white-space: nowrap;
-    }
-
-    .notes-modern-page .notes-status::before {
-        content: '';
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background: currentColor;
-        opacity: 0.85;
-    }
-
-    .notes-modern-page .notes-status--active {
-        background: rgba(22, 163, 74, 0.12);
-        color: #15803d;
-    }
-
-    .notes-modern-page .notes-status--inactive {
-        background: rgba(148, 163, 184, 0.16);
-        color: #64748b;
-    }
-
-    .notes-modern-page .notes-actions {
-        display: inline-flex;
-        align-items: center;
-        gap: 10px;
-        flex-wrap: wrap;
-    }
-
-    .notes-modern-page .notes-action-btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 6px;
-        min-height: 38px;
-        padding: 0 12px;
-        border-radius: 12px;
-        border: 1px solid transparent;
-        font-size: 0.8rem;
-        font-weight: 700;
-        transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease, color 0.18s ease;
-    }
-
-    .notes-modern-page .notes-action-btn:hover,
-    .notes-modern-page .notes-action-btn:focus {
-        transform: translateY(-1px);
-    }
-
-    .notes-modern-page .notes-action-btn--edit {
-        background: rgba(29, 78, 216, 0.1);
-        color: var(--notes-primary);
-    }
-
-    .notes-modern-page .notes-action-btn--delete {
-        background: rgba(220, 38, 38, 0.1);
-        color: var(--notes-danger);
-    }
-
-    .notes-modern-page .notes-modal .modal-content {
-        border: 0;
-        border-radius: 22px;
-        overflow: hidden;
-        box-shadow: 0 28px 70px rgba(15, 23, 42, 0.18);
-    }
-
-    .notes-modern-page .notes-modal .modal-header {
-        border-bottom: 0;
-        padding: 18px 22px;
-        background: linear-gradient(135deg, var(--notes-primary) 0%, var(--notes-accent) 100%);
-    }
-
-    .notes-modern-page .notes-modal .modal-title {
-        color: #ffffff;
-        font-weight: 800;
-    }
-
-    .notes-modern-page .notes-modal .close {
-        color: #ffffff;
-        text-shadow: none;
-        opacity: 0.9;
-    }
-
-    .notes-modern-page .notes-modal .modal-body {
-        padding: 22px;
-    }
-
-    .notes-modern-page .notes-modal label {
-        color: var(--notes-text);
-        font-weight: 700;
-        font-size: 0.88rem;
-    }
-
-    .notes-modern-page .notes-modal .form-control {
-        min-height: 46px;
-        border-radius: 14px;
-        border-color: rgba(148, 163, 184, 0.34);
-        box-shadow: none;
-    }
-
-    .notes-modern-page .notes-modal textarea.form-control {
-        min-height: 108px;
-    }
-
-    .notes-modern-page .notes-modal .modal-footer {
-        padding: 0 22px 22px;
-        border-top: 0;
-    }
-
-    .notes-modern-page .notes-modal .btn {
-        min-height: 44px;
-        border-radius: 12px;
-        font-weight: 700;
-    }
-
-    @media (max-width: 991.98px) {
-        .notes-modern-page .notes-metrics {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-        }
-    }
-
-    @media (max-width: 767.98px) {
-        .notes-modern-page .notes-workspace {
-            padding-top: 0;
-        }
-
-        .notes-modern-page .notes-hero {
-            padding: 22px;
-            border-radius: 24px;
-        }
-
-        .notes-modern-page .notes-hero h1 {
-            font-size: 1.9rem;
-        }
-
-        .notes-modern-page .notes-metrics {
-            grid-template-columns: 1fr;
-        }
-
-        .notes-modern-page .notes-card__header {
-            align-items: flex-start;
-            flex-direction: column;
-        }
-
-        .notes-modern-page .table-responsive {
-            border: 0;
-            box-shadow: none;
-        }
-
-        .notes-modern-page .table thead {
-            display: none;
-        }
-
-        .notes-modern-page .table,
-        .notes-modern-page .table tbody,
-        .notes-modern-page .table tr,
-        .notes-modern-page .table td {
-            display: block;
-            width: 100%;
-        }
-
-        .notes-modern-page .table tbody tr {
-            margin-bottom: 14px;
-            border: 1px solid rgba(226, 232, 240, 0.95);
-            border-radius: 18px;
-            background: #ffffff;
-            box-shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
-            overflow: hidden;
-        }
-
-        .notes-modern-page .table tbody td {
-            border-top: 1px solid rgba(226, 232, 240, 0.72);
-            padding: 14px 16px;
-        }
-
-        .notes-modern-page .table tbody td:first-child {
-            border-top: 0;
-        }
-
-        .notes-modern-page .table tbody td::before {
-            content: attr(data-label);
-            display: block;
-            margin-bottom: 5px;
-            color: var(--notes-text-muted);
-            font-size: 0.74rem;
-            font-weight: 800;
-            letter-spacing: 0.05em;
-            text-transform: uppercase;
-        }
-
-        .notes-modern-page .notes-description {
-            max-width: none;
-        }
-    }
-
-    /*
-     * Sticky footer layout
-     * Keeps the footer at the bottom of the viewport when the page has
-     * little content, while allowing it to move down normally on long pages.
-     */
-    html,
-    body.notes-modern-page {
-        min-height: 100%;
-    }
-
-    .notes-modern-page #wrapper {
-        min-height: 100vh;
-    }
-
-    .notes-modern-page .content-page {
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .notes-modern-page .content-page > .content {
-        width: 100%;
-        flex: 1 0 auto;
-    }
-
-    .notes-modern-page .content-page > footer,
-    .notes-modern-page .content-page > .footer {
-        position: static !important;
-        top: auto !important;
-        right: auto !important;
-        bottom: auto !important;
-        left: auto !important;
-        width: 100%;
-        margin-top: auto;
-        flex: 0 0 auto;
-    }
-
-</style>
 
 <body class="notes-modern-page">
     <div id="wrapper">
@@ -648,63 +58,62 @@ if (!function_exists('page_reminders_preview')) {
 
         <div class="content-page">
             <div class="content">
-                <div class="container-fluid">
+                <div class="container-fluid reminders-workspace-page berps-page">
                     <div class="notes-workspace">
-                        <div class="notes-hero">
-                            <div class="notes-hero__top">
-                                <div>
-                                    <div class="notes-eyebrow">
-                                        <i class="mdi mdi-calendar"></i>
-                                        <?= htmlspecialchars($currentDateLabel, ENT_QUOTES, 'UTF-8'); ?>
-                                    </div>
-                                    <h1>My Reminders</h1>
-                                </div>
-                                <div class="notes-hero__actions">
-                                    <button type="button" class="notes-btn notes-btn--primary" id="addReminderBtn">
-                                        <i class="mdi mdi-plus"></i>
-                                        Add Reminder
-                                    </button>
-                                </div>
+                        <header class="berps-page-header">
+                            <div class="berps-page-header__content">
+                                <span class="berps-page-header__eyebrow"><i class="mdi mdi-calendar mr-1"></i><?= htmlspecialchars($currentDateLabel, ENT_QUOTES, 'UTF-8'); ?></span>
+                                <h1 class="berps-page-title">My Reminders</h1>
+                                <p class="berps-page-subtitle">Track recurring dates without checking the calendar manually.</p>
                             </div>
+                            <div class="berps-page-header__actions">
+                                <button type="button" class="btn btn-primary" id="addReminderBtn">
+                                    <i class="mdi mdi-plus mr-1" aria-hidden="true"></i>Add Reminder
+                                </button>
+                            </div>
+                        </header>
 
-                            <div class="notes-hero__bottom">
-                                <div class="notes-metrics">
-                                    <div class="notes-metric">
-                                        <div class="notes-metric__label">Active Reminders</div>
-                                        <div class="notes-metric__value"><?= number_format($activeReminderCount); ?></div>
-                                        <div class="notes-metric__meta"><?= number_format($totalReminders); ?> total saved</div>
-                                    </div>
-                                    <div class="notes-metric">
-                                        <div class="notes-metric__label">Inactive</div>
-                                        <div class="notes-metric__value"><?= number_format($inactiveReminderCount); ?></div>
-                                        <div class="notes-metric__meta">Paused until you reactivate them</div>
-                                    </div>
-                                    <div class="notes-metric">
-                                        <div class="notes-metric__label">Next Reminder</div>
-                                        <div class="notes-metric__value" style="font-size: 1.25rem;"><?= htmlspecialchars($nextReminderLabel, ENT_QUOTES, 'UTF-8'); ?></div>
-                                        <div class="notes-metric__meta">Earliest scheduled alert</div>
-                                    </div>
+                        <div class="berps-stat-grid">
+                            <div class="berps-stat-card berps-tone-success">
+                                <div>
+                                    <p class="berps-stat-card__value"><?= number_format($activeReminderCount); ?></p>
+                                    <p class="berps-stat-card__label">Active Reminders</p>
+                                    <p class="berps-stat-card__meta"><?= number_format($totalReminders); ?> total saved</p>
                                 </div>
+                                <span class="berps-stat-card__icon" aria-hidden="true"><i class="mdi mdi-bell-ring-outline"></i></span>
+                            </div>
+                            <div class="berps-stat-card berps-tone-warning">
+                                <div>
+                                    <p class="berps-stat-card__value"><?= number_format($inactiveReminderCount); ?></p>
+                                    <p class="berps-stat-card__label">Inactive</p>
+                                    <p class="berps-stat-card__meta">Paused until you reactivate them</p>
+                                </div>
+                                <span class="berps-stat-card__icon" aria-hidden="true"><i class="mdi mdi-bell-off-outline"></i></span>
+                            </div>
+                            <div class="berps-stat-card berps-tone-info">
+                                <div>
+                                    <p class="berps-stat-card__value" style="font-size: 1.1rem;"><?= htmlspecialchars($nextReminderLabel, ENT_QUOTES, 'UTF-8'); ?></p>
+                                    <p class="berps-stat-card__label">Next Reminder</p>
+                                    <p class="berps-stat-card__meta">Earliest scheduled alert</p>
+                                </div>
+                                <span class="berps-stat-card__icon" aria-hidden="true"><i class="mdi mdi-calendar-clock"></i></span>
                             </div>
                         </div>
 
-                        <div class="notes-card">
-                            <div class="notes-card__header">
+                        <section class="berps-table-card">
+                            <div class="berps-table-card__header">
                                 <div>
-                                    <h3 class="notes-card__title">Reminder Queue</h3>
-                                    <div class="notes-card__subtitle">Review upcoming dates, adjust frequency, or remove reminders you no longer need.</div>
+                                    <h2 class="berps-section-title">Reminder Queue</h2>
+                                    <p class="berps-section-copy">Review upcoming dates, adjust frequency, or remove reminders you no longer need.</p>
                                 </div>
-                                <div class="notes-card__count"><?= number_format($totalReminders); ?></div>
+                                <span class="berps-status berps-status--info"><?= number_format($totalReminders); ?> reminders</span>
                             </div>
 
-                            <div class="notes-card__body">
+                            <div class="berps-table-card__body">
                                 <?php if (empty($reminders)): ?>
-                                    <div class="notes-empty">
-                                        <div class="notes-empty__icon">
-                                            <i class="mdi mdi-bell-off-outline"></i>
-                                        </div>
-                                        <h3>No reminders yet</h3>
-                                        <p>Create your first reminder to start tracking recurring dates without checking the calendar manually.</p>
+                                    <div class="berps-empty-state">
+                                        <i class="mdi mdi-bell-off-outline berps-empty-state__icon" aria-hidden="true"></i>
+                                        <span>No reminders yet. Create your first reminder to start tracking recurring dates.</span>
                                     </div>
                                 <?php else: ?>
                                     <div class="table-responsive">
@@ -726,7 +135,7 @@ if (!function_exists('page_reminders_preview')) {
                                                     <?php
                                                     $descriptionPreview = page_reminders_preview($reminder->description ?? '');
                                                     $daysBefore = (int) ($reminder->reminder_days_before ?? 0);
-                                                    $statusClass = !empty($reminder->is_active) ? 'notes-status notes-status--active' : 'notes-status notes-status--inactive';
+                                                    $statusClass = !empty($reminder->is_active) ? 'berps-status berps-status--success' : 'berps-status';
                                                     $statusLabel = !empty($reminder->is_active) ? 'Active' : 'Inactive';
                                                     ?>
                                                     <tr>
@@ -753,10 +162,10 @@ if (!function_exists('page_reminders_preview')) {
                                                             <span class="<?= $statusClass; ?>"><?= $statusLabel; ?></span>
                                                         </td>
                                                         <td data-label="Actions">
-                                                            <div class="notes-actions">
+                                                            <div class="berps-row-actions">
                                                                 <button
                                                                     type="button"
-                                                                    class="btn notes-action-btn notes-action-btn--edit edit-reminder-btn"
+                                                                    class="btn btn-sm btn-outline-secondary edit-reminder-btn"
                                                                     data-reminder-id="<?= (int) ($reminder->reminder_id ?? 0); ?>"
                                                                     data-title="<?= htmlspecialchars((string) ($reminder->title ?? ''), ENT_QUOTES, 'UTF-8'); ?>"
                                                                     data-description="<?= htmlspecialchars((string) ($reminder->description ?? ''), ENT_QUOTES, 'UTF-8'); ?>"
@@ -769,7 +178,7 @@ if (!function_exists('page_reminders_preview')) {
                                                                 </button>
                                                                 <button
                                                                     type="button"
-                                                                    class="btn notes-action-btn notes-action-btn--delete delete-reminder-btn"
+                                                                    class="btn btn-sm btn-outline-danger delete-reminder-btn"
                                                                     data-reminder-id="<?= (int) ($reminder->reminder_id ?? 0); ?>">
                                                                     <i class="mdi mdi-delete"></i>
                                                                     Delete
@@ -783,7 +192,7 @@ if (!function_exists('page_reminders_preview')) {
                                     </div>
                                 <?php endif; ?>
                             </div>
-                        </div>
+                        </section>
                     </div>
                 </div>
             </div>
@@ -794,7 +203,7 @@ if (!function_exists('page_reminders_preview')) {
 
     <?php include('includes/themecustomizer.php'); ?>
 
-    <div class="modal fade notes-modal" id="reminderModal" tabindex="-1" aria-hidden="true">
+    <div class="modal fade berps-form-modal" id="reminderModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -843,7 +252,7 @@ if (!function_exists('page_reminders_preview')) {
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-light" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Cancel</button>
                     <button type="button" class="btn btn-primary" id="saveReminderBtn">Save Reminder</button>
                 </div>
             </div>

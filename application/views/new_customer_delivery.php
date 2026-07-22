@@ -17,7 +17,7 @@ $data3 = isset($data3) ? $data3 : array();
 
         <div class="content-page">
             <div class="content">
-                <div class="container-fluid delivery-entry-page">
+                <div class="container-fluid delivery-entry-page berps-page">
 
                     <?php if ($this->session->flashdata('success')): ?>
                         <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
@@ -37,335 +37,19 @@ $data3 = isset($data3) ? $data3 : array();
                         </div>
                     <?php endif; ?>
 
-                    <style>
-                        .delivery-entry-page {
-                            --bg: #f5f7fb;
-                            --surface: rgba(255, 255, 255, 0.96);
-                            --surface-strong: #ffffff;
-                            --surface-soft: #f8fbff;
-                            --line: #e4ebf4;
-                            --line-strong: #cfdbea;
-                            --text: #142235;
-                            --text-soft: #617489;
-                            --text-faint: #8ea0b5;
-                            --primary: #2563eb;
-                            --primary-2: #1d4ed8;
-                            --primary-soft: #eaf2ff;
-                            --success: #059669;
-                            --danger: #e11d48;
-                            --warning: #d97706;
-                            --shadow: 0 20px 50px rgba(15, 23, 42, 0.08);
-                            --shadow-soft: 0 12px 30px rgba(15, 23, 42, 0.05);
-                            --radius-xl: 24px;
-                            --radius-lg: 18px;
-                            --radius-md: 14px;
-                            --radius-sm: 10px;
-                            --font-body: var(--font-primary);
-                            --font-head: var(--font-primary);
-                            --font-mono: var(--font-primary);
-                            background:
-                                radial-gradient(circle at top left, rgba(37, 99, 235, 0.08), transparent 28%),
-                                radial-gradient(circle at top right, rgba(16, 185, 129, 0.08), transparent 24%),
-                                linear-gradient(180deg, #f8fbff 0%, #f4f7fb 100%);
-                            min-height: 100vh;
-                            padding-bottom: 28px;
-                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
-                        }
 
-                        .delivery-entry-page * {
-                            box-sizing: border-box;
-                        }
-
-                        .delivery-entry-page .entry-header {
-                            display: flex;
-                            justify-content: space-between;
-                            align-items: flex-end;
-                            gap: 18px;
-                            margin: 24px 0 22px;
-                            flex-wrap: wrap;
-                        }
-
-                        .delivery-entry-page .entry-eyebrow {
-                            display: inline-flex;
-                            align-items: center;
-                            gap: 8px;
-                            padding: 7px 12px;
-                            border-radius: 999px;
-                            background: rgba(37, 99, 235, 0.08);
-                            color: var(--primary-2);
-                            font-size: 0.74rem;
-                            font-weight: 700;
-                            letter-spacing: 0.08em;
-                            text-transform: uppercase;
-                            margin-bottom: 12px;
-                        }
-
-                        .delivery-entry-page .entry-eyebrow::before {
-                            content: '';
-                            width: 8px;
-                            height: 8px;
-                            border-radius: 50%;
-                            background: linear-gradient(135deg, var(--primary), var(--primary-2));
-                            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.10);
-                        }
-
-                        .delivery-entry-page .entry-title {
-                            margin: 0;
-                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
-                            font-size: 2.1rem;
-                            line-height: 1.05;
-                            letter-spacing: -0.05em;
-                            font-weight: 800;
-                            color: var(--text);
-                        }
-
-                        .delivery-entry-page .entry-subtitle {
-                            margin-top: 8px;
-                            color: var(--text-soft);
-                            font-size: 0.96rem;
-                            max-width: 760px;
-                        }
-
-                        .delivery-entry-page .entry-actions {
-                            display: flex;
-                            gap: 12px;
-                            flex-wrap: wrap;
-                        }
-
-                        .delivery-entry-page .btn-action,
-                        .delivery-entry-page .btn-submit,
-                        .delivery-entry-page .btn-add-row,
-                        .delivery-entry-page .btn-remove-row {
-                            display: inline-flex;
-                            align-items: center;
-                            justify-content: center;
-                            gap: 8px;
-                            border-radius: 12px;
-                            font-size: 0.92rem;
-                            font-weight: 700;
-                            padding: 11px 18px;
-                            transition: all 0.16s ease;
-                            text-decoration: none;
-                            position: relative;
-                            overflow: hidden;
-                        }
-
-                        .delivery-entry-page .btn-add-row {
-                            border: none;
-                            color: #fff;
-                            background: linear-gradient(135deg, var(--primary), var(--primary-2));
-                            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-                        }
-
-                        .delivery-entry-page .btn-add-row:hover {
-                            transform: translateY(-2px);
-                            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
-                            background: linear-gradient(135deg, var(--primary-2), #1e40af);
-                        }
-
-                        .delivery-entry-page .btn-add-row:active {
-                            transform: translateY(0);
-                            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
-                        }
-
-                        .delivery-entry-page .btn-add-row::before {
-                            content: '';
-                            position: absolute;
-                            top: 0;
-                            left: -100%;
-                            width: 100%;
-                            height: 100%;
-                            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-                            transition: left 0.5s;
-                        }
-
-                        .delivery-entry-page .btn-add-row:hover::before {
-                            left: 100%;
-                        }
-
-                        .add-item-container {
-                            text-align: center;
-                            margin-top: 20px;
-                        }
-
-                        .btn-add-row .item-counter {
-                            display: inline-flex;
-                            align-items: center;
-                            justify-content: center;
-                            min-width: 24px;
-                            height: 24px;
-                            background: rgba(255, 255, 255, 0.2);
-                            border-radius: 12px;
-                            font-size: 0.75rem;
-                            font-weight: 700;
-                            margin-left: 8px;
-                            padding: 0 6px;
-                        }
-
-                        .add-item-hint {
-                            margin-top: 8px;
-                            opacity: 0;
-                            transform: translateY(-5px);
-                            transition: all 0.3s ease;
-                        }
-
-                        .add-item-container:hover .add-item-hint {
-                            opacity: 1;
-                            transform: translateY(0);
-                        }
-
-                        .add-item-hint small {
-                            color: var(--text-faint);
-                            font-size: 0.75rem;
-                            font-style: italic;
-                            text-align: right;
-                            display: block;
-                        }
-
-                        .delivery-entry-page .btn-action {
-                            border: 1px solid var(--line-strong);
-                            color: var(--text);
-                            background: #fff;
-                        }
-
-                        .delivery-entry-page .btn-action:hover {
-                            color: var(--primary);
-                            border-color: #bfd3ef;
-                            background: #f9fbff;
-                        }
-
-                        .delivery-entry-page .btn-submit {
-                            border: none;
-                            color: #fff;
-                            background: linear-gradient(135deg, var(--primary), var(--primary-2));
-                            box-shadow: 0 10px 24px rgba(37, 99, 235, 0.24);
-                        }
-
-                        .delivery-entry-page .btn-submit:hover {
-                            transform: translateY(-1px);
-                            box-shadow: 0 14px 28px rgba(37, 99, 235, 0.28);
-                        }
-
-                        .delivery-entry-page .entry-layout {
-                            display: grid;
-                            grid-template-columns: minmax(0, 1.85fr) minmax(300px, 0.95fr);
-                            gap: 20px;
-                            align-items: start;
-                        }
-
-                        .delivery-entry-page .entry-main,
-                        .delivery-entry-page .entry-side {
-                            display: grid;
-                            gap: 20px;
-                        }
-
-                        .delivery-entry-page .entry-card {
-                            background: var(--surface);
-                            border: 1px solid var(--line);
-                            border-radius: var(--radius-lg);
-                            padding: 24px;
-                            box-shadow: var(--shadow-soft);
-                        }
-
-                        .delivery-entry-page .entry-card-header {
-                            display: flex;
-                            justify-content: space-between;
-                            align-items: center;
-                            margin-bottom: 20px;
-                            padding-bottom: 16px;
-                            border-bottom: 1px solid var(--line);
-                        }
-
-                        .delivery-entry-page .entry-card-title {
-                            margin: 0;
-                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
-                            font-size: 1.25rem;
-                            font-weight: 700;
-                            color: var(--text);
-                        }
-
-                        .delivery-entry-page .form-group {
-                            margin-bottom: 16px;
-                        }
-
-                        .delivery-entry-page .form-label {
-                            display: block;
-                            margin-bottom: 6px;
-                            font-size: 0.85rem;
-                            font-weight: 600;
-                            color: var(--text);
-                        }
-
-                        .delivery-entry-page .form-control,
-                        .delivery-entry-page .form-select {
-                            width: 100%;
-                            padding: 10px 14px;
-                            border: 1px solid var(--line-strong);
-                            border-radius: var(--radius-sm);
-                            font-size: 0.9rem;
-                            color: var(--text);
-                            background: #fff;
-                            transition: all 0.16s ease;
-                        }
-
-                        .delivery-entry-page .form-control:focus,
-                        .delivery-entry-page .form-select:focus {
-                            outline: none;
-                            border-color: var(--primary);
-                            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-                        }
-
-                        .delivery-entry-page .item-row {
-                            display: grid;
-                            grid-template-columns: 2fr 1fr 1fr 1.2fr 1.2fr auto;
-                            gap: 12px;
-                            align-items: end;
-                            padding: 16px;
-                            background: var(--surface-soft);
-                            border-radius: var(--radius-md);
-                            margin-bottom: 12px;
-                        }
-
-                        .delivery-entry-page .item-row .form-control[readonly] {
-                            background: #fff;
-                            font-weight: 600;
-                            color: var(--primary);
-                        }
-
-                        .delivery-entry-page .details-row {
-                            display: grid;
-                            grid-template-columns: 1fr 1fr 1fr;
-                            gap: 12px;
-                            margin-top: 16px;
-                        }
-
-                        @media (max-width: 992px) {
-                            .delivery-entry-page .entry-layout {
-                                grid-template-columns: 1fr;
-                            }
-
-                            .delivery-entry-page .item-row {
-                                grid-template-columns: 1fr 1fr;
-                            }
-
-                            .delivery-entry-page .item-row > *:nth-child(n+3) {
-                                grid-column: span 1;
-                            }
-                        }
-                    </style>
-
-                    <div class="entry-header">
-                        <div>
-                            <div class="entry-eyebrow">Customer Delivery</div>
-                            <h1 class="entry-title">New Delivery</h1>
-                            <p class="entry-subtitle">Create a new delivery record for customer items that are still payable</p>
+                    <header class="berps-page-header">
+                        <div class="berps-page-header__content">
+                            <span class="berps-page-header__eyebrow">Customer Delivery</span>
+                            <h1 class="berps-page-title">New Delivery</h1>
+                            <p class="berps-page-subtitle">Create a new delivery record for customer items that are still payable</p>
                         </div>
-                        <div class="entry-actions">
-                            <a href="<?= base_url('Page/customerDeliveryList'); ?>" class="btn-action">
-                                <i class="mdi mdi-arrow-left"></i> Back to List
+                        <div class="berps-page-header__actions">
+                            <a href="<?= base_url('Page/customerDeliveryList'); ?>" class="btn btn-outline-secondary">
+                                <i class="mdi mdi-arrow-left mr-1" aria-hidden="true"></i>Back to List
                             </a>
                         </div>
-                    </div>
+                    </header>
 
                     <form method="post" action="<?= base_url('Page/saveCustomerDelivery'); ?>">
                         <div class="entry-layout">
@@ -471,7 +155,7 @@ $data3 = isset($data3) ? $data3 : array();
                                             </div>
                                             <div>
                                                 <label class="form-label">&nbsp;</label>
-                                                <button type="button" class="btn-remove-row" onclick="removeDeliveryItem(this)" style="width: 100%; background: var(--danger); color: white; border: none;">
+                                                <button type="button" class="btn-remove-row" onclick="removeDeliveryItem(this)">
                                                     <i class="mdi mdi-trash"></i>
                                                 </button>
                                             </div>
@@ -514,8 +198,8 @@ $data3 = isset($data3) ? $data3 : array();
                                         <button type="submit" class="btn-submit">
                                             <i class="mdi mdi-content-save"></i> Save Delivery
                                         </button>
-                                        <a href="<?= base_url('Page/customerDeliveryList'); ?>" class="btn-action" style="text-align: center;">
-                                            <i class="mdi mdi-cancel"></i> Cancel
+                                        <a href="<?= base_url('Page/customerDeliveryList'); ?>" class="btn btn-outline-secondary" style="text-align: center;">
+                                            <i class="mdi mdi-cancel mr-1" aria-hidden="true"></i>Cancel
                                         </a>
                                     </div>
                                 </div>
@@ -652,7 +336,7 @@ $data3 = isset($data3) ? $data3 : array();
                 '</div>' +
                 '<div>' +
                 '<label class="form-label">&nbsp;</label>' +
-                '<button type="button" class="btn-remove-row" onclick="removeDeliveryItem(this)" style="width: 100%; background: var(--danger); color: white; border: none;">' +
+                '<button type="button" class="btn-remove-row" onclick="removeDeliveryItem(this)">' +
                 '<i class="mdi mdi-trash"></i>' +
                 '</button>' +
                 '</div>' +

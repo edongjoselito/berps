@@ -167,6 +167,7 @@ class Users extends CI_Controller
 
     public function update_password()
     {
+        $isAjax = $this->input->is_ajax_request();
         $this->form_validation->set_rules('currentpassword', 'Current Password', 'required|trim|callback__validate_currentpassword');
         $this->form_validation->set_rules('newpassword', 'New Password', 'required|trim|min_length[8]|regex_match[/^[a-zA-Z0-9!@#\$%\^&\*]+$/]');
         $this->form_validation->set_rules('cnewpassword', 'Confirm New Password', 'required|trim|matches[newpassword]');
@@ -185,14 +186,46 @@ class Users extends CI_Controller
             }
 
             if ($updated) {
+                if ($isAjax) {
+                    return $this->_account_json_response([
+                        'success' => true,
+                        'message' => 'Your password was changed successfully.'
+                    ]);
+                }
+
                 $this->session->set_flashdata('msg', '<div class="alert alert-success text-center">Password changed successfully.</div>');
                 redirect($this->agent->referrer()); // ✅ redirect back to the previous page
             } else {
+                if ($isAjax) {
+                    return $this->_account_json_response([
+                        'success' => false,
+                        'message' => 'We could not update your password. Please try again.'
+                    ], 500);
+                }
+
                 show_error('Error updating password.');
             }
         } else {
+            if ($isAjax) {
+                return $this->_account_json_response([
+                    'success' => false,
+                    'message' => 'Please check the highlighted information and try again.',
+                    'errors' => $this->form_validation->error_array()
+                ], 422);
+            }
+
             $this->changepassword(); // reload form with errors
         }
+    }
+
+    private function _account_json_response(array $payload, $statusCode = 200)
+    {
+        $this->output
+            ->set_status_header((int) $statusCode)
+            ->set_content_type('application/json', 'utf-8')
+            ->set_output(json_encode($payload));
+
+        return null;
     }
 
     public function reset_password($id)

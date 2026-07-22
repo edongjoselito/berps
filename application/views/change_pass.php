@@ -11,188 +11,7 @@
 
         <div class="content-page">
             <div class="content">
-                <div class="container-fluid change-password-page">
-                    <style>
-                        .change-password-page {
-                            --ink: #0f172a;
-                            --muted: #6b7280;
-                            --accent: #2563eb;
-                            --accent-2: #7c3aed;
-                            --border: #e5e7eb;
-                            --shadow: 0 22px 48px rgba(15, 23, 42, 0.12);
-                            padding-top: 12px;
-                        }
-
-                        .change-password-page .breadcrumb {
-                            background: transparent;
-                            padding: 0;
-                            margin-bottom: 10px;
-                        }
-
-                        .change-password-page .page-hero {
-                            border-radius: 18px;
-                            background: radial-gradient(circle at 18% 20%, rgba(37, 99, 235, 0.14), transparent 32%),
-                                radial-gradient(circle at 82% 0%, rgba(124, 58, 237, 0.18), transparent 30%),
-                                linear-gradient(120deg, #1f2937, #111827);
-                            color: #e5e7eb;
-                            padding: 20px 24px;
-                            position: relative;
-                            overflow: hidden;
-                            box-shadow: var(--shadow);
-                        }
-
-                        .change-password-page .page-hero::after {
-                            content: '';
-                            position: absolute;
-                            inset: 14px;
-                            border: 1px solid rgba(255, 255, 255, 0.08);
-                            border-radius: 14px;
-                            pointer-events: none;
-                        }
-
-                        .change-password-page .page-hero h4 {
-                            color: #fff;
-                            margin-bottom: 4px;
-                            letter-spacing: -0.02em;
-                        }
-
-                        .change-password-page .eyebrow {
-                            text-transform: uppercase;
-                            font-weight: 700;
-                            letter-spacing: 0.08em;
-                            color: rgba(255, 255, 255, 0.75);
-                            font-size: 11px;
-                        }
-
-                        .change-password-page .hero-pill {
-                            display: inline-flex;
-                            align-items: center;
-                            gap: 8px;
-                            background: rgba(255, 255, 255, 0.08);
-                            color: #e5e7eb;
-                            padding: 9px 14px;
-                            border-radius: 999px;
-                            border: 1px solid rgba(255, 255, 255, 0.08);
-                            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
-                        }
-
-                        .change-password-page .card {
-                            border: none;
-                            border-radius: 18px;
-                            box-shadow: var(--shadow);
-                        }
-
-                        .change-password-page .card-header {
-                            background: #fff;
-                            border-bottom: 1px solid rgba(15, 23, 42, 0.06);
-                            padding: 16px 20px;
-                        }
-
-                        .change-password-page .card-body {
-                            padding: 22px;
-                        }
-
-                        .change-password-page .section-title {
-                            font-weight: 700;
-                            color: var(--ink);
-                            margin: 0;
-                            letter-spacing: -0.01em;
-                        }
-
-                        .change-password-page .input-group-text {
-                            background: #f4f6fb;
-                            border: 1px solid var(--border);
-                            border-right: 0;
-                            color: #4b5563;
-                        }
-
-                        .change-password-page .form-control {
-                            border: 1px solid var(--border);
-                            border-radius: 12px;
-                            height: 48px;
-                            background: #fbfdff;
-                            box-shadow: none;
-                            transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
-                        }
-
-                        .change-password-page .form-control:focus {
-                            border-color: rgba(37, 99, 235, 0.75);
-                            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18);
-                            background: #fff;
-                        }
-
-                        .change-password-page .toggle-password {
-                            border: 1px solid var(--border);
-                            border-left: 0;
-                            background: #f8fafc;
-                            color: #4b5563;
-                            padding: 0 12px;
-                        }
-
-                        .change-password-page .helper {
-                            color: var(--muted);
-                            font-size: 13px;
-                        }
-
-                        .change-password-page .alert {
-                            border-radius: 12px;
-                            border: 1px solid rgba(220, 38, 38, 0.12);
-                        }
-
-                        .change-password-page .alert > .d-flex {
-                            gap: 12px;
-                        }
-
-                        .change-password-page .checklist {
-                            list-style: none;
-                            padding: 0;
-                            margin: 0;
-                        }
-
-                        .change-password-page .checklist li {
-                            display: flex;
-                            align-items: center;
-                            gap: 8px;
-                            padding: 8px 0;
-                            color: var(--muted);
-                        }
-
-                        .change-password-page .side-card {
-                            background: linear-gradient(130deg, rgba(37, 99, 235, 0.12), rgba(124, 58, 237, 0.1));
-                        }
-
-                        .change-password-page .icon-pill {
-                            width: 44px;
-                            height: 44px;
-                            border-radius: 14px;
-                            display: inline-flex;
-                            align-items: center;
-                            justify-content: center;
-                            background: rgba(37, 99, 235, 0.1);
-                            color: var(--accent);
-                            font-size: 20px;
-                        }
-
-                        .change-password-page .action-row {
-                            display: flex;
-                            flex-wrap: wrap;
-                            gap: 10px;
-                            justify-content: space-between;
-                            align-items: center;
-                            margin-top: 8px;
-                        }
-
-                        @media (max-width: 767px) {
-                            .change-password-page .card-header,
-                            .change-password-page .card-body {
-                                padding: 16px;
-                            }
-
-                            .change-password-page .page-hero {
-                                padding: 18px;
-                            }
-                        }
-                    </style>
+                <div class="container-fluid change-password-page berps-page">
 
                     <?php
                     $level = strtolower((string) $this->session->userdata('level'));
@@ -229,19 +48,16 @@
                         </div>
                     </div>
 
-                    <div class="page-hero mb-3">
-                        <div class="d-flex flex-wrap align-items-center justify-content-between">
-                            <div>
-                                <div class="eyebrow mb-1">Account security</div>
-                                <h4 class="mb-1">Keep your credentials fresh</h4>
-                                <p class="mb-0">Signed in as <strong><?= $safeDisplayName; ?></strong></p>
-                            </div>
-                            <div class="hero-pill mt-2 mt-sm-0">
-                                <i class="mdi mdi-shield-check-outline"></i>
-                                <span>Two-minute update</span>
-                            </div>
+                    <header class="berps-page-header">
+                        <div class="berps-page-header__content">
+                            <span class="berps-page-header__eyebrow">Account security</span>
+                            <h1 class="berps-page-title">Change Password</h1>
+                            <p class="berps-page-subtitle">Signed in as <strong><?= $safeDisplayName; ?></strong></p>
                         </div>
-                    </div>
+                        <div class="berps-page-header__actions">
+                            <span class="berps-status berps-status--info"><i class="mdi mdi-shield-check-outline mr-1"></i>Two-minute update</span>
+                        </div>
+                    </header>
 
                     <div class="row">
                         <div class="col-xl-7">

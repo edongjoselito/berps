@@ -67,114 +67,6 @@ $formattedAddressHtml = htmlspecialchars($formattedAddress, ENT_QUOTES, 'UTF-8')
 
 <?php include('includes/head.php'); ?>
 
-<style>
-    .staff-profile-shell {
-        padding-bottom: 24px;
-    }
-
-    .staff-profile-cover {
-        border-radius: 16px;
-        overflow: hidden;
-        position: relative;
-        background: linear-gradient(135deg, rgba(30,60,114,0.95) 0%, rgba(42,82,152,0.92) 100%);
-        min-height: 180px;
-        box-shadow: 0 14px 32px rgba(15, 23, 42, 0.18);
-    }
-
-    .staff-profile-cover .picture-bg-overlay {
-        background: radial-gradient(circle at 18% 22%, rgba(255,255,255,0.16), transparent 50%),
-            radial-gradient(circle at 86% 34%, rgba(255,255,255,0.12), transparent 55%),
-            linear-gradient(180deg, rgba(15,23,42,0.15), rgba(15,23,42,0.55));
-    }
-
-    .staff-profile-meta {
-        margin-top: -70px;
-    }
-
-    .staff-profile-meta .profile-user-box {
-        border-radius: 16px;
-        box-shadow: 0 12px 28px rgba(15, 23, 42, 0.12);
-        border: 1px solid rgba(226, 232, 240, 0.85);
-        padding: 18px 18px;
-        background: rgba(255, 255, 255, 0.96);
-        backdrop-filter: blur(6px);
-    }
-
-    .staff-profile-meta .profile-user-img img {
-        border: 4px solid rgba(255,255,255,0.95);
-        box-shadow: 0 10px 22px rgba(15, 23, 42, 0.18);
-        object-fit: cover;
-    }
-
-    .staff-profile-title {
-        font-weight: 700;
-        letter-spacing: -0.02em;
-    }
-
-    .staff-profile-subtitle {
-        color: #64748b;
-        margin-bottom: 0;
-    }
-
-    .staff-profile-badges {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        margin-top: 10px;
-    }
-
-    .staff-profile-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        padding: 6px 10px;
-        border-radius: 999px;
-        font-size: 12px;
-        font-weight: 600;
-        background: #f1f5f9;
-        color: #0f172a;
-        border: 1px solid rgba(148, 163, 184, 0.35);
-    }
-
-    .staff-profile-card {
-        border-radius: 16px;
-        box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
-        border: 1px solid rgba(226, 232, 240, 0.85);
-        overflow: hidden;
-    }
-
-    .staff-profile-card .nav-tabs {
-        background: #ffffff;
-    }
-
-    .staff-profile-card .nav-tabs .nav-link {
-        font-weight: 700;
-        color: #475569;
-        padding: 14px 12px;
-    }
-
-    .staff-profile-card .nav-tabs .nav-link.active {
-        color: #1e3c72;
-    }
-
-    .staff-profile-section-title {
-        margin-top: 22px;
-        font-weight: 800;
-        letter-spacing: -0.01em;
-    }
-
-    .staff-profile-table th {
-        width: 42%;
-        color: #334155;
-        font-weight: 700;
-        background: rgba(148, 163, 184, 0.08);
-    }
-
-    .staff-profile-table td {
-        color: #0f172a;
-        font-weight: 600;
-    }
-</style>
 
 
 <body>
@@ -198,7 +90,7 @@ $formattedAddressHtml = htmlspecialchars($formattedAddress, ENT_QUOTES, 'UTF-8')
             <div class="content">
 
                 <!-- Start Content-->
-                <div class="container-fluid staff-profile-shell">
+                <div class="container-fluid staff-profile-shell berps-page">
                     <!-- start page title -->
                     <div class="row">
                         <div class="col-sm-12">

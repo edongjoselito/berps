@@ -12,334 +12,7 @@
 
           <div class="content-page">
                <div class="content">
-                    <div class="container-fluid accomplishments-page">
-                         <style>
-
-                              .accomplishments-page {
-                                   --bg: #f5f7fb;
-                                   --surface: rgba(255, 255, 255, 0.96);
-                                   --surface-strong: #ffffff;
-                                   --surface-soft: #f8fbff;
-                                   --line: #e4ebf4;
-                                   --line-strong: #cfdbea;
-                                   --text: #142235;
-                                   --text-soft: #617489;
-                                   --text-faint: #8ea0b5;
-                                   --primary: #2563eb;
-                                   --primary-2: #1d4ed8;
-                                   --primary-soft: #eaf2ff;
-                                   --success: #059669;
-                                   --success-soft: #ecfdf5;
-                                   --warning: #d97706;
-                                   --warning-soft: #fff7ed;
-                                   --danger: #e11d48;
-                                   --danger-soft: #fff1f2;
-                                   --shadow: 0 16px 40px rgba(15, 23, 42, 0.06);
-                                   --shadow-soft: 0 8px 24px rgba(15, 23, 42, 0.04);
-                                   --radius-xl: 16px;
-                                   --radius-lg: 12px;
-                                   --radius-md: 10px;
-                                   --radius-sm: 8px;
-                                   --font-body: var(--font-primary);
-                                   --font-head: var(--font-primary);
-                                   --font-mono: var(--font-primary);
-                                   background:
-                                        radial-gradient(circle at top left, rgba(37, 99, 235, 0.08), transparent 28%),
-                                        radial-gradient(circle at top right, rgba(16, 185, 129, 0.08), transparent 24%),
-                                        linear-gradient(180deg, #f8fbff 0%, #f4f7fb 100%);
-                                   min-height: 100vh;
-                                   padding-bottom: 20px;
-                                   font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
-                              }
-
-                              .accomplishments-page * {
-                                   box-sizing: border-box;
-                              }
-
-                              .accomplishments-page .page-header {
-                                   display: flex;
-                                   justify-content: space-between;
-                                   align-items: flex-end;
-                                   gap: 16px;
-                                   margin: 16px 0 16px;
-                                   flex-wrap: wrap;
-                              }
-
-                              .accomplishments-page .page-eyebrow {
-                                   display: inline-flex;
-                                   align-items: center;
-                                   gap: 8px;
-                                   padding: 7px 12px;
-                                   border-radius: 999px;
-                                   background: rgba(37, 99, 235, 0.08);
-                                   color: var(--primary-2);
-                                   font-size: 0.74rem;
-                                   font-weight: 700;
-                                   letter-spacing: 0.08em;
-                                   text-transform: uppercase;
-                                   margin-bottom: 12px;
-                              }
-
-                              .accomplishments-page .page-eyebrow::before {
-                                   content: '';
-                                   width: 8px;
-                                   height: 8px;
-                                   border-radius: 50%;
-                                   background: linear-gradient(135deg, var(--primary), var(--primary-2));
-                                   box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.10);
-                              }
-
-                              .accomplishments-page .page-title {
-                                   margin: 0;
-                                   font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
-                                   font-size: 1.5rem;
-                                   line-height: 1.2;
-                                   letter-spacing: -0.02em;
-                                   font-weight: 700;
-                                   color: var(--text);
-                              }
-
-                              .accomplishments-page .stats-grid {
-                                   display: grid;
-                                   grid-template-columns: repeat(4, minmax(0, 1fr));
-                                   gap: 12px;
-                                   margin-bottom: 16px;
-                              }
-
-                              .accomplishments-page .stat-card {
-                                   position: relative;
-                                   overflow: hidden;
-                                   background: var(--surface);
-                                   border: 1px solid rgba(255, 255, 255, 0.72);
-                                   border-radius: var(--radius-xl);
-                                   box-shadow: var(--shadow-soft);
-                                   padding: 14px 16px 14px;
-                              }
-
-                              .accomplishments-page .stat-card::before {
-                                   content: '';
-                                   position: absolute;
-                                   inset: 0 0 auto 0;
-                                   height: 4px;
-                              }
-
-                              .accomplishments-page .stat-employees::before {
-                                   background: linear-gradient(90deg, #3b82f6, #60a5fa);
-                              }
-
-                              .accomplishments-page .stat-tasks::before {
-                                   background: linear-gradient(90deg, #10b981, #34d399);
-                              }
-
-                              .accomplishments-page .stat-label {
-                                   color: var(--text-faint);
-                                   font-size: 0.65rem;
-                                   font-weight: 600;
-                                   text-transform: uppercase;
-                                   letter-spacing: 0.06em;
-                                   margin-bottom: 8px;
-                              }
-
-                              .accomplishments-page .stat-value {
-                                   color: var(--text);
-                                   font-size: 1.25rem;
-                                   font-weight: 700;
-                                   line-height: 1.2;
-                                   letter-spacing: -0.02em;
-                                   font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
-                              }
-
-                              .accomplishments-page .stat-meta {
-                                   color: var(--text-soft);
-                                   font-size: 0.72rem;
-                                   margin-top: 4px;
-                              }
-
-                              .accomplishments-page .card-stack {
-                                   display: grid;
-                                   gap: 16px;
-                              }
-
-                              .accomplishments-page .theme-card {
-                                   background: var(--surface);
-                                   border: 1px solid rgba(255, 255, 255, 0.72);
-                                   border-radius: var(--radius-xl);
-                                   box-shadow: var(--shadow-soft);
-                                   overflow: hidden;
-                              }
-
-                              .accomplishments-page .filter-bar {
-                                   padding: 14px 18px;
-                                   display: flex;
-                                   justify-content: space-between;
-                                   align-items: center;
-                                   flex-wrap: wrap;
-                                   gap: 10px;
-                                   border-bottom: 1px solid var(--line);
-                                   background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(249, 251, 255, 0.94));
-                              }
-
-                              .accomplishments-page .accordion-card {
-                                   background: var(--surface-strong);
-                                   border: 1px solid var(--line);
-                                   border-radius: var(--radius-lg);
-                                   box-shadow: var(--shadow-soft);
-                                   margin-bottom: 12px;
-                                   overflow: hidden;
-                              }
-
-                              .accomplishments-page .accordion-header-btn {
-                                   width: 100%;
-                                   text-align: left;
-                                   border: 0;
-                                   background: var(--surface-strong);
-                                   padding: 14px 16px;
-                                   display: flex;
-                                   align-items: center;
-                                   justify-content: space-between;
-                                   cursor: pointer;
-                                   outline: none;
-                              }
-
-                              .accomplishments-page .employee-meta {
-                                   display: flex;
-                                   align-items: center;
-                                   gap: 12px;
-                                   min-width: 0;
-                              }
-
-                              .accomplishments-page .avatar-circle {
-                                   width: 40px;
-                                   height: 40px;
-                                   border-radius: 50%;
-                                   background: var(--primary-soft);
-                                   color: var(--primary-2);
-                                   font-weight: 700;
-                                   display: flex;
-                                   align-items: center;
-                                   justify-content: center;
-                                   font-size: 14px;
-                                   flex-shrink: 0;
-                              }
-
-                              .accomplishments-page .employee-name {
-                                   font-size: 0.95rem;
-                                   font-weight: 700;
-                                   color: var(--text);
-                                   margin: 0;
-                              }
-
-                              .accomplishments-page .employee-sub {
-                                   font-size: 0.75rem;
-                                   color: var(--text-soft);
-                                   margin-top: 2px;
-                              }
-
-                              .accomplishments-page .right-meta {
-                                   display: flex;
-                                   align-items: center;
-                                   gap: 10px;
-                                   flex-wrap: wrap;
-                                   margin-left: 12px;
-                              }
-
-                              .accomplishments-page .count-badge {
-                                   display: inline-block;
-                                   padding: 6px 10px;
-                                   border-radius: 999px;
-                                   font-size: 0.75rem;
-                                   font-weight: 700;
-                                   background: var(--success-soft);
-                                   color: var(--success);
-                              }
-
-                              .accomplishments-page .chevron {
-                                   transition: transform .25s ease;
-                                   font-size: 16px;
-                                   color: var(--text);
-                              }
-
-                              .accomplishments-page .accordion-header-btn[aria-expanded="true"] .chevron {
-                                   transform: rotate(180deg);
-                              }
-
-                              .accomplishments-page .task-body {
-                                   padding: 0 16px 16px;
-                                   background: var(--surface-soft);
-                                   border-top: 1px solid var(--line);
-                              }
-
-                              .accomplishments-page .task-table {
-                                   margin-top: 12px;
-                                   margin-bottom: 0;
-                              }
-
-                              .accomplishments-page .task-table thead th {
-                                   background: transparent;
-                                   color: var(--text-faint);
-                                   font-size: 0.72rem;
-                                   font-weight: 800;
-                                   text-transform: uppercase;
-                                   letter-spacing: 0.08em;
-                                   border-top: none;
-                                   border-bottom: 1px solid var(--line);
-                                   white-space: nowrap;
-                                   vertical-align: middle;
-                              }
-
-                              .accomplishments-page .task-table td {
-                                   vertical-align: middle;
-                                   border-color: var(--line);
-                              }
-
-                              .accomplishments-page .task-cell {
-                                   white-space: normal;
-                                   min-width: 240px;
-                              }
-
-                              .accomplishments-page .task-text {
-                                   font-weight: 600;
-                                   color: var(--text);
-                                   line-height: 1.4;
-                              }
-
-                              .accomplishments-page .empty-state {
-                                   background: var(--primary-soft);
-                                   border-radius: var(--radius-md);
-                                   padding: 14px 18px;
-                                   color: #5c6b7a;
-                                   margin-top: 14px;
-                              }
-
-                              @media (max-width: 768px) {
-                                   .accomplishments-page .accordion-header-btn {
-                                        flex-direction: column;
-                                        align-items: flex-start;
-                                        gap: 10px;
-                                   }
-
-                                   .accomplishments-page .right-meta {
-                                        width: 100%;
-                                        justify-content: space-between;
-                                        margin-left: 0;
-                                   }
-
-                                   .accomplishments-page .filter-bar {
-                                        flex-direction: column;
-                                        align-items: flex-start;
-                                   }
-                              }
-
-                              @media (max-width:576px) {
-                                   .accomplishments-page .title-wrap {
-                                        padding: 1rem 1rem 0;
-                                   }
-
-                                   .accomplishments-page .title-divider {
-                                        margin: 8px 1rem 14px;
-                                   }
-                              }
-                         </style>
+                    <div class="container-fluid accomplishments-page berps-page">
 
                          <?php
                          $selected_month = isset($selected_month) ? $selected_month : date('n');
@@ -370,23 +43,30 @@
                          $totalEmployees = count($groupedData);
                          ?>
 
-                         <div class="page-header">
-                              <div>
-                                   <div class="page-eyebrow">Performance Monitoring</div>
-                                   <h4 class="page-title">Task Accomplishments</h4>
+                         <header class="berps-page-header">
+                              <div class="berps-page-header__content">
+                                   <span class="berps-page-header__eyebrow">Performance Monitoring</span>
+                                   <h1 class="berps-page-title">Task Accomplishments</h1>
+                                   <p class="berps-page-subtitle">Completed tasks grouped per employee for the selected month.</p>
                               </div>
-                         </div>
+                         </header>
 
-                         <div class="stats-grid">
-                              <div class="stat-card stat-employees">
-                                   <div class="stat-label">Total Employees</div>
-                                   <div class="stat-value"><?= number_format($totalEmployees); ?></div>
-                                   <div class="stat-meta">Active staff members</div>
+                         <div class="berps-stat-grid">
+                              <div class="berps-stat-card">
+                                   <div>
+                                        <p class="berps-stat-card__value"><?= number_format($totalEmployees); ?></p>
+                                        <p class="berps-stat-card__label">Total Employees</p>
+                                        <p class="berps-stat-card__meta">Active staff members</p>
+                                   </div>
+                                   <span class="berps-stat-card__icon" aria-hidden="true"><i class="mdi mdi-account-group-outline"></i></span>
                               </div>
-                              <div class="stat-card stat-tasks">
-                                   <div class="stat-label">Total Accomplishments</div>
-                                   <div class="stat-value"><?= number_format($totalAccomplishments); ?></div>
-                                   <div class="stat-meta">Completed tasks</div>
+                              <div class="berps-stat-card berps-tone-success">
+                                   <div>
+                                        <p class="berps-stat-card__value"><?= number_format($totalAccomplishments); ?></p>
+                                        <p class="berps-stat-card__label">Total Accomplishments</p>
+                                        <p class="berps-stat-card__meta">Completed tasks</p>
+                                   </div>
+                                   <span class="berps-stat-card__icon" aria-hidden="true"><i class="mdi mdi-check-circle-outline"></i></span>
                               </div>
                          </div>
 
@@ -566,7 +246,7 @@
           })(jQuery);
      </script>
 
-     <div class="modal fade" id="filterAccomplishmentsModal" tabindex="-1" role="dialog" aria-labelledby="filterAccomplishmentsModalLabel" aria-hidden="true">
+     <div class="modal fade berps-form-modal" id="filterAccomplishmentsModal" tabindex="-1" role="dialog" aria-labelledby="filterAccomplishmentsModalLabel" aria-hidden="true">
           <div class="modal-dialog" role="document">
                <div class="modal-content">
                     <form method="post">
@@ -611,7 +291,7 @@
           </div>
      </div>
 
-     <div class="modal fade" id="addStatusModal" tabindex="-1" role="dialog" aria-hidden="true">
+     <div class="modal fade berps-form-modal" id="addStatusModal" tabindex="-1" role="dialog" aria-hidden="true">
           <div class="modal-dialog modal-lg" role="document">
                <div class="modal-content">
                     <div class="modal-header bg-primary text-white">

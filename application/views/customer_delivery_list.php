@@ -16,516 +16,32 @@ $data2 = isset($data2) ? $data2 : array();
 
         <div class="content-page">
             <div class="content">
-                <div class="container-fluid invoice-list-page">
+                <div class="container-fluid customer-delivery-page berps-page">
 
-                    <style>
 
-                         .invoice-list-page {
-                              --bg: #f5f7fb;
-                              --surface: rgba(255, 255, 255, 0.96);
-                              --surface-strong: #ffffff;
-                              --surface-soft: #f8fbff;
-                              --line: #e4ebf4;
-                              --line-strong: #cfdbea;
-                              --text: #142235;
-                              --text-soft: #617489;
-                              --text-faint: #8ea0b5;
-                              --primary: #2563eb;
-                              --primary-2: #1d4ed8;
-                              --primary-soft: #eaf2ff;
-                              --success: #059669;
-                              --warning: #d97706;
-                              --danger: #dc2626;
-                              --font-head: var(--font-primary);
-                              --font-body: var(--font-primary);
-                         }
-
-                         .invoice-list-page * {
-                              box-sizing: border-box;
-                         }
-
-                         .invoice-list-page .content {
-                              margin-bottom: 40px;
-                         }
-
-                         .invoice-list-page .page-header {
-                              display: flex;
-                              justify-content: space-between;
-                              align-items: flex-end;
-                              gap: 20px;
-                              flex-wrap: wrap;
-                              margin-bottom: 24px;
-                              margin-top: 20px;
-                         }
-
-                         .invoice-list-page .page-eyebrow {
-                              display: inline-flex;
-                              align-items: center;
-                              gap: 8px;
-                              font-size: 0.875rem;
-                              font-weight: 600;
-                              color: var(--primary);
-                              text-transform: uppercase;
-                              letter-spacing: 0.05em;
-                              margin-bottom: 12px;
-                         }
-
-                         .invoice-list-page .page-eyebrow::before {
-                              content: '';
-                              width: 8px;
-                              height: 8px;
-                              background: var(--primary);
-                              border-radius: 50%;
-                              box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.10);
-                         }
-
-                         .invoice-list-page .page-title {
-                              margin: 0;
-                              font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
-                              font-size: 1.5rem;
-                              font-weight: 700;
-                              color: var(--text);
-                              letter-spacing: -0.02em;
-                         }
-
-                         .invoice-list-page .page-subtitle {
-                              margin-top: 6px;
-                              color: var(--text-soft);
-                              font-size: 0.9rem;
-                              max-width: 760px;
-                         }
-
-                         .invoice-list-page .page-actions {
-                              display: flex;
-                              gap: 12px;
-                              flex-wrap: wrap;
-                         }
-
-                         .invoice-list-page .stats-grid {
-                              display: grid;
-                              grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-                              gap: 20px;
-                              margin-bottom: 28px;
-                              margin-top: 8px;
-                         }
-
-                         .invoice-list-page .stat-card {
-                              background: var(--surface);
-                              border: 1px solid rgba(255, 255, 255, 0.72);
-                              border-radius: 16px;
-                              padding: 20px;
-                              box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-                         }
-
-                         .invoice-list-page .stat-label {
-                              font-size: 0.875rem;
-                              color: var(--text-soft);
-                              margin-bottom: 8px;
-                              font-weight: 500;
-                         }
-
-                         .invoice-list-page .stat-value {
-                              font-size: 1.75rem;
-                              font-weight: 700;
-                              color: var(--text);
-                         }
-
-                         .invoice-list-page .stat-meta {
-                              font-size: 0.75rem;
-                              color: var(--text-faint);
-                              margin-top: 4px;
-                         }
-
-                         .invoice-list-page .card-stack {
-                              display: grid;
-                              gap: 16px;
-                              margin-top: 4px;
-                         }
-
-                         .invoice-list-page .theme-card {
-                              background: var(--surface);
-                              border: 1px solid rgba(255, 255, 255, 0.72);
-                              border-radius: 16px;
-                              box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-                              overflow: hidden;
-                         }
-
-                         .invoice-list-page .theme-card-head {
-                              padding: 14px 18px;
-                              border-bottom: 1px solid var(--line);
-                              background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(249, 251, 255, 0.94));
-                         }
-
-                         .invoice-list-page .theme-card-title {
-                              margin: 0;
-                              color: var(--text);
-                              font-size: 0.95rem;
-                              font-weight: 700;
-                              letter-spacing: -0.01em;
-                         }
-
-                         .invoice-list-page .theme-card-body,
-                         .modal-body.inv-modal-body {
-                              padding-left: 16px;
-                              padding-right: 16px;
-                         }
-
-                         .invoice-list-page #delivery-table tbody td {
-                              padding: 13px 12px !important;
-                         }
-
-                         .inv-modal-footer {
-                              flex-direction: column;
-                              align-items: stretch;
-                         }
-
-                         .inv-modal-footer .text-right {
-                              width: 100%;
-                              display: flex;
-                              gap: 10px;
-                         }
-
-                         .inv-modal-footer .text-right button {
-                              width: 100%;
-                         }
-
-                         .invoice-list-page .item-builder-head {
-                              flex-direction: column;
-                              align-items: stretch;
-                         }
-
-                         .invoice-list-page .btn-add-entry {
-                              width: 100%;
-                         }
-
-                         .invoice-list-page .btn-action,
-                         .invoice-list-page .btn-submit {
-                              display: inline-flex;
-                              align-items: center;
-                              justify-content: center;
-                              gap: 8px;
-                              border-radius: 12px;
-                              font-size: 0.92rem;
-                              font-weight: 700;
-                              padding: 11px 18px;
-                              transition: all 0.16s ease;
-                              text-decoration: none;
-                         }
-
-                         .invoice-list-page .btn-action {
-                              border: 1px solid var(--line-strong);
-                              color: var(--text);
-                              background: #fff;
-                         }
-
-                         .invoice-list-page .btn-action:hover {
-                              color: var(--primary);
-                              border-color: #bfd3ef;
-                              background: #f9fbff;
-                              transform: translateY(-1px);
-                              box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
-                         }
-
-                         .invoice-list-page .btn-submit {
-                              background: var(--primary);
-                              color: #fff;
-                              border: 1px solid var(--primary);
-                         }
-
-                         .invoice-list-page .btn-submit:hover {
-                              background: var(--primary-2);
-                              border-color: var(--primary-2);
-                              transform: translateY(-1px);
-                              box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-                         }
-
-                         .invoice-list-page .tbl-btn {
-                              display: inline-flex;
-                              align-items: center;
-                              justify-content: center;
-                              gap: 6px;
-                              padding: 6px 12px;
-                              border-radius: 8px;
-                              font-size: 0.85rem;
-                              font-weight: 600;
-                              transition: all 0.16s ease;
-                              border: none;
-                              cursor: pointer;
-                              text-decoration: none;
-                         }
-
-                         .invoice-list-page .tbl-btn-print {
-                              background: var(--primary);
-                              color: #fff;
-                         }
-
-                         .invoice-list-page .tbl-btn-print:hover {
-                              background: var(--primary-2);
-                              transform: translateY(-1px);
-                              box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
-                         }
-
-                         .invoice-list-page .tbl-actions {
-                              display: flex;
-                              align-items: center;
-                              justify-content: center;
-                              gap: 6px;
-                              flex-wrap: wrap;
-                         }
-
-                         .invoice-list-page .tbl-btn {
-                              display: inline-flex;
-                              align-items: center;
-                              justify-content: center;
-                              gap: 4px;
-                              padding: 6px 10px;
-                              border-radius: 6px;
-                              font-size: 0.8rem;
-                              font-weight: 600;
-                              transition: all 0.16s ease;
-                              border: none;
-                              cursor: pointer;
-                              text-decoration: none;
-                              min-width: 32px;
-                              height: 32px;
-                              background: var(--primary);
-                              color: #fff;
-                         }
-
-                         .invoice-list-page .tbl-btn:hover {
-                              transform: translateY(-1px);
-                              box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-                         }
-
-                         .invoice-list-page .tbl-btn-success {
-                              background: var(--success);
-                              color: #fff;
-                         }
-
-                         .invoice-list-page .tbl-btn-success:hover {
-                              background: #047857;
-                         }
-
-                         .invoice-list-page .tbl-btn-warning {
-                              background: var(--warning);
-                              color: #fff;
-                         }
-
-                         .invoice-list-page .tbl-btn-warning:hover {
-                              background: #b45309;
-                         }
-
-                         .invoice-list-page .tbl-btn-danger {
-                              background: var(--danger);
-                              color: #fff;
-                         }
-
-                         .invoice-list-page .tbl-btn-danger:hover {
-                              background: #b91c1c;
-                         }
-
-                         .invoice-list-page .badge {
-                              padding: 4px 10px;
-                              border-radius: 6px;
-                              font-weight: 500;
-                              font-size: 0.75rem;
-                         }
-
-                         .invoice-list-page .badge-success {
-                              background: #d1fae5;
-                              color: var(--success);
-                         }
-
-                         .invoice-list-page .badge-warning {
-                              background: #fef3c7;
-                              color: var(--warning);
-                         }
-
-                         .invoice-list-page .badge-danger {
-                              background: #fee2e2;
-                              color: var(--danger);
-                         }
-
-                         .invoice-list-page .badge-secondary {
-                              background: #f1f5f9;
-                              color: var(--text-soft);
-                         }
-
-                         .invoice-list-page .table-responsive {
-                              border-radius: 12px;
-                              overflow: hidden;
-                              box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-                         }
-
-                         .invoice-list-page #delivery-table {
-                              background: var(--surface-strong);
-                              border: 1px solid var(--line);
-                              border-radius: 12px;
-                              overflow: hidden;
-                         }
-
-                         .invoice-list-page #delivery-table thead th {
-                              background: #f8fafc;
-                              color: #374151;
-                              font-weight: 700;
-                              font-size: 12px;
-                              padding: 14px 16px;
-                              border-bottom: 2px solid var(--line);
-                              text-transform: uppercase;
-                              letter-spacing: .04em;
-                              white-space: nowrap;
-                         }
-
-                         .invoice-list-page #delivery-table tbody td {
-                              padding: 14px 16px !important;
-                              border-bottom: 1px solid #f1f5f9;
-                              vertical-align: middle;
-                              color: var(--text);
-                         }
-
-                         .invoice-list-page #delivery-table tbody tr:hover {
-                              background: #f8fafc;
-                         }
-
-                         .invoice-list-page .dataTables_wrapper .dataTables_filter,
-                         .invoice-list-page .dataTables_wrapper .dataTables_length,
-                         .invoice-list-page .dataTables_wrapper .dataTables_info,
-                         .invoice-list-page .dataTables_wrapper .dataTables_paginate {
-                              font-size: 13px;
-                              color: #4b5563;
-                         }
-
-                         .invoice-list-page .dataTables_wrapper .dataTables_filter input {
-                              border: 1px solid #d1d5db;
-                              border-radius: 8px;
-                              padding: 6px 12px;
-                              margin-left: 8px;
-                         }
-
-                         .invoice-list-page .dataTables_wrapper .dataTables_filter input:focus {
-                              outline: none;
-                              border-color: #6366f1;
-                              box-shadow: 0 0 0 2px rgba(99, 102, 241, .15);
-                         }
-
-                         .invoice-list-page .dataTables_wrapper .dataTables_paginate .paginate_button {
-                              border-radius: 6px !important;
-                              margin: 0 2px;
-                         }
-
-                         .invoice-list-page .delivery-status-text {
-                              font-size: 12px;
-                              font-weight: 600;
-                              text-transform: capitalize;
-                         }
-
-                         .invoice-list-page .delivery-status--delivered {
-                              color: var(--success);
-                         }
-
-                         .invoice-list-page .delivery-status--cancelled {
-                              color: var(--danger);
-                         }
-
-                         .invoice-list-page .delivery-status--pending {
-                              color: var(--warning);
-                         }
-
-                         /* Minimal sidebar fix - only for this page */
-                         .left-side-menu .metismenu li a {
-                              pointer-events: auto !important;
-                         }
-
-                         /* Fix dropdown visibility on all screens */
-                         .dropdown-menu {
-                              position: absolute !important;
-                              z-index: 9999 !important;
-                              background: white !important;
-                              border: 1px solid #dee2e6 !important;
-                              border-radius: 0.375rem !important;
-                              box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.175) !important;
-                         }
-
-                         .dropdown-menu.show {
-                              display: block !important;
-                         }
-
-                         .dropdown-menu-right {
-                              right: 0 !important;
-                              left: auto !important;
-                         }
-
-                         @media (max-width: 768px) {
-                              .invoice-list-page .page-header {
-                                   flex-direction: column;
-                                   align-items: stretch;
-                              }
-
-                              .invoice-list-page .page-actions {
-                                   justify-content: stretch;
-                              }
-
-                              .invoice-list-page .btn-action,
-                              .invoice-list-page .btn-submit {
-                                   width: 100%;
-                                   justify-content: center;
-                              }
-
-                              .invoice-list-page .stats-grid {
-                                   grid-template-columns: 1fr;
-                              }
-
-                              /* Ensure dropdowns are visible on mobile */
-                              .dropdown-menu {
-                                   position: fixed !important;
-                                   top: auto !important;
-                                   bottom: 0 !important;
-                                   left: 0 !important;
-                                   right: 0 !important;
-                                   width: 100% !important;
-                                   max-height: 50vh !important;
-                                   overflow-y: auto !important;
-                                   border-radius: 0 !important;
-                                   border-top: 1px solid #dee2e6 !important;
-                                   box-shadow: 0 -0.5rem 1rem rgba(0, 0, 0, 0.175) !important;
-                                   z-index: 9999 !important;
-                              }
-
-                              .dropdown-menu-right {
-                                   right: 0 !important;
-                                   left: 0 !important;
-                              }
-
-                              .dropdown-item {
-                                   z-index: 10000 !important;
-                                   position: relative !important;
-                              }
-                         }
-                    </style>
-
-                    <div class="page-header">
-                        <div>
-                            <div class="page-eyebrow">Delivery Management</div>
-                            <h4 class="page-title">Customer Deliveries</h4>
+                    <header class="berps-page-header">
+                        <div class="berps-page-header__content">
+                            <span class="berps-page-header__eyebrow">Delivery Management</span>
+                            <h1 class="berps-page-title">Customer Deliveries</h1>
+                            <p class="berps-page-subtitle">Monitor delivery schedules, payments, and statuses.</p>
                         </div>
-                        <div class="page-actions">
-                            <div class="filter-buttons" style="display: flex; gap: 8px; margin-right: 12px;">
-                                <a href="<?= base_url(); ?>Page/customerDeliveryList" class="btn-action <?= !isset($_GET['status']) ? 'active' : ''; ?>">
+                        <div class="berps-page-header__actions">
+                            <div class="berps-choice-pills">
+                                <a href="<?= base_url(); ?>Page/customerDeliveryList" class="berps-choice-pill <?= !isset($_GET['status']) ? 'is-active' : ''; ?>">
                                     <i class="mdi mdi-format-list-bulleted"></i> All
                                 </a>
-                                <a href="<?= base_url(); ?>Page/customerDeliveryList?status=delivered" class="btn-action <?= isset($_GET['status']) && $_GET['status'] == 'delivered' ? 'active' : ''; ?>">
+                                <a href="<?= base_url(); ?>Page/customerDeliveryList?status=delivered" class="berps-choice-pill <?= isset($_GET['status']) && $_GET['status'] == 'delivered' ? 'is-active' : ''; ?>">
                                     <i class="mdi mdi-truck-check"></i> Delivered
                                 </a>
-                                <a href="<?= base_url(); ?>Page/customerDeliveryList?status=pending" class="btn-action <?= isset($_GET['status']) && $_GET['status'] == 'pending' ? 'active' : ''; ?>">
+                                <a href="<?= base_url(); ?>Page/customerDeliveryList?status=pending" class="berps-choice-pill <?= isset($_GET['status']) && $_GET['status'] == 'pending' ? 'is-active' : ''; ?>">
                                     <i class="mdi mdi-clock"></i> Not Yet
                                 </a>
                             </div>
-                            <a href="<?= base_url(); ?>Page/newCustomerDelivery" class="btn-submit">
-                                <i class="mdi mdi-plus-circle-outline"></i>
-                                Add New Delivery
+                            <a href="<?= base_url(); ?>Page/newCustomerDelivery" class="btn btn-primary">
+                                <i class="mdi mdi-plus-circle-outline mr-1" aria-hidden="true"></i>Add New Delivery
                             </a>
                         </div>
-                    </div>
+                    </header>
 
                     <?php
                     // Calculate statistics
@@ -545,26 +61,38 @@ $data2 = isset($data2) ? $data2 : array();
                     }
                     ?>
 
-                    <div class="stats-grid">
-                         <div class="stat-card stat-total">
-                              <div class="stat-label">Total</div>
-                              <div class="stat-value"><?= $totalCount; ?></div>
-                              <div class="stat-meta">All deliveries</div>
+                    <div class="berps-stat-grid">
+                         <div class="berps-stat-card">
+                              <div>
+                                   <p class="berps-stat-card__value"><?= $totalCount; ?></p>
+                                   <p class="berps-stat-card__label">Total</p>
+                                   <p class="berps-stat-card__meta">All deliveries</p>
+                              </div>
+                              <span class="berps-stat-card__icon" aria-hidden="true"><i class="mdi mdi-truck-outline"></i></span>
                          </div>
-                         <div class="stat-card stat-paid">
-                              <div class="stat-label">Delivered</div>
-                              <div class="stat-value"><?= $deliveredCount; ?></div>
-                              <div class="stat-meta">Completed deliveries</div>
+                         <div class="berps-stat-card berps-tone-success">
+                              <div>
+                                   <p class="berps-stat-card__value"><?= $deliveredCount; ?></p>
+                                   <p class="berps-stat-card__label">Delivered</p>
+                                   <p class="berps-stat-card__meta">Completed deliveries</p>
+                              </div>
+                              <span class="berps-stat-card__icon" aria-hidden="true"><i class="mdi mdi-truck-check-outline"></i></span>
                          </div>
-                         <div class="stat-card stat-partial">
-                              <div class="stat-label">Pending</div>
-                              <div class="stat-value"><?= $pendingCount; ?></div>
-                              <div class="stat-meta">Awaiting delivery</div>
+                         <div class="berps-stat-card berps-tone-warning">
+                              <div>
+                                   <p class="berps-stat-card__value"><?= $pendingCount; ?></p>
+                                   <p class="berps-stat-card__label">Pending</p>
+                                   <p class="berps-stat-card__meta">Awaiting delivery</p>
+                              </div>
+                              <span class="berps-stat-card__icon" aria-hidden="true"><i class="mdi mdi-clock-outline"></i></span>
                          </div>
-                         <div class="stat-card stat-unpaid">
-                              <div class="stat-label">Total Value</div>
-                              <div class="stat-value"><?= number_format($totalAmount, 2); ?></div>
-                              <div class="stat-meta">Delivery amount</div>
+                         <div class="berps-stat-card berps-tone-info">
+                              <div>
+                                   <p class="berps-stat-card__value"><?= number_format($totalAmount, 2); ?></p>
+                                   <p class="berps-stat-card__label">Total Value</p>
+                                   <p class="berps-stat-card__meta">Delivery amount</p>
+                              </div>
+                              <span class="berps-stat-card__icon" aria-hidden="true"><i class="mdi mdi-cash-multiple"></i></span>
                          </div>
                     </div>
 
@@ -646,41 +174,41 @@ $data2 = isset($data2) ? $data2 : array();
                                                             <?= number_format($delivery->total_balance, 2); ?>
                                                         </td>
                                                         <td>
-                                                            <span class="delivery-status-text delivery-status--<?= $delivery->deliveryStatus === 'delivered' ? 'delivered' : ($delivery->deliveryStatus === 'cancelled' ? 'cancelled' : 'pending'); ?>">
+                                                            <span class="berps-status berps-status--<?= $delivery->deliveryStatus === 'delivered' ? 'success' : ($delivery->deliveryStatus === 'cancelled' ? 'danger' : 'warning'); ?>">
                                                                 <?= ucfirst($delivery->deliveryStatus); ?>
                                                             </span>
                                                         </td>
                                                         <td class="text-center">
-                                                            <div class="tbl-actions">
-                                                                <a href="<?= base_url(); ?>Page/viewCustomerDelivery?deliveryNo=<?= urlencode($delivery->deliveryNo); ?>&customer=<?= urlencode($delivery->customerName); ?>" class="tbl-btn" title="View Details">
+                                                            <div class="berps-row-actions">
+                                                                <a href="<?= base_url(); ?>Page/viewCustomerDelivery?deliveryNo=<?= urlencode($delivery->deliveryNo); ?>&customer=<?= urlencode($delivery->customerName); ?>" class="berps-icon-action" title="View Details" aria-label="View Details">
                                                                     <i class="mdi mdi-eye"></i>
                                                                 </a>
 
-                                                                <a href="<?= base_url(); ?>Page/printDeliveryReceipt?deliveryNo=<?= urlencode($delivery->deliveryNo); ?>&customer=<?= urlencode($delivery->customerName); ?>" target="_blank" rel="noopener" class="tbl-btn" title="Print Receipt">
+                                                                <a href="<?= base_url(); ?>Page/printDeliveryReceipt?deliveryNo=<?= urlencode($delivery->deliveryNo); ?>&customer=<?= urlencode($delivery->customerName); ?>" target="_blank" rel="noopener" class="berps-icon-action" title="Print Receipt" aria-label="Print Receipt">
                                                                     <i class="mdi mdi-printer"></i>
                                                                 </a>
 
-                                                                <a href="<?= base_url(); ?>Page/editCustomerDelivery?deliveryNo=<?= urlencode($delivery->deliveryNo); ?>&customer=<?= urlencode($delivery->customerName); ?>" class="tbl-btn" title="Edit Delivery">
+                                                                <a href="<?= base_url(); ?>Page/editCustomerDelivery?deliveryNo=<?= urlencode($delivery->deliveryNo); ?>&customer=<?= urlencode($delivery->customerName); ?>" class="berps-icon-action" title="Edit Delivery" aria-label="Edit Delivery">
                                                                     <i class="mdi mdi-pencil"></i>
                                                                 </a>
 
                                                                 <?php if ($delivery->deliveryStatus === 'delivered'): ?>
-                                                                    <a href="javascript:void(0);" class="tbl-btn tbl-btn-success" title="Mark as Undelivered">
+                                                                    <a href="javascript:void(0);" class="berps-icon-action" title="Mark as Undelivered" aria-label="Mark as Undelivered">
                                                                         <i class="mdi mdi-check-circle"></i>
                                                                     </a>
                                                                 <?php else: ?>
-                                                                    <a href="<?= base_url(); ?>Page/updateDeliveryStatus?deliveryNo=<?= urlencode($delivery->deliveryNo); ?>&customer=<?= urlencode($delivery->customerName); ?>&status=delivered" class="tbl-btn tbl-btn-warning" title="Mark as Delivered">
+                                                                    <a href="<?= base_url(); ?>Page/updateDeliveryStatus?deliveryNo=<?= urlencode($delivery->deliveryNo); ?>&customer=<?= urlencode($delivery->customerName); ?>&status=delivered" class="berps-icon-action" title="Mark as Delivered" aria-label="Mark as Delivered">
                                                                         <i class="mdi mdi-truck-delivery"></i>
                                                                     </a>
                                                                 <?php endif; ?>
 
-                                                                
+
                                                                 <?php if ($delivery->deliveryStatus !== 'delivered'): ?>
-                                                                <a href="<?= base_url(); ?>Page/deleteCustomerDelivery?deliveryNo=<?= urlencode($delivery->deliveryNo); ?>&customer=<?= urlencode($delivery->customerName); ?>" onclick="return confirm('Are you sure you want to delete this delivery?');" class="tbl-btn tbl-btn-danger" title="Delete Delivery">
+                                                                <a href="<?= base_url(); ?>Page/deleteCustomerDelivery?deliveryNo=<?= urlencode($delivery->deliveryNo); ?>&customer=<?= urlencode($delivery->customerName); ?>" onclick="return confirm('Are you sure you want to delete this delivery?');" class="berps-icon-action berps-icon-action--danger" title="Delete Delivery" aria-label="Delete Delivery">
                                                                     <i class="mdi mdi-delete"></i>
                                                                 </a>
                                                             <?php else: ?>
-                                                                <button class="tbl-btn tbl-btn-secondary" disabled title="Cannot delete delivered delivery">
+                                                                <button class="berps-icon-action" disabled title="Cannot delete delivered delivery">
                                                                     <i class="mdi mdi-delete-off"></i>
                                                                 </button>
                                                             <?php endif; ?>

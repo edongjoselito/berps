@@ -19510,9 +19510,17 @@ class Page extends CI_Controller
 
   public function uploadProfPic()
   {
+    $isAjax = $this->input->is_ajax_request();
     $username = (string) $this->session->userdata('username');
 
     if ($username === '') {
+      if ($isAjax) {
+        return $this->_accountJsonResponse(array(
+          'success' => false,
+          'message' => 'Your session has expired. Please sign in again.'
+        ), 401);
+      }
+
       redirect('login');
       return;
     }
@@ -19528,6 +19536,13 @@ class Page extends CI_Controller
 
     if (!is_dir($config['upload_path'])) {
       if (!@mkdir($config['upload_path'], 0755, TRUE) && !is_dir($config['upload_path'])) {
+        if ($isAjax) {
+          return $this->_accountJsonResponse(array(
+            'success' => false,
+            'message' => 'The upload folder is not available right now. Please try again later.'
+          ), 500);
+        }
+
         $this->session->set_flashdata('msg', '<div class="alert alert-danger text-center">Unable to prepare upload directory.</div>');
         redirect('Page/changeDP');
         return;
@@ -19537,6 +19552,16 @@ class Page extends CI_Controller
     $this->load->library('upload', $config);
 
     if (!$this->upload->do_upload('nonoy')) {
+      $uploadError = trim(strip_tags($this->upload->display_errors('', '')));
+
+      if ($isAjax) {
+        return $this->_accountJsonResponse(array(
+          'success' => false,
+          'message' => $uploadError !== '' ? $uploadError : 'Please choose a valid image and try again.',
+          'errors' => array('nonoy' => $uploadError)
+        ), 422);
+      }
+
       $this->session->set_flashdata('msg', '<div class="alert alert-danger text-center">' . $this->upload->display_errors('', '') . '</div>');
       redirect('Page/changeDP');
       return;
@@ -19549,6 +19574,30 @@ class Page extends CI_Controller
       $row = $this->db->select('avatar')->from('o_users')->where('username', $username)->get()->row();
     }
 
+    $updated = $this->db->where('username', $username)->update('users', ['avatar' => $filename]);
+
+    if (!$updated) {
+      $newUploadPath = $config['upload_path'] . $filename;
+      if (is_file($newUploadPath)) {
+        @unlink($newUploadPath);
+      }
+
+      if ($isAjax) {
+        return $this->_accountJsonResponse(array(
+          'success' => false,
+          'message' => 'We could not save your new profile photo. Please try again.'
+        ), 500);
+      }
+
+      $this->session->set_flashdata('msg', '<div class="alert alert-danger text-center">Unable to save the new profile picture.</div>');
+      redirect('Page/changeDP');
+      return;
+    }
+
+    if ($this->db->table_exists('o_users')) {
+      $this->db->where('username', $username)->update('o_users', ['avatar' => $filename]);
+    }
+
     if ($row && $row->avatar && strtolower($row->avatar) !== 'avatar.png') {
       $old = $config['upload_path'] . $row->avatar;
       if (is_file($old)) {
@@ -19556,15 +19605,28 @@ class Page extends CI_Controller
       }
     }
 
-    $this->db->where('username', $username)->update('users', ['avatar' => $filename]);
+    $this->session->set_userdata('avatar', $filename);
 
-    if ($this->db->table_exists('o_users')) {
-      $this->db->where('username', $username)->update('o_users', ['avatar' => $filename]);
+    if ($isAjax) {
+      return $this->_accountJsonResponse(array(
+        'success' => true,
+        'message' => 'Your profile photo was updated successfully.',
+        'avatar_url' => base_url('upload/profile/' . rawurlencode($filename))
+      ));
     }
 
-    $this->session->set_userdata('avatar', $filename);
     $this->session->set_flashdata('msg', '<div class="alert alert-success text-center"><b>Profile picture updated successfully.</b></div>');
     redirect('Page/changeDP');
+  }
+
+  private function _accountJsonResponse(array $payload, $statusCode = 200)
+  {
+    $this->output
+      ->set_status_header((int) $statusCode)
+      ->set_content_type('application/json', 'utf-8')
+      ->set_output(json_encode($payload));
+
+    return null;
   }
 
   function paymentHistory()
