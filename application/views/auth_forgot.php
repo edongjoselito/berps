@@ -207,7 +207,7 @@
     }
   </style>
     <link rel="stylesheet" href="<?= base_url('assets/css/fonts.css'); ?>">
-    <link rel="stylesheet" href="<?= base_url('assets/css/berps-design-system.css'); ?>?v=20260722">
+    <link rel="stylesheet" href="<?= base_url('assets/css/berps-design-system.css'); ?>?v=20260722-2">
 </head>
 
 <body>

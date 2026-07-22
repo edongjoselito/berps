@@ -28,7 +28,7 @@
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <link href="<?= base_url(); ?>assets/css/fonts.css" rel="stylesheet" type="text/css" />
-    <link href="<?= base_url(); ?>assets/css/berps-design-system.css?v=20260722" rel="stylesheet" type="text/css" />
+    <link href="<?= base_url(); ?>assets/css/berps-design-system.css?v=20260722-2" rel="stylesheet" type="text/css" />
     <link href="<?= base_url(); ?>assets/css/phosphor-icons-custom.css" rel="stylesheet" type="text/css" />
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 </head>

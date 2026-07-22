@@ -57,289 +57,65 @@ $quickActions = array(
 
         <div class="content-page">
             <div class="content">
-                <div class="container-fluid super-admin-dashboard-page">
-
-                    <style>
-
-                        .super-admin-dashboard-page {
-                            --bg: #f5f7fb;
-                            --surface: rgba(255, 255, 255, 0.96);
-                            --surface-strong: #ffffff;
-                            --surface-soft: #f8fbff;
-                            --line: #e4ebf4;
-                            --line-strong: #cfdbea;
-                            --text: #142235;
-                            --text-soft: #617489;
-                            --text-faint: #8ea0b5;
-                            --primary: #7c3aed;
-                            --primary-2: #6d28d9;
-                            --primary-soft: #ede9fe;
-                            --success: #10b981;
-                            --warning: #f59e0b;
-                            --danger: #ef4444;
-                            --info: #3b82f6;
-                        }
-
-                        .super-admin-dashboard-page body {
-                            background: var(--bg);
-                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif);
-                            color: var(--text);
-                        }
-
-                        .stat-card {
-                            background: var(--surface);
-                            border: 1px solid var(--line);
-                            border-radius: 16px;
-                            padding: 24px;
-                            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
-                            transition: all 0.3s ease;
-                        }
-
-                        .stat-card:hover {
-                            transform: translateY(-4px);
-                            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
-                        }
-
-                        .stat-value {
-                            font-size: 36px;
-                            font-weight: 700;
-                            color: var(--text);
-                            margin-bottom: 4px;
-                        }
-
-                        .stat-label {
-                            font-size: 14px;
-                            color: var(--text-soft);
-                            font-weight: 500;
-                        }
-
-                        .stat-icon {
-                            width: 48px;
-                            height: 48px;
-                            border-radius: 12px;
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            font-size: 24px;
-                        }
-
-                        .quick-action-card {
-                            background: var(--surface);
-                            border: 1px solid var(--line);
-                            border-radius: 12px;
-                            padding: 20px;
-                            transition: all 0.3s ease;
-                            cursor: pointer;
-                            text-decoration: none;
-                            display: block;
-                        }
-
-                        .quick-action-card:hover {
-                            border-color: var(--primary);
-                            background: var(--primary-soft);
-                            transform: translateY(-2px);
-                        }
-
-                        .quick-action-icon {
-                            width: 40px;
-                            height: 40px;
-                            border-radius: 10px;
-                            background: var(--primary-soft);
-                            color: var(--primary);
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            font-size: 20px;
-                            margin-bottom: 12px;
-                        }
-
-                        .quick-action-label {
-                            font-weight: 600;
-                            color: var(--text);
-                            margin-bottom: 4px;
-                        }
-
-                        .quick-action-meta {
-                            font-size: 12px;
-                            color: var(--text-soft);
-                        }
-
-                        .company-card {
-                            background: var(--surface);
-                            border: 1px solid var(--line);
-                            border-radius: 12px;
-                            padding: 20px;
-                            transition: all 0.3s ease;
-                        }
-
-                        .company-card:hover {
-                            border-color: var(--primary);
-                            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
-                        }
-
-                        .company-name {
-                            font-weight: 700;
-                            color: var(--text);
-                            margin-bottom: 4px;
-                        }
-
-                        .company-meta {
-                            font-size: 13px;
-                            color: var(--text-soft);
-                        }
-
-                        .company-stats {
-                            display: flex;
-                            gap: 16px;
-                            margin-top: 12px;
-                            padding-top: 12px;
-                            border-top: 1px solid var(--line);
-                        }
-
-                        .company-stat {
-                            display: flex;
-                            align-items: center;
-                            gap: 6px;
-                            font-size: 12px;
-                            color: var(--text-soft);
-                        }
-
-                        .company-stat i {
-                            font-size: 16px;
-                        }
-
-                        .company-stat.users i {
-                            color: #0284c7;
-                        }
-
-                        .company-stat.clients i {
-                            color: #16a34a;
-                        }
-
-                        .table-responsive {
-                            background: var(--surface);
-                            border-radius: 12px;
-                            border: 1px solid var(--line);
-                            overflow: hidden;
-                        }
-
-                        .table thead th {
-                            background: var(--surface-soft);
-                            border-bottom: 2px solid var(--line);
-                            font-weight: 600;
-                            color: var(--text);
-                            padding: 16px;
-                        }
-
-                        .table tbody td {
-                            padding: 16px;
-                            border-bottom: 1px solid var(--line);
-                            vertical-align: middle;
-                        }
-
-                        .table tbody tr:hover {
-                            background: var(--surface-soft);
-                        }
-
-                        .badge-status {
-                            padding: 6px 12px;
-                            border-radius: 20px;
-                            font-size: 12px;
-                            font-weight: 600;
-                        }
-
-                        .badge-active {
-                            background: #dcfce7;
-                            color: #16a34a;
-                        }
-
-                        .search-box {
-                            position: relative;
-                        }
-
-                        .search-box input {
-                            padding-left: 40px;
-                            border-radius: 10px;
-                            border: 1px solid var(--line);
-                        }
-
-                        .search-box i {
-                            position: absolute;
-                            left: 14px;
-                            top: 50%;
-                            transform: translateY(-50%);
-                            color: var(--text-soft);
-                        }
-                    </style>
-
-                    <div class="row mb-4">
-                        <div class="col-12">
-                            <h3 class="mb-1">Super Admin Dashboard</h3>
-                            <p class="text-muted">Manage all companies and system-wide settings</p>
+                <div class="container-fluid super-admin-dashboard-page berps-page">
+                    <header class="berps-page-header">
+                        <div class="berps-page-header__content">
+                            <span class="berps-page-header__eyebrow">System overview</span>
+                            <h1 class="berps-page-title">Super Admin Dashboard</h1>
+                            <p class="berps-page-subtitle">Manage companies, administrators, billing, and system-wide settings.</p>
                         </div>
-                    </div>
+                    </header>
 
-                    <!-- Stats Row -->
-                    <div class="row mb-4">
-                        <div class="col-md-4">
-                            <div class="stat-card">
-                                <div class="d-flex justify-content-between align-items-start">
-                                    <div>
-                                        <div class="stat-value"><?= number_format($totalCompaniesValue); ?></div>
-                                        <div class="stat-label">Total Companies</div>
-                                    </div>
-                                    <div class="stat-icon" style="background: var(--primary-soft); color: var(--primary);">
-                                        <i class="mdi mdi-domain"></i>
-                                    </div>
+                    <section aria-labelledby="super-admin-summary-heading">
+                        <h2 id="super-admin-summary-heading" class="sr-only">System summary</h2>
+                        <div class="berps-stat-grid">
+                            <div class="berps-stat-card">
+                                <div>
+                                    <p class="berps-stat-card__value"><?= number_format($totalCompaniesValue); ?></p>
+                                    <p class="berps-stat-card__label">Total companies</p>
                                 </div>
+                                <span class="berps-stat-card__icon" aria-hidden="true"><i class="mdi mdi-domain"></i></span>
+                            </div>
+                            <div class="berps-stat-card berps-tone-info">
+                                <div>
+                                    <p class="berps-stat-card__value"><?= number_format($totalUsersValue); ?></p>
+                                    <p class="berps-stat-card__label">Total users</p>
+                                </div>
+                                <span class="berps-stat-card__icon" aria-hidden="true"><i class="mdi mdi-account-group"></i></span>
+                            </div>
+                            <div class="berps-stat-card berps-tone-success">
+                                <div>
+                                    <p class="berps-stat-card__value"><?= number_format($totalClientsValue); ?></p>
+                                    <p class="berps-stat-card__label">Total clients</p>
+                                </div>
+                                <span class="berps-stat-card__icon" aria-hidden="true"><i class="mdi mdi-account-multiple"></i></span>
                             </div>
                         </div>
-                        <div class="col-md-4">
-                            <div class="stat-card">
-                                <div class="d-flex justify-content-between align-items-start">
-                                    <div>
-                                        <div class="stat-value"><?= number_format($totalUsersValue); ?></div>
-                                        <div class="stat-label">Total Users</div>
-                                    </div>
-                                    <div class="stat-icon" style="background: #e0f2fe; color: #0284c7;">
-                                        <i class="mdi mdi-account-group"></i>
-                                    </div>
-                                </div>
+                    </section>
+
+                    <section class="berps-section-card" aria-labelledby="super-admin-actions-heading">
+                        <div class="berps-section-card__header">
+                            <div>
+                                <h2 id="super-admin-actions-heading" class="berps-section-title">Quick actions</h2>
+                                <p class="berps-section-copy">Open the administration areas you use most often.</p>
                             </div>
                         </div>
-                        <div class="col-md-4">
-                            <div class="stat-card">
-                                <div class="d-flex justify-content-between align-items-start">
-                                    <div>
-                                        <div class="stat-value"><?= number_format($totalClientsValue); ?></div>
-                                        <div class="stat-label">Total Clients</div>
-                                    </div>
-                                    <div class="stat-icon" style="background: #dcfce7; color: #16a34a;">
-                                        <i class="mdi mdi-account-multiple"></i>
-                                    </div>
-                                </div>
+                        <div class="berps-section-card__body">
+                            <div class="berps-quick-action-grid">
+                                <?php foreach ($quickActions as $action): ?>
+                                    <a href="<?= htmlspecialchars($action['url'], ENT_QUOTES, 'UTF-8'); ?>" class="berps-quick-action">
+                                        <span class="berps-quick-action__icon" aria-hidden="true">
+                                            <i class="mdi <?= htmlspecialchars($action['icon'], ENT_QUOTES, 'UTF-8'); ?>"></i>
+                                        </span>
+                                        <span>
+                                            <span class="berps-quick-action__label"><?= htmlspecialchars($action['label'], ENT_QUOTES, 'UTF-8'); ?></span>
+                                            <span class="berps-quick-action__meta"><?= htmlspecialchars($action['meta'], ENT_QUOTES, 'UTF-8'); ?></span>
+                                        </span>
+                                    </a>
+                                <?php endforeach; ?>
                             </div>
                         </div>
-                    </div>
-
-                    <!-- Quick Actions -->
-                    <div class="row mb-4">
-                        <div class="col-12">
-                            <h5 class="mb-3">Quick Actions</h5>
-                        </div>
-                        <?php foreach ($quickActions as $action): ?>
-                        <div class="col-md-4 mb-3">
-                            <a href="<?= $action['url']; ?>" class="quick-action-card">
-                                <div class="quick-action-icon">
-                                    <i class="mdi <?= $action['icon']; ?>"></i>
-                                </div>
-                                <div class="quick-action-label"><?= $action['label']; ?></div>
-                                <div class="quick-action-meta"><?= $action['meta']; ?></div>
-                            </a>
-                        </div>
-                        <?php endforeach; ?>
-                    </div>
-
+                    </section>
                 </div>
             </div>
             <?php include('includes/footer.php'); ?>
