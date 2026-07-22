@@ -79,79 +79,62 @@ $overviewTotals = isset($overviewTotals) && is_array($overviewTotals) ? $overvie
         margin-top: 6px;
     }
 
-    .search-box {
-        position: relative;
-        min-width: 280px;
-    }
-
-    .search-box i {
-        position: absolute;
-        left: 12px;
-        top: 50%;
-        transform: translateY(-50%);
-        color: #94a3b8;
-    }
-
-    .search-box .form-control {
-        padding-left: 36px;
-        border-radius: 10px;
-    }
-
     .table-wrap {
         overflow-x: auto;
-        border: 1px solid #e5e7eb;
-        border-radius: 14px;
     }
 
     .table {
         margin-bottom: 0;
+        width: 100% !important;
     }
 
     .table thead th {
         background: #f8fafc;
-        border-bottom: 1px solid #e5e7eb;
-        color: #111827;
+        border-bottom: 2px solid #e5e7eb;
+        color: #374151;
         font-weight: 700;
+        font-size: 12px;
+        letter-spacing: .04em;
+        text-transform: uppercase;
         white-space: nowrap;
+        padding: 14px 16px;
     }
 
     .table tbody td {
         vertical-align: middle;
+        padding: 16px 16px;
+        border-bottom: 1px solid #f1f5f9;
+        color: #1f2937;
+    }
+
+    .table tbody tr:hover td {
+        background: #f8fafc;
     }
 
     .company-name {
         font-weight: 700;
         color: #111827;
+        font-size: 14px;
     }
 
     .company-meta {
-        margin-top: 4px;
+        margin-top: 3px;
         font-size: 12px;
         color: #6b7280;
     }
 
-    .pill {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        padding: 6px 10px;
-        border-radius: 999px;
-        font-size: 12px;
-        font-weight: 700;
-    }
-
-    .pill.mode {
-        background: #eef2ff;
-        color: #4338ca;
+    .billing-mode-text {
+        font-weight: 600;
+        color: #1f2937;
     }
 
     .status-badge {
         display: inline-flex;
         align-items: center;
-        padding: 6px 10px;
-        border-radius: 999px;
+        padding: 4px 10px;
+        border-radius: 6px;
         font-size: 12px;
-        font-weight: 700;
+        font-weight: 600;
         text-transform: capitalize;
     }
 
@@ -175,6 +158,32 @@ $overviewTotals = isset($overviewTotals) && is_array($overviewTotals) ? $overvie
         color: #6d28d9;
     }
 
+    .dataTables_wrapper .dataTables_filter,
+    .dataTables_wrapper .dataTables_length,
+    .dataTables_wrapper .dataTables_info,
+    .dataTables_wrapper .dataTables_paginate {
+        font-size: 13px;
+        color: #4b5563;
+    }
+
+    .dataTables_wrapper .dataTables_filter input {
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        padding: 6px 12px;
+        margin-left: 8px;
+    }
+
+    .dataTables_wrapper .dataTables_filter input:focus {
+        outline: none;
+        border-color: #6366f1;
+        box-shadow: 0 0 0 2px rgba(99, 102, 241, .15);
+    }
+
+    .dataTables_wrapper .dataTables_paginate .paginate_button {
+        border-radius: 6px !important;
+        margin: 0 2px;
+    }
+
     @media (max-width: 1199.98px) {
         .stat-grid {
             grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -185,10 +194,6 @@ $overviewTotals = isset($overviewTotals) && is_array($overviewTotals) ? $overvie
         .hero-grid,
         .stat-grid {
             grid-template-columns: 1fr;
-        }
-
-        .search-box {
-            min-width: 100%;
         }
     }
 </style>
@@ -246,20 +251,14 @@ $overviewTotals = isset($overviewTotals) && is_array($overviewTotals) ? $overvie
 
                         <div class="card">
                             <div class="card-body p-4">
-                                <div class="d-flex justify-content-between align-items-center flex-wrap mb-3" style="gap: 12px;">
-                                    <div>
-                                        <h4 class="mb-1">Company Billing Overview</h4>
-                                        <p class="text-muted mb-0">Each row shows the company billing setup, latest billing status, and current unpaid balance.</p>
-                                    </div>
-                                    <div class="search-box">
-                                        <i class="mdi mdi-magnify"></i>
-                                        <input type="text" class="form-control" id="companyBillingSearch" placeholder="Search company or settings ID">
-                                    </div>
+                                <div class="mb-3">
+                                    <h4 class="mb-1">Company Billing Overview</h4>
+                                    <p class="text-muted mb-0">Each row shows the company billing setup, latest billing status, and current unpaid balance.</p>
                                 </div>
 
                                 <?php if (!empty($companies)): ?>
                                 <div class="table-wrap">
-                                    <table class="table table-hover">
+                                    <table class="table table-hover" id="billingCompaniesTable">
                                         <thead>
                                             <tr>
                                                 <th>Company</th>
@@ -268,10 +267,10 @@ $overviewTotals = isset($overviewTotals) && is_array($overviewTotals) ? $overvie
                                                 <th>Current Estimate</th>
                                                 <th>Outstanding</th>
                                                 <th>Last Billing</th>
-                                                <th>Actions</th>
+                                                <th class="text-right">Actions</th>
                                             </tr>
                                         </thead>
-                                        <tbody id="billingCompaniesTable">
+                                        <tbody>
                                             <?php foreach ($companies as $company): ?>
                                             <?php
                                             $settingsID = (int) ($company->settingsID ?? 0);
@@ -282,7 +281,7 @@ $overviewTotals = isset($overviewTotals) && is_array($overviewTotals) ? $overvie
                                             $rateSuffix = $billingMode === 'individual' ? '/ active user' : '/ company';
                                             $companyName = trim((string) ($company->CompName ?? $company->BusinessName ?? 'Unknown Company'));
                                             ?>
-                                            <tr class="billing-company-row" data-search="<?= htmlspecialchars(strtolower($companyName . ' ' . $settingsID), ENT_QUOTES, 'UTF-8'); ?>">
+                                            <tr>
                                                 <td>
                                                     <div class="company-name"><?= htmlspecialchars($companyName, ENT_QUOTES, 'UTF-8'); ?></div>
                                                     <div class="company-meta">Settings ID: <?= $settingsID; ?></div>
@@ -291,11 +290,8 @@ $overviewTotals = isset($overviewTotals) && is_array($overviewTotals) ? $overvie
                                                     <?php endif; ?>
                                                 </td>
                                                 <td>
-                                                    <div class="pill mode">
-                                                        <i class="mdi mdi-credit-card-outline"></i>
-                                                        <?= htmlspecialchars((string) ($summary['billing_mode_label'] ?? 'Paid by Company'), ENT_QUOTES, 'UTF-8'); ?>
-                                                    </div>
-                                                    <div class="company-meta mt-2">
+                                                    <div class="billing-mode-text"><?= htmlspecialchars((string) ($summary['billing_mode_label'] ?? 'Paid by Company'), ENT_QUOTES, 'UTF-8'); ?></div>
+                                                    <div class="company-meta">
                                                         <?php if ($billingMode === 'free'): ?>
                                                             No recurring rate configured
                                                         <?php else: ?>
@@ -329,7 +325,7 @@ $overviewTotals = isset($overviewTotals) && is_array($overviewTotals) ? $overvie
                                                         <div class="company-meta">No billing entry yet</div>
                                                     <?php endif; ?>
                                                 </td>
-                                                <td>
+                                                <td class="text-right">
                                                     <a href="<?= site_url('Page/superAdminCompanyBilling?settingsID=' . $settingsID); ?>" class="btn btn-sm btn-primary">
                                                         <i class="mdi mdi-file-document-edit-outline mr-1"></i> Manage
                                                     </a>
@@ -357,19 +353,38 @@ $overviewTotals = isset($overviewTotals) && is_array($overviewTotals) ? $overvie
     <?php include('includes/themecustomizer.php'); ?>
     <script src="<?= base_url(); ?>assets/js/vendor.min.js"></script>
     <script src="<?= base_url(); ?>assets/js/app.min.js"></script>
+    <script src="<?= base_url(); ?>assets/libs/datatables/jquery.dataTables.min.js"></script>
+    <script src="<?= base_url(); ?>assets/libs/datatables/dataTables.bootstrap4.min.js"></script>
+    <script src="<?= base_url(); ?>assets/libs/datatables/dataTables.responsive.min.js"></script>
+    <script src="<?= base_url(); ?>assets/libs/datatables/responsive.bootstrap4.min.js"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const $search = $('#companyBillingSearch');
-            const $rows = $('.billing-company-row');
+            if (!$.fn.DataTable) return;
 
-            $search.on('input', function() {
-                const query = ($(this).val() || '').toLowerCase().trim();
+            if ($.fn.DataTable.isDataTable('#billingCompaniesTable')) {
+                $('#billingCompaniesTable').DataTable().destroy();
+            }
 
-                $rows.each(function() {
-                    const haystack = ($(this).data('search') || '').toString();
-                    $(this).toggle(query === '' || haystack.indexOf(query) !== -1);
-                });
+            $('#billingCompaniesTable').DataTable({
+                responsive: true,
+                autoWidth: false,
+                order: [],
+                pageLength: 10,
+                lengthMenu: [10, 25, 50, 100],
+                dom: '<"row align-items-center mb-3"<"col-sm-6"l><"col-sm-6 text-sm-right"f>>' +
+                     'rt' +
+                     '<"row align-items-center mt-3"<"col-sm-6"i><"col-sm-6"p>>',
+                language: {
+                    emptyTable: 'No companies found.',
+                    search: 'Search:',
+                    searchPlaceholder: 'Company name or settings ID...',
+                    lengthMenu: 'Show _MENU_ entries',
+                    info: 'Showing _START_ to _END_ of _TOTAL_ companies'
+                },
+                columnDefs: [
+                    { targets: -1, orderable: false, searchable: false }
+                ]
             });
         });
     </script>
