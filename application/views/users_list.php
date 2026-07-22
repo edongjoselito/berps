@@ -163,16 +163,180 @@ foreach ($users as $user) {
                     <?php endif; ?>
 
 
-                    <div class="page-header">
-                        <div>
-                            <div class="page-eyebrow">Account Management</div>
-                            <h1 class="page-title">User Accounts</h1>
-                            <div class="page-subtitle">Create and manage staff access, account roles, and password resets from one place while keeping invoice and payment ownership properly separated.</div>
+                    <style>
+                        /* Hero Banner */
+                        .users-management-page .um-hero {
+                            display: flex;
+                            align-items: center;
+                            justify-content: space-between;
+                            flex-wrap: wrap;
+                            gap: 16px;
+                            padding: 28px 24px;
+                            margin: 24px 0 22px;
+                            border-radius: 16px;
+                            background: #991b1b;
+                            box-shadow: 0 8px 32px rgba(153, 27, 27, 0.25);
+                            position: relative;
+                            overflow: hidden;
+                        }
+
+                        .users-management-page .um-hero::before {
+                            content: '';
+                            position: absolute;
+                            top: -50%;
+                            right: -10%;
+                            width: 400px;
+                            height: 400px;
+                            border-radius: 50%;
+                            background: rgba(255, 255, 255, 0.06);
+                            pointer-events: none;
+                        }
+
+                        .users-management-page .um-hero::after {
+                            content: '';
+                            position: absolute;
+                            bottom: -60%;
+                            right: 15%;
+                            width: 300px;
+                            height: 300px;
+                            border-radius: 50%;
+                            background: rgba(255, 255, 255, 0.04);
+                            pointer-events: none;
+                        }
+
+                        .users-management-page .um-hero__content {
+                            position: relative;
+                            z-index: 1;
+                        }
+
+                        .users-management-page .um-hero__eyebrow {
+                            display: inline-flex;
+                            align-items: center;
+                            gap: 6px;
+                            margin-bottom: 8px;
+                            color: rgba(255, 255, 255, 0.85);
+                            font-size: 0.78rem;
+                            font-weight: 600;
+                            letter-spacing: 0.04em;
+                        }
+
+                        .users-management-page .um-hero__eyebrow i {
+                            font-size: 1rem;
+                        }
+
+                        .users-management-page .um-hero__title {
+                            margin: 0 0 4px 0;
+                            color: #fff;
+                            font-size: clamp(1.6rem, 2.5vw, 2.2rem);
+                            font-weight: 800;
+                            line-height: 1.15;
+                            letter-spacing: -0.02em;
+                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif), "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+                        }
+
+                        .users-management-page .um-hero__subtitle {
+                            margin: 0;
+                            color: rgba(255, 255, 255, 0.8);
+                            font-size: 0.88rem;
+                            max-width: 520px;
+                        }
+
+                        .users-management-page .um-hero__actions {
+                            display: flex;
+                            align-items: center;
+                            flex-wrap: wrap;
+                            gap: 10px;
+                            position: relative;
+                            z-index: 1;
+                        }
+
+                        .users-management-page .um-hero-btn {
+                            display: inline-flex;
+                            align-items: center;
+                            gap: 6px;
+                            padding: 8px 16px;
+                            border-radius: 10px;
+                            border: 1px solid rgba(255, 255, 255, 0.3);
+                            background: rgba(255, 255, 255, 0.15);
+                            color: #fff;
+                            font-size: 0.82rem;
+                            font-weight: 600;
+                            text-decoration: none;
+                            cursor: pointer;
+                            transition: all 0.18s ease;
+                        }
+
+                        .users-management-page .um-hero-btn:hover,
+                        .users-management-page .um-hero-btn:focus {
+                            background: rgba(255, 255, 255, 0.25);
+                            border-color: rgba(255, 255, 255, 0.5);
+                            color: #fff;
+                            text-decoration: none;
+                            transform: translateY(-1px);
+                        }
+
+                        .users-management-page .um-hero-btn--solid {
+                            border-color: rgba(255, 255, 255, 0.6);
+                            background: rgba(255, 255, 255, 0.95);
+                            color: #991b1b;
+                            font-weight: 700;
+                        }
+
+                        .users-management-page .um-hero-btn--solid:hover,
+                        .users-management-page .um-hero-btn--solid:focus {
+                            background: #fff;
+                            color: #7f1d1d;
+                        }
+
+                        .users-management-page .lock-pulse {
+                            display: inline-block;
+                            animation: lock-pulse 2s ease-in-out infinite;
+                        }
+
+                        @keyframes lock-pulse {
+                            0%, 70%, 100% { transform: scale(1); }
+                            15% { transform: scale(1.15); }
+                            30% { transform: scale(1); }
+                            45% { transform: scale(1.08); }
+                            60% { transform: scale(1); }
+                        }
+
+                        .users-management-page .stat-card,
+                        .users-management-page .theme-card {
+                            border-top: 3px solid #991b1b;
+                        }
+
+                        @media (max-width: 767px) {
+                            .users-management-page .um-hero,
+                            .users-management-page .um-hero__actions {
+                                flex-direction: column;
+                                align-items: stretch;
+                            }
+
+                            .users-management-page .um-hero {
+                                padding: 20px;
+                            }
+
+                            .users-management-page .um-hero-btn {
+                                flex: 1 1 auto;
+                                justify-content: center;
+                            }
+                        }
+                    </style>
+
+                    <div class="um-hero">
+                        <div class="um-hero__content">
+                            <div class="um-hero__eyebrow">
+                                <i class="mdi mdi-shield-account-outline"></i>
+                                Account Management
+                            </div>
+                            <h1 class="um-hero__title">User Accounts <span class="lock-pulse">🔐</span></h1>
+                            <p class="um-hero__subtitle">Create and manage staff access, account roles, and password resets from one place while keeping invoice and payment ownership properly separated.</p>
                         </div>
-                        <div class="page-actions">
-                            <button type="button" class="btn-submit" data-toggle="modal" data-target="#addUserModal">
+                        <div class="um-hero__actions">
+                            <button type="button" class="um-hero-btn um-hero-btn--solid" data-toggle="modal" data-target="#addUserModal">
                                 <i class="mdi mdi-account-plus-outline"></i>
-                                Add User
+                                <span>Add User</span>
                             </button>
                         </div>
                     </div>

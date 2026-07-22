@@ -15,16 +15,169 @@ $backUrl = base_url('Page/clientMyTickets');
         <div class="content">
             <div class="container-fluid client-profile-page berps-form-page berps-page">
 
-                <header class="berps-page-header">
-                    <div class="berps-page-header__content">
-                        <span class="berps-page-header__eyebrow">Client portal</span>
-                        <h1 class="berps-page-title">Report an Issue</h1>
-                        <p class="berps-page-subtitle">Give the support team enough context to investigate and respond quickly.</p>
+                <style>
+                    /* Hero Banner */
+                    .client-profile-page .ri-hero {
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        flex-wrap: wrap;
+                        gap: 16px;
+                        padding: 28px 24px;
+                        margin: 0 0 22px;
+                        border-radius: 16px;
+                        background: #0e7490;
+                        box-shadow: 0 8px 32px rgba(14, 116, 144, 0.25);
+                        position: relative;
+                        overflow: hidden;
+                    }
+
+                    .client-profile-page .ri-hero::before {
+                        content: '';
+                        position: absolute;
+                        top: -50%;
+                        right: -10%;
+                        width: 400px;
+                        height: 400px;
+                        border-radius: 50%;
+                        background: rgba(255, 255, 255, 0.06);
+                        pointer-events: none;
+                    }
+
+                    .client-profile-page .ri-hero::after {
+                        content: '';
+                        position: absolute;
+                        bottom: -60%;
+                        right: 15%;
+                        width: 300px;
+                        height: 300px;
+                        border-radius: 50%;
+                        background: rgba(255, 255, 255, 0.04);
+                        pointer-events: none;
+                    }
+
+                    .client-profile-page .ri-hero__content {
+                        position: relative;
+                        z-index: 1;
+                    }
+
+                    .client-profile-page .ri-hero__eyebrow {
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 6px;
+                        margin-bottom: 8px;
+                        color: rgba(255, 255, 255, 0.85);
+                        font-size: 0.78rem;
+                        font-weight: 600;
+                        letter-spacing: 0.04em;
+                    }
+
+                    .client-profile-page .ri-hero__eyebrow i {
+                        font-size: 1rem;
+                    }
+
+                    .client-profile-page .ri-hero__title {
+                        margin: 0 0 4px 0;
+                        color: #fff;
+                        font-size: clamp(1.6rem, 2.5vw, 2.2rem);
+                        font-weight: 800;
+                        line-height: 1.15;
+                        letter-spacing: -0.02em;
+                        font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif), "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+                    }
+
+                    .client-profile-page .ri-hero__subtitle {
+                        margin: 0;
+                        color: rgba(255, 255, 255, 0.8);
+                        font-size: 0.88rem;
+                        max-width: 520px;
+                    }
+
+                    .client-profile-page .ri-hero__actions {
+                        display: flex;
+                        align-items: center;
+                        flex-wrap: wrap;
+                        gap: 10px;
+                        position: relative;
+                        z-index: 1;
+                    }
+
+                    .client-profile-page .ri-hero-btn {
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 6px;
+                        padding: 8px 16px;
+                        border-radius: 10px;
+                        border: 1px solid rgba(255, 255, 255, 0.3);
+                        background: rgba(255, 255, 255, 0.15);
+                        color: #fff;
+                        font-size: 0.82rem;
+                        font-weight: 600;
+                        text-decoration: none;
+                        cursor: pointer;
+                        transition: all 0.18s ease;
+                    }
+
+                    .client-profile-page .ri-hero-btn:hover,
+                    .client-profile-page .ri-hero-btn:focus {
+                        background: rgba(255, 255, 255, 0.25);
+                        border-color: rgba(255, 255, 255, 0.5);
+                        color: #fff;
+                        text-decoration: none;
+                        transform: translateY(-1px);
+                    }
+
+                    .client-profile-page .memo-bounce {
+                        display: inline-block;
+                        animation: memo-bounce 2s ease-in-out infinite;
+                    }
+
+                    @keyframes memo-bounce {
+                        0%, 70%, 100% { transform: translateY(0); }
+                        15% { transform: translateY(-10px); }
+                        30% { transform: translateY(0); }
+                        45% { transform: translateY(-5px); }
+                        60% { transform: translateY(0); }
+                    }
+
+                    .client-profile-page .berps-form-card {
+                        border-top: 3px solid #0e7490;
+                    }
+
+                    @media (max-width: 767px) {
+                        .client-profile-page .ri-hero,
+                        .client-profile-page .ri-hero__actions {
+                            flex-direction: column;
+                            align-items: stretch;
+                        }
+
+                        .client-profile-page .ri-hero {
+                            padding: 20px;
+                        }
+
+                        .client-profile-page .ri-hero-btn {
+                            flex: 1 1 auto;
+                            justify-content: center;
+                        }
+                    }
+                </style>
+
+                <div class="ri-hero">
+                    <div class="ri-hero__content">
+                        <div class="ri-hero__eyebrow">
+                            <i class="mdi mdi-lifebuoy"></i>
+                            Client Portal
+                        </div>
+                        <h1 class="ri-hero__title">Report an Issue <span class="memo-bounce">📝</span></h1>
+                        <p class="ri-hero__subtitle">Give the support team enough context to investigate and respond quickly.</p>
                     </div>
-                    <div class="berps-page-header__actions">
-                        <a class="btn btn-outline-secondary" href="<?= htmlspecialchars($backUrl, ENT_QUOTES, 'UTF-8'); ?>"><i class="fas fa-arrow-left mr-1" aria-hidden="true"></i>Back to My Tickets</a>
+                    <div class="ri-hero__actions">
+                        <a class="ri-hero-btn" href="<?= htmlspecialchars($backUrl, ENT_QUOTES, 'UTF-8'); ?>">
+                            <i class="mdi mdi-arrow-left"></i>
+                            <span>Back to My Tickets</span>
+                        </a>
                     </div>
-                </header>
+                </div>
 
                 <?php if ($this->session->flashdata('danger')): ?>
                     <div class="alert alert-danger"><?= htmlspecialchars((string) $this->session->flashdata('danger'), ENT_QUOTES, 'UTF-8'); ?></div>

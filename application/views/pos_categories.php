@@ -25,17 +25,175 @@
                         .pos-staff-dashboard .table thead th {
                             white-space: nowrap;
                         }
+
+                        /* Hero Banner */
+                        .pos-staff-dashboard .pc-hero {
+                            display: flex;
+                            align-items: center;
+                            justify-content: space-between;
+                            flex-wrap: wrap;
+                            gap: 16px;
+                            padding: 28px 24px;
+                            margin: 0 0 22px;
+                            border-radius: 16px;
+                            background: #b45309;
+                            box-shadow: 0 8px 32px rgba(180, 83, 9, 0.25);
+                            position: relative;
+                            overflow: hidden;
+                        }
+
+                        .pos-staff-dashboard .pc-hero::before {
+                            content: '';
+                            position: absolute;
+                            top: -50%;
+                            right: -10%;
+                            width: 400px;
+                            height: 400px;
+                            border-radius: 50%;
+                            background: rgba(255, 255, 255, 0.06);
+                            pointer-events: none;
+                        }
+
+                        .pos-staff-dashboard .pc-hero::after {
+                            content: '';
+                            position: absolute;
+                            bottom: -60%;
+                            right: 15%;
+                            width: 300px;
+                            height: 300px;
+                            border-radius: 50%;
+                            background: rgba(255, 255, 255, 0.04);
+                            pointer-events: none;
+                        }
+
+                        .pos-staff-dashboard .pc-hero__content {
+                            position: relative;
+                            z-index: 1;
+                        }
+
+                        .pos-staff-dashboard .pc-hero__eyebrow {
+                            display: inline-flex;
+                            align-items: center;
+                            gap: 6px;
+                            margin-bottom: 8px;
+                            color: rgba(255, 255, 255, 0.85);
+                            font-size: 0.78rem;
+                            font-weight: 600;
+                            letter-spacing: 0.04em;
+                        }
+
+                        .pos-staff-dashboard .pc-hero__eyebrow i {
+                            font-size: 1rem;
+                        }
+
+                        .pos-staff-dashboard .pc-hero__title {
+                            margin: 0 0 4px 0;
+                            color: #fff;
+                            font-size: clamp(1.6rem, 2.5vw, 2.2rem);
+                            font-weight: 800;
+                            line-height: 1.15;
+                            letter-spacing: -0.02em;
+                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif), "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+                        }
+
+                        .pos-staff-dashboard .pc-hero__subtitle {
+                            margin: 0;
+                            color: rgba(255, 255, 255, 0.8);
+                            font-size: 0.88rem;
+                            max-width: 520px;
+                        }
+
+                        .pos-staff-dashboard .pc-hero__actions {
+                            display: flex;
+                            align-items: center;
+                            flex-wrap: wrap;
+                            gap: 10px;
+                            position: relative;
+                            z-index: 1;
+                        }
+
+                        .pos-staff-dashboard .pc-hero-btn {
+                            display: inline-flex;
+                            align-items: center;
+                            gap: 6px;
+                            padding: 8px 16px;
+                            border-radius: 10px;
+                            border: 1px solid rgba(255, 255, 255, 0.3);
+                            background: rgba(255, 255, 255, 0.15);
+                            color: #fff;
+                            font-size: 0.82rem;
+                            font-weight: 600;
+                            text-decoration: none;
+                            cursor: pointer;
+                            transition: all 0.18s ease;
+                        }
+
+                        .pos-staff-dashboard .pc-hero-btn:hover,
+                        .pos-staff-dashboard .pc-hero-btn:focus {
+                            background: rgba(255, 255, 255, 0.25);
+                            border-color: rgba(255, 255, 255, 0.5);
+                            color: #fff;
+                            text-decoration: none;
+                            transform: translateY(-1px);
+                        }
+
+                        /* Tag swing animation */
+                        .pos-staff-dashboard .tag-swing {
+                            display: inline-block;
+                            animation: tag-swing 2.5s ease-in-out infinite;
+                            transform-origin: top center;
+                        }
+
+                        @keyframes tag-swing {
+                            0%, 70%, 100% { transform: rotate(0deg); }
+                            15% { transform: rotate(-15deg); }
+                            30% { transform: rotate(10deg); }
+                            45% { transform: rotate(-6deg); }
+                            60% { transform: rotate(0deg); }
+                        }
+
+                        /* Amber accent on cards */
+                        .pos-staff-dashboard .card {
+                            border-top: 3px solid #b45309;
+                        }
+
+                        .pos-staff-dashboard .card .card-header {
+                            border-bottom: 2px solid #b45309;
+                        }
+
+                        /* Responsive hero */
+                        @media (max-width: 767px) {
+                            .pos-staff-dashboard .pc-hero,
+                            .pos-staff-dashboard .pc-hero__actions {
+                                flex-direction: column;
+                                align-items: stretch;
+                            }
+
+                            .pos-staff-dashboard .pc-hero {
+                                padding: 20px;
+                            }
+
+                            .pos-staff-dashboard .pc-hero-btn {
+                                flex: 1 1 auto;
+                                justify-content: center;
+                            }
+                        }
                     </style>
 
-                    <div class="page-title-box d-flex justify-content-between align-items-center flex-wrap">
-                        <div class="mb-2 mb-md-0">
-                            <h4 class="page-title mb-0"><?= htmlspecialchars($page_title ?? 'POS Categories', ENT_QUOTES, 'UTF-8'); ?></h4>
-                            <?php if (!empty($page_subtitle)): ?>
-                                <p class="text-muted page-subtitle mb-0"><?= htmlspecialchars($page_subtitle, ENT_QUOTES, 'UTF-8'); ?></p>
-                            <?php endif; ?>
+                    <div class="pc-hero">
+                        <div class="pc-hero__content">
+                            <div class="pc-hero__eyebrow">
+                                <i class="mdi mdi-tag-multiple-outline"></i>
+                                Product Organization
+                            </div>
+                            <h1 class="pc-hero__title"><?= htmlspecialchars($page_title ?? 'POS Categories', ENT_QUOTES, 'UTF-8'); ?> <span class="tag-swing">🏷️</span></h1>
+                            <p class="pc-hero__subtitle"><?= htmlspecialchars($page_subtitle ?? 'Organize your POS products into categories for easier browsing and reporting.', ENT_QUOTES, 'UTF-8'); ?></p>
                         </div>
-                        <div class="mt-2 mt-md-0">
-                            <a href="<?= base_url(); ?>Pos/posProductList" class="btn btn-outline-secondary btn-sm">Back to Products</a>
+                        <div class="pc-hero__actions">
+                            <a class="pc-hero-btn" href="<?= base_url(); ?>Pos/posProductList">
+                                <i class="mdi mdi-arrow-left"></i>
+                                <span>Back to Products</span>
+                            </a>
                         </div>
                     </div>
 

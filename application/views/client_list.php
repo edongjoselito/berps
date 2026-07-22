@@ -62,16 +62,19 @@ foreach ($clientRecords as $clientSummaryRow) {
                         </div>
                     <?php endif; ?>
 
-                    <div class="page-header">
-                        <div>
-                            <div class="page-eyebrow">Clients</div>
-                            <h1 class="page-title">Client Directory</h1>
-                            <div class="page-subtitle">Review company profiles, portal access, lead sources, and customer notes.</div>
+                    <div class="client-hero">
+                        <div class="client-hero__content">
+                            <div class="client-hero__eyebrow">
+                                <i class="mdi mdi-account-group-outline"></i>
+                                Clients
+                            </div>
+                            <h1 class="client-hero__title">Client Directory <span class="client-wave">👋</span></h1>
+                            <p class="client-hero__subtitle">Manage company profiles, portal access, lead sources, and customer relationships.</p>
                         </div>
-                        <div class="page-actions">
-                            <a href="<?= base_url(); ?>Page/clientEntry" class="btn-submit">
+                        <div class="client-hero__actions">
+                            <a href="<?= base_url(); ?>Page/clientEntry" class="client-hero-btn client-hero-btn--solid">
                                 <i class="mdi mdi-account-plus-outline"></i>
-                                Add Client
+                                <span>Add Client</span>
                             </a>
                         </div>
                     </div>

@@ -167,8 +167,8 @@ if (empty($invoiceItems)) {
                             width: 8px;
                             height: 8px;
                             border-radius: 50%;
-                            background: linear-gradient(135deg, var(--primary), var(--primary-2));
-                            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.10);
+                            background: #e76f51;
+                            box-shadow: 0 0 0 4px rgba(231, 111, 81, 0.10);
                         }
 
                         .invoice-entry-page .entry-title {
@@ -225,13 +225,14 @@ if (empty($invoiceItems)) {
                         .invoice-entry-page .btn-submit {
                             border: none;
                             color: #fff;
-                            background: linear-gradient(135deg, var(--primary), var(--primary-2));
-                            box-shadow: 0 10px 24px rgba(37, 99, 235, 0.24);
+                            background: #e76f51;
+                            box-shadow: 0 10px 24px rgba(231, 111, 81, 0.24);
                         }
 
                         .invoice-entry-page .btn-submit:hover {
                             transform: translateY(-1px);
-                            box-shadow: 0 14px 28px rgba(37, 99, 235, 0.28);
+                            box-shadow: 0 14px 28px rgba(231, 111, 81, 0.28);
+                            background: #d55a3c;
                         }
 
                         .invoice-entry-page .entry-layout {
@@ -259,6 +260,7 @@ if (empty($invoiceItems)) {
                             padding: 18px 22px;
                             border-bottom: 1px solid var(--line);
                             background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(249, 251, 255, 0.94));
+                            border-top: 3px solid #e76f51;
                         }
 
                         .invoice-entry-page .entry-card-title {
@@ -595,17 +597,179 @@ if (empty($invoiceItems)) {
                                 padding-right: 16px;
                             }
                         }
+
+                        /* Hero banner for invoice entry */
+                        .invoice-entry-page .inv-entry-hero {
+                            display: flex;
+                            align-items: center;
+                            justify-content: space-between;
+                            flex-wrap: wrap;
+                            gap: 18px;
+                            padding: 28px 24px;
+                            margin: 24px 0 22px;
+                            border-radius: 18px;
+                            background: #e76f51;
+                            box-shadow: 0 8px 32px rgba(231, 111, 81, 0.25);
+                            position: relative;
+                            overflow: hidden;
+                        }
+
+                        .invoice-entry-page .inv-entry-hero::before {
+                            content: '';
+                            position: absolute;
+                            top: -50%;
+                            right: -10%;
+                            width: 400px;
+                            height: 400px;
+                            border-radius: 50%;
+                            background: rgba(255, 255, 255, 0.06);
+                            pointer-events: none;
+                        }
+
+                        .invoice-entry-page .inv-entry-hero::after {
+                            content: '';
+                            position: absolute;
+                            bottom: -60%;
+                            right: 15%;
+                            width: 300px;
+                            height: 300px;
+                            border-radius: 50%;
+                            background: rgba(255, 255, 255, 0.04);
+                            pointer-events: none;
+                        }
+
+                        .invoice-entry-page .inv-entry-hero__content {
+                            position: relative;
+                            z-index: 1;
+                        }
+
+                        .invoice-entry-page .inv-entry-hero__eyebrow {
+                            display: inline-flex;
+                            align-items: center;
+                            gap: 6px;
+                            margin-bottom: 8px;
+                            color: rgba(255, 255, 255, 0.8);
+                            font-size: 0.78rem;
+                            font-weight: 600;
+                            letter-spacing: 0.04em;
+                        }
+
+                        .invoice-entry-page .inv-entry-hero__eyebrow i {
+                            font-size: 1rem;
+                        }
+
+                        .invoice-entry-page .inv-entry-hero__title {
+                            margin: 0 0 4px 0;
+                            color: #fff;
+                            font-size: 2.1rem;
+                            font-weight: 800;
+                            line-height: 1.15;
+                            letter-spacing: -0.02em;
+                        }
+
+                        .invoice-entry-page .inv-entry-hero__subtitle {
+                            margin: 0;
+                            color: rgba(255, 255, 255, 0.75);
+                            font-size: 0.88rem;
+                            max-width: 480px;
+                        }
+
+                        .invoice-entry-page .inv-entry-hero__actions {
+                            display: flex;
+                            align-items: center;
+                            flex-wrap: wrap;
+                            gap: 8px;
+                            position: relative;
+                            z-index: 1;
+                        }
+
+                        .invoice-entry-page .inv-entry-hero-btn {
+                            display: inline-flex;
+                            align-items: center;
+                            gap: 6px;
+                            padding: 10px 18px;
+                            border-radius: 12px;
+                            border: 1px solid rgba(255, 255, 255, 0.25);
+                            background: rgba(255, 255, 255, 0.12);
+                            color: #fff;
+                            font-size: 0.92rem;
+                            font-weight: 700;
+                            text-decoration: none;
+                            cursor: pointer;
+                            transition: all 0.18s ease;
+                        }
+
+                        .invoice-entry-page .inv-entry-hero-btn:hover,
+                        .invoice-entry-page .inv-entry-hero-btn:focus {
+                            background: rgba(255, 255, 255, 0.22);
+                            border-color: rgba(255, 255, 255, 0.4);
+                            color: #fff;
+                            text-decoration: none;
+                            transform: translateY(-1px);
+                        }
+
+                        .invoice-entry-page .inv-entry-hero-btn--solid {
+                            border-color: rgba(255, 255, 255, 0.6);
+                            background: rgba(255, 255, 255, 0.95);
+                            color: #e76f51;
+                        }
+
+                        .invoice-entry-page .inv-entry-hero-btn--solid:hover,
+                        .invoice-entry-page .inv-entry-hero-btn--solid:focus {
+                            background: #fff;
+                            color: #d55a3c;
+                        }
+
+                        /* Pen writing animation */
+                        .invoice-entry-page .pen-write {
+                            display: inline-block;
+                            animation: pen-write 2.5s ease-in-out infinite;
+                            transform-origin: bottom right;
+                        }
+
+                        @keyframes pen-write {
+                            0%, 70%, 100% { transform: rotate(0deg) translateX(0); }
+                            10% { transform: rotate(-12deg) translateX(-4px); }
+                            20% { transform: rotate(8deg) translateX(2px); }
+                            30% { transform: rotate(-10deg) translateX(-3px); }
+                            40% { transform: rotate(6deg) translateX(1px); }
+                            50% { transform: rotate(0deg) translateX(0); }
+                        }
+
+                        @media (max-width: 767px) {
+                            .invoice-entry-page .inv-entry-hero,
+                            .invoice-entry-page .inv-entry-hero__actions {
+                                flex-direction: column;
+                                align-items: stretch;
+                            }
+
+                            .invoice-entry-page .inv-entry-hero {
+                                padding: 20px;
+                            }
+
+                            .invoice-entry-page .inv-entry-hero-btn {
+                                flex: 1 1 auto;
+                                justify-content: center;
+                            }
+
+                            .invoice-entry-page .inv-entry-hero__title {
+                                font-size: 1.75rem;
+                            }
+                        }
                     </style>
 
-                    <div class="entry-header">
-                        <div>
-                            <div class="entry-eyebrow">Invoice Workspace</div>
-                            <h4 class="entry-title"><?= $isEditMode ? 'Update Invoice' : 'Create Invoice'; ?></h4>
-                            <div class="entry-subtitle">Use the wider screen to encode multiple invoice entries without squeezing everything into a modal.</div>
+                    <div class="inv-entry-hero">
+                        <div class="inv-entry-hero__content">
+                            <div class="inv-entry-hero__eyebrow">
+                                <i class="mdi mdi-file-document-edit-outline"></i>
+                                Invoice Workspace
+                            </div>
+                            <h1 class="inv-entry-hero__title"><?= $isEditMode ? 'Update Invoice' : 'Create Invoice'; ?> <span class="pen-write">✍️</span></h1>
+                            <p class="inv-entry-hero__subtitle">Enter customer, billing, and line-item details for this invoice.</p>
                         </div>
-                        <div class="entry-actions">
-                            <a href="<?= htmlspecialchars($backUrl, ENT_QUOTES, 'UTF-8'); ?>" class="btn-action"><?= htmlspecialchars($backLabel, ENT_QUOTES, 'UTF-8'); ?></a>
-                            <button type="submit" form="invoiceEntryForm" class="btn-submit"><?= $isEditMode ? 'Update Invoice' : 'Save Invoice'; ?></button>
+                        <div class="inv-entry-hero__actions">
+                            <a href="<?= htmlspecialchars($backUrl, ENT_QUOTES, 'UTF-8'); ?>" class="inv-entry-hero-btn"><?= htmlspecialchars($backLabel, ENT_QUOTES, 'UTF-8'); ?></a>
+                            <button type="submit" form="invoiceEntryForm" class="inv-entry-hero-btn inv-entry-hero-btn--solid"><?= $isEditMode ? 'Update Invoice' : 'Save Invoice'; ?></button>
                         </div>
                     </div>
 

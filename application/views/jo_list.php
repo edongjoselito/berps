@@ -43,18 +43,22 @@ foreach ($jobOrders as $jobOrder) {
                 <div class="container-fluid job-order-page berps-page">
 
 
-                    <header class="berps-page-header">
-                        <div class="berps-page-header__content">
-                            <span class="berps-page-header__eyebrow">Job Orders</span>
-                            <h1 class="berps-page-title">Job Order Management</h1>
-                            <p class="berps-page-subtitle">Track open work, collect payments, and open the generated invoice.</p>
+                    <div class="jo-hero">
+                        <div class="jo-hero__content">
+                            <div class="jo-hero__eyebrow">
+                                <i class="mdi mdi-clipboard-list-outline"></i>
+                                Job Orders
+                            </div>
+                            <h1 class="jo-hero__title">Job Order Management <span class="jo-bounce">📋</span></h1>
+                            <p class="jo-hero__subtitle">Manage open work orders, record payments, and access generated invoices.</p>
                         </div>
-                        <div class="berps-page-header__actions">
-                            <a href="<?= base_url(); ?>Page/jobOrderEntry" class="btn btn-primary">
-                                <i class="mdi mdi-plus-circle-outline mr-1" aria-hidden="true"></i>Add New Job Order
+                        <div class="jo-hero__actions">
+                            <a href="<?= base_url(); ?>Page/jobOrderEntry" class="jo-hero-btn jo-hero-btn--solid">
+                                <i class="mdi mdi-plus-circle-outline"></i>
+                                <span>Add New Job Order</span>
                             </a>
                         </div>
-                    </header>
+                    </div>
 
                     <div class="berps-stat-grid">
                         <div class="berps-stat-card">

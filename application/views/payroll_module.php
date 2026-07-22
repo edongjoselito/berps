@@ -460,26 +460,197 @@ $dateLabel = function ($value, $fallback = '-') {
                         }
                     </style>
 
-                    <div class="pm-header">
-                        <div>
-                            <div class="pm-eyebrow">Human Resource</div>
-                            <h1 class="pm-title">Payroll Module</h1>
-                            <div class="pm-subtitle">
-                                Manage fixed monthly salaries, PhilHealth, SSS, Pag-IBIG deductions, staff loans, cash advances, payroll posting, deduction payables, and individual payslips for <?= htmlspecialchars($businessName); ?>.
+                    <style>
+                        /* Hero Banner */
+                        .payroll-module-page .pm-hero {
+                            display: flex;
+                            align-items: center;
+                            justify-content: space-between;
+                            flex-wrap: wrap;
+                            gap: 16px;
+                            padding: 28px 24px;
+                            margin: 0 0 22px;
+                            border-radius: 16px;
+                            background: #065f46;
+                            box-shadow: 0 8px 32px rgba(6, 95, 70, 0.25);
+                            position: relative;
+                            overflow: hidden;
+                        }
+
+                        .payroll-module-page .pm-hero::before {
+                            content: '';
+                            position: absolute;
+                            top: -50%;
+                            right: -10%;
+                            width: 400px;
+                            height: 400px;
+                            border-radius: 50%;
+                            background: rgba(255, 255, 255, 0.06);
+                            pointer-events: none;
+                        }
+
+                        .payroll-module-page .pm-hero::after {
+                            content: '';
+                            position: absolute;
+                            bottom: -60%;
+                            right: 15%;
+                            width: 300px;
+                            height: 300px;
+                            border-radius: 50%;
+                            background: rgba(255, 255, 255, 0.04);
+                            pointer-events: none;
+                        }
+
+                        .payroll-module-page .pm-hero__content {
+                            position: relative;
+                            z-index: 1;
+                        }
+
+                        .payroll-module-page .pm-hero__eyebrow {
+                            display: inline-flex;
+                            align-items: center;
+                            gap: 6px;
+                            margin-bottom: 8px;
+                            color: rgba(255, 255, 255, 0.85);
+                            font-size: 0.78rem;
+                            font-weight: 600;
+                            letter-spacing: 0.04em;
+                        }
+
+                        .payroll-module-page .pm-hero__eyebrow i {
+                            font-size: 1rem;
+                        }
+
+                        .payroll-module-page .pm-hero__title {
+                            margin: 0 0 4px 0;
+                            color: #fff;
+                            font-size: clamp(1.6rem, 2.5vw, 2.2rem);
+                            font-weight: 800;
+                            line-height: 1.15;
+                            letter-spacing: -0.02em;
+                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif), "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+                        }
+
+                        .payroll-module-page .pm-hero__subtitle {
+                            margin: 0;
+                            color: rgba(255, 255, 255, 0.8);
+                            font-size: 0.88rem;
+                            max-width: 560px;
+                        }
+
+                        .payroll-module-page .pm-hero__actions {
+                            display: flex;
+                            align-items: center;
+                            flex-wrap: wrap;
+                            gap: 10px;
+                            position: relative;
+                            z-index: 1;
+                        }
+
+                        .payroll-module-page .pm-hero-btn {
+                            display: inline-flex;
+                            align-items: center;
+                            gap: 6px;
+                            padding: 8px 16px;
+                            border-radius: 10px;
+                            border: 1px solid rgba(255, 255, 255, 0.3);
+                            background: rgba(255, 255, 255, 0.15);
+                            color: #fff;
+                            font-size: 0.82rem;
+                            font-weight: 600;
+                            text-decoration: none;
+                            cursor: pointer;
+                            transition: all 0.18s ease;
+                        }
+
+                        .payroll-module-page .pm-hero-btn:hover,
+                        .payroll-module-page .pm-hero-btn:focus {
+                            background: rgba(255, 255, 255, 0.25);
+                            border-color: rgba(255, 255, 255, 0.5);
+                            color: #fff;
+                            text-decoration: none;
+                            transform: translateY(-1px);
+                        }
+
+                        .payroll-module-page .pm-hero-btn--solid {
+                            border-color: rgba(255, 255, 255, 0.6);
+                            background: rgba(255, 255, 255, 0.95);
+                            color: #065f46;
+                            font-weight: 700;
+                        }
+
+                        .payroll-module-page .pm-hero-btn--solid:hover,
+                        .payroll-module-page .pm-hero-btn--solid:focus {
+                            background: #fff;
+                            color: #064e3b;
+                        }
+
+                        /* Money bounce animation */
+                        .payroll-module-page .money-bounce {
+                            display: inline-block;
+                            animation: money-bounce 2s ease-in-out infinite;
+                        }
+
+                        @keyframes money-bounce {
+                            0%, 70%, 100% { transform: translateY(0); }
+                            15% { transform: translateY(-10px); }
+                            30% { transform: translateY(0); }
+                            45% { transform: translateY(-5px); }
+                            60% { transform: translateY(0); }
+                        }
+
+                        /* Green accent on cards */
+                        .payroll-module-page .panel-card,
+                        .payroll-module-page .stat-card,
+                        .payroll-module-page .filter-card,
+                        .payroll-module-page .notice-card {
+                            border-top: 3px solid #065f46;
+                        }
+
+                        /* Responsive hero */
+                        @media (max-width: 767px) {
+                            .payroll-module-page .pm-hero,
+                            .payroll-module-page .pm-hero__actions {
+                                flex-direction: column;
+                                align-items: stretch;
+                            }
+
+                            .payroll-module-page .pm-hero {
+                                padding: 20px;
+                            }
+
+                            .payroll-module-page .pm-hero-btn {
+                                flex: 1 1 auto;
+                                justify-content: center;
+                            }
+                        }
+                    </style>
+
+                    <div class="pm-hero">
+                        <div class="pm-hero__content">
+                            <div class="pm-hero__eyebrow">
+                                <i class="mdi mdi-cash-multiple"></i>
+                                Human Resource
                             </div>
+                            <h1 class="pm-hero__title">Payroll Module <span class="money-bounce">💰</span></h1>
+                            <p class="pm-hero__subtitle">Manage fixed monthly salaries, PhilHealth, SSS, Pag-IBIG deductions, staff loans, cash advances, payroll posting, deduction payables, and individual payslips for <?= htmlspecialchars($businessName); ?>.</p>
                         </div>
-                        <div class="pm-actions">
-                            <a href="<?= base_url(); ?>Page/employeeList" class="btn-soft">
-                                <i class="mdi mdi-account-group-outline"></i> Employee List
+                        <div class="pm-hero__actions">
+                            <a class="pm-hero-btn" href="<?= base_url(); ?>Page/employeeList">
+                                <i class="mdi mdi-account-group-outline"></i>
+                                <span>Employee List</span>
                             </a>
-                            <button type="button" class="btn-success-soft" data-toggle="modal" data-target="#loanModal">
-                                <i class="mdi mdi-bank-plus"></i> Add Loan
+                            <button type="button" class="pm-hero-btn" data-toggle="modal" data-target="#loanModal">
+                                <i class="mdi mdi-bank-plus"></i>
+                                <span>Add Loan</span>
                             </button>
-                            <button type="button" class="btn-warning-soft" data-toggle="modal" data-target="#cashAdvanceModal">
-                                <i class="mdi mdi-cash-fast"></i> Cash Advance
+                            <button type="button" class="pm-hero-btn" data-toggle="modal" data-target="#cashAdvanceModal">
+                                <i class="mdi mdi-cash-fast"></i>
+                                <span>Cash Advance</span>
                             </button>
-                            <button type="button" class="btn-solid" data-toggle="modal" data-target="#generatePayrollModal">
-                                <i class="mdi mdi-file-document-edit-outline"></i> Generate Payroll
+                            <button type="button" class="pm-hero-btn pm-hero-btn--solid" data-toggle="modal" data-target="#generatePayrollModal">
+                                <i class="mdi mdi-file-document-edit-outline"></i>
+                                <span>Generate Payroll</span>
                             </button>
                         </div>
                     </div>

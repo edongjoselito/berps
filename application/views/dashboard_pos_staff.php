@@ -215,13 +215,196 @@
                         }
                     </style>
 
-                    <div class="row">
-                        <div class="col-12">
-                            <div class="page-title-box mb-2">
-                                <h4 class="page-title"><?= htmlspecialchars($page_title ?? 'POS Staff Panel', ENT_QUOTES, 'UTF-8'); ?></h4>
-                                <div class="clearfix"></div>
-                                <hr style="border:0; height:2px; background:linear-gradient(to right, #4285F4 60%, #FBBC05 80%, #34A853 100%); border-radius:1px; margin:12px 0;" />
+                    <style>
+                        /* Hero Banner */
+                        .pos-staff-dashboard .ps-hero {
+                            display: flex;
+                            align-items: center;
+                            justify-content: space-between;
+                            flex-wrap: wrap;
+                            gap: 16px;
+                            padding: 28px 24px;
+                            margin: 0 0 22px;
+                            border-radius: 16px;
+                            background: #4338ca;
+                            box-shadow: 0 8px 32px rgba(67, 56, 202, 0.25);
+                            position: relative;
+                            overflow: hidden;
+                        }
+
+                        .pos-staff-dashboard .ps-hero::before {
+                            content: '';
+                            position: absolute;
+                            top: -50%;
+                            right: -10%;
+                            width: 400px;
+                            height: 400px;
+                            border-radius: 50%;
+                            background: rgba(255, 255, 255, 0.06);
+                            pointer-events: none;
+                        }
+
+                        .pos-staff-dashboard .ps-hero::after {
+                            content: '';
+                            position: absolute;
+                            bottom: -60%;
+                            right: 15%;
+                            width: 300px;
+                            height: 300px;
+                            border-radius: 50%;
+                            background: rgba(255, 255, 255, 0.04);
+                            pointer-events: none;
+                        }
+
+                        .pos-staff-dashboard .ps-hero__content {
+                            position: relative;
+                            z-index: 1;
+                        }
+
+                        .pos-staff-dashboard .ps-hero__eyebrow {
+                            display: inline-flex;
+                            align-items: center;
+                            gap: 6px;
+                            margin-bottom: 8px;
+                            color: rgba(255, 255, 255, 0.85);
+                            font-size: 0.78rem;
+                            font-weight: 600;
+                            letter-spacing: 0.04em;
+                        }
+
+                        .pos-staff-dashboard .ps-hero__eyebrow i {
+                            font-size: 1rem;
+                        }
+
+                        .pos-staff-dashboard .ps-hero__title {
+                            margin: 0 0 4px 0;
+                            color: #fff;
+                            font-size: clamp(1.6rem, 2.5vw, 2.2rem);
+                            font-weight: 800;
+                            line-height: 1.15;
+                            letter-spacing: -0.02em;
+                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif), "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+                        }
+
+                        .pos-staff-dashboard .ps-hero__subtitle {
+                            margin: 0;
+                            color: rgba(255, 255, 255, 0.8);
+                            font-size: 0.88rem;
+                            max-width: 520px;
+                        }
+
+                        .pos-staff-dashboard .ps-hero__actions {
+                            display: flex;
+                            align-items: center;
+                            flex-wrap: wrap;
+                            gap: 10px;
+                            position: relative;
+                            z-index: 1;
+                        }
+
+                        .pos-staff-dashboard .ps-hero-btn {
+                            display: inline-flex;
+                            align-items: center;
+                            gap: 6px;
+                            padding: 8px 16px;
+                            border-radius: 10px;
+                            border: 1px solid rgba(255, 255, 255, 0.3);
+                            background: rgba(255, 255, 255, 0.15);
+                            color: #fff;
+                            font-size: 0.82rem;
+                            font-weight: 600;
+                            text-decoration: none;
+                            cursor: pointer;
+                            transition: all 0.18s ease;
+                        }
+
+                        .pos-staff-dashboard .ps-hero-btn:hover,
+                        .pos-staff-dashboard .ps-hero-btn:focus {
+                            background: rgba(255, 255, 255, 0.25);
+                            border-color: rgba(255, 255, 255, 0.5);
+                            color: #fff;
+                            text-decoration: none;
+                            transform: translateY(-1px);
+                        }
+
+                        .pos-staff-dashboard .ps-hero-btn--solid {
+                            border-color: rgba(255, 255, 255, 0.6);
+                            background: rgba(255, 255, 255, 0.95);
+                            color: #4338ca;
+                            font-weight: 700;
+                        }
+
+                        .pos-staff-dashboard .ps-hero-btn--solid:hover,
+                        .pos-staff-dashboard .ps-hero-btn--solid:focus {
+                            background: #fff;
+                            color: #3730a3;
+                        }
+
+                        .pos-staff-dashboard .cart-bounce {
+                            display: inline-block;
+                            animation: cart-bounce 2s ease-in-out infinite;
+                        }
+
+                        @keyframes cart-bounce {
+                            0%, 70%, 100% { transform: translateY(0); }
+                            15% { transform: translateY(-10px); }
+                            30% { transform: translateY(0); }
+                            45% { transform: translateY(-5px); }
+                            60% { transform: translateY(0); }
+                        }
+
+                        .pos-staff-dashboard .card.kpi {
+                            border-top: 3px solid #4338ca;
+                        }
+
+                        .pos-staff-dashboard .quick-card {
+                            border-top: 3px solid #4338ca;
+                        }
+
+                        @media (max-width: 767px) {
+                            .pos-staff-dashboard .ps-hero,
+                            .pos-staff-dashboard .ps-hero__actions {
+                                flex-direction: column;
+                                align-items: stretch;
+                            }
+
+                            .pos-staff-dashboard .ps-hero {
+                                padding: 20px;
+                            }
+
+                            .pos-staff-dashboard .ps-hero-btn {
+                                flex: 1 1 auto;
+                                justify-content: center;
+                            }
+                        }
+                    </style>
+
+                    <div class="ps-hero">
+                        <div class="ps-hero__content">
+                            <div class="ps-hero__eyebrow">
+                                <i class="mdi mdi-store-outline"></i>
+                                POS Panel
                             </div>
+                            <h1 class="ps-hero__title"><?= htmlspecialchars($page_title ?? 'POS Staff Panel', ENT_QUOTES, 'UTF-8'); ?> <span class="cart-bounce">🛒</span></h1>
+                            <p class="ps-hero__subtitle">Track sales, monitor inventory, and manage transactions from your point-of-sale dashboard.</p>
+                        </div>
+                        <div class="ps-hero__actions">
+                            <a class="ps-hero-btn ps-hero-btn--solid" href="<?= base_url(); ?>Pos/posNewTransaction">
+                                <i class="mdi mdi-plus-circle-outline"></i>
+                                <span>New Sale</span>
+                            </a>
+                            <a class="ps-hero-btn" href="<?= base_url(); ?>Pos/posTransactionHistory">
+                                <i class="mdi mdi-history"></i>
+                                <span>Sales History</span>
+                            </a>
+                            <a class="ps-hero-btn" href="<?= base_url(); ?>Pos/posReports">
+                                <i class="mdi mdi-chart-box-outline"></i>
+                                <span>Reports</span>
+                            </a>
+                            <a class="ps-hero-btn" href="<?= base_url(); ?>Pos/posProductList">
+                                <i class="mdi mdi-package-variant-closed"></i>
+                                <span>Products</span>
+                            </a>
                         </div>
                     </div>
 

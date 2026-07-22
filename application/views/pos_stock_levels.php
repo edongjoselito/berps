@@ -186,6 +186,176 @@
     .expiry-cell {
         min-width: 160px;
     }
+
+    /* Hero Banner */
+    .pos-history-page .ps-hero {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 16px;
+        padding: 28px 24px;
+        margin: 0 0 22px;
+        border-radius: 16px;
+        background: #334155;
+        box-shadow: 0 8px 32px rgba(51, 65, 85, 0.25);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .pos-history-page .ps-hero::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 400px;
+        height: 400px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.06);
+        pointer-events: none;
+    }
+
+    .pos-history-page .ps-hero::after {
+        content: '';
+        position: absolute;
+        bottom: -60%;
+        right: 15%;
+        width: 300px;
+        height: 300px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.04);
+        pointer-events: none;
+    }
+
+    .pos-history-page .ps-hero__content {
+        position: relative;
+        z-index: 1;
+    }
+
+    .pos-history-page .ps-hero__eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 8px;
+        color: rgba(255, 255, 255, 0.85);
+        font-size: 0.78rem;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+    }
+
+    .pos-history-page .ps-hero__eyebrow i {
+        font-size: 1rem;
+    }
+
+    .pos-history-page .ps-hero__title {
+        margin: 0 0 4px 0;
+        color: #fff;
+        font-size: clamp(1.6rem, 2.5vw, 2.2rem);
+        font-weight: 800;
+        line-height: 1.15;
+        letter-spacing: -0.02em;
+        font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif), "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+    }
+
+    .pos-history-page .ps-hero__subtitle {
+        margin: 0;
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 0.88rem;
+        max-width: 520px;
+    }
+
+    .pos-history-page .ps-hero__actions {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .pos-history-page .ps-hero-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 16px;
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        background: rgba(255, 255, 255, 0.15);
+        color: #fff;
+        font-size: 0.82rem;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.18s ease;
+    }
+
+    .pos-history-page .ps-hero-btn:hover,
+    .pos-history-page .ps-hero-btn:focus {
+        background: rgba(255, 255, 255, 0.25);
+        border-color: rgba(255, 255, 255, 0.5);
+        color: #fff;
+        text-decoration: none;
+        transform: translateY(-1px);
+    }
+
+    .pos-history-page .ps-hero-btn--solid {
+        border-color: rgba(255, 255, 255, 0.6);
+        background: rgba(255, 255, 255, 0.95);
+        color: #334155;
+        font-weight: 700;
+    }
+
+    .pos-history-page .ps-hero-btn--solid:hover,
+    .pos-history-page .ps-hero-btn--solid:focus {
+        background: #fff;
+        color: #1e293b;
+    }
+
+    /* Box shake animation */
+    .pos-history-page .box-shake {
+        display: inline-block;
+        animation: box-shake 2.5s ease-in-out infinite;
+    }
+
+    @keyframes box-shake {
+        0%, 70%, 100% { transform: rotate(0deg); }
+        15% { transform: rotate(-10deg); }
+        30% { transform: rotate(8deg); }
+        45% { transform: rotate(-5deg); }
+        60% { transform: rotate(0deg); }
+    }
+
+    /* Slate accent on cards */
+    .pos-history-page .stat-card,
+    .pos-history-page .theme-card {
+        border-top: 3px solid #334155;
+    }
+
+    .pos-history-page .theme-card-head {
+        border-bottom: 2px solid #334155;
+    }
+
+    .pos-history-page .theme-card-title {
+        color: #334155;
+    }
+
+    /* Responsive hero */
+    @media (max-width: 767px) {
+        .pos-history-page .ps-hero,
+        .pos-history-page .ps-hero__actions {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .pos-history-page .ps-hero {
+            padding: 20px;
+        }
+
+        .pos-history-page .ps-hero-btn {
+            flex: 1 1 auto;
+            justify-content: center;
+        }
+    }
 </style>
 
 <body>
@@ -241,23 +411,31 @@
             <div class="content">
                 <div class="container-fluid pos-history-page">
 
-                    <div class="page-header">
-                        <div>
-                            <h4 class="page-title"><?= htmlspecialchars($page_title ?? 'Stock Levels', ENT_QUOTES, 'UTF-8'); ?></h4>
-                            <p class="page-subtitle"><?= htmlspecialchars($page_subtitle ?? '', ENT_QUOTES, 'UTF-8'); ?></p>
+                    <div class="ps-hero">
+                        <div class="ps-hero__content">
+                            <div class="ps-hero__eyebrow">
+                                <i class="mdi mdi-warehouse"></i>
+                                Inventory Monitoring
+                            </div>
+                            <h1 class="ps-hero__title"><?= htmlspecialchars($page_title ?? 'Stock Levels', ENT_QUOTES, 'UTF-8'); ?> <span class="box-shake">📦</span></h1>
+                            <p class="ps-hero__subtitle"><?= htmlspecialchars($page_subtitle ?? '', ENT_QUOTES, 'UTF-8'); ?></p>
                         </div>
-                        <div class="page-actions">
-                            <a class="btn-action btn-primary-soft" href="<?= base_url(); ?>Pos/posStockLevels">
-                                <i class="mdi mdi-warehouse"></i> Stock Levels
+                        <div class="ps-hero__actions">
+                            <a class="ps-hero-btn ps-hero-btn--solid" href="<?= base_url(); ?>Pos/posStockLevels">
+                                <i class="mdi mdi-warehouse"></i>
+                                <span>Stock Levels</span>
                             </a>
-                            <a class="btn-action btn-ghost" href="<?= base_url(); ?>Pos/posLowStockItems">
-                                <i class="mdi mdi-alert"></i> Low Stock
+                            <a class="ps-hero-btn" href="<?= base_url(); ?>Pos/posLowStockItems">
+                                <i class="mdi mdi-alert"></i>
+                                <span>Low Stock</span>
                             </a>
-                            <a class="btn-action btn-ghost" href="<?= base_url(); ?>Pos/posExpiringSoon">
-                                <i class="mdi mdi-timer-sand"></i> Expiry
+                            <a class="ps-hero-btn" href="<?= base_url(); ?>Pos/posExpiringSoon">
+                                <i class="mdi mdi-timer-sand"></i>
+                                <span>Expiry</span>
                             </a>
-                            <a class="btn-action btn-ghost" href="<?= base_url(); ?>Pos/posProductList">
-                                <i class="mdi mdi-package-variant"></i> Products
+                            <a class="ps-hero-btn" href="<?= base_url(); ?>Pos/posProductList">
+                                <i class="mdi mdi-package-variant"></i>
+                                <span>Products</span>
                             </a>
                         </div>
                     </div>

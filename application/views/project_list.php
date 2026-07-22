@@ -73,17 +73,20 @@
                     <?php endif; ?>
 
                     <!-- Page header -->
-                    <div class="page-header">
-                        <div>
-                            <div class="page-eyebrow">Project Management</div>
-                            <h1 class="page-title">Projects</h1>
-                            <div class="page-subtitle">Manage active engagements, view tasks, and track deployment status.</div>
+                    <div class="proj-hero">
+                        <div class="proj-hero__content">
+                            <div class="proj-hero__eyebrow">
+                                <i class="mdi mdi-briefcase-outline"></i>
+                                Project Management
+                            </div>
+                            <h1 class="proj-hero__title">Projects <span class="proj-bounce">📁</span></h1>
+                            <p class="proj-hero__subtitle">Manage active engagements, view tasks, and track deployment status.</p>
                         </div>
                         <?php if ($isAdmin): ?>
-                            <div class="page-actions">
-                                <a href="<?= base_url(); ?>Page/addProject" class="btn-submit">
+                            <div class="proj-hero__actions">
+                                <a href="<?= base_url(); ?>Page/addProject" class="proj-hero-btn proj-hero-btn--solid">
                                     <i class="mdi mdi-briefcase-plus-outline"></i>
-                                    Add Project
+                                    <span>Add Project</span>
                                 </a>
                             </div>
                         <?php endif; ?>

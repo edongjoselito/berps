@@ -12635,6 +12635,9 @@ class Page extends CI_Controller
     $data['title'] = 'Payments with BIR Form 2307';
     $data['from_date'] = $fromDate;
     $data['to_date'] = $toDate;
+    $businessDetails = $this->CashModel->businessDetails($settingsID);
+    $data['business'] = !empty($businessDetails) ? $businessDetails[0] : null;
+    $data['generatedAt'] = date('F j, Y h:i A');
 
     $this->load->view('includes/head', $data);
     $this->load->view('payments_with_tax', $data);

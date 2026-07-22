@@ -601,12 +601,7 @@ switch ($__sidebarLevel) {
                         </a>
                     </li>
 
-                    <li>
-                        <a href="<?= base_url(); ?>Users/changepassword" data-account-modal-open="password">
-                            <i class="ph ph-lock"></i>
-                            <span> Change Password </span>
-                        </a>
-                    </li>
+                    
                 </ul>
             </div>
             <!-- End Sidebar -->
@@ -751,18 +746,7 @@ switch ($__sidebarLevel) {
                         </ul>
                     </li>
 
-                    <li>
-                        <a href="javascript: void(0);">
-                            <i class="ph ph-user"></i>
-                            <span> My Account </span>
-                            <span class="menu-arrow"></span>
-                        </a>
-                        <ul class="nav-second-level" aria-expanded="false">
-                            <li><a href="<?= base_url(); ?>Page/staffprofile?id=<?= $this->session->userdata('IDNumber'); ?>">Profile</a></li>
-                            <li><a href="<?= base_url(); ?>Users/changepassword" data-account-modal-open="password">Change Password</a></li>
-                            <li><a href="<?= base_url(); ?>login/logout">Logout</a></li>
-                        </ul>
-                    </li>
+                   
                 </ul>
 
             </div>

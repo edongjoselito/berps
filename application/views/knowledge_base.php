@@ -541,16 +541,180 @@ if ($current_type_filter === 'article') {
                     }
                 </style>
 
-                <div class="kb-page-header">
-                    <div>
-                        <div class="kb-page-eyebrow">Knowledge Base</div>
-                        <h4 class="kb-page-title">Knowledge Base & FAQ</h4>
-                        <div class="kb-page-subtitle">Manage internal articles, FAQs, and published help content from one place.</div>
+                <style>
+                    /* Hero Banner */
+                    .knowledge-base-page .kb-hero {
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        flex-wrap: wrap;
+                        gap: 16px;
+                        padding: 28px 24px;
+                        margin: 0 0 22px;
+                        border-radius: 16px;
+                        background: #b45309;
+                        box-shadow: 0 8px 32px rgba(180, 83, 9, 0.25);
+                        position: relative;
+                        overflow: hidden;
+                    }
+
+                    .knowledge-base-page .kb-hero::before {
+                        content: '';
+                        position: absolute;
+                        top: -50%;
+                        right: -10%;
+                        width: 400px;
+                        height: 400px;
+                        border-radius: 50%;
+                        background: rgba(255, 255, 255, 0.06);
+                        pointer-events: none;
+                    }
+
+                    .knowledge-base-page .kb-hero::after {
+                        content: '';
+                        position: absolute;
+                        bottom: -60%;
+                        right: 15%;
+                        width: 300px;
+                        height: 300px;
+                        border-radius: 50%;
+                        background: rgba(255, 255, 255, 0.04);
+                        pointer-events: none;
+                    }
+
+                    .knowledge-base-page .kb-hero__content {
+                        position: relative;
+                        z-index: 1;
+                    }
+
+                    .knowledge-base-page .kb-hero__eyebrow {
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 6px;
+                        margin-bottom: 8px;
+                        color: rgba(255, 255, 255, 0.85);
+                        font-size: 0.78rem;
+                        font-weight: 600;
+                        letter-spacing: 0.04em;
+                    }
+
+                    .knowledge-base-page .kb-hero__eyebrow i {
+                        font-size: 1rem;
+                    }
+
+                    .knowledge-base-page .kb-hero__title {
+                        margin: 0 0 4px 0;
+                        color: #fff;
+                        font-size: clamp(1.6rem, 2.5vw, 2.2rem);
+                        font-weight: 800;
+                        line-height: 1.15;
+                        letter-spacing: -0.02em;
+                        font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif), "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+                    }
+
+                    .knowledge-base-page .kb-hero__subtitle {
+                        margin: 0;
+                        color: rgba(255, 255, 255, 0.8);
+                        font-size: 0.88rem;
+                        max-width: 520px;
+                    }
+
+                    .knowledge-base-page .kb-hero__actions {
+                        display: flex;
+                        align-items: center;
+                        flex-wrap: wrap;
+                        gap: 10px;
+                        position: relative;
+                        z-index: 1;
+                    }
+
+                    .knowledge-base-page .kb-hero-btn {
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 6px;
+                        padding: 8px 16px;
+                        border-radius: 10px;
+                        border: 1px solid rgba(255, 255, 255, 0.3);
+                        background: rgba(255, 255, 255, 0.15);
+                        color: #fff;
+                        font-size: 0.82rem;
+                        font-weight: 600;
+                        text-decoration: none;
+                        cursor: pointer;
+                        transition: all 0.18s ease;
+                    }
+
+                    .knowledge-base-page .kb-hero-btn:hover,
+                    .knowledge-base-page .kb-hero-btn:focus {
+                        background: rgba(255, 255, 255, 0.25);
+                        border-color: rgba(255, 255, 255, 0.5);
+                        color: #fff;
+                        text-decoration: none;
+                        transform: translateY(-1px);
+                    }
+
+                    .knowledge-base-page .kb-hero-btn--solid {
+                        border-color: rgba(255, 255, 255, 0.6);
+                        background: rgba(255, 255, 255, 0.95);
+                        color: #b45309;
+                        font-weight: 700;
+                    }
+
+                    .knowledge-base-page .kb-hero-btn--solid:hover,
+                    .knowledge-base-page .kb-hero-btn--solid:focus {
+                        background: #fff;
+                        color: #92400e;
+                    }
+
+                    .knowledge-base-page .books-bounce {
+                        display: inline-block;
+                        animation: books-bounce 2s ease-in-out infinite;
+                    }
+
+                    @keyframes books-bounce {
+                        0%, 70%, 100% { transform: translateY(0); }
+                        15% { transform: translateY(-10px); }
+                        30% { transform: translateY(0); }
+                        45% { transform: translateY(-5px); }
+                        60% { transform: translateY(0); }
+                    }
+
+                    .knowledge-base-page .stat-card,
+                    .knowledge-base-page .kb-card {
+                        border-top: 3px solid #b45309;
+                    }
+
+                    @media (max-width: 767px) {
+                        .knowledge-base-page .kb-hero,
+                        .knowledge-base-page .kb-hero__actions {
+                            flex-direction: column;
+                            align-items: stretch;
+                        }
+
+                        .knowledge-base-page .kb-hero {
+                            padding: 20px;
+                        }
+
+                        .knowledge-base-page .kb-hero-btn {
+                            flex: 1 1 auto;
+                            justify-content: center;
+                        }
+                    }
+                </style>
+
+                <div class="kb-hero">
+                    <div class="kb-hero__content">
+                        <div class="kb-hero__eyebrow">
+                            <i class="mdi mdi-book-open-page-variant"></i>
+                            Knowledge Base
+                        </div>
+                        <h1 class="kb-hero__title">Knowledge Base &amp; FAQ <span class="books-bounce">📚</span></h1>
+                        <p class="kb-hero__subtitle">Manage internal articles, FAQs, and published help content from one place.</p>
                     </div>
-                    <div class="kb-page-actions">
-                        <a href="<?= base_url('Page/knowledgeBaseCreate'); ?>" class="btn-submit">
+                    <div class="kb-hero__actions">
+                        <a class="kb-hero-btn kb-hero-btn--solid" href="<?= base_url('Page/knowledgeBaseCreate'); ?>">
                             <i class="mdi mdi-plus-circle-outline"></i>
-                            Add New Article
+                            <span>Add New Article</span>
                         </a>
                     </div>
                 </div>

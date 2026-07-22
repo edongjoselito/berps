@@ -264,6 +264,157 @@ $unitNameValue = $isEditMode ? (string) ($editUnit->unitName ?? '') : '';
                         }
                     </style>
 
+                    <style>
+                        /* Hero Banner */
+                        .invoice-units-page .iu-hero {
+                            display: flex;
+                            align-items: center;
+                            justify-content: space-between;
+                            flex-wrap: wrap;
+                            gap: 16px;
+                            padding: 28px 24px;
+                            margin: 0 0 22px;
+                            border-radius: 16px;
+                            background: #115e59;
+                            box-shadow: 0 8px 32px rgba(17, 94, 89, 0.25);
+                            position: relative;
+                            overflow: hidden;
+                        }
+
+                        .invoice-units-page .iu-hero::before {
+                            content: '';
+                            position: absolute;
+                            top: -50%;
+                            right: -10%;
+                            width: 400px;
+                            height: 400px;
+                            border-radius: 50%;
+                            background: rgba(255, 255, 255, 0.06);
+                            pointer-events: none;
+                        }
+
+                        .invoice-units-page .iu-hero::after {
+                            content: '';
+                            position: absolute;
+                            bottom: -60%;
+                            right: 15%;
+                            width: 300px;
+                            height: 300px;
+                            border-radius: 50%;
+                            background: rgba(255, 255, 255, 0.04);
+                            pointer-events: none;
+                        }
+
+                        .invoice-units-page .iu-hero__content {
+                            position: relative;
+                            z-index: 1;
+                        }
+
+                        .invoice-units-page .iu-hero__eyebrow {
+                            display: inline-flex;
+                            align-items: center;
+                            gap: 6px;
+                            margin-bottom: 8px;
+                            color: rgba(255, 255, 255, 0.85);
+                            font-size: 0.78rem;
+                            font-weight: 600;
+                            letter-spacing: 0.04em;
+                        }
+
+                        .invoice-units-page .iu-hero__eyebrow i {
+                            font-size: 1rem;
+                        }
+
+                        .invoice-units-page .iu-hero__title {
+                            margin: 0 0 4px 0;
+                            color: #fff;
+                            font-size: clamp(1.6rem, 2.5vw, 2.2rem);
+                            font-weight: 800;
+                            line-height: 1.15;
+                            letter-spacing: -0.02em;
+                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif), "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+                        }
+
+                        .invoice-units-page .iu-hero__subtitle {
+                            margin: 0;
+                            color: rgba(255, 255, 255, 0.8);
+                            font-size: 0.88rem;
+                            max-width: 520px;
+                        }
+
+                        .invoice-units-page .iu-hero__actions {
+                            display: flex;
+                            align-items: center;
+                            flex-wrap: wrap;
+                            gap: 10px;
+                            position: relative;
+                            z-index: 1;
+                        }
+
+                        .invoice-units-page .iu-hero-btn {
+                            display: inline-flex;
+                            align-items: center;
+                            gap: 6px;
+                            padding: 8px 16px;
+                            border-radius: 10px;
+                            border: 1px solid rgba(255, 255, 255, 0.3);
+                            background: rgba(255, 255, 255, 0.15);
+                            color: #fff;
+                            font-size: 0.82rem;
+                            font-weight: 600;
+                            text-decoration: none;
+                            cursor: pointer;
+                            transition: all 0.18s ease;
+                        }
+
+                        .invoice-units-page .iu-hero-btn:hover,
+                        .invoice-units-page .iu-hero-btn:focus {
+                            background: rgba(255, 255, 255, 0.25);
+                            border-color: rgba(255, 255, 255, 0.5);
+                            color: #fff;
+                            text-decoration: none;
+                            transform: translateY(-1px);
+                        }
+
+                        .invoice-units-page .ruler-shake {
+                            display: inline-block;
+                            animation: ruler-shake 2.5s ease-in-out infinite;
+                        }
+
+                        @keyframes ruler-shake {
+                            0%, 70%, 100% { transform: rotate(0deg); }
+                            15% { transform: rotate(-10deg); }
+                            30% { transform: rotate(8deg); }
+                            45% { transform: rotate(-5deg); }
+                            60% { transform: rotate(0deg); }
+                        }
+
+                        .invoice-units-page .theme-card {
+                            border-top: 3px solid #115e59;
+                        }
+
+                        .invoice-units-page .theme-card-title {
+                            color: #115e59;
+                        }
+
+                        @media (max-width: 767px) {
+                            .invoice-units-page .iu-hero,
+                            .invoice-units-page .iu-hero__actions {
+                                flex-direction: column;
+                                align-items: stretch;
+                            }
+
+                            .invoice-units-page .iu-hero {
+                                padding: 20px;
+                            }
+
+                            .invoice-units-page .iu-hero-btn {
+                                flex: 1 1 auto;
+                                justify-content: center;
+                            }
+                        }
+                    </style>
+
                     <div class="row">
                         <div class="col-12">
                             <?php if ($this->session->flashdata('success')): ?>
@@ -278,91 +429,121 @@ $unitNameValue = $isEditMode ? (string) ($editUnit->unitName ?? '') : '';
                         </div>
                     </div>
 
-                    <div class="page-header">
-                        <div>
-                            <div class="page-eyebrow">Settings</div>
-                            <h4 class="page-title">Invoice Units</h4>
-                            <p class="page-subtitle">Manage the unit options shown in the invoice entry form, such as day, week, month, pcs, lot, unit, or meter.</p>
+                    <div class="iu-hero">
+                        <div class="iu-hero__content">
+                            <div class="iu-hero__eyebrow">
+                                <i class="mdi mdi-ruler-square"></i>
+                                Settings
+                            </div>
+                            <h1 class="iu-hero__title">Invoice Units <span class="ruler-shake">📐</span></h1>
+                            <p class="iu-hero__subtitle">Manage the unit options shown in the invoice entry form, such as day, week, month, pcs, lot, unit, or meter.</p>
+                        </div>
+                        <div class="iu-hero__actions">
+                            <a class="iu-hero-btn" href="<?= base_url(); ?>Page/admin">
+                                <i class="mdi mdi-arrow-left"></i>
+                                <span>Back to Dashboard</span>
+                            </a>
+                            <button type="button" class="iu-hero-btn iu-hero-btn--solid" data-toggle="modal" data-target="#unitModal" onclick="resetUnitForm()">
+                                <i class="mdi mdi-plus"></i>
+                                <span>Add Unit</span>
+                            </button>
                         </div>
                     </div>
 
-                    <div class="row">
-                        <div class="col-lg-4">
-                            <div class="theme-card">
-                                <div class="theme-card-head">
-                                    <h4 class="theme-card-title"><?= $isEditMode ? 'Edit Invoice Unit' : 'Add Invoice Unit'; ?></h4>
-                                </div>
-                                <div class="theme-card-body">
-                                    <form method="post" action="<?= base_url(); ?>Settings/InvoiceUnits">
-                                        <?php if ($isEditMode): ?>
-                                            <input type="hidden" name="unitID" value="<?= (int) ($editUnit->unitID ?? 0); ?>">
+                    <div class="theme-card" style="border-top: 3px solid #115e59;">
+                        <div class="theme-card-head">
+                            <h4 class="theme-card-title" style="color: #115e59;">Available Units</h4>
+                        </div>
+                        <div class="theme-card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 90px;">ID</th>
+                                            <th>Unit</th>
+                                            <th style="width: 180px;" class="text-center">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php if (!empty($units)): ?>
+                                            <?php foreach ($units as $unit): ?>
+                                                <tr>
+                                                    <td><?= (int) ($unit->unitID ?? 0); ?></td>
+                                                    <td><?= htmlspecialchars((string) ($unit->unitName ?? ''), ENT_QUOTES, 'UTF-8'); ?></td>
+                                                    <td class="text-center">
+                                                        <button type="button" class="btn btn-sm btn-info" onclick="editUnit(<?= (int) ($unit->unitID ?? 0); ?>, <?= htmlspecialchars(json_encode((string) ($unit->unitName ?? '')), ENT_QUOTES, 'UTF-8'); ?>)">Edit</button>
+                                                        <a
+                                                            href="<?= base_url(); ?>Settings/deleteInvoiceUnit?id=<?= (int) ($unit->unitID ?? 0); ?>"
+                                                            class="btn btn-sm btn-danger"
+                                                            onclick="return confirm('Delete this invoice unit?');">
+                                                            Delete
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                            <?php endforeach; ?>
+                                        <?php else: ?>
+                                            <tr>
+                                                <td colspan="3" class="text-center text-muted">No invoice units available yet.</td>
+                                            </tr>
                                         <?php endif; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
 
+                    <!-- Unit Modal -->
+                    <div class="modal fade" id="unitModal" tabindex="-1" role="dialog" aria-labelledby="unitModalLabel" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="unitModalLabel">Add Invoice Unit</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <form id="unitForm" method="post" action="<?= base_url(); ?>Settings/InvoiceUnits">
+                                    <div class="modal-body">
+                                        <input type="hidden" id="unitIDField" name="unitID" value="">
                                         <div class="form-group">
-                                            <label for="unit-name">Unit Name</label>
+                                            <label for="unitNameField">Unit Name</label>
                                             <input
                                                 type="text"
-                                                id="unit-name"
+                                                id="unitNameField"
                                                 name="unitName"
                                                 class="form-control"
-                                                value="<?= htmlspecialchars($unitNameValue, ENT_QUOTES, 'UTF-8'); ?>"
+                                                value=""
                                                 placeholder="e.g. day, pcs, lot"
                                                 maxlength="50"
                                                 required>
                                             <small class="form-text text-muted">Stored once and loaded dynamically into invoice entry rows.</small>
                                         </div>
-
-                                        <button type="submit" class="btn btn-primary"><?= $isEditMode ? 'Update Unit' : 'Save Unit'; ?></button>
-                                        <?php if ($isEditMode): ?>
-                                            <a href="<?= base_url(); ?>Settings/InvoiceUnits" class="btn btn-light ml-2">Cancel</a>
-                                        <?php endif; ?>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-lg-8">
-                            <div class="card">
-                                <div class="card-body">
-                                    <h4 class="card-title mb-3">Available Units</h4>
-                                    <div class="table-responsive">
-                                        <table class="table table-bordered table-hover">
-                                            <thead>
-                                                <tr>
-                                                    <th style="width: 90px;">ID</th>
-                                                    <th>Unit</th>
-                                                    <th style="width: 180px;" class="text-center">Actions</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <?php if (!empty($units)): ?>
-                                                    <?php foreach ($units as $unit): ?>
-                                                        <tr>
-                                                            <td><?= (int) ($unit->unitID ?? 0); ?></td>
-                                                            <td><?= htmlspecialchars((string) ($unit->unitName ?? ''), ENT_QUOTES, 'UTF-8'); ?></td>
-                                                            <td class="text-center">
-                                                                <a href="<?= base_url(); ?>Settings/InvoiceUnits?edit=<?= (int) ($unit->unitID ?? 0); ?>" class="btn btn-sm btn-info">Edit</a>
-                                                                <a
-                                                                    href="<?= base_url(); ?>Settings/deleteInvoiceUnit?id=<?= (int) ($unit->unitID ?? 0); ?>"
-                                                                    class="btn btn-sm btn-danger"
-                                                                    onclick="return confirm('Delete this invoice unit?');">
-                                                                    Delete
-                                                                </a>
-                                                            </td>
-                                                        </tr>
-                                                    <?php endforeach; ?>
-                                                <?php else: ?>
-                                                    <tr>
-                                                        <td colspan="3" class="text-center text-muted">No invoice units available yet.</td>
-                                                    </tr>
-                                                <?php endif; ?>
-                                            </tbody>
-                                        </table>
                                     </div>
-                                </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-light" data-dismiss="modal">Cancel</button>
+                                        <button type="submit" class="btn btn-primary" id="unitSubmitBtn">Save Unit</button>
+                                    </div>
+                                </form>
                             </div>
                         </div>
                     </div>
+
+                    <script>
+                        function resetUnitForm() {
+                            document.getElementById('unitForm').reset();
+                            document.getElementById('unitIDField').value = '';
+                            document.getElementById('unitModalLabel').textContent = 'Add Invoice Unit';
+                            document.getElementById('unitSubmitBtn').textContent = 'Save Unit';
+                        }
+
+                        function editUnit(id, name) {
+                            document.getElementById('unitIDField').value = id;
+                            document.getElementById('unitNameField').value = name;
+                            document.getElementById('unitModalLabel').textContent = 'Edit Invoice Unit';
+                            document.getElementById('unitSubmitBtn').textContent = 'Update Unit';
+                            $('#unitModal').modal('show');
+                        }
+                    </script>
                 </div>
             </div>
             <?php include('includes/footer.php'); ?>

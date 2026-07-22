@@ -719,15 +719,6 @@
 
             /* ─── Responsive ────────────────────────────────────────── */
             @media (max-width: 767px) {
-              .attendance-page .page-title {
-                font-size: 1.3rem;
-              }
-
-              .attendance-page .page-header {
-                flex-direction: column;
-                align-items: flex-start;
-              }
-
               .attendance-page .punch-grid {
                 grid-template-columns: 1fr;
               }
@@ -827,11 +818,14 @@
           <?php endif; ?>
 
           <!-- Page header -->
-          <header class="berps-page-header">
-            <div class="berps-page-header__content">
-              <span class="berps-page-header__eyebrow">Attendance</span>
-              <h1 class="berps-page-title"><?= htmlspecialchars($pageTitle, ENT_QUOTES, 'UTF-8'); ?></h1>
-              <p class="berps-page-subtitle">
+          <div class="att-hero">
+            <div class="att-hero__content">
+              <div class="att-hero__eyebrow">
+                <i class="mdi mdi-clock-time-four-outline"></i>
+                Attendance
+              </div>
+              <h1 class="att-hero__title"><?= htmlspecialchars($pageTitle, ENT_QUOTES, 'UTF-8'); ?> <span class="clock-tick">⏰</span></h1>
+              <p class="att-hero__subtitle">
                 <?= $level === 'Admin' ? 'All employee punch logs' : 'Your daily punch logs'; ?>
                 <?php if (!$isToday): ?>
                   &mdash; <?= htmlspecialchars($selectedLabel, ENT_QUOTES, 'UTF-8'); ?>
@@ -839,15 +833,15 @@
               </p>
             </div>
             <?php if ($level === 'Admin' && !$attendanceOnly && !$presenceOnly): ?>
-              <div class="berps-page-header__actions">
+              <div class="att-hero__actions">
                 <a href="<?= base_url(); ?>Page/dayAccomplishments?from=<?= htmlspecialchars($from, ENT_QUOTES, 'UTF-8'); ?>&to=<?= htmlspecialchars($to, ENT_QUOTES, 'UTF-8'); ?>"
-                  class="btn btn-primary">
-                  <i class="mdi mdi-trophy-outline" aria-hidden="true"></i>
-                  <?= htmlspecialchars($accompBtnText, ENT_QUOTES, 'UTF-8'); ?>
+                  class="att-hero-btn att-hero-btn--solid">
+                  <i class="mdi mdi-trophy-outline"></i>
+                  <span><?= htmlspecialchars($accompBtnText, ENT_QUOTES, 'UTF-8'); ?></span>
                 </a>
               </div>
             <?php endif; ?>
-          </header>
+          </div>
 
           <!-- Staff Punch Cards -->
           <?php if ($level !== 'Admin'): ?>

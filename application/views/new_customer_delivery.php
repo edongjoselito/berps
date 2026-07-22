@@ -38,18 +38,22 @@ $data3 = isset($data3) ? $data3 : array();
                     <?php endif; ?>
 
 
-                    <header class="berps-page-header">
-                        <div class="berps-page-header__content">
-                            <span class="berps-page-header__eyebrow">Customer Delivery</span>
-                            <h1 class="berps-page-title">New Delivery</h1>
-                            <p class="berps-page-subtitle">Create a new delivery record for customer items that are still payable</p>
+                    <div class="cd-entry-hero">
+                        <div class="cd-entry-hero__content">
+                            <div class="cd-entry-hero__eyebrow">
+                                <i class="mdi mdi-truck-plus-outline"></i>
+                                Customer Delivery
+                            </div>
+                            <h1 class="cd-entry-hero__title">New Delivery <span class="truck-move">🚚</span></h1>
+                            <p class="cd-entry-hero__subtitle">Create a delivery record for customer items with tracking and payment details.</p>
                         </div>
-                        <div class="berps-page-header__actions">
-                            <a href="<?= base_url('Page/customerDeliveryList'); ?>" class="btn btn-outline-secondary">
-                                <i class="mdi mdi-arrow-left mr-1" aria-hidden="true"></i>Back to List
+                        <div class="cd-entry-hero__actions">
+                            <a href="<?= base_url('Page/customerDeliveryList'); ?>" class="cd-entry-hero-btn">
+                                <i class="mdi mdi-arrow-left"></i>
+                                <span>Back to List</span>
                             </a>
                         </div>
-                    </header>
+                    </div>
 
                     <form method="post" action="<?= base_url('Page/saveCustomerDelivery'); ?>">
                         <div class="entry-layout">

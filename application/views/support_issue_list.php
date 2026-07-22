@@ -153,13 +153,143 @@ $pageTitle = $scopeLabels[$scope] ?? 'Support Tickets';
                             width: fit-content;
                         }
                     }
+
+                    /* ─── Hero Banner ─────────────────────────────────────── */
+                    .client-profile-page .support-hero {
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        flex-wrap: wrap;
+                        gap: 16px;
+                        padding: 28px 24px;
+                        margin: 24px 0 22px;
+                        border-radius: 22px;
+                        background: #0a7e8c;
+                        box-shadow: 0 8px 32px rgba(10, 126, 140, 0.25);
+                        position: relative;
+                        overflow: hidden;
+                    }
+
+                    .client-profile-page .support-hero::before {
+                        content: '';
+                        position: absolute;
+                        top: -50%;
+                        right: -10%;
+                        width: 400px;
+                        height: 400px;
+                        border-radius: 50%;
+                        background: rgba(255, 255, 255, 0.06);
+                        pointer-events: none;
+                    }
+
+                    .client-profile-page .support-hero::after {
+                        content: '';
+                        position: absolute;
+                        bottom: -60%;
+                        right: 15%;
+                        width: 300px;
+                        height: 300px;
+                        border-radius: 50%;
+                        background: rgba(255, 255, 255, 0.04);
+                        pointer-events: none;
+                    }
+
+                    .client-profile-page .support-hero__content {
+                        position: relative;
+                        z-index: 1;
+                    }
+
+                    .client-profile-page .support-hero__eyebrow {
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 6px;
+                        margin-bottom: 8px;
+                        color: rgba(255, 255, 255, 0.85);
+                        font-size: 0.78rem;
+                        font-weight: 600;
+                        letter-spacing: 0.04em;
+                    }
+
+                    .client-profile-page .support-hero__eyebrow i {
+                        font-size: 1rem;
+                    }
+
+                    .client-profile-page .support-hero__title {
+                        margin: 0 0 4px 0;
+                        color: #fff;
+                        font-size: clamp(1.6rem, 2.5vw, 2.2rem);
+                        font-weight: 800;
+                        line-height: 1.15;
+                        letter-spacing: -0.02em;
+                    }
+
+                    .client-profile-page .support-hero__subtitle {
+                        margin: 0;
+                        color: rgba(255, 255, 255, 0.8);
+                        font-size: 0.88rem;
+                        max-width: 480px;
+                    }
+
+                    /* SOS wave animation */
+                    .client-profile-page .support-wave {
+                        display: inline-block;
+                        animation: support-wave 2s ease-in-out infinite;
+                        transform-origin: 70% 70%;
+                    }
+
+                    @keyframes support-wave {
+                        0%, 70%, 100% { transform: rotate(0deg); }
+                        10% { transform: rotate(-20deg); }
+                        20% { transform: rotate(15deg); }
+                        30% { transform: rotate(-10deg); }
+                        40% { transform: rotate(8deg); }
+                        50% { transform: rotate(0deg); }
+                    }
+
+                    /* Teal accent on panel card */
+                    .client-profile-page .panel-card {
+                        border-top: 3px solid #0a7e8c;
+                    }
+
+                    .client-profile-page .panel-header {
+                        border-bottom: 2px solid #0a7e8c;
+                    }
+
+                    .client-profile-page .panel-title {
+                        color: #0a7e8c;
+                    }
+
+                    .client-profile-page .btn-filter.is-active {
+                        background: linear-gradient(135deg, #0a7e8c, #086a77);
+                        color: #fff;
+                        border-color: transparent;
+                    }
+
+                    .client-profile-page .btn-open {
+                        background: #e0f5f7;
+                        color: #0a7e8c;
+                    }
+
+                    /* Responsive hero */
+                    @media (max-width: 767px) {
+                        .client-profile-page .support-hero {
+                            padding: 20px;
+                        }
+
+                        .client-profile-page .support-hero__title {
+                            font-size: 1.3rem;
+                        }
+                    }
                 </style>
 
-                <div class="cp-header">
-                    <div>
-                        <div class="cp-eyebrow">Support Portal</div>
-                        <h1 class="cp-title"><?= htmlspecialchars($pageTitle, ENT_QUOTES, 'UTF-8'); ?></h1>
-                        <p class="cp-subtitle">Unread notifications: <?= number_format($unreadNotificationCount); ?></p>
+                <div class="support-hero">
+                    <div class="support-hero__content">
+                        <div class="support-hero__eyebrow">
+                            <i class="mdi mdi-lifebuoy"></i>
+                            Support Portal
+                        </div>
+                        <h1 class="support-hero__title"><?= htmlspecialchars($pageTitle, ENT_QUOTES, 'UTF-8'); ?> <span class="support-wave">🆘</span></h1>
+                        <p class="support-hero__subtitle">Manage customer support tickets, track response times, and resolve issues efficiently.</p>
                     </div>
                 </div>
 

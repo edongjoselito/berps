@@ -69,6 +69,7 @@ $forwardedTaskValue   = isset($forwardedTaskCount) ? (int) $forwardedTaskCount :
 
 $timeNotice           = trim((string) ($time_notice ?? ''));
 $attendanceStatusMeta = $timeNotice !== '' ? $timeNotice : 'Your attendance record looks complete for today.';
+$todayTimestamp       = strtotime(date('Y-m-d'));
 $currentDateLabel     = date('l, F j, Y');
 $currentMonthLabel    = date('F Y');
 ?>
@@ -103,77 +104,126 @@ $currentMonthLabel    = date('F Y');
                         </div>
                     <?php endif; ?>
 
-                    <div class="dash-header">
-                        <div class="dash-header-left">
-                            <div class="eyebrow">Staff Overview</div>
-                            <h1>Staff Dashboard</h1>
+                    <!-- Hero greeting banner -->
+                    <div class="dash-hero">
+                        <div class="dash-hero__content">
+                            <div class="dash-hero__eyebrow">
+                                <i class="mdi mdi-hand-peace-outline"></i>
+                                <?= htmlspecialchars($currentDateLabel, ENT_QUOTES, 'UTF-8'); ?>
+                            </div>
+                            <h1 class="dash-hero__title">Welcome back! <span class="wave-emoji">👋</span></h1>
+                            <p class="dash-hero__subtitle"><?= htmlspecialchars($attendanceStatusMeta, ENT_QUOTES, 'UTF-8'); ?></p>
                         </div>
-                        <div class="header-actions">
+                        <div class="dash-hero__actions">
                             <?php if (!$staffDashboardIsPackage2): ?>
-                            <a href="<?= base_url(); ?>Page/myDTR" class="btn btn-clean">
+                            <a href="<?= base_url(); ?>Page/myDTR" class="dash-hero-btn">
                                 <i class="mdi mdi-clock-time-four-outline"></i>
-                                My DTR
+                                <span>My DTR</span>
                             </a>
-                            <a href="<?= base_url(); ?>Page/supportIssues?scope=unassigned" class="btn btn-clean">
+                            <a href="<?= base_url(); ?>Page/supportIssues?scope=unassigned" class="dash-hero-btn">
                                 <i class="mdi mdi-lifebuoy"></i>
-                                Unassigned
-                                <span class="badge badge-pill badge-danger ml-2"><?= number_format((int) ($unassignedTicketCount ?? 0)); ?></span>
+                                <span>Unassigned</span>
+                                <span class="dash-hero-btn__badge"><?= number_format((int) ($unassignedTicketCount ?? 0)); ?></span>
                             </a>
-                            <a href="<?= base_url(); ?>Page/projectAddTask?status=open&amp;scope=forwarded" class="btn btn-clean">
+                            <a href="<?= base_url(); ?>Page/projectAddTask?status=open&amp;scope=forwarded" class="dash-hero-btn">
                                 <i class="mdi mdi-share-all-outline"></i>
-                                Forwarded Tasks
-                                <span class="badge badge-pill badge-danger ml-2"><?= number_format($forwardedTaskValue); ?></span>
+                                <span>Forwarded</span>
+                                <span class="dash-hero-btn__badge"><?= number_format($forwardedTaskValue); ?></span>
                             </a>
                             <?php endif; ?>
-                            <a href="<?= base_url(); ?>Page/projectAddTask" class="btn btn-solid">
+                            <a href="<?= base_url(); ?>Page/projectAddTask" class="dash-hero-btn dash-hero-btn--solid">
                                 <i class="mdi mdi-format-list-checks"></i>
-                                Task List
+                                <span>Task List</span>
                             </a>
                         </div>
                     </div>
 
+                    <!-- KPI cards -->
                     <div class="kpi-grid">
                         <?php if (!$staffDashboardIsPackage2): ?>
                         <div class="kpi-card kpi-card--info">
-                            <div class="kpi-top">
-                                <div class="kpi-icon"><i class="mdi mdi-bell-ring-outline"></i></div>
+                            <div class="kpi-card__icon"><i class="mdi mdi-bell-ring-outline"></i></div>
+                            <div class="kpi-card__body">
+                                <div class="kpi-card__label">Due Today</div>
+                                <div class="kpi-card__num"><?= number_format($dueTodayCount); ?></div>
                             </div>
-                            <div class="kpi-label">Due Today</div>
-                            <div class="kpi-num"><?= number_format($dueTodayCount); ?></div>
-                            <!-- <div class="kpi-meta">Reminders scheduled for <?= htmlspecialchars($currentDateLabel, ENT_QUOTES, 'UTF-8'); ?>.</div> -->
+                            <div class="kpi-card__bar"></div>
                         </div>
                         <?php endif; ?>
 
                         <div class="kpi-card kpi-card--warning">
-                            <div class="kpi-top">
-                                <div class="kpi-icon"><i class="mdi mdi-calendar-clock"></i></div>
+                            <div class="kpi-card__icon"><i class="mdi mdi-calendar-clock"></i></div>
+                            <div class="kpi-card__body">
+                                <div class="kpi-card__label">Tasks Due Today</div>
+                                <div class="kpi-card__num"><?= number_format($taskDueTodayValue); ?></div>
                             </div>
-                            <div class="kpi-label">Tasks Due Today</div>
-                            <div class="kpi-num"><?= number_format($taskDueTodayValue); ?></div>
-                            <!-- <div class="kpi-meta">Open tasks to complete or update today.</div> -->
+                            <div class="kpi-card__bar"></div>
                         </div>
 
                         <div class="kpi-card kpi-card--danger">
-                            <div class="kpi-top">
-                                <div class="kpi-icon"><i class="mdi mdi-alert-circle-outline"></i></div>
+                            <div class="kpi-card__icon"><i class="mdi mdi-alert-circle-outline"></i></div>
+                            <div class="kpi-card__body">
+                                <div class="kpi-card__label">Overdue Tasks</div>
+                                <div class="kpi-card__num"><?= number_format($taskOverdueValue); ?></div>
                             </div>
-                            <div class="kpi-label">Overdue Tasks</div>
-                            <div class="kpi-num"><?= number_format($taskOverdueValue); ?></div>
-                            <!-- <div class="kpi-meta">Tasks whose due date has already passed.</div> -->
+                            <div class="kpi-card__bar"></div>
                         </div>
 
                         <div class="kpi-card kpi-card--success">
-                            <div class="kpi-top">
-                                <div class="kpi-icon"><i class="mdi mdi-trophy-outline"></i></div>
+                            <div class="kpi-card__icon"><i class="mdi mdi-trophy-outline"></i></div>
+                            <div class="kpi-card__body">
+                                <div class="kpi-card__label">Top Monthly Score</div>
+                                <div class="kpi-card__num"><?= number_format($topScoreValue); ?></div>
                             </div>
-                            <div class="kpi-label">Top Monthly Score</div>
-                            <div class="kpi-num"><?= number_format($topScoreValue); ?></div>
-                            <!-- <div class="kpi-meta">Highest accomplishment total for <?= htmlspecialchars($currentMonthLabel, ENT_QUOTES, 'UTF-8'); ?>.</div> -->
+                            <div class="kpi-card__bar"></div>
                         </div>
                     </div>
 
-                    <div class="content-grid">
-                        <div>
+                    <!-- Two-column layout: sidebar + main -->
+                    <div class="dash-layout">
+                        <!-- Left sidebar: Task queue + quick stats -->
+                        <aside class="dash-sidebar">
+                            <?php if (!empty($taskQueueRows)): ?>
+                            <div class="side-card side-card--orange">
+                                <div class="side-card__head">
+                                    <div class="side-card__icon"><i class="mdi mdi-fire"></i></div>
+                                    <h5 class="side-card__title">Priority Queue</h5>
+                                </div>
+                                <div class="side-card__body">
+                                    <?php foreach ($taskQueueRows as $tq):
+                                        $tqTask = trim((string) ($tq->task ?? 'Untitled'));
+                                        $tqDue = trim((string) ($tq->dueDate ?? ''));
+                                        $tqHasDue = ($tqDue !== '' && $tqDue !== '0000-00-00');
+                                        $tqDueDisplay = $tqHasDue ? date('M j', strtotime($tqDue)) : 'No date';
+                                        $tqPriority = (string) ($tq->priority ?? '2');
+                                        $tqPrioLabel = $tqPriority === '1' ? 'High' : ($tqPriority === '2' ? 'Medium' : 'Low');
+                                        $tqPrioClass = $tqPriority === '1' ? 'is-high' : ($tqPriority === '2' ? 'is-medium' : 'is-low');
+                                        $tqDayDiff = 0;
+                                        $tqUrgencyClass = '';
+                                        if ($tqHasDue) {
+                                            $tqDayDiff = (int) floor((strtotime($tqDue) - $todayTimestamp) / 86400);
+                                            if ($tqDayDiff < 0) $tqUrgencyClass = 'is-overdue';
+                                            elseif ($tqDayDiff === 0) $tqUrgencyClass = 'is-today';
+                                            else $tqUrgencyClass = 'is-soon';
+                                        }
+                                        $tqLink = base_url('Page/taskStat?id=') . (int) ($tq->taskID ?? 0);
+                                    ?>
+                                        <a href="<?= htmlspecialchars($tqLink, ENT_QUOTES, 'UTF-8'); ?>" class="queue-item <?= htmlspecialchars($tqUrgencyClass, ENT_QUOTES, 'UTF-8'); ?>">
+                                            <div class="queue-item__task"><?= htmlspecialchars(mb_strimwidth($tqTask, 0, 50, '…'), ENT_QUOTES, 'UTF-8'); ?></div>
+                                            <div class="queue-item__meta">
+                                                <span class="queue-item__prio <?= htmlspecialchars($tqPrioClass, ENT_QUOTES, 'UTF-8'); ?>"><?= htmlspecialchars($tqPrioLabel, ENT_QUOTES, 'UTF-8'); ?></span>
+                                                <span class="queue-item__due"><i class="mdi mdi-calendar-blank-outline"></i> <?= htmlspecialchars($tqDueDisplay, ENT_QUOTES, 'UTF-8'); ?></span>
+                                            </div>
+                                        </a>
+                                    <?php endforeach; ?>
+                                </div>
+                            </div>
+                            <?php endif; ?>
+
+                        </aside>
+
+                        <!-- Main content area -->
+                        <div class="dash-main">
                             <?php if ($staffDashboardIsPackage2): ?>
                             <!-- Calendar for Package 2 -->
                             <div class="panel">

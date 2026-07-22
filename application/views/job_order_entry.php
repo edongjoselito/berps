@@ -185,8 +185,8 @@ $serviceCategories = array_values($serviceCategories);
                             width: 8px;
                             height: 8px;
                             border-radius: 50%;
-                            background: linear-gradient(135deg, var(--primary), var(--primary-2));
-                            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.10);
+                            background: #5f0f40;
+                            box-shadow: 0 0 0 4px rgba(95, 15, 64, 0.10);
                         }
 
                         .job-order-entry-page .entry-title {
@@ -241,13 +241,14 @@ $serviceCategories = array_values($serviceCategories);
                         .job-order-entry-page .btn-submit {
                             border: none;
                             color: #fff;
-                            background: linear-gradient(135deg, var(--primary), var(--primary-2));
-                            box-shadow: 0 10px 24px rgba(37, 99, 235, 0.24);
+                            background: #5f0f40;
+                            box-shadow: 0 10px 24px rgba(95, 15, 64, 0.24);
                         }
 
                         .job-order-entry-page .btn-submit:hover {
                             transform: translateY(-1px);
-                            box-shadow: 0 14px 28px rgba(37, 99, 235, 0.28);
+                            box-shadow: 0 14px 28px rgba(95, 15, 64, 0.28);
+                            background: #4a0a30;
                         }
 
                         .job-order-entry-page .entry-layout {
@@ -275,6 +276,7 @@ $serviceCategories = array_values($serviceCategories);
                             padding: 18px 22px;
                             border-bottom: 1px solid var(--line);
                             background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(249, 251, 255, 0.94));
+                            border-top: 3px solid #5f0f40;
                         }
 
                         .job-order-entry-page .entry-card-title {
@@ -410,17 +412,179 @@ $serviceCategories = array_values($serviceCategories);
                                 padding-right: 16px;
                             }
                         }
+
+                        /* Hero banner for job order entry */
+                        .job-order-entry-page .jo-entry-hero {
+                            display: flex;
+                            align-items: center;
+                            justify-content: space-between;
+                            flex-wrap: wrap;
+                            gap: 18px;
+                            padding: 28px 24px;
+                            margin: 24px 0 22px;
+                            border-radius: 18px;
+                            background: #5f0f40;
+                            box-shadow: 0 8px 32px rgba(95, 15, 64, 0.25);
+                            position: relative;
+                            overflow: hidden;
+                        }
+
+                        .job-order-entry-page .jo-entry-hero::before {
+                            content: '';
+                            position: absolute;
+                            top: -50%;
+                            right: -10%;
+                            width: 400px;
+                            height: 400px;
+                            border-radius: 50%;
+                            background: rgba(255, 255, 255, 0.06);
+                            pointer-events: none;
+                        }
+
+                        .job-order-entry-page .jo-entry-hero::after {
+                            content: '';
+                            position: absolute;
+                            bottom: -60%;
+                            right: 15%;
+                            width: 300px;
+                            height: 300px;
+                            border-radius: 50%;
+                            background: rgba(255, 255, 255, 0.04);
+                            pointer-events: none;
+                        }
+
+                        .job-order-entry-page .jo-entry-hero__content {
+                            position: relative;
+                            z-index: 1;
+                        }
+
+                        .job-order-entry-page .jo-entry-hero__eyebrow {
+                            display: inline-flex;
+                            align-items: center;
+                            gap: 6px;
+                            margin-bottom: 8px;
+                            color: rgba(255, 255, 255, 0.8);
+                            font-size: 0.78rem;
+                            font-weight: 600;
+                            letter-spacing: 0.04em;
+                        }
+
+                        .job-order-entry-page .jo-entry-hero__eyebrow i {
+                            font-size: 1rem;
+                        }
+
+                        .job-order-entry-page .jo-entry-hero__title {
+                            margin: 0 0 4px 0;
+                            color: #fff;
+                            font-size: 2.1rem;
+                            font-weight: 800;
+                            line-height: 1.15;
+                            letter-spacing: -0.02em;
+                        }
+
+                        .job-order-entry-page .jo-entry-hero__subtitle {
+                            margin: 0;
+                            color: rgba(255, 255, 255, 0.75);
+                            font-size: 0.88rem;
+                            max-width: 480px;
+                        }
+
+                        .job-order-entry-page .jo-entry-hero__actions {
+                            display: flex;
+                            align-items: center;
+                            flex-wrap: wrap;
+                            gap: 8px;
+                            position: relative;
+                            z-index: 1;
+                        }
+
+                        .job-order-entry-page .jo-entry-hero-btn {
+                            display: inline-flex;
+                            align-items: center;
+                            gap: 6px;
+                            padding: 10px 18px;
+                            border-radius: 12px;
+                            border: 1px solid rgba(255, 255, 255, 0.25);
+                            background: rgba(255, 255, 255, 0.12);
+                            color: #fff;
+                            font-size: 0.92rem;
+                            font-weight: 700;
+                            text-decoration: none;
+                            cursor: pointer;
+                            transition: all 0.18s ease;
+                        }
+
+                        .job-order-entry-page .jo-entry-hero-btn:hover,
+                        .job-order-entry-page .jo-entry-hero-btn:focus {
+                            background: rgba(255, 255, 255, 0.22);
+                            border-color: rgba(255, 255, 255, 0.4);
+                            color: #fff;
+                            text-decoration: none;
+                            transform: translateY(-1px);
+                        }
+
+                        .job-order-entry-page .jo-entry-hero-btn--solid {
+                            border-color: rgba(255, 255, 255, 0.6);
+                            background: rgba(255, 255, 255, 0.95);
+                            color: #5f0f40;
+                        }
+
+                        .job-order-entry-page .jo-entry-hero-btn--solid:hover,
+                        .job-order-entry-page .jo-entry-hero-btn--solid:focus {
+                            background: #fff;
+                            color: #4a0a30;
+                        }
+
+                        /* Clipboard tap animation */
+                        .job-order-entry-page .jo-tap {
+                            display: inline-block;
+                            animation: jo-tap 2s ease-in-out infinite;
+                        }
+
+                        @keyframes jo-tap {
+                            0%, 70%, 100% { transform: translateY(0) rotate(0deg); }
+                            10% { transform: translateY(-8px) rotate(-6deg); }
+                            20% { transform: translateY(0) rotate(0deg); }
+                            30% { transform: translateY(-5px) rotate(4deg); }
+                            40% { transform: translateY(0) rotate(0deg); }
+                            50% { transform: translateY(-2px) rotate(-2deg); }
+                            60% { transform: translateY(0) rotate(0deg); }
+                        }
+
+                        @media (max-width: 767px) {
+                            .job-order-entry-page .jo-entry-hero,
+                            .job-order-entry-page .jo-entry-hero__actions {
+                                flex-direction: column;
+                                align-items: stretch;
+                            }
+
+                            .job-order-entry-page .jo-entry-hero {
+                                padding: 20px;
+                            }
+
+                            .job-order-entry-page .jo-entry-hero-btn {
+                                flex: 1 1 auto;
+                                justify-content: center;
+                            }
+
+                            .job-order-entry-page .jo-entry-hero__title {
+                                font-size: 1.75rem;
+                            }
+                        }
                     </style>
 
-                    <div class="entry-header">
-                        <div>
-                            <div class="entry-eyebrow">Job Order Workspace</div>
-                            <h4 class="entry-title"><?= $isEditMode ? 'Update Job Order' : 'Create Job Order'; ?></h4>
-                            <div class="entry-subtitle">Use the full page to encode customer, service, and billing details without squeezing the form into a modal.</div>
+                    <div class="jo-entry-hero">
+                        <div class="jo-entry-hero__content">
+                            <div class="jo-entry-hero__eyebrow">
+                                <i class="mdi mdi-clipboard-edit-outline"></i>
+                                Job Order Workspace
+                            </div>
+                            <h1 class="jo-entry-hero__title"><?= $isEditMode ? 'Update Job Order' : 'Create Job Order'; ?> <span class="jo-tap">📋</span></h1>
+                            <p class="jo-entry-hero__subtitle">Encode customer, service, and billing details for this job order.</p>
                         </div>
-                        <div class="entry-actions">
-                            <a href="<?= htmlspecialchars($backUrl, ENT_QUOTES, 'UTF-8'); ?>" class="btn-action"><?= htmlspecialchars($backLabel, ENT_QUOTES, 'UTF-8'); ?></a>
-                            <button type="submit" form="jobOrderEntryForm" class="btn-submit"><?= $isEditMode ? 'Update Job Order' : 'Save Job Order'; ?></button>
+                        <div class="jo-entry-hero__actions">
+                            <a href="<?= htmlspecialchars($backUrl, ENT_QUOTES, 'UTF-8'); ?>" class="jo-entry-hero-btn"><?= htmlspecialchars($backLabel, ENT_QUOTES, 'UTF-8'); ?></a>
+                            <button type="submit" form="jobOrderEntryForm" class="jo-entry-hero-btn jo-entry-hero-btn--solid"><?= $isEditMode ? 'Update Job Order' : 'Save Job Order'; ?></button>
                         </div>
                     </div>
 

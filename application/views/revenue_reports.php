@@ -490,36 +490,206 @@ $currentMonthStartUrl = base_url() . 'Page/revenueReports?date_from=' . date('Y-
                                 padding-right: 16px;
                             }
                         }
+
+                        /* Hero Banner */
+                        .revenue-reports-page .rr-hero {
+                            display: flex;
+                            align-items: center;
+                            justify-content: space-between;
+                            flex-wrap: wrap;
+                            gap: 16px;
+                            padding: 28px 24px;
+                            margin: 24px 0 22px;
+                            border-radius: 16px;
+                            background: #0d7c4a;
+                            box-shadow: 0 8px 32px rgba(13, 124, 74, 0.25);
+                            position: relative;
+                            overflow: hidden;
+                        }
+
+                        .revenue-reports-page .rr-hero::before {
+                            content: '';
+                            position: absolute;
+                            top: -50%;
+                            right: -10%;
+                            width: 400px;
+                            height: 400px;
+                            border-radius: 50%;
+                            background: rgba(255, 255, 255, 0.06);
+                            pointer-events: none;
+                        }
+
+                        .revenue-reports-page .rr-hero::after {
+                            content: '';
+                            position: absolute;
+                            bottom: -60%;
+                            right: 15%;
+                            width: 300px;
+                            height: 300px;
+                            border-radius: 50%;
+                            background: rgba(255, 255, 255, 0.04);
+                            pointer-events: none;
+                        }
+
+                        .revenue-reports-page .rr-hero__content {
+                            position: relative;
+                            z-index: 1;
+                        }
+
+                        .revenue-reports-page .rr-hero__eyebrow {
+                            display: inline-flex;
+                            align-items: center;
+                            gap: 6px;
+                            margin-bottom: 8px;
+                            color: rgba(255, 255, 255, 0.85);
+                            font-size: 0.78rem;
+                            font-weight: 600;
+                            letter-spacing: 0.04em;
+                        }
+
+                        .revenue-reports-page .rr-hero__eyebrow i {
+                            font-size: 1rem;
+                        }
+
+                        .revenue-reports-page .rr-hero__title {
+                            margin: 0 0 4px 0;
+                            color: #fff;
+                            font-size: clamp(1.6rem, 2.5vw, 2.2rem);
+                            font-weight: 800;
+                            line-height: 1.15;
+                            letter-spacing: -0.02em;
+                        }
+
+                        .revenue-reports-page .rr-hero__subtitle {
+                            margin: 0;
+                            color: rgba(255, 255, 255, 0.8);
+                            font-size: 0.88rem;
+                            max-width: 480px;
+                        }
+
+                        .revenue-reports-page .rr-hero__actions {
+                            display: flex;
+                            align-items: center;
+                            flex-wrap: wrap;
+                            gap: 10px;
+                            position: relative;
+                            z-index: 1;
+                        }
+
+                        .revenue-reports-page .rr-hero-btn {
+                            display: inline-flex;
+                            align-items: center;
+                            gap: 6px;
+                            padding: 8px 16px;
+                            border-radius: 10px;
+                            border: 1px solid rgba(255, 255, 255, 0.3);
+                            background: rgba(255, 255, 255, 0.15);
+                            color: #fff;
+                            font-size: 0.82rem;
+                            font-weight: 600;
+                            text-decoration: none;
+                            cursor: pointer;
+                            transition: all 0.18s ease;
+                        }
+
+                        .revenue-reports-page .rr-hero-btn:hover,
+                        .revenue-reports-page .rr-hero-btn:focus {
+                            background: rgba(255, 255, 255, 0.25);
+                            border-color: rgba(255, 255, 255, 0.5);
+                            color: #fff;
+                            text-decoration: none;
+                            transform: translateY(-1px);
+                        }
+
+                        .revenue-reports-page .rr-hero-btn--solid {
+                            border-color: rgba(255, 255, 255, 0.6);
+                            background: rgba(255, 255, 255, 0.95);
+                            color: #0d7c4a;
+                            font-weight: 700;
+                        }
+
+                        .revenue-reports-page .rr-hero-btn--solid:hover,
+                        .revenue-reports-page .rr-hero-btn--solid:focus {
+                            background: #fff;
+                            color: #0a6b3f;
+                        }
+
+                        /* Chart bounce animation */
+                        .revenue-reports-page .chart-bounce {
+                            display: inline-block;
+                            animation: chart-bounce 2s ease-in-out infinite;
+                        }
+
+                        @keyframes chart-bounce {
+                            0%, 70%, 100% { transform: translateY(0) scale(1); }
+                            15% { transform: translateY(-10px) scale(1.1); }
+                            30% { transform: translateY(0) scale(1); }
+                            45% { transform: translateY(-5px) scale(1.05); }
+                            60% { transform: translateY(0) scale(1); }
+                        }
+
+                        /* Emerald accent on cards */
+                        .revenue-reports-page .panel-card {
+                            border-top: 3px solid #0d7c4a;
+                        }
+
+                        .revenue-reports-page .panel-header {
+                            border-bottom: 2px solid #0d7c4a;
+                        }
+
+                        .revenue-reports-page .panel-title {
+                            color: #0d7c4a;
+                        }
+
+                        /* Responsive hero */
+                        @media (max-width: 767px) {
+                            .revenue-reports-page .rr-hero,
+                            .revenue-reports-page .rr-hero__actions {
+                                flex-direction: column;
+                                align-items: stretch;
+                            }
+
+                            .revenue-reports-page .rr-hero {
+                                padding: 20px;
+                            }
+
+                            .revenue-reports-page .rr-hero-btn {
+                                flex: 1 1 auto;
+                                justify-content: center;
+                            }
+                        }
                     </style>
 
-                    <div class="rr-header">
-                        <div>
-                            <div class="rr-eyebrow">Revenue Intelligence</div>
-                            <h1 class="rr-title">Revenue Reports</h1>
-                            <p class="rr-subtitle">
+                    <div class="rr-hero">
+                        <div class="rr-hero__content">
+                            <div class="rr-hero__eyebrow">
+                                <i class="mdi mdi-chart-line-variant"></i>
+                                Revenue Intelligence
+                            </div>
+                            <h1 class="rr-hero__title">Revenue Reports <span class="chart-bounce">📊</span></h1>
+                            <p class="rr-hero__subtitle">
                                 Track recurring invoices, expected monthly income, and accepted-payment collections in one place.
                                 <?php if ($businessName !== ''): ?>
                                     <span class="d-block mt-1"><?= htmlspecialchars($businessName, ENT_QUOTES, 'UTF-8'); ?><?= $businessAddress !== '' ? ' · ' . htmlspecialchars($businessAddress, ENT_QUOTES, 'UTF-8') : ''; ?></span>
                                 <?php endif; ?>
                             </p>
                         </div>
-
-                        <div class="rr-actions">
-                            <button type="button" class="btn-soft" data-toggle="modal" data-target="#filterModal">
-                                <i class="fas fa-filter"></i>
-                                Filter
+                        <div class="rr-hero__actions">
+                            <button type="button" class="rr-hero-btn" data-toggle="modal" data-target="#filterModal">
+                                <i class="mdi mdi-filter-variant"></i>
+                                <span>Filter</span>
                             </button>
-                            <a class="btn-soft" href="<?= htmlspecialchars(base_url() . 'Page/invList', ENT_QUOTES, 'UTF-8'); ?>">
-                                <i class="fas fa-file-invoice"></i>
-                                Invoice List
+                            <a class="rr-hero-btn" href="<?= htmlspecialchars(base_url() . 'Page/invList', ENT_QUOTES, 'UTF-8'); ?>">
+                                <i class="mdi mdi-file-document-outline"></i>
+                                <span>Invoice List</span>
                             </a>
-                            <a class="btn-soft" href="<?= htmlspecialchars(base_url() . 'Page/paymentList', ENT_QUOTES, 'UTF-8'); ?>">
-                                <i class="fas fa-money-check-dollar"></i>
-                                Payment List
+                            <a class="rr-hero-btn" href="<?= htmlspecialchars(base_url() . 'Page/paymentList', ENT_QUOTES, 'UTF-8'); ?>">
+                                <i class="mdi mdi-cash-check"></i>
+                                <span>Payment List</span>
                             </a>
-                            <a class="btn-solid" href="<?= htmlspecialchars(base_url() . 'Page/revenueReports', ENT_QUOTES, 'UTF-8'); ?>">
-                                <i class="fas fa-rotate-right"></i>
-                                Reset
+                            <a class="rr-hero-btn rr-hero-btn--solid" href="<?= htmlspecialchars(base_url() . 'Page/revenueReports', ENT_QUOTES, 'UTF-8'); ?>">
+                                <i class="mdi mdi-refresh"></i>
+                                <span>Reset</span>
                             </a>
                         </div>
                     </div>

@@ -34,21 +34,26 @@
                <div class="content">
                     <div class="container-fluid reminders-list-page berps-page">
 
-                         <header class="berps-page-header">
-                              <div class="berps-page-header__content">
-                                   <span class="berps-page-header__eyebrow">Productivity</span>
-                                   <h1 class="berps-page-title">Reminder List</h1>
-                                   <p class="berps-page-subtitle">Stay on top of important tasks and due dates.</p>
+                         <div class="reminders-hero">
+                              <div class="reminders-hero__content">
+                                   <div class="reminders-hero__eyebrow">
+                                        <i class="mdi mdi-bell-outline"></i>
+                                        Productivity
+                                   </div>
+                                   <h1 class="reminders-hero__title">Reminder List <span class="bell-ring">🔔</span></h1>
+                                   <p class="reminders-hero__subtitle">Stay on top of important tasks and due dates.</p>
                               </div>
-                              <div class="berps-page-header__actions">
-                                   <a href="<?= base_url('Reminders/history'); ?>" class="btn btn-outline-secondary">
-                                        <i class="material-icons align-middle mr-1" style="font-size:18px;">history</i>History
+                              <div class="reminders-hero__actions">
+                                   <a href="<?= base_url('Reminders/history'); ?>" class="reminders-hero-btn">
+                                        <i class="mdi mdi-history"></i>
+                                        <span>History</span>
                                    </a>
-                                   <button class="btn btn-primary" data-toggle="modal" data-target="#addReminderModal">
-                                        <i class="material-icons align-middle mr-1" style="font-size:18px;">add_alert</i>Add Reminder
+                                   <button class="reminders-hero-btn reminders-hero-btn--solid" data-toggle="modal" data-target="#addReminderModal">
+                                        <i class="mdi mdi-bell-plus-outline"></i>
+                                        <span>Add Reminder</span>
                                    </button>
                               </div>
-                         </header>
+                         </div>
 
                          <?php if (!empty($dueToday)): ?>
                               <div class="alert alert-info shadow-sm">

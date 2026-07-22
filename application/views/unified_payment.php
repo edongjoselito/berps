@@ -438,17 +438,176 @@ $settingsID = $this->session->userdata('settingsID');
                                 grid-template-columns: 1fr;
                             }
                         }
+
+                        /* Hero Banner */
+                        .unified-payment-page .up-hero {
+                            display: flex;
+                            align-items: center;
+                            justify-content: space-between;
+                            flex-wrap: wrap;
+                            gap: 16px;
+                            padding: 28px 24px;
+                            margin: 24px 0 22px;
+                            border-radius: 16px;
+                            background: #4338ca;
+                            box-shadow: 0 8px 32px rgba(67, 56, 202, 0.25);
+                            position: relative;
+                            overflow: hidden;
+                        }
+
+                        .unified-payment-page .up-hero::before {
+                            content: '';
+                            position: absolute;
+                            top: -50%;
+                            right: -10%;
+                            width: 400px;
+                            height: 400px;
+                            border-radius: 50%;
+                            background: rgba(255, 255, 255, 0.06);
+                            pointer-events: none;
+                        }
+
+                        .unified-payment-page .up-hero::after {
+                            content: '';
+                            position: absolute;
+                            bottom: -60%;
+                            right: 15%;
+                            width: 300px;
+                            height: 300px;
+                            border-radius: 50%;
+                            background: rgba(255, 255, 255, 0.04);
+                            pointer-events: none;
+                        }
+
+                        .unified-payment-page .up-hero__content {
+                            position: relative;
+                            z-index: 1;
+                        }
+
+                        .unified-payment-page .up-hero__eyebrow {
+                            display: inline-flex;
+                            align-items: center;
+                            gap: 6px;
+                            margin-bottom: 8px;
+                            color: rgba(255, 255, 255, 0.85);
+                            font-size: 0.78rem;
+                            font-weight: 600;
+                            letter-spacing: 0.04em;
+                        }
+
+                        .unified-payment-page .up-hero__eyebrow i {
+                            font-size: 1rem;
+                        }
+
+                        .unified-payment-page .up-hero__title {
+                            margin: 0 0 4px 0;
+                            color: #fff;
+                            font-size: clamp(1.6rem, 2.5vw, 2.2rem);
+                            font-weight: 800;
+                            line-height: 1.15;
+                            letter-spacing: -0.02em;
+                        }
+
+                        .unified-payment-page .up-hero__subtitle {
+                            margin: 0;
+                            color: rgba(255, 255, 255, 0.8);
+                            font-size: 0.88rem;
+                            max-width: 520px;
+                        }
+
+                        .unified-payment-page .up-hero__actions {
+                            display: flex;
+                            align-items: center;
+                            flex-wrap: wrap;
+                            gap: 10px;
+                            position: relative;
+                            z-index: 1;
+                        }
+
+                        .unified-payment-page .up-hero-btn {
+                            display: inline-flex;
+                            align-items: center;
+                            gap: 6px;
+                            padding: 8px 16px;
+                            border-radius: 10px;
+                            border: 1px solid rgba(255, 255, 255, 0.3);
+                            background: rgba(255, 255, 255, 0.15);
+                            color: #fff;
+                            font-size: 0.82rem;
+                            font-weight: 600;
+                            text-decoration: none;
+                            cursor: pointer;
+                            transition: all 0.18s ease;
+                        }
+
+                        .unified-payment-page .up-hero-btn:hover,
+                        .unified-payment-page .up-hero-btn:focus {
+                            background: rgba(255, 255, 255, 0.25);
+                            border-color: rgba(255, 255, 255, 0.5);
+                            color: #fff;
+                            text-decoration: none;
+                            transform: translateY(-1px);
+                        }
+
+                        /* Card swipe animation */
+                        .unified-payment-page .card-swipe {
+                            display: inline-block;
+                            animation: card-swipe 2.5s ease-in-out infinite;
+                        }
+
+                        @keyframes card-swipe {
+                            0%, 70%, 100% { transform: translateX(0) rotate(0deg); }
+                            15% { transform: translateX(12px) rotate(-8deg); }
+                            30% { transform: translateX(0) rotate(0deg); }
+                            45% { transform: translateX(6px) rotate(4deg); }
+                            60% { transform: translateX(0) rotate(0deg); }
+                        }
+
+                        /* Indigo accent on cards */
+                        .unified-payment-page .entry-card {
+                            border-top: 3px solid #4338ca;
+                        }
+
+                        .unified-payment-page .entry-card-header {
+                            border-bottom: 2px solid #4338ca;
+                        }
+
+                        .unified-payment-page .entry-card-title {
+                            color: #4338ca;
+                        }
+
+                        /* Responsive hero */
+                        @media (max-width: 767px) {
+                            .unified-payment-page .up-hero,
+                            .unified-payment-page .up-hero__actions {
+                                flex-direction: column;
+                                align-items: stretch;
+                            }
+
+                            .unified-payment-page .up-hero {
+                                padding: 20px;
+                            }
+
+                            .unified-payment-page .up-hero-btn {
+                                flex: 1 1 auto;
+                                justify-content: center;
+                            }
+                        }
                     </style>
 
-                    <div class="entry-header">
-                        <div>
-                            <div class="entry-eyebrow">Payment Processing</div>
-                            <h1 class="entry-title">Universal Payment Center</h1>
-                            <p class="entry-subtitle">Single window for processing all payments - Invoices, Job Orders, and Deliveries</p>
+                    <div class="up-hero">
+                        <div class="up-hero__content">
+                            <div class="up-hero__eyebrow">
+                                <i class="mdi mdi-credit-card-check-outline"></i>
+                                Payment Processing
+                            </div>
+                            <h1 class="up-hero__title">Universal Payment Center <span class="card-swipe">💳</span></h1>
+                            <p class="up-hero__subtitle">Single window for processing all payments — Invoices, Job Orders, and Deliveries.</p>
                         </div>
-                        <div class="entry-actions">
-                            <a href="<?= base_url('Page/paymentList'); ?>" class="btn-action">
-                                <i class="mdi mdi-arrow-left"></i> Back to Payments
+                        <div class="up-hero__actions">
+                            <a class="up-hero-btn" href="<?= base_url('Page/paymentList'); ?>">
+                                <i class="mdi mdi-arrow-left"></i>
+                                <span>Back to Payments</span>
                             </a>
                         </div>
                     </div>

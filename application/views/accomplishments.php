@@ -43,13 +43,16 @@
                          $totalEmployees = count($groupedData);
                          ?>
 
-                         <header class="berps-page-header">
-                              <div class="berps-page-header__content">
-                                   <span class="berps-page-header__eyebrow">Performance Monitoring</span>
-                                   <h1 class="berps-page-title">Task Accomplishments</h1>
-                                   <p class="berps-page-subtitle">Completed tasks grouped per employee for the selected month.</p>
+                         <div class="accomplishments-hero">
+                              <div class="accomplishments-hero__content">
+                                   <div class="accomplishments-hero__eyebrow">
+                                        <i class="mdi mdi-trophy-outline"></i>
+                                        Performance Monitoring
+                                   </div>
+                                   <h1 class="accomplishments-hero__title">Task Accomplishments <span class="trophy-bounce">🏆</span></h1>
+                                   <p class="accomplishments-hero__subtitle">Completed tasks grouped per employee for the selected month.</p>
                               </div>
-                         </header>
+                         </div>
 
                          <div class="berps-stat-grid">
                               <div class="berps-stat-card">

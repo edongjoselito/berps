@@ -188,6 +188,175 @@ $sales = is_array($sales ?? null) ? $sales : [];
                                 grid-template-columns: minmax(0, 1fr);
                             }
                         }
+
+                        /* Hero Banner */
+                        .pos-history-page .ph-hero {
+                            display: flex;
+                            align-items: center;
+                            justify-content: space-between;
+                            flex-wrap: wrap;
+                            gap: 16px;
+                            padding: 28px 24px;
+                            margin: 0 0 22px;
+                            border-radius: 16px;
+                            background: #0e7490;
+                            box-shadow: 0 8px 32px rgba(14, 116, 144, 0.25);
+                            position: relative;
+                            overflow: hidden;
+                        }
+
+                        .pos-history-page .ph-hero::before {
+                            content: '';
+                            position: absolute;
+                            top: -50%;
+                            right: -10%;
+                            width: 400px;
+                            height: 400px;
+                            border-radius: 50%;
+                            background: rgba(255, 255, 255, 0.06);
+                            pointer-events: none;
+                        }
+
+                        .pos-history-page .ph-hero::after {
+                            content: '';
+                            position: absolute;
+                            bottom: -60%;
+                            right: 15%;
+                            width: 300px;
+                            height: 300px;
+                            border-radius: 50%;
+                            background: rgba(255, 255, 255, 0.04);
+                            pointer-events: none;
+                        }
+
+                        .pos-history-page .ph-hero__content {
+                            position: relative;
+                            z-index: 1;
+                        }
+
+                        .pos-history-page .ph-hero__eyebrow {
+                            display: inline-flex;
+                            align-items: center;
+                            gap: 6px;
+                            margin-bottom: 8px;
+                            color: rgba(255, 255, 255, 0.85);
+                            font-size: 0.78rem;
+                            font-weight: 600;
+                            letter-spacing: 0.04em;
+                        }
+
+                        .pos-history-page .ph-hero__eyebrow i {
+                            font-size: 1rem;
+                        }
+
+                        .pos-history-page .ph-hero__title {
+                            margin: 0 0 4px 0;
+                            color: #fff;
+                            font-size: clamp(1.6rem, 2.5vw, 2.2rem);
+                            font-weight: 800;
+                            line-height: 1.15;
+                            letter-spacing: -0.02em;
+                        }
+
+                        .pos-history-page .ph-hero__subtitle {
+                            margin: 0;
+                            color: rgba(255, 255, 255, 0.8);
+                            font-size: 0.88rem;
+                            max-width: 520px;
+                        }
+
+                        .pos-history-page .ph-hero__actions {
+                            display: flex;
+                            align-items: center;
+                            flex-wrap: wrap;
+                            gap: 10px;
+                            position: relative;
+                            z-index: 1;
+                        }
+
+                        .pos-history-page .ph-hero-btn {
+                            display: inline-flex;
+                            align-items: center;
+                            gap: 6px;
+                            padding: 8px 16px;
+                            border-radius: 10px;
+                            border: 1px solid rgba(255, 255, 255, 0.3);
+                            background: rgba(255, 255, 255, 0.15);
+                            color: #fff;
+                            font-size: 0.82rem;
+                            font-weight: 600;
+                            text-decoration: none;
+                            cursor: pointer;
+                            transition: all 0.18s ease;
+                        }
+
+                        .pos-history-page .ph-hero-btn:hover,
+                        .pos-history-page .ph-hero-btn:focus {
+                            background: rgba(255, 255, 255, 0.25);
+                            border-color: rgba(255, 255, 255, 0.5);
+                            color: #fff;
+                            text-decoration: none;
+                            transform: translateY(-1px);
+                        }
+
+                        .pos-history-page .ph-hero-btn--solid {
+                            border-color: rgba(255, 255, 255, 0.6);
+                            background: rgba(255, 255, 255, 0.95);
+                            color: #0e7490;
+                            font-weight: 700;
+                        }
+
+                        .pos-history-page .ph-hero-btn--solid:hover,
+                        .pos-history-page .ph-hero-btn--solid:focus {
+                            background: #fff;
+                            color: #0b5d72;
+                        }
+
+                        /* Receipt shake animation */
+                        .pos-history-page .receipt-shake {
+                            display: inline-block;
+                            animation: receipt-shake 2.5s ease-in-out infinite;
+                        }
+
+                        @keyframes receipt-shake {
+                            0%, 70%, 100% { transform: rotate(0deg); }
+                            15% { transform: rotate(-12deg); }
+                            30% { transform: rotate(8deg); }
+                            45% { transform: rotate(-5deg); }
+                            60% { transform: rotate(0deg); }
+                        }
+
+                        /* Teal accent on cards */
+                        .pos-history-page .stat-card,
+                        .pos-history-page .theme-card {
+                            border-top: 3px solid #0e7490;
+                        }
+
+                        .pos-history-page .theme-card-head {
+                            border-bottom: 2px solid #0e7490;
+                        }
+
+                        .pos-history-page .theme-card-title {
+                            color: #0e7490;
+                        }
+
+                        /* Responsive hero */
+                        @media (max-width: 767px) {
+                            .pos-history-page .ph-hero,
+                            .pos-history-page .ph-hero__actions {
+                                flex-direction: column;
+                                align-items: stretch;
+                            }
+
+                            .pos-history-page .ph-hero {
+                                padding: 20px;
+                            }
+
+                            .pos-history-page .ph-hero-btn {
+                                flex: 1 1 auto;
+                                justify-content: center;
+                            }
+                        }
                     </style>
 
                     <?php if (!empty($notice)): ?>
@@ -199,17 +368,23 @@ $sales = is_array($sales ?? null) ? $sales : [];
                         </div>
                     <?php endif; ?>
 
-                    <div class="page-header">
-                        <div>
-                            <h4 class="page-title"><?= htmlspecialchars($page_title ?? 'POS History', ENT_QUOTES, 'UTF-8'); ?></h4>
-                            <p class="page-subtitle"><?= htmlspecialchars($page_subtitle ?? '', ENT_QUOTES, 'UTF-8'); ?></p>
+                    <div class="ph-hero">
+                        <div class="ph-hero__content">
+                            <div class="ph-hero__eyebrow">
+                                <i class="mdi mdi-history"></i>
+                                Transaction History
+                            </div>
+                            <h1 class="ph-hero__title"><?= htmlspecialchars($page_title ?? 'POS History', ENT_QUOTES, 'UTF-8'); ?> <span class="receipt-shake">🧾</span></h1>
+                            <p class="ph-hero__subtitle"><?= htmlspecialchars($page_subtitle ?? '', ENT_QUOTES, 'UTF-8'); ?></p>
                         </div>
-                        <div class="page-actions">
-                            <a class="btn-ghost" href="<?= base_url('Pos/posNewTransaction'); ?>">
-                                <i class="mdi mdi-plus-box-outline"></i> New Sale
+                        <div class="ph-hero__actions">
+                            <a class="ph-hero-btn" href="<?= base_url('Pos/posNewTransaction'); ?>">
+                                <i class="mdi mdi-plus-box-outline"></i>
+                                <span>New Sale</span>
                             </a>
-                            <a class="btn-primary-soft" href="<?= base_url('Pos/posReports'); ?>">
-                                <i class="mdi mdi-chart-line"></i> Reports
+                            <a class="ph-hero-btn ph-hero-btn--solid" href="<?= base_url('Pos/posReports'); ?>">
+                                <i class="mdi mdi-chart-line"></i>
+                                <span>Reports</span>
                             </a>
                         </div>
                     </div>

@@ -218,27 +218,188 @@
                               }
                          </style>
 
-                         <div class="card page-header-card">
-                              <div class="card-header d-flex flex-column flex-md-row align-items-md-center justify-content-between">
-                                   <div>
-                                        <h3 class="mb-1" style="color: #fff;">Service Price List</h3>
-                                        <p>Keep your service offerings and rates accessible to the team.</p>
+                         <style>
+                              /* Hero Banner */
+                              .service-price-list-page .pl-hero {
+                                   display: flex;
+                                   align-items: center;
+                                   justify-content: space-between;
+                                   flex-wrap: wrap;
+                                   gap: 16px;
+                                   padding: 28px 24px;
+                                   margin: 0 0 22px;
+                                   border-radius: 16px;
+                                   background: #9d174d;
+                                   box-shadow: 0 8px 32px rgba(157, 23, 77, 0.25);
+                                   position: relative;
+                                   overflow: hidden;
+                              }
+
+                              .service-price-list-page .pl-hero::before {
+                                   content: '';
+                                   position: absolute;
+                                   top: -50%;
+                                   right: -10%;
+                                   width: 400px;
+                                   height: 400px;
+                                   border-radius: 50%;
+                                   background: rgba(255, 255, 255, 0.06);
+                                   pointer-events: none;
+                              }
+
+                              .service-price-list-page .pl-hero::after {
+                                   content: '';
+                                   position: absolute;
+                                   bottom: -60%;
+                                   right: 15%;
+                                   width: 300px;
+                                   height: 300px;
+                                   border-radius: 50%;
+                                   background: rgba(255, 255, 255, 0.04);
+                                   pointer-events: none;
+                              }
+
+                              .service-price-list-page .pl-hero__content {
+                                   position: relative;
+                                   z-index: 1;
+                              }
+
+                              .service-price-list-page .pl-hero__eyebrow {
+                                   display: inline-flex;
+                                   align-items: center;
+                                   gap: 6px;
+                                   margin-bottom: 8px;
+                                   color: rgba(255, 255, 255, 0.85);
+                                   font-size: 0.78rem;
+                                   font-weight: 600;
+                                   letter-spacing: 0.04em;
+                              }
+
+                              .service-price-list-page .pl-hero__eyebrow i {
+                                   font-size: 1rem;
+                              }
+
+                              .service-price-list-page .pl-hero__title {
+                                   margin: 0 0 4px 0;
+                                   color: #fff;
+                                   font-size: clamp(1.6rem, 2.5vw, 2.2rem);
+                                   font-weight: 800;
+                                   line-height: 1.15;
+                                   letter-spacing: -0.02em;
+                                   font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif), "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+                              }
+
+                              .service-price-list-page .pl-hero__subtitle {
+                                   margin: 0;
+                                   color: rgba(255, 255, 255, 0.8);
+                                   font-size: 0.88rem;
+                                   max-width: 520px;
+                              }
+
+                              .service-price-list-page .pl-hero__actions {
+                                   display: flex;
+                                   align-items: center;
+                                   flex-wrap: wrap;
+                                   gap: 10px;
+                                   position: relative;
+                                   z-index: 1;
+                              }
+
+                              .service-price-list-page .pl-hero-btn {
+                                   display: inline-flex;
+                                   align-items: center;
+                                   gap: 6px;
+                                   padding: 8px 16px;
+                                   border-radius: 10px;
+                                   border: 1px solid rgba(255, 255, 255, 0.3);
+                                   background: rgba(255, 255, 255, 0.15);
+                                   color: #fff;
+                                   font-size: 0.82rem;
+                                   font-weight: 600;
+                                   text-decoration: none;
+                                   cursor: pointer;
+                                   transition: all 0.18s ease;
+                              }
+
+                              .service-price-list-page .pl-hero-btn:hover,
+                              .service-price-list-page .pl-hero-btn:focus {
+                                   background: rgba(255, 255, 255, 0.25);
+                                   border-color: rgba(255, 255, 255, 0.5);
+                                   color: #fff;
+                                   text-decoration: none;
+                                   transform: translateY(-1px);
+                              }
+
+                              .service-price-list-page .pl-hero-btn--solid {
+                                   border-color: rgba(255, 255, 255, 0.6);
+                                   background: rgba(255, 255, 255, 0.95);
+                                   color: #9d174d;
+                                   font-weight: 700;
+                              }
+
+                              .service-price-list-page .pl-hero-btn--solid:hover,
+                              .service-price-list-page .pl-hero-btn--solid:focus {
+                                   background: #fff;
+                                   color: #831843;
+                              }
+
+                              .service-price-list-page .dollar-pulse {
+                                   display: inline-block;
+                                   animation: dollar-pulse 2s ease-in-out infinite;
+                              }
+
+                              @keyframes dollar-pulse {
+                                   0%, 70%, 100% { transform: scale(1); }
+                                   15% { transform: scale(1.2); }
+                                   30% { transform: scale(1); }
+                                   45% { transform: scale(1.1); }
+                                   60% { transform: scale(1); }
+                              }
+
+                              .service-price-list-page .service-table-card {
+                                   border-top: 3px solid #9d174d;
+                              }
+
+                              .service-price-list-page .service-table-card .card-title {
+                                   color: #9d174d;
+                              }
+
+                              @media (max-width: 767px) {
+                                   .service-price-list-page .pl-hero,
+                                   .service-price-list-page .pl-hero__actions {
+                                        flex-direction: column;
+                                        align-items: stretch;
+                                   }
+
+                                   .service-price-list-page .pl-hero {
+                                        padding: 20px;
+                                   }
+
+                                   .service-price-list-page .pl-hero-btn {
+                                        flex: 1 1 auto;
+                                        justify-content: center;
+                                   }
+                              }
+                         </style>
+
+                         <div class="pl-hero">
+                              <div class="pl-hero__content">
+                                   <div class="pl-hero__eyebrow">
+                                        <i class="mdi mdi-format-list-bulleted-type"></i>
+                                        Service Catalogue
                                    </div>
-                                   <div class="page-header-actions mt-3 mt-md-0">
-                                        <button type="button" class="btn btn-add-service" data-toggle="modal" data-target="#newServiceModal">
-                                             <i class="mdi mdi-plus-circle-outline"></i>
-                                             <span>Add Service</span>
-                                        </button>
-                                   </div>
+                                   <h1 class="pl-hero__title">Service Price List <span class="dollar-pulse">💲</span></h1>
+                                   <p class="pl-hero__subtitle">Keep your service offerings and rates accessible to the team.</p>
                               </div>
-                              <div class="card-body">
-                                   <ol class="breadcrumb mb-0">
-                                        <li class="breadcrumb-item">
-                                             <a href="<?= base_url('Page/admin'); ?>">Home</a>
-                                        </li>
-                                        <li class="breadcrumb-item">Notes</li>
-                                        <li class="breadcrumb-item active">Price List (Services)</li>
-                                   </ol>
+                              <div class="pl-hero__actions">
+                                   <a class="pl-hero-btn" href="<?= base_url('Page/admin'); ?>">
+                                        <i class="mdi mdi-arrow-left"></i>
+                                        <span>Back to Dashboard</span>
+                                   </a>
+                                   <button type="button" class="pl-hero-btn pl-hero-btn--solid" data-toggle="modal" data-target="#newServiceModal">
+                                        <i class="mdi mdi-plus-circle-outline"></i>
+                                        <span>Add Service</span>
+                                   </button>
                               </div>
                          </div>
 

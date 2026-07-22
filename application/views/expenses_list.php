@@ -35,24 +35,30 @@ $expenseCategories = isset($expenseCategories) && is_array($expenseCategories) ?
                          <?php $totalExpenses = !empty($data1) && isset($data1[0]->Total) ? (float) $data1[0]->Total : 0; ?>
 
                          <!-- Page header -->
-                         <header class="berps-page-header">
-                              <div class="berps-page-header__content">
-                                   <span class="berps-page-header__eyebrow">Finance Overview</span>
-                                   <h1 class="berps-page-title">Expenses</h1>
-                                   <p class="berps-page-subtitle">Monitor and manage outgoing costs efficiently.</p>
+                         <div class="exp-hero">
+                              <div class="exp-hero__content">
+                                   <div class="exp-hero__eyebrow">
+                                        <i class="mdi mdi-finance"></i>
+                                        Finance Overview
+                                   </div>
+                                   <h1 class="exp-hero__title">Expenses <span class="coin-drop">💰</span></h1>
+                                   <p class="exp-hero__subtitle">Track and manage operational costs, analyze trends, and monitor spending.</p>
                               </div>
-                              <div class="berps-page-header__actions">
-                                   <a href="<?= base_url(); ?>Page/downloadExpenseTemplate" class="btn btn-outline-secondary">
-                                        <i class="mdi mdi-download mr-1" aria-hidden="true"></i>Download Template
+                              <div class="exp-hero__actions">
+                                   <a href="<?= base_url(); ?>Page/downloadExpenseTemplate" class="exp-hero-btn">
+                                        <i class="mdi mdi-download"></i>
+                                        <span>Download Template</span>
                                    </a>
-                                   <button type="button" class="btn btn-outline-secondary" data-toggle="modal" data-target="#bulkUploadModal">
-                                        <i class="mdi mdi-upload mr-1" aria-hidden="true"></i>Bulk Upload
+                                   <button type="button" class="exp-hero-btn" data-toggle="modal" data-target="#bulkUploadModal">
+                                        <i class="mdi mdi-upload"></i>
+                                        <span>Bulk Upload</span>
                                    </button>
-                                   <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#expenseModal">
-                                        <i class="mdi mdi-cash-minus mr-1" aria-hidden="true"></i>Add New Expense
+                                   <button type="button" class="exp-hero-btn exp-hero-btn--solid" data-toggle="modal" data-target="#expenseModal">
+                                        <i class="mdi mdi-cash-minus"></i>
+                                        <span>Add New Expense</span>
                                    </button>
                               </div>
-                         </header>
+                         </div>
 
                          <!-- Per Year Expense Statistics -->
                          <div class="row" style="margin-bottom: 24px;">

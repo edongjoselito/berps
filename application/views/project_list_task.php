@@ -102,27 +102,34 @@ $priorityClasses = array('1' => 'priority-high', '2' => 'priority-medium', '3' =
                     <?php endif; ?>
 
                     <!-- Page header -->
-                    <header class="berps-page-header">
-                        <div class="berps-page-header__content">
-                            <span class="berps-page-header__eyebrow">Task Operations</span>
-                            <h1 class="berps-page-title">Task List</h1>
-                            <p class="berps-page-subtitle">Assign, track, and close out team tasks.</p>
+                    <div class="task-hero">
+                        <div class="task-hero__content">
+                            <div class="task-hero__eyebrow">
+                                <i class="mdi mdi-clipboard-list-outline"></i>
+                                Task Operations
+                            </div>
+                            <h1 class="task-hero__title">Task List <span class="task-bounce">📝</span></h1>
+                            <p class="task-hero__subtitle">Assign, track, and close out team tasks with deadlines and priorities.</p>
                         </div>
-                        <div class="berps-page-header__actions">
-                            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addTaskModal">
-                                <i class="mdi mdi-plus-circle-outline mr-1" aria-hidden="true"></i>Add New Task
+                        <div class="task-hero__actions">
+                            <button type="button" class="task-hero-btn task-hero-btn--solid" data-toggle="modal" data-target="#addTaskModal">
+                                <i class="mdi mdi-plus-circle-outline"></i>
+                                <span>Add New Task</span>
                             </button>
-                            <button type="button" class="btn btn-outline-secondary" data-toggle="modal" data-target="#bulkTaskUploadModal">
-                                <i class="mdi mdi-upload-outline mr-1" aria-hidden="true"></i>Bulk Upload
+                            <button type="button" class="task-hero-btn" data-toggle="modal" data-target="#bulkTaskUploadModal">
+                                <i class="mdi mdi-upload-outline"></i>
+                                <span>Bulk Upload</span>
                             </button>
-                            <a href="<?= base_url(); ?>Page/downloadTaskBulkTemplate" class="btn btn-outline-secondary">
-                                <i class="mdi mdi-download-outline mr-1" aria-hidden="true"></i>Download Template
+                            <a href="<?= base_url(); ?>Page/downloadTaskBulkTemplate" class="task-hero-btn">
+                                <i class="mdi mdi-download-outline"></i>
+                                <span>Download Template</span>
                             </a>
-                            <a href="<?= base_url(); ?>Page/accomplishments" class="btn btn-outline-secondary">
-                                <i class="mdi mdi-trophy-outline mr-1" aria-hidden="true"></i>Accomplishments
+                            <a href="<?= base_url(); ?>Page/accomplishments" class="task-hero-btn">
+                                <i class="mdi mdi-trophy-outline"></i>
+                                <span>Accomplishments</span>
                             </a>
                         </div>
-                    </header>
+                    </div>
 
                     <!-- Stat cards -->
                     <div class="berps-stat-grid">

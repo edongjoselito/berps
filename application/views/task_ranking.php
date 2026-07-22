@@ -43,18 +43,22 @@
                     ?>
 
                     <!-- Page Header -->
-                    <header class="berps-page-header">
-                        <div class="berps-page-header__content">
-                            <span class="berps-page-header__eyebrow">Task Performance</span>
-                            <h1 class="berps-page-title">Employee Ranking</h1>
-                            <p class="berps-page-subtitle">Top performers by task points — <?= htmlspecialchars($periodLabel, ENT_QUOTES, 'UTF-8'); ?></p>
+                    <div class="ranking-hero">
+                        <div class="ranking-hero__content">
+                            <div class="ranking-hero__eyebrow">
+                                <i class="mdi mdi-podium-outline"></i>
+                                Task Performance
+                            </div>
+                            <h1 class="ranking-hero__title">Employee Ranking <span class="medal-spin">🥇</span></h1>
+                            <p class="ranking-hero__subtitle">Top performers by task points — <?= htmlspecialchars($periodLabel, ENT_QUOTES, 'UTF-8'); ?></p>
                         </div>
-                        <div class="berps-page-header__actions">
-                            <button type="button" class="btn btn-outline-secondary" data-toggle="modal" data-target="#filterRankingModal">
-                                <i class="mdi mdi-filter-variant mr-1" aria-hidden="true"></i>Filter Period
+                        <div class="ranking-hero__actions">
+                            <button type="button" class="ranking-hero-btn" data-toggle="modal" data-target="#filterRankingModal">
+                                <i class="mdi mdi-filter-variant"></i>
+                                <span>Filter Period</span>
                             </button>
                         </div>
-                    </header>
+                    </div>
 
                     <?php if (!empty($ranking)): ?>
                         <!-- Top 3 Podium -->
@@ -122,9 +126,6 @@
                     <div class="theme-card">
                         <div class="theme-card-head">
                             <h5 class="theme-card-title">Complete Rankings</h5>
-                            <button type="button" class="btn btn-sm btn-outline-secondary" data-toggle="modal" data-target="#filterRankingModal">
-                                <i class="mdi mdi-filter-variant mr-1" aria-hidden="true"></i>Adjust Filter
-                            </button>
                         </div>
                         <div class="theme-card-body">
                             <?php if (!empty($ranking)): ?>

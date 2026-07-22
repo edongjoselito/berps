@@ -32,6 +32,12 @@ $money = function ($value) {
     return number_format((float) $value, 2);
 };
 
+$reportMoney = function ($value) {
+    $amount = (float) $value;
+    $formatted = number_format(abs($amount), 2);
+    return $amount < 0 ? '(' . $formatted . ')' : $formatted;
+};
+
 $formatDate = function ($value, $fallback = '-') {
     $value = trim((string) $value);
     if ($value === '' || $value === '0000-00-00') {
@@ -213,7 +219,7 @@ $printUrl = base_url() . 'Page/accountingReports?' . http_build_query($printQuer
 
                         .accounting-reports-page .stat-strip {
                             display: grid;
-                            grid-template-columns: repeat(6, minmax(0, 1fr));
+                            grid-template-columns: repeat(3, minmax(0, 1fr));
                             gap: 16px;
                             margin-bottom: 22px;
                         }
@@ -559,7 +565,7 @@ $printUrl = base_url() . 'Page/accountingReports?' . http_build_query($printQuer
 
                         @media (max-width: 1399px) {
                             .accounting-reports-page .stat-strip {
-                                grid-template-columns: repeat(3, minmax(0, 1fr));
+                                grid-template-columns: repeat(2, minmax(0, 1fr));
                             }
 
                             .accounting-reports-page .mini-grid {
@@ -809,29 +815,706 @@ $printUrl = base_url() . 'Page/accountingReports?' . http_build_query($printQuer
                                 opacity: 1 !important;
                             }
                         }
+
+                        /* Hero Banner */
+                        .accounting-reports-page .ar-hero {
+                            display: flex;
+                            align-items: center;
+                            justify-content: space-between;
+                            flex-wrap: wrap;
+                            gap: 16px;
+                            padding: 28px 24px;
+                            margin: 24px 0 22px;
+                            border-radius: 16px;
+                            background: #1e3a5f;
+                            box-shadow: 0 8px 32px rgba(30, 58, 95, 0.25);
+                            position: relative;
+                            overflow: hidden;
+                        }
+
+                        .accounting-reports-page .ar-hero::before {
+                            content: '';
+                            position: absolute;
+                            top: -50%;
+                            right: -10%;
+                            width: 400px;
+                            height: 400px;
+                            border-radius: 50%;
+                            background: rgba(255, 255, 255, 0.06);
+                            pointer-events: none;
+                        }
+
+                        .accounting-reports-page .ar-hero::after {
+                            content: '';
+                            position: absolute;
+                            bottom: -60%;
+                            right: 15%;
+                            width: 300px;
+                            height: 300px;
+                            border-radius: 50%;
+                            background: rgba(255, 255, 255, 0.04);
+                            pointer-events: none;
+                        }
+
+                        .accounting-reports-page .ar-hero__content {
+                            position: relative;
+                            z-index: 1;
+                        }
+
+                        .accounting-reports-page .ar-hero__eyebrow {
+                            display: inline-flex;
+                            align-items: center;
+                            gap: 6px;
+                            margin-bottom: 8px;
+                            color: rgba(255, 255, 255, 0.85);
+                            font-size: 0.78rem;
+                            font-weight: 600;
+                            letter-spacing: 0.04em;
+                        }
+
+                        .accounting-reports-page .ar-hero__eyebrow i {
+                            font-size: 1rem;
+                        }
+
+                        .accounting-reports-page .ar-hero__title {
+                            margin: 0 0 4px 0;
+                            color: #fff;
+                            font-size: clamp(1.6rem, 2.5vw, 2.2rem);
+                            font-weight: 800;
+                            line-height: 1.15;
+                            letter-spacing: -0.02em;
+                        }
+
+                        .accounting-reports-page .ar-hero__subtitle {
+                            margin: 0;
+                            color: rgba(255, 255, 255, 0.8);
+                            font-size: 0.88rem;
+                            max-width: 480px;
+                        }
+
+                        .accounting-reports-page .ar-hero__actions {
+                            display: flex;
+                            align-items: center;
+                            flex-wrap: wrap;
+                            gap: 10px;
+                            position: relative;
+                            z-index: 1;
+                        }
+
+                        .accounting-reports-page .ar-hero-btn {
+                            display: inline-flex;
+                            align-items: center;
+                            gap: 6px;
+                            padding: 8px 16px;
+                            border-radius: 10px;
+                            border: 1px solid rgba(255, 255, 255, 0.3);
+                            background: rgba(255, 255, 255, 0.15);
+                            color: #fff;
+                            font-size: 0.82rem;
+                            font-weight: 600;
+                            text-decoration: none;
+                            cursor: pointer;
+                            transition: all 0.18s ease;
+                        }
+
+                        .accounting-reports-page .ar-hero-btn:hover,
+                        .accounting-reports-page .ar-hero-btn:focus {
+                            background: rgba(255, 255, 255, 0.25);
+                            border-color: rgba(255, 255, 255, 0.5);
+                            color: #fff;
+                            text-decoration: none;
+                            transform: translateY(-1px);
+                        }
+
+                        .accounting-reports-page .ar-hero-btn--solid {
+                            border-color: rgba(255, 255, 255, 0.6);
+                            background: rgba(255, 255, 255, 0.95);
+                            color: #1e3a5f;
+                            font-weight: 700;
+                        }
+
+                        .accounting-reports-page .ar-hero-btn--solid:hover,
+                        .accounting-reports-page .ar-hero-btn--solid:focus {
+                            background: #fff;
+                            color: #162d4a;
+                        }
+
+                        /* Calculator bounce animation */
+                        .accounting-reports-page .calc-bounce {
+                            display: inline-block;
+                            animation: calc-bounce 2s ease-in-out infinite;
+                        }
+
+                        @keyframes calc-bounce {
+                            0%, 70%, 100% { transform: translateY(0) rotate(0deg); }
+                            15% { transform: translateY(-8px) rotate(-8deg); }
+                            30% { transform: translateY(0) rotate(0deg); }
+                            45% { transform: translateY(-4px) rotate(5deg); }
+                            60% { transform: translateY(0) rotate(0deg); }
+                        }
+
+                        /* Slate-blue accent on cards */
+                        .accounting-reports-page .panel-card {
+                            border-top: 3px solid #1e3a5f;
+                        }
+
+                        .accounting-reports-page .panel-header {
+                            border-bottom: 2px solid #1e3a5f;
+                        }
+
+                        .accounting-reports-page .panel-title {
+                            color: #1e3a5f;
+                        }
+
+                        /* Responsive hero */
+                        @media (max-width: 767px) {
+                            .accounting-reports-page .ar-hero,
+                            .accounting-reports-page .ar-hero__actions {
+                                flex-direction: column;
+                                align-items: stretch;
+                            }
+
+                            .accounting-reports-page .ar-hero {
+                                padding: 20px;
+                            }
+
+                            .accounting-reports-page .ar-hero-btn {
+                                flex: 1 1 auto;
+                                justify-content: center;
+                            }
+                        }
+
+                        /* Dedicated paged document. The dashboard remains unchanged on screen. */
+                        .accounting-print-document {
+                            display: none;
+                        }
+
+                        @media print {
+                            @page {
+                                size: A4 landscape;
+                                margin: 14mm 13mm 16mm;
+                            }
+
+                            html,
+                            body,
+                            #wrapper,
+                            .content-page,
+                            .content,
+                            .container-fluid {
+                                margin: 0 !important;
+                                padding: 0 !important;
+                                background: #fff !important;
+                            }
+
+                            .navbar-custom,
+                            .left-side-menu,
+                            .footer,
+                            .theme-settings,
+                            .right-bar,
+                            .button-menu-mobile {
+                                display: none !important;
+                            }
+
+                            .accounting-reports-page > *:not(.accounting-print-document) {
+                                display: none !important;
+                            }
+
+                            .accounting-reports-page .accounting-print-document {
+                                display: block !important;
+                                color: #111 !important;
+                                font-family: Arial, Helvetica, sans-serif !important;
+                                font-size: 9pt;
+                                line-height: 1.35;
+                            }
+
+                            .accounting-print-document,
+                            .accounting-print-document * {
+                                box-sizing: border-box;
+                                color: #111 !important;
+                                text-shadow: none !important;
+                                box-shadow: none !important;
+                            }
+
+                            .accounting-print-letterhead {
+                                display: grid;
+                                grid-template-columns: minmax(0, 1fr) auto;
+                                gap: 18mm;
+                                align-items: end;
+                                padding-bottom: 4mm;
+                                margin-bottom: 5mm;
+                                border-bottom: 2px solid #111;
+                            }
+
+                            .accounting-print-company {
+                                margin: 0 0 1mm;
+                                font-size: 17pt;
+                                font-weight: 700;
+                                letter-spacing: 0.02em;
+                                text-transform: uppercase;
+                            }
+
+                            .accounting-print-company-meta,
+                            .accounting-print-doc-meta {
+                                font-size: 8.5pt;
+                                line-height: 1.45;
+                            }
+
+                            .accounting-print-doc-meta {
+                                min-width: 58mm;
+                            }
+
+                            .accounting-print-doc-meta div {
+                                display: flex;
+                                justify-content: space-between;
+                                gap: 8mm;
+                                padding: 0.5mm 0;
+                                border-bottom: 1px solid #bbb;
+                            }
+
+                            .accounting-print-doc-meta span:first-child {
+                                font-weight: 700;
+                                text-transform: uppercase;
+                            }
+
+                            .accounting-print-report-title {
+                                margin: 0;
+                                text-align: center;
+                                font-size: 15pt;
+                                font-weight: 700;
+                                letter-spacing: 0.08em;
+                                text-transform: uppercase;
+                            }
+
+                            .accounting-print-report-period {
+                                margin: 1mm 0 5mm;
+                                text-align: center;
+                                font-size: 9pt;
+                            }
+
+                            .accounting-print-summary {
+                                width: 100%;
+                                margin: 0 0 5mm;
+                                border-collapse: collapse;
+                                table-layout: fixed;
+                            }
+
+                            .accounting-print-summary td {
+                                width: 16.666%;
+                                padding: 2.5mm 3mm;
+                                border: 1px solid #777;
+                                vertical-align: top;
+                            }
+
+                            .accounting-print-summary-label {
+                                display: block;
+                                margin-bottom: 1mm;
+                                font-size: 7.3pt;
+                                font-weight: 700;
+                                letter-spacing: 0.04em;
+                                text-transform: uppercase;
+                            }
+
+                            .accounting-print-summary-value {
+                                display: block;
+                                font-size: 10.5pt;
+                                font-weight: 700;
+                                font-variant-numeric: tabular-nums;
+                                white-space: nowrap;
+                            }
+
+                            .accounting-print-section {
+                                margin-top: 5mm;
+                            }
+
+                            .accounting-print-section--page {
+                                break-before: page;
+                                page-break-before: always;
+                            }
+
+                            .accounting-print-section-title {
+                                margin: 0 0 1mm;
+                                padding-bottom: 1.5mm;
+                                border-bottom: 1px solid #111;
+                                font-size: 11pt;
+                                font-weight: 700;
+                                letter-spacing: 0.04em;
+                                text-transform: uppercase;
+                            }
+
+                            .accounting-print-section-subtitle,
+                            .accounting-print-note {
+                                margin: 0 0 2.5mm;
+                                font-size: 8pt;
+                                color: #444 !important;
+                            }
+
+                            .accounting-print-grid {
+                                display: grid;
+                                grid-template-columns: 1fr 1fr;
+                                gap: 8mm;
+                                align-items: start;
+                            }
+
+                            .accounting-print-table {
+                                width: 100%;
+                                border-collapse: collapse;
+                                table-layout: fixed;
+                                font-size: 8pt;
+                            }
+
+                            .accounting-print-table thead {
+                                display: table-header-group;
+                            }
+
+                            .accounting-print-table tfoot {
+                                display: table-row-group;
+                            }
+
+                            .accounting-print-table tr {
+                                break-inside: avoid;
+                                page-break-inside: avoid;
+                            }
+
+                            .accounting-print-table th,
+                            .accounting-print-table td {
+                                padding: 1.6mm 2mm;
+                                border: 1px solid #999;
+                                vertical-align: top;
+                                overflow-wrap: anywhere;
+                            }
+
+                            .accounting-print-table th {
+                                background: #ececec !important;
+                                font-size: 7.2pt;
+                                font-weight: 700;
+                                letter-spacing: 0.03em;
+                                text-align: left;
+                                text-transform: uppercase;
+                            }
+
+                            .accounting-print-table .accounting-print-num {
+                                text-align: right;
+                                white-space: nowrap;
+                                font-variant-numeric: tabular-nums;
+                            }
+
+                            .accounting-print-table--compact th,
+                            .accounting-print-table--compact td {
+                                padding-top: 1.05mm;
+                                padding-bottom: 1.05mm;
+                                font-size: 7.5pt;
+                            }
+
+                            .accounting-print-table .accounting-print-group td {
+                                padding-top: 2.4mm;
+                                border-bottom: 1.5px solid #111;
+                                background: #f5f5f5 !important;
+                                font-weight: 700;
+                                text-transform: uppercase;
+                            }
+
+                            .accounting-print-table .accounting-print-subtotal td,
+                            .accounting-print-table .accounting-print-total td,
+                            .accounting-print-table tfoot td {
+                                font-weight: 700;
+                            }
+
+                            .accounting-print-table .accounting-print-subtotal td {
+                                border-top: 1.5px solid #111;
+                            }
+
+                            .accounting-print-table .accounting-print-total td,
+                            .accounting-print-table tfoot td {
+                                border-top: 2px double #111;
+                                border-bottom: 2px double #111;
+                                background: #f5f5f5 !important;
+                                font-size: 8.4pt;
+                            }
+
+                            .accounting-print-empty {
+                                padding: 5mm !important;
+                                text-align: center;
+                            }
+
+                            .accounting-print-attestation {
+                                display: grid;
+                                grid-template-columns: 1.3fr 1fr 1fr;
+                                gap: 12mm;
+                                margin-top: 4mm;
+                                break-inside: avoid;
+                                page-break-inside: avoid;
+                            }
+
+                            .accounting-print-attestation-note {
+                                font-size: 8pt;
+                                color: #444 !important;
+                            }
+
+                            .accounting-print-signature {
+                                padding-top: 5mm;
+                                border-top: 1px solid #111;
+                                text-align: center;
+                                font-size: 8pt;
+                            }
+
+                            .accounting-print-footer-note {
+                                margin-top: 3mm;
+                                padding-top: 1mm;
+                                border-top: 1px solid #aaa;
+                                text-align: center;
+                                font-size: 7.25pt;
+                                color: #555 !important;
+                            }
+                        }
                     </style>
 
-                    <div class="ar-header">
-                        <div>
-                            <div class="ar-eyebrow">Accounting</div>
-                            <h1 class="ar-title">Accounting Reports</h1>
-                            <div class="ar-subtitle ar-range-line"><?= htmlspecialchars($rangeLabel); ?> &middot; as of <?= htmlspecialchars($formatDate($asOfDate)); ?></div>
+                    <article class="accounting-print-document" aria-label="Printable accounting report package">
+                        <header class="accounting-print-letterhead">
+                            <div>
+                                <h1 class="accounting-print-company"><?= htmlspecialchars($businessName !== '' ? $businessName : 'BERPS'); ?></h1>
+                                <div class="accounting-print-company-meta">
+                                    <?php if ($businessAddress !== ''): ?>
+                                        <div><?= htmlspecialchars($businessAddress); ?></div>
+                                    <?php endif; ?>
+                                    <?php if ($businessTin !== ''): ?>
+                                        <div>Taxpayer Identification No.: <?= htmlspecialchars($businessTin); ?></div>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                            <div class="accounting-print-doc-meta">
+                                <div><span>Document</span><strong>FINANCIAL-REPORTS</strong></div>
+                                <div><span>Prepared</span><strong><?= htmlspecialchars($generatedAt); ?></strong></div>
+                            </div>
+                        </header>
+
+                        <h2 class="accounting-print-report-title">Accounting Report Package</h2>
+                        <p class="accounting-print-report-period">For the period <strong><?= htmlspecialchars($rangeLabel); ?></strong> &middot; Balance sheet as of <strong><?= htmlspecialchars($formatDate($asOfDate)); ?></strong></p>
+
+                        <table class="accounting-print-summary" aria-label="Accounting report key figures">
+                            <tbody>
+                                <tr>
+                                    <td><span class="accounting-print-summary-label">Total Revenue</span><span class="accounting-print-summary-value">PHP <?= $reportMoney($headlineCards['totalRevenue'] ?? 0); ?></span></td>
+                                    <td><span class="accounting-print-summary-label">Net Income</span><span class="accounting-print-summary-value">PHP <?= $reportMoney($headlineCards['netIncome'] ?? 0); ?></span></td>
+                                    <td><span class="accounting-print-summary-label">Cash Inflow</span><span class="accounting-print-summary-value">PHP <?= $reportMoney($headlineCards['cashInflow'] ?? 0); ?></span></td>
+                                    <td><span class="accounting-print-summary-label">Operating Expenses</span><span class="accounting-print-summary-value">PHP <?= $reportMoney($headlineCards['totalExpenses'] ?? 0); ?></span></td>
+                                    <td><span class="accounting-print-summary-label">Receivables</span><span class="accounting-print-summary-value">PHP <?= $reportMoney($headlineCards['accountsReceivable'] ?? 0); ?></span></td>
+                                    <td><span class="accounting-print-summary-label">Tax Credits</span><span class="accounting-print-summary-value">PHP <?= $reportMoney($headlineCards['taxCredits'] ?? 0); ?></span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <section class="accounting-print-section">
+                            <h3 class="accounting-print-section-title">Statement of Income</h3>
+                            <p class="accounting-print-section-subtitle">For the period <?= htmlspecialchars($rangeLabel); ?></p>
+                            <table class="accounting-print-table">
+                                <tbody>
+                                    <tr class="accounting-print-group"><td colspan="2">Revenue</td></tr>
+                                    <?php foreach ($revenueSources as $source): ?>
+                                        <tr>
+                                            <td><?= htmlspecialchars((string) ($source['label'] ?? 'Revenue')); ?> <small>(<?= number_format((int) ($source['count'] ?? 0)); ?> document(s))</small></td>
+                                            <td class="accounting-print-num" style="width: 28%;">PHP <?= $reportMoney($source['amount'] ?? 0); ?></td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                    <tr class="accounting-print-subtotal"><td>Total Revenue</td><td class="accounting-print-num">PHP <?= $reportMoney($incomeStatement['totalRevenue'] ?? 0); ?></td></tr>
+                                    <tr class="accounting-print-group"><td colspan="2">Operating Expenses</td></tr>
+                                    <tr><td>Manual Operating Expenses</td><td class="accounting-print-num">PHP <?= $reportMoney($incomeStatement['manualExpenses'] ?? 0); ?></td></tr>
+                                    <tr><td>Salaries and Wages</td><td class="accounting-print-num">PHP <?= $reportMoney($incomeStatement['payrollExpense'] ?? 0); ?></td></tr>
+                                    <tr class="accounting-print-subtotal"><td>Total Operating Expenses</td><td class="accounting-print-num">PHP <?= $reportMoney($incomeStatement['totalExpenses'] ?? 0); ?></td></tr>
+                                    <tr class="accounting-print-total"><td>Net Income</td><td class="accounting-print-num">PHP <?= $reportMoney($incomeStatement['netIncome'] ?? 0); ?></td></tr>
+                                </tbody>
+                            </table>
+                        </section>
+
+                        <div class="accounting-print-attestation">
+                            <div class="accounting-print-attestation-note">I certify that this package was generated from the operational records available in BERPS for the reporting period and snapshot date shown above.</div>
+                            <div class="accounting-print-signature">Prepared by / Date</div>
+                            <div class="accounting-print-signature">Reviewed and approved by / Date</div>
                         </div>
-                        <div class="ar-actions">
-                            <button type="button" class="btn-soft" data-toggle="modal" data-target="#arFilterModal" title="Filter reports">
-                                <i class="mdi mdi-filter-variant"></i> Filter
+                        <div class="accounting-print-footer-note">Computer-generated report &middot; <?= htmlspecialchars($businessName !== '' ? $businessName : 'BERPS'); ?> &middot; Confidential</div>
+
+                        <section class="accounting-print-section accounting-print-section--page">
+                            <h3 class="accounting-print-section-title">Statement of Financial Position</h3>
+                            <p class="accounting-print-section-subtitle">As of <?= htmlspecialchars($formatDate($asOfDate)); ?></p>
+                            <table class="accounting-print-table">
+                                <tbody>
+                                    <tr class="accounting-print-group"><td colspan="2">Assets</td></tr>
+                                    <?php foreach ($balanceAssets as $asset): ?>
+                                        <tr><td><?= htmlspecialchars((string) ($asset['label'] ?? 'Asset')); ?></td><td class="accounting-print-num" style="width: 28%;">PHP <?= $reportMoney($asset['amount'] ?? 0); ?></td></tr>
+                                    <?php endforeach; ?>
+                                    <tr class="accounting-print-total"><td>Total Assets</td><td class="accounting-print-num">PHP <?= $reportMoney($balanceSheet['totalAssets'] ?? 0); ?></td></tr>
+                                    <tr class="accounting-print-group"><td colspan="2">Liabilities and Operational Equity</td></tr>
+                                    <?php foreach ($balanceLiabilitiesAndEquity as $line): ?>
+                                        <tr><td><?= htmlspecialchars((string) ($line['label'] ?? 'Liability or Equity')); ?></td><td class="accounting-print-num">PHP <?= $reportMoney($line['amount'] ?? 0); ?></td></tr>
+                                    <?php endforeach; ?>
+                                    <tr class="accounting-print-total"><td>Total Liabilities and Operational Equity</td><td class="accounting-print-num">PHP <?= $reportMoney($balanceSheet['totalLiabilitiesAndEquity'] ?? 0); ?></td></tr>
+                                </tbody>
+                            </table>
+                            <p class="accounting-print-note" style="margin-top: 3mm;">Operational statement generated from recorded invoices, POS sales, collections, expenses, payroll, tax credits, and cash advances. It is not a substitute for a full general-ledger trial balance.</p>
+                        </section>
+
+                        <section class="accounting-print-section accounting-print-section--page">
+                            <h3 class="accounting-print-section-title">Statement of Cash Flows</h3>
+                            <p class="accounting-print-section-subtitle">For the period <?= htmlspecialchars($rangeLabel); ?></p>
+                            <table class="accounting-print-table">
+                                <tbody>
+                                    <tr class="accounting-print-group"><td colspan="2">Cash Inflows</td></tr>
+                                    <tr><td>Collections from Service Invoices</td><td class="accounting-print-num" style="width: 28%;">PHP <?= $reportMoney($cashFlow['invoiceCashCollections'] ?? 0); ?></td></tr>
+                                    <tr><td>Collections from POS Sales</td><td class="accounting-print-num">PHP <?= $reportMoney($cashFlow['posCashCollections'] ?? 0); ?></td></tr>
+                                    <tr class="accounting-print-subtotal"><td>Total Cash Inflows</td><td class="accounting-print-num">PHP <?= $reportMoney($cashFlow['totalCashIn'] ?? 0); ?></td></tr>
+                                    <tr class="accounting-print-group"><td colspan="2">Cash Outflows</td></tr>
+                                    <tr><td>Manual Operating Expenses Paid</td><td class="accounting-print-num">PHP <?= $reportMoney($cashFlow['manualExpensesPaid'] ?? 0); ?></td></tr>
+                                    <tr><td>Payroll Net Paid</td><td class="accounting-print-num">PHP <?= $reportMoney($cashFlow['payrollNetPaid'] ?? 0); ?></td></tr>
+                                    <tr><td>Employee Cash Advances Issued</td><td class="accounting-print-num">PHP <?= $reportMoney($cashFlow['cashAdvancesIssued'] ?? 0); ?></td></tr>
+                                    <tr class="accounting-print-subtotal"><td>Total Cash Outflows</td><td class="accounting-print-num">PHP <?= $reportMoney($cashFlow['totalCashOut'] ?? 0); ?></td></tr>
+                                    <tr class="accounting-print-total"><td>Net Cash Movement</td><td class="accounting-print-num">PHP <?= $reportMoney($cashFlow['netCashMovement'] ?? 0); ?></td></tr>
+                                </tbody>
+                            </table>
+                            <p class="accounting-print-note" style="margin-top: 3mm;">BIR Form 2307 tax credits of PHP <?= $reportMoney($cashFlow['invoiceTaxCredits'] ?? 0); ?> are non-cash credits and are excluded from cash inflows.</p>
+                        </section>
+
+                        <section class="accounting-print-section accounting-print-section--page">
+                            <h3 class="accounting-print-section-title">Schedule A — Accounts Receivable Aging</h3>
+                            <p class="accounting-print-section-subtitle">Open balances for documents in <?= htmlspecialchars($rangeLabel); ?>, net of credits posted through <?= htmlspecialchars($formatDate($asOfDate)); ?></p>
+                            <table class="accounting-print-table">
+                                <thead><tr><th>Aging Bucket</th><th class="accounting-print-num">Open Items</th><th class="accounting-print-num">Outstanding Balance</th></tr></thead>
+                                <tbody>
+                                    <?php foreach ($receivableBuckets as $bucket): ?>
+                                        <tr>
+                                            <td><?= htmlspecialchars((string) ($bucket['label'] ?? 'Bucket')); ?></td>
+                                            <td class="accounting-print-num"><?= number_format((int) ($bucket['count'] ?? 0)); ?></td>
+                                            <td class="accounting-print-num">PHP <?= $reportMoney($bucket['amount'] ?? 0); ?></td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                                <tfoot><tr><td>Total Receivables</td><td class="accounting-print-num"><?= number_format((int) ($receivables['openCount'] ?? 0)); ?></td><td class="accounting-print-num">PHP <?= $reportMoney($receivables['totalReceivable'] ?? 0); ?></td></tr></tfoot>
+                            </table>
+
+                            <h4 class="accounting-print-section-title" style="margin-top: 6mm;">Open Item Register</h4>
+                            <table class="accounting-print-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 10%;">Source</th>
+                                        <th style="width: 12%;">Reference</th>
+                                        <th style="width: 23%;">Customer</th>
+                                        <th style="width: 10%;">Document Date</th>
+                                        <th style="width: 10%;">Due Date</th>
+                                        <th class="accounting-print-num" style="width: 12%;">Original Total</th>
+                                        <th class="accounting-print-num" style="width: 12%;">Credits</th>
+                                        <th class="accounting-print-num" style="width: 11%;">Balance</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php if (empty($receivableRows)): ?>
+                                        <tr><td colspan="8" class="accounting-print-empty">No open receivables were found for the selected report period.</td></tr>
+                                    <?php else: ?>
+                                        <?php foreach ($receivableRows as $row): ?>
+                                            <tr>
+                                                <td><?= htmlspecialchars((string) ($row['sourceLabel'] ?? '-')); ?></td>
+                                                <td><?= htmlspecialchars((string) ($row['referenceNo'] ?? '-')); ?></td>
+                                                <td><?= htmlspecialchars((string) ($row['customer'] ?? '-')); ?></td>
+                                                <td><?= htmlspecialchars($formatDate($row['documentDate'] ?? '')); ?></td>
+                                                <td><?= htmlspecialchars($formatDate($row['dueDate'] ?? '')); ?></td>
+                                                <td class="accounting-print-num"><?= $reportMoney($row['totalAmount'] ?? 0); ?></td>
+                                                <td class="accounting-print-num"><?= $reportMoney($row['creditApplied'] ?? 0); ?></td>
+                                                <td class="accounting-print-num"><?= $reportMoney($row['balance'] ?? 0); ?></td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
+                                </tbody>
+                                <tfoot><tr><td colspan="7">Total Outstanding</td><td class="accounting-print-num"><?= $reportMoney($receivables['totalReceivable'] ?? 0); ?></td></tr></tfoot>
+                            </table>
+                        </section>
+
+                        <section class="accounting-print-section accounting-print-section--page">
+                            <h3 class="accounting-print-section-title">Schedule B — Monthly Operating Results</h3>
+                            <p class="accounting-print-section-subtitle">Revenue, collections, expenses, and cash movement by month</p>
+                            <table class="accounting-print-table accounting-print-table--compact">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 12%;">Period</th>
+                                        <th class="accounting-print-num">Revenue</th>
+                                        <th class="accounting-print-num">Cash In</th>
+                                        <th class="accounting-print-num">Tax Credit</th>
+                                        <th class="accounting-print-num">Manual Expense</th>
+                                        <th class="accounting-print-num">Payroll Expense</th>
+                                        <th class="accounting-print-num">Cash Advances</th>
+                                        <th class="accounting-print-num">Net Income</th>
+                                        <th class="accounting-print-num">Net Cash</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php if (empty($cashMonthly)): ?>
+                                        <tr><td colspan="9" class="accounting-print-empty">No monthly activity was recorded for this period.</td></tr>
+                                    <?php else: ?>
+                                        <?php foreach ($cashMonthly as $row): ?>
+                                            <tr>
+                                                <td><?= htmlspecialchars((string) ($row['periodLabel'] ?? '-')); ?></td>
+                                                <td class="accounting-print-num"><?= $reportMoney((float) ($row['invoiceRevenue'] ?? 0) + (float) ($row['posRevenue'] ?? 0)); ?></td>
+                                                <td class="accounting-print-num"><?= $reportMoney((float) ($row['invoiceCash'] ?? 0) + (float) ($row['posCash'] ?? 0)); ?></td>
+                                                <td class="accounting-print-num"><?= $reportMoney($row['invoiceTax'] ?? 0); ?></td>
+                                                <td class="accounting-print-num"><?= $reportMoney($row['expenses'] ?? 0); ?></td>
+                                                <td class="accounting-print-num"><?= $reportMoney($row['payrollExpense'] ?? 0); ?></td>
+                                                <td class="accounting-print-num"><?= $reportMoney($row['cashAdvancesIssued'] ?? 0); ?></td>
+                                                <td class="accounting-print-num"><?= $reportMoney($row['netIncome'] ?? 0); ?></td>
+                                                <td class="accounting-print-num"><?= $reportMoney($row['netCash'] ?? 0); ?></td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
+                                </tbody>
+                            </table>
+
+                            <h4 class="accounting-print-section-title" style="margin-top: 6mm;">Schedule C — Expense Categories</h4>
+                            <table class="accounting-print-table accounting-print-table--compact">
+                                <thead><tr><th>Category</th><th class="accounting-print-num">Entries</th><th class="accounting-print-num">Share</th><th class="accounting-print-num">Amount</th></tr></thead>
+                                <tbody>
+                                    <?php if (empty($expenseCategories)): ?>
+                                        <tr><td colspan="4" class="accounting-print-empty">No expenses were recorded for this period.</td></tr>
+                                    <?php else: ?>
+                                        <?php foreach ($expenseCategories as $category): ?>
+                                            <tr>
+                                                <td><?= htmlspecialchars((string) ($category['label'] ?? 'Uncategorized')); ?></td>
+                                                <td class="accounting-print-num"><?= number_format((int) ($category['count'] ?? 0)); ?></td>
+                                                <td class="accounting-print-num"><?= number_format((float) ($category['share'] ?? 0), 2); ?>%</td>
+                                                <td class="accounting-print-num">PHP <?= $reportMoney($category['amount'] ?? 0); ?></td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
+                                </tbody>
+                                <tfoot><tr><td>Total Operating Expenses</td><td class="accounting-print-num"><?= number_format(array_sum(array_map(function ($category) { return (int) ($category['count'] ?? 0); }, $expenseCategories))); ?></td><td class="accounting-print-num"><?= !empty($expenseCategories) ? '100.00%' : '0.00%'; ?></td><td class="accounting-print-num">PHP <?= $reportMoney($expenseSummary['total'] ?? 0); ?></td></tr></tfoot>
+                            </table>
+                        </section>
+
+                    </article>
+
+                    <div class="ar-hero">
+                        <div class="ar-hero__content">
+                            <div class="ar-hero__eyebrow">
+                                <i class="mdi mdi-calculator-variant-outline"></i>
+                                Accounting
+                            </div>
+                            <h1 class="ar-hero__title">Accounting Reports <span class="calc-bounce">🧮</span></h1>
+                            <p class="ar-hero__subtitle"><?= htmlspecialchars($rangeLabel); ?> &middot; as of <?= htmlspecialchars($formatDate($asOfDate)); ?></p>
+                        </div>
+                        <div class="ar-hero__actions">
+                            <button type="button" class="ar-hero-btn" data-toggle="modal" data-target="#arFilterModal" title="Filter reports">
+                                <i class="mdi mdi-filter-variant"></i>
+                                <span>Filter</span>
                             </button>
-                            <button type="button" class="btn-soft" data-toggle="modal" data-target="#arLegendModal" title="How to read these reports">
-                                <i class="mdi mdi-information-outline"></i> Legend
+                            <button type="button" class="ar-hero-btn" data-toggle="modal" data-target="#arLegendModal" title="How to read these reports">
+                                <i class="mdi mdi-information-outline"></i>
+                                <span>Legend</span>
                             </button>
-                            <a href="<?= base_url(); ?>Page/revenueReports" class="btn-soft" title="Revenue Reports">
+                            <a href="<?= base_url(); ?>Page/revenueReports" class="ar-hero-btn" title="Revenue Reports">
                                 <i class="mdi mdi-chart-line"></i>
+                                <span>Revenue</span>
                             </a>
-                            <a href="<?= base_url(); ?>Page/taxSummaryReport" class="btn-soft" title="Tax Summary">
+                            <a href="<?= base_url(); ?>Page/taxSummaryReport" class="ar-hero-btn" title="Tax Summary">
                                 <i class="mdi mdi-receipt-text-outline"></i>
+                                <span>Tax</span>
                             </a>
-                            <a href="<?= $printUrl; ?>" class="btn-solid" target="_blank" rel="noopener">
-                                <i class="mdi mdi-printer"></i> Print
+                            <a href="<?= $printUrl; ?>" class="ar-hero-btn ar-hero-btn--solid" target="_blank" rel="noopener">
+                                <i class="mdi mdi-printer"></i>
+                                <span>Print</span>
                             </a>
                         </div>
                     </div>

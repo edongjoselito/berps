@@ -441,6 +441,45 @@ $printUrl = base_url() . 'Page/taxSummaryReport?' . http_build_query($printQuery
                             line-height: 1.6;
                         }
 
+                        /* Official print document styles */
+                        .tax-summary-page .ts-print-header {
+                            text-align: center;
+                        }
+
+                        .tax-summary-page .ts-print-title {
+                            font-size: 1.6rem;
+                            font-weight: 800;
+                            text-transform: uppercase;
+                            letter-spacing: 0.02em;
+                        }
+
+                        .tax-summary-page .ts-print-subtitle {
+                            font-size: 1.05rem;
+                            font-weight: 700;
+                            margin: 4px 0 8px;
+                        }
+
+                        .tax-summary-page .ts-print-meta {
+                            font-size: 0.82rem;
+                            line-height: 1.7;
+                        }
+
+                        .tax-summary-page .ts-print-divider {
+                            border: none;
+                            border-top: 2px solid #000;
+                            margin: 12px 0 18px;
+                        }
+
+                        .tax-summary-page .ts-print-footer {
+                            display: none;
+                            margin-top: 40px;
+                            padding-top: 16px;
+                            border-top: 1px solid #999;
+                            text-align: center;
+                            font-size: 0.78rem;
+                            color: #555;
+                        }
+
                         .tax-summary-page .empty-state {
                             padding: 24px;
                             text-align: center;
@@ -516,8 +555,10 @@ $printUrl = base_url() . 'Page/taxSummaryReport?' . http_build_query($printQuery
                             .navbar-custom,
                             .footer,
                             .ts-header,
+                            .ts-hero,
                             .filter-card,
                             .ts-actions,
+                            .ts-hero__actions,
                             .dataTables_length,
                             .dataTables_filter,
                             .dataTables_info,
@@ -538,6 +579,101 @@ $printUrl = base_url() . 'Page/taxSummaryReport?' . http_build_query($printQuery
 
                             .tax-summary-page .ts-print-header {
                                 display: block;
+                                padding: 0 0 16px 0;
+                                margin-bottom: 20px;
+                                border-bottom: 2px solid #000;
+                            }
+
+                            .tax-summary-page .ts-print-footer {
+                                display: block;
+                            }
+
+                            .tax-summary-page .ts-print-divider {
+                                display: block;
+                            }
+
+                            .tax-summary-page .stat-strip {
+                                grid-template-columns: repeat(4, 1fr) !important;
+                                gap: 8px !important;
+                                margin-bottom: 16px !important;
+                            }
+
+                            .tax-summary-page .stat-card {
+                                padding: 10px 12px !important;
+                                min-height: 0 !important;
+                                border: 1px solid #333 !important;
+                                border-radius: 4px !important;
+                            }
+
+                            .tax-summary-page .stat-card::before {
+                                display: none !important;
+                            }
+
+                            .tax-summary-page .stat-label {
+                                font-size: 0.7rem !important;
+                                text-transform: uppercase;
+                                letter-spacing: 0.03em;
+                            }
+
+                            .tax-summary-page .stat-value {
+                                font-size: 1rem !important;
+                            }
+
+                            .tax-summary-page .stat-meta {
+                                font-size: 0.7rem !important;
+                            }
+
+                            .tax-summary-page .panel-card {
+                                border: 1px solid #333 !important;
+                                border-top: 1px solid #333 !important;
+                                border-radius: 4px !important;
+                                box-shadow: none !important;
+                                margin-bottom: 14px !important;
+                            }
+
+                            .tax-summary-page .panel-header {
+                                border-bottom: 1px solid #333 !important;
+                                padding: 10px 14px !important;
+                            }
+
+                            .tax-summary-page .panel-title {
+                                font-size: 0.95rem !important;
+                                text-transform: uppercase;
+                                letter-spacing: 0.02em;
+                            }
+
+                            .tax-summary-page .panel-subtitle {
+                                font-size: 0.78rem !important;
+                            }
+
+                            .tax-summary-page .panel-body {
+                                padding: 12px 14px !important;
+                            }
+
+                            .tax-summary-page .table {
+                                font-size: 0.8rem !important;
+                            }
+
+                            .tax-summary-page .table thead th {
+                                background: #eee !important;
+                                border: 1px solid #333 !important;
+                                font-weight: 700 !important;
+                                text-transform: uppercase;
+                                font-size: 0.72rem !important;
+                            }
+
+                            .tax-summary-page .table td {
+                                border: 1px solid #ccc !important;
+                            }
+
+                            .tax-summary-page .summary-grid {
+                                grid-template-columns: 1fr 1fr !important;
+                                gap: 12px !important;
+                            }
+
+                            @page {
+                                margin: 1.5cm 2cm;
+                                size: A4 portrait;
                             }
 
                             .tax-summary-page .summary-grid,
@@ -603,48 +739,627 @@ $printUrl = base_url() . 'Page/taxSummaryReport?' . http_build_query($printQuery
                                 page-break-after: auto;
                             }
                         }
+
+                        /* Hero Banner */
+                        .tax-summary-page .ts-hero {
+                            display: flex;
+                            align-items: center;
+                            justify-content: space-between;
+                            flex-wrap: wrap;
+                            gap: 16px;
+                            padding: 28px 24px;
+                            margin: 24px 0 22px;
+                            border-radius: 16px;
+                            background: #6b21a8;
+                            box-shadow: 0 8px 32px rgba(107, 33, 168, 0.25);
+                            position: relative;
+                            overflow: hidden;
+                        }
+
+                        .tax-summary-page .ts-hero::before {
+                            content: '';
+                            position: absolute;
+                            top: -50%;
+                            right: -10%;
+                            width: 400px;
+                            height: 400px;
+                            border-radius: 50%;
+                            background: rgba(255, 255, 255, 0.06);
+                            pointer-events: none;
+                        }
+
+                        .tax-summary-page .ts-hero::after {
+                            content: '';
+                            position: absolute;
+                            bottom: -60%;
+                            right: 15%;
+                            width: 300px;
+                            height: 300px;
+                            border-radius: 50%;
+                            background: rgba(255, 255, 255, 0.04);
+                            pointer-events: none;
+                        }
+
+                        .tax-summary-page .ts-hero__content {
+                            position: relative;
+                            z-index: 1;
+                        }
+
+                        .tax-summary-page .ts-hero__eyebrow {
+                            display: inline-flex;
+                            align-items: center;
+                            gap: 6px;
+                            margin-bottom: 8px;
+                            color: rgba(255, 255, 255, 0.85);
+                            font-size: 0.78rem;
+                            font-weight: 600;
+                            letter-spacing: 0.04em;
+                        }
+
+                        .tax-summary-page .ts-hero__eyebrow i {
+                            font-size: 1rem;
+                        }
+
+                        .tax-summary-page .ts-hero__title {
+                            margin: 0 0 4px 0;
+                            color: #fff;
+                            font-size: clamp(1.6rem, 2.5vw, 2.2rem);
+                            font-weight: 800;
+                            line-height: 1.15;
+                            letter-spacing: -0.02em;
+                        }
+
+                        .tax-summary-page .ts-hero__subtitle {
+                            margin: 0;
+                            color: rgba(255, 255, 255, 0.8);
+                            font-size: 0.88rem;
+                            max-width: 480px;
+                        }
+
+                        .tax-summary-page .ts-hero__actions {
+                            display: flex;
+                            align-items: center;
+                            flex-wrap: wrap;
+                            gap: 10px;
+                            position: relative;
+                            z-index: 1;
+                        }
+
+                        .tax-summary-page .ts-hero-btn {
+                            display: inline-flex;
+                            align-items: center;
+                            gap: 6px;
+                            padding: 8px 16px;
+                            border-radius: 10px;
+                            border: 1px solid rgba(255, 255, 255, 0.3);
+                            background: rgba(255, 255, 255, 0.15);
+                            color: #fff;
+                            font-size: 0.82rem;
+                            font-weight: 600;
+                            text-decoration: none;
+                            cursor: pointer;
+                            transition: all 0.18s ease;
+                        }
+
+                        .tax-summary-page .ts-hero-btn:hover,
+                        .tax-summary-page .ts-hero-btn:focus {
+                            background: rgba(255, 255, 255, 0.25);
+                            border-color: rgba(255, 255, 255, 0.5);
+                            color: #fff;
+                            text-decoration: none;
+                            transform: translateY(-1px);
+                        }
+
+                        .tax-summary-page .ts-hero-btn--solid {
+                            border-color: rgba(255, 255, 255, 0.6);
+                            background: rgba(255, 255, 255, 0.95);
+                            color: #6b21a8;
+                            font-weight: 700;
+                        }
+
+                        .tax-summary-page .ts-hero-btn--solid:hover,
+                        .tax-summary-page .ts-hero-btn--solid:focus {
+                            background: #fff;
+                            color: #581c87;
+                        }
+
+                        /* Receipt shake animation */
+                        .tax-summary-page .receipt-shake {
+                            display: inline-block;
+                            animation: receipt-shake 2.5s ease-in-out infinite;
+                            transform-origin: center;
+                        }
+
+                        @keyframes receipt-shake {
+                            0%, 75%, 100% { transform: rotate(0deg) translateY(0); }
+                            10% { transform: rotate(-6deg) translateY(-3px); }
+                            20% { transform: rotate(4deg) translateY(0); }
+                            30% { transform: rotate(-3deg) translateY(-2px); }
+                            40% { transform: rotate(0deg) translateY(0); }
+                        }
+
+                        /* Deep purple accent on cards */
+                        .tax-summary-page .panel-card {
+                            border-top: 3px solid #6b21a8;
+                        }
+
+                        .tax-summary-page .panel-header {
+                            border-bottom: 2px solid #6b21a8;
+                        }
+
+                        .tax-summary-page .panel-title {
+                            color: #6b21a8;
+                        }
+
+                        /* Responsive hero */
+                        @media (max-width: 767px) {
+                            .tax-summary-page .ts-hero,
+                            .tax-summary-page .ts-hero__actions {
+                                flex-direction: column;
+                                align-items: stretch;
+                            }
+
+                            .tax-summary-page .ts-hero {
+                                padding: 20px;
+                            }
+
+                            .tax-summary-page .ts-hero-btn {
+                                flex: 1 1 auto;
+                                justify-content: center;
+                            }
+                        }
+
+                        /* Dedicated paged document. The dashboard remains unchanged on screen. */
+                        .tax-print-document {
+                            display: none;
+                        }
+
+                        @media print {
+                            @page {
+                                size: A4 landscape;
+                                margin: 14mm 13mm 16mm;
+                            }
+
+                            .tax-summary-page > *:not(.tax-print-document) {
+                                display: none !important;
+                            }
+
+                            .tax-summary-page .tax-print-document {
+                                display: block !important;
+                                color: #111 !important;
+                                font-family: Arial, Helvetica, sans-serif !important;
+                                font-size: 9pt;
+                                line-height: 1.35;
+                            }
+
+                            .tax-print-document,
+                            .tax-print-document * {
+                                box-sizing: border-box;
+                                color: #111 !important;
+                                text-shadow: none !important;
+                                box-shadow: none !important;
+                            }
+
+                            .tax-print-letterhead {
+                                display: grid;
+                                grid-template-columns: minmax(0, 1fr) auto;
+                                gap: 18mm;
+                                align-items: end;
+                                padding-bottom: 4mm;
+                                margin-bottom: 5mm;
+                                border-bottom: 2px solid #111;
+                            }
+
+                            .tax-print-company {
+                                margin: 0 0 1mm;
+                                font-size: 17pt;
+                                font-weight: 700;
+                                letter-spacing: 0.02em;
+                                text-transform: uppercase;
+                            }
+
+                            .tax-print-company-meta,
+                            .tax-print-doc-meta {
+                                font-size: 8.5pt;
+                                line-height: 1.45;
+                            }
+
+                            .tax-print-doc-meta {
+                                min-width: 58mm;
+                            }
+
+                            .tax-print-doc-meta div {
+                                display: flex;
+                                justify-content: space-between;
+                                gap: 8mm;
+                                padding: 0.5mm 0;
+                                border-bottom: 1px solid #bbb;
+                            }
+
+                            .tax-print-doc-meta span:first-child {
+                                font-weight: 700;
+                                text-transform: uppercase;
+                            }
+
+                            .tax-print-report-title {
+                                margin: 0;
+                                text-align: center;
+                                font-size: 15pt;
+                                font-weight: 700;
+                                letter-spacing: 0.08em;
+                                text-transform: uppercase;
+                            }
+
+                            .tax-print-report-period {
+                                margin: 1mm 0 5mm;
+                                text-align: center;
+                                font-size: 9pt;
+                            }
+
+                            .tax-print-summary {
+                                width: 100%;
+                                margin: 0 0 5mm;
+                                border-collapse: collapse;
+                                table-layout: fixed;
+                            }
+
+                            .tax-print-summary td {
+                                width: 20%;
+                                padding: 2.5mm 3mm;
+                                border: 1px solid #777;
+                                vertical-align: top;
+                            }
+
+                            .tax-print-summary-label {
+                                display: block;
+                                margin-bottom: 1mm;
+                                font-size: 7.5pt;
+                                font-weight: 700;
+                                letter-spacing: 0.04em;
+                                text-transform: uppercase;
+                            }
+
+                            .tax-print-summary-value {
+                                display: block;
+                                font-size: 11.5pt;
+                                font-weight: 700;
+                                font-variant-numeric: tabular-nums;
+                            }
+
+                            .tax-print-section {
+                                margin-top: 5mm;
+                            }
+
+                            .tax-print-section--page {
+                                break-before: page;
+                                page-break-before: always;
+                            }
+
+                            .tax-print-section-title {
+                                margin: 0 0 2mm;
+                                padding-bottom: 1.5mm;
+                                border-bottom: 1px solid #111;
+                                font-size: 10.5pt;
+                                font-weight: 700;
+                                letter-spacing: 0.04em;
+                                text-transform: uppercase;
+                            }
+
+                            .tax-print-note {
+                                margin: -1mm 0 2.5mm;
+                                font-size: 8pt;
+                                color: #444 !important;
+                            }
+
+                            .tax-print-grid {
+                                display: grid;
+                                grid-template-columns: 1fr 1fr;
+                                gap: 7mm;
+                                align-items: start;
+                            }
+
+                            .tax-print-table {
+                                width: 100%;
+                                border-collapse: collapse;
+                                table-layout: fixed;
+                                font-size: 8pt;
+                            }
+
+                            .tax-print-table thead {
+                                display: table-header-group;
+                            }
+
+                            .tax-print-table tfoot {
+                                display: table-row-group;
+                            }
+
+                            .tax-print-table tr {
+                                break-inside: avoid;
+                                page-break-inside: avoid;
+                            }
+
+                            .tax-print-table th,
+                            .tax-print-table td {
+                                padding: 1.7mm 2mm;
+                                border: 1px solid #999;
+                                vertical-align: top;
+                                overflow-wrap: anywhere;
+                            }
+
+                            .tax-print-table th {
+                                background: #ececec !important;
+                                font-size: 7.25pt;
+                                font-weight: 700;
+                                letter-spacing: 0.03em;
+                                text-align: left;
+                                text-transform: uppercase;
+                            }
+
+                            .tax-print-table .tax-print-num {
+                                text-align: right;
+                                white-space: nowrap;
+                                font-variant-numeric: tabular-nums;
+                            }
+
+                            .tax-print-table tfoot td {
+                                border-top: 1.5px solid #111;
+                                background: #f5f5f5 !important;
+                                font-weight: 700;
+                            }
+
+                            .tax-print-empty {
+                                padding: 5mm !important;
+                                text-align: center;
+                            }
+
+                            .tax-print-attestation {
+                                display: grid;
+                                grid-template-columns: 1.3fr 1fr 1fr;
+                                gap: 12mm;
+                                margin-top: 4mm;
+                                break-inside: avoid;
+                                page-break-inside: avoid;
+                            }
+
+                            .tax-print-attestation-note {
+                                font-size: 8pt;
+                                color: #444 !important;
+                            }
+
+                            .tax-print-signature {
+                                padding-top: 5mm;
+                                border-top: 1px solid #111;
+                                text-align: center;
+                                font-size: 8pt;
+                            }
+
+                            .tax-print-footer-note {
+                                margin-top: 3mm;
+                                padding-top: 1mm;
+                                border-top: 1px solid #aaa;
+                                text-align: center;
+                                font-size: 7.25pt;
+                                color: #555 !important;
+                            }
+                        }
                     </style>
+
+                    <section class="tax-print-document" aria-label="Printable tax summary report">
+                        <header class="tax-print-letterhead">
+                            <div>
+                                <h1 class="tax-print-company"><?= htmlspecialchars($businessName !== '' ? $businessName : 'BERPS', ENT_QUOTES, 'UTF-8'); ?></h1>
+                                <div class="tax-print-company-meta">
+                                    <?php if ($businessAddress !== ''): ?>
+                                        <div><?= htmlspecialchars($businessAddress, ENT_QUOTES, 'UTF-8'); ?></div>
+                                    <?php endif; ?>
+                                    <?php if ($businessTin !== ''): ?>
+                                        <div>Taxpayer Identification No.: <?= htmlspecialchars($businessTin, ENT_QUOTES, 'UTF-8'); ?></div>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                            <div class="tax-print-doc-meta">
+                                <div><span>Document</span><strong>TAX-SUMMARY</strong></div>
+                                <div><span>Prepared</span><strong><?= htmlspecialchars($generatedAt, ENT_QUOTES, 'UTF-8'); ?></strong></div>
+                            </div>
+                        </header>
+
+                        <h2 class="tax-print-report-title">Tax Summary Report</h2>
+                        <p class="tax-print-report-period">Reporting period: <strong><?= htmlspecialchars($rangeLabel, ENT_QUOTES, 'UTF-8'); ?></strong></p>
+
+                        <table class="tax-print-summary" aria-label="Tax report totals">
+                            <tbody>
+                                <tr>
+                                    <td><span class="tax-print-summary-label">Cash Received</span><span class="tax-print-summary-value">PHP <?= number_format($totalCash, 2); ?></span></td>
+                                    <td><span class="tax-print-summary-label">BIR 2307 Tax Credit</span><span class="tax-print-summary-value">PHP <?= number_format($totalTax, 2); ?></span></td>
+                                    <td><span class="tax-print-summary-label">Gross Settlement</span><span class="tax-print-summary-value">PHP <?= number_format($totalGross, 2); ?></span></td>
+                                    <td><span class="tax-print-summary-label">Taxed Payments</span><span class="tax-print-summary-value"><?= number_format($entryCount); ?></span></td>
+                                    <td><span class="tax-print-summary-label">Clients</span><span class="tax-print-summary-value"><?= number_format($uniqueClients); ?></span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <div class="tax-print-grid">
+                            <section class="tax-print-section">
+                                <h3 class="tax-print-section-title">Schedule A — Summary by Client</h3>
+                                <table class="tax-print-table">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 36%;">Client</th>
+                                            <th class="tax-print-num" style="width: 12%;">Entries</th>
+                                            <th class="tax-print-num">Cash</th>
+                                            <th class="tax-print-num">Tax Credit</th>
+                                            <th class="tax-print-num">Gross</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php if (!empty($customerSummaries)): ?>
+                                            <?php foreach ($customerSummaries as $summary): ?>
+                                                <tr>
+                                                    <td><?= htmlspecialchars((string) ($summary['label'] ?? 'Unknown Customer'), ENT_QUOTES, 'UTF-8'); ?></td>
+                                                    <td class="tax-print-num"><?= number_format((int) ($summary['entryCount'] ?? 0)); ?></td>
+                                                    <td class="tax-print-num"><?= number_format((float) ($summary['cashAmount'] ?? 0), 2); ?></td>
+                                                    <td class="tax-print-num"><?= number_format((float) ($summary['taxAmount'] ?? 0), 2); ?></td>
+                                                    <td class="tax-print-num"><?= number_format((float) ($summary['grossAmount'] ?? 0), 2); ?></td>
+                                                </tr>
+                                            <?php endforeach; ?>
+                                        <?php else: ?>
+                                            <tr><td colspan="5" class="tax-print-empty">No tax-bearing payments were recorded for this period.</td></tr>
+                                        <?php endif; ?>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td>Report Total</td>
+                                            <td class="tax-print-num"><?= number_format($entryCount); ?></td>
+                                            <td class="tax-print-num"><?= number_format($totalCash, 2); ?></td>
+                                            <td class="tax-print-num"><?= number_format($totalTax, 2); ?></td>
+                                            <td class="tax-print-num"><?= number_format($totalGross, 2); ?></td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </section>
+
+                            <section class="tax-print-section">
+                                <h3 class="tax-print-section-title">Schedule B — Summary by Month</h3>
+                                <table class="tax-print-table">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 36%;">Month</th>
+                                            <th class="tax-print-num" style="width: 12%;">Entries</th>
+                                            <th class="tax-print-num">Cash</th>
+                                            <th class="tax-print-num">Tax Credit</th>
+                                            <th class="tax-print-num">Gross</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php if (!empty($monthSummaries)): ?>
+                                            <?php foreach ($monthSummaries as $summary): ?>
+                                                <tr>
+                                                    <td><?= htmlspecialchars((string) ($summary['periodLabel'] ?? '-'), ENT_QUOTES, 'UTF-8'); ?></td>
+                                                    <td class="tax-print-num"><?= number_format((int) ($summary['entryCount'] ?? 0)); ?></td>
+                                                    <td class="tax-print-num"><?= number_format((float) ($summary['cashAmount'] ?? 0), 2); ?></td>
+                                                    <td class="tax-print-num"><?= number_format((float) ($summary['taxAmount'] ?? 0), 2); ?></td>
+                                                    <td class="tax-print-num"><?= number_format((float) ($summary['grossAmount'] ?? 0), 2); ?></td>
+                                                </tr>
+                                            <?php endforeach; ?>
+                                        <?php else: ?>
+                                            <tr><td colspan="5" class="tax-print-empty">No monthly tax summary is available for this period.</td></tr>
+                                        <?php endif; ?>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td>Report Total</td>
+                                            <td class="tax-print-num"><?= number_format($entryCount); ?></td>
+                                            <td class="tax-print-num"><?= number_format($totalCash, 2); ?></td>
+                                            <td class="tax-print-num"><?= number_format($totalTax, 2); ?></td>
+                                            <td class="tax-print-num"><?= number_format($totalGross, 2); ?></td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </section>
+                        </div>
+
+                        <div class="tax-print-attestation">
+                            <div class="tax-print-attestation-note">I certify that this report was generated from the payment records available in BERPS for the reporting period shown above.</div>
+                            <div class="tax-print-signature">Prepared by / Date</div>
+                            <div class="tax-print-signature">Reviewed by / Date</div>
+                        </div>
+
+                        <section class="tax-print-section tax-print-section--page">
+                            <h3 class="tax-print-section-title">Schedule C — Tax-Bearing Payment Register</h3>
+                            <p class="tax-print-note">Detailed schedule supporting the report totals. Amounts are stated in Philippine pesos.</p>
+                            <table class="tax-print-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 8%;">Date</th>
+                                        <th style="width: 8%;">Invoice</th>
+                                        <th style="width: 20%;">Client</th>
+                                        <th style="width: 10%;">Source</th>
+                                        <th style="width: 18%;">Reference / OR No.</th>
+                                        <th class="tax-print-num" style="width: 12%;">Cash</th>
+                                        <th class="tax-print-num" style="width: 12%;">Tax Credit</th>
+                                        <th class="tax-print-num" style="width: 12%;">Gross</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php if (!empty($entries)): ?>
+                                        <?php foreach ($entries as $row): ?>
+                                            <?php
+                                            $detailCash = (float) ($row->AmountPaid ?? 0);
+                                            $detailTax = (float) ($row->TaxAmount ?? 0);
+                                            $detailGross = (float) ($row->GrossAmountPaid ?? ($detailCash + $detailTax));
+                                            $detailReference = trim((string) ($row->PaymentReference ?? $row->paymentReference ?? ''));
+                                            $detailOrNo = trim((string) ($row->ORNo ?? $row->orNo ?? ''));
+                                            $detailRefs = array_values(array_filter(array($detailReference, $detailOrNo), function ($value) { return $value !== ''; }));
+                                            ?>
+                                            <tr>
+                                                <td><?= htmlspecialchars((string) ($row->PDate ?? '-'), ENT_QUOTES, 'UTF-8'); ?></td>
+                                                <td><?= htmlspecialchars((string) ($row->InvoiceNo ?? '-'), ENT_QUOTES, 'UTF-8'); ?></td>
+                                                <td><?= htmlspecialchars(trim((string) ($row->Customer ?? '')) !== '' ? (string) $row->Customer : 'Unknown Customer', ENT_QUOTES, 'UTF-8'); ?></td>
+                                                <td><?= htmlspecialchars(trim((string) ($row->PaymentSource ?? '')) !== '' ? (string) $row->PaymentSource : '-', ENT_QUOTES, 'UTF-8'); ?></td>
+                                                <td><?= htmlspecialchars(!empty($detailRefs) ? implode(' / ', $detailRefs) : '-', ENT_QUOTES, 'UTF-8'); ?></td>
+                                                <td class="tax-print-num"><?= number_format($detailCash, 2); ?></td>
+                                                <td class="tax-print-num"><?= number_format($detailTax, 2); ?></td>
+                                                <td class="tax-print-num"><?= number_format($detailGross, 2); ?></td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    <?php else: ?>
+                                        <tr><td colspan="8" class="tax-print-empty">No tax-bearing payments were recorded for this period.</td></tr>
+                                    <?php endif; ?>
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="5">Grand Total</td>
+                                        <td class="tax-print-num"><?= number_format($totalCash, 2); ?></td>
+                                        <td class="tax-print-num"><?= number_format($totalTax, 2); ?></td>
+                                        <td class="tax-print-num"><?= number_format($totalGross, 2); ?></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </section>
+
+                    </section>
 
                     <div class="ts-print-header">
                         <div class="ts-print-title"><?= htmlspecialchars($businessName !== '' ? $businessName : 'BERPS', ENT_QUOTES, 'UTF-8'); ?></div>
+                        <?php if ($businessAddress !== ''): ?>
+                            <div class="ts-print-meta"><?= htmlspecialchars($businessAddress, ENT_QUOTES, 'UTF-8'); ?></div>
+                        <?php endif; ?>
+                        <?php if ($businessTin !== ''): ?>
+                            <div class="ts-print-meta">TIN: <?= htmlspecialchars($businessTin, ENT_QUOTES, 'UTF-8'); ?></div>
+                        <?php endif; ?>
+                        <hr class="ts-print-divider">
+                        <div class="ts-print-subtitle">Tax Summary Report</div>
                         <div class="ts-print-meta">
-                            Tax Summary Report<br>
                             Coverage: <?= htmlspecialchars($rangeLabel, ENT_QUOTES, 'UTF-8'); ?><br>
                             Generated: <?= htmlspecialchars($generatedAt, ENT_QUOTES, 'UTF-8'); ?>
-                            <?php if ($businessTin !== ''): ?>
-                                <br>TIN: <?= htmlspecialchars($businessTin, ENT_QUOTES, 'UTF-8'); ?>
-                            <?php endif; ?>
-                            <?php if ($businessAddress !== ''): ?>
-                                <br>Address: <?= htmlspecialchars($businessAddress, ENT_QUOTES, 'UTF-8'); ?>
-                            <?php endif; ?>
                         </div>
                     </div>
 
-                    <div class="ts-header">
-                        <div>
-                            <div class="ts-eyebrow">Tax Reporting</div>
-                            <h1 class="ts-title">Tax Summary Report</h1>
-                            <p class="ts-subtitle">
-                                Review all payments with BIR Form 2307 tax, grouped by client and by month.
-                            </p>
+                    <div class="ts-hero">
+                        <div class="ts-hero__content">
+                            <div class="ts-hero__eyebrow">
+                                <i class="mdi mdi-receipt-text-outline"></i>
+                                Tax Reporting
+                            </div>
+                            <h1 class="ts-hero__title">Tax Summary Report <span class="receipt-shake">🧾</span></h1>
+                            <p class="ts-hero__subtitle">Review all payments with BIR Form 2307 tax, grouped by client and by month.</p>
                         </div>
-
-                        <div class="ts-actions">
-                            <button type="button" class="btn-soft" data-toggle="modal" data-target="#filterModal">
-                                <i class="fas fa-filter"></i>
-                                Filter
+                        <div class="ts-hero__actions">
+                            <button type="button" class="ts-hero-btn" data-toggle="modal" data-target="#filterModal">
+                                <i class="mdi mdi-filter-variant"></i>
+                                <span>Filter</span>
                             </button>
-                            <a class="btn-soft" href="<?= htmlspecialchars(base_url() . 'Page/paymentList', ENT_QUOTES, 'UTF-8'); ?>">
-                                <i class="fas fa-arrow-left"></i>
-                                Back to Payments
+                            <a class="ts-hero-btn" href="<?= htmlspecialchars(base_url() . 'Page/paymentList', ENT_QUOTES, 'UTF-8'); ?>">
+                                <i class="mdi mdi-arrow-left"></i>
+                                <span>Back to Payments</span>
                             </a>
-                            <a class="btn-soft" href="<?= htmlspecialchars($printUrl, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener noreferrer">
-                                <i class="fas fa-print"></i>
-                                Print Report
+                            <a class="ts-hero-btn" href="<?= htmlspecialchars($printUrl, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener noreferrer">
+                                <i class="mdi mdi-printer"></i>
+                                <span>Print</span>
                             </a>
-                            <a class="btn-solid" href="<?= htmlspecialchars(base_url() . 'Page/taxSummaryReport', ENT_QUOTES, 'UTF-8'); ?>">
-                                <i class="fas fa-rotate-right"></i>
-                                Reset
+                            <a class="ts-hero-btn ts-hero-btn--solid" href="<?= htmlspecialchars(base_url() . 'Page/taxSummaryReport', ENT_QUOTES, 'UTF-8'); ?>">
+                                <i class="mdi mdi-refresh"></i>
+                                <span>Reset</span>
                             </a>
                         </div>
                     </div>
@@ -916,6 +1631,12 @@ $printUrl = base_url() . 'Page/taxSummaryReport?' . http_build_query($printQuery
                             </div>
                         </div>
                     </div>
+
+                    <div class="ts-print-footer">
+                        This document is computer-generated from BERPS. <?= htmlspecialchars($businessName, ENT_QUOTES, 'UTF-8'); ?> &middot; <?= htmlspecialchars($generatedAt, ENT_QUOTES, 'UTF-8'); ?><br>
+                        Confidential &mdash; For internal use only.
+                    </div>
+
                 </div>
 
             </div>

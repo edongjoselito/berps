@@ -260,6 +260,178 @@
                                 margin: 8px 1rem 14px;
                             }
                         }
+
+                        /* Hero Banner */
+                        .employee-task-page .et-hero {
+                            display: flex;
+                            align-items: center;
+                            justify-content: space-between;
+                            flex-wrap: wrap;
+                            gap: 16px;
+                            padding: 28px 24px;
+                            margin: 0 0 22px;
+                            border-radius: 16px;
+                            background: #3730a3;
+                            box-shadow: 0 8px 32px rgba(55, 48, 163, 0.25);
+                            position: relative;
+                            overflow: hidden;
+                        }
+
+                        .employee-task-page .et-hero::before {
+                            content: '';
+                            position: absolute;
+                            top: -50%;
+                            right: -10%;
+                            width: 400px;
+                            height: 400px;
+                            border-radius: 50%;
+                            background: rgba(255, 255, 255, 0.06);
+                            pointer-events: none;
+                        }
+
+                        .employee-task-page .et-hero::after {
+                            content: '';
+                            position: absolute;
+                            bottom: -60%;
+                            right: 15%;
+                            width: 300px;
+                            height: 300px;
+                            border-radius: 50%;
+                            background: rgba(255, 255, 255, 0.04);
+                            pointer-events: none;
+                        }
+
+                        .employee-task-page .et-hero__content {
+                            position: relative;
+                            z-index: 1;
+                        }
+
+                        .employee-task-page .et-hero__eyebrow {
+                            display: inline-flex;
+                            align-items: center;
+                            gap: 6px;
+                            margin-bottom: 8px;
+                            color: rgba(255, 255, 255, 0.85);
+                            font-size: 0.78rem;
+                            font-weight: 600;
+                            letter-spacing: 0.04em;
+                        }
+
+                        .employee-task-page .et-hero__eyebrow i {
+                            font-size: 1rem;
+                        }
+
+                        .employee-task-page .et-hero__title {
+                            margin: 0 0 4px 0;
+                            color: #fff;
+                            font-size: clamp(1.6rem, 2.5vw, 2.2rem);
+                            font-weight: 800;
+                            line-height: 1.15;
+                            letter-spacing: -0.02em;
+                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif), "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+                        }
+
+                        .employee-task-page .et-hero__subtitle {
+                            margin: 0;
+                            color: rgba(255, 255, 255, 0.8);
+                            font-size: 0.88rem;
+                            max-width: 520px;
+                        }
+
+                        .employee-task-page .et-hero__actions {
+                            display: flex;
+                            align-items: center;
+                            flex-wrap: wrap;
+                            gap: 10px;
+                            position: relative;
+                            z-index: 1;
+                        }
+
+                        .employee-task-page .et-hero-btn {
+                            display: inline-flex;
+                            align-items: center;
+                            gap: 6px;
+                            padding: 8px 16px;
+                            border-radius: 10px;
+                            border: 1px solid rgba(255, 255, 255, 0.3);
+                            background: rgba(255, 255, 255, 0.15);
+                            color: #fff;
+                            font-size: 0.82rem;
+                            font-weight: 600;
+                            text-decoration: none;
+                            cursor: pointer;
+                            transition: all 0.18s ease;
+                        }
+
+                        .employee-task-page .et-hero-btn:hover,
+                        .employee-task-page .et-hero-btn:focus {
+                            background: rgba(255, 255, 255, 0.25);
+                            border-color: rgba(255, 255, 255, 0.5);
+                            color: #fff;
+                            text-decoration: none;
+                            transform: translateY(-1px);
+                        }
+
+                        .employee-task-page .et-hero-btn--solid {
+                            border-color: rgba(255, 255, 255, 0.6);
+                            background: rgba(255, 255, 255, 0.95);
+                            color: #3730a3;
+                            font-weight: 700;
+                        }
+
+                        .employee-task-page .et-hero-btn--solid:hover,
+                        .employee-task-page .et-hero-btn--solid:focus {
+                            background: #fff;
+                            color: #312e81;
+                        }
+
+                        .employee-task-page .et-hero-btn--active {
+                            background: rgba(255, 255, 255, 0.95);
+                            color: #3730a3;
+                            font-weight: 700;
+                        }
+
+                        /* Checkmark bounce animation */
+                        .employee-task-page .check-bounce {
+                            display: inline-block;
+                            animation: check-bounce 2s ease-in-out infinite;
+                        }
+
+                        @keyframes check-bounce {
+                            0%, 70%, 100% { transform: translateY(0); }
+                            15% { transform: translateY(-10px); }
+                            30% { transform: translateY(0); }
+                            45% { transform: translateY(-5px); }
+                            60% { transform: translateY(0); }
+                        }
+
+                        /* Indigo accent on cards */
+                        .employee-task-page .summary-card,
+                        .employee-task-page .accordion-card {
+                            border-top: 3px solid #3730a3;
+                        }
+
+                        .employee-task-page .stat-box {
+                            border-top: 3px solid #3730a3;
+                        }
+
+                        /* Responsive hero */
+                        @media (max-width: 767px) {
+                            .employee-task-page .et-hero,
+                            .employee-task-page .et-hero__actions {
+                                flex-direction: column;
+                                align-items: stretch;
+                            }
+
+                            .employee-task-page .et-hero {
+                                padding: 20px;
+                            }
+
+                            .employee-task-page .et-hero-btn {
+                                flex: 1 1 auto;
+                                justify-content: center;
+                            }
+                        }
                     </style>
 
                     <?php
@@ -273,34 +445,28 @@
                     }
                     ?>
 
-                    <div class="row">
-                        <div class="col-12">
-                            <div class="title-wrap">
-                                <h4 class="page-title">
-                                    Employee Pending Tasks<br>
-
-                                </h4>
+                    <div class="et-hero">
+                        <div class="et-hero__content">
+                            <div class="et-hero__eyebrow">
+                                <i class="mdi mdi-clipboard-list-outline"></i>
+                                Task Management
                             </div>
-                            <hr class="title-divider">
+                            <h1 class="et-hero__title">Employee Pending Tasks <span class="check-bounce">✅</span></h1>
+                            <p class="et-hero__subtitle">Review and manage pending tasks assigned to each employee.</p>
                         </div>
-                    </div>
-
-                    <?php
-                    $taskFilter = isset($taskFilter) ? (string) $taskFilter : 'all';
-                    ?>
-                    <div class="row mb-3">
-                        <div class="col-12">
-                            <div class="btn-group" role="group" aria-label="Task filter">
-                                <a href="<?= base_url('Page/employeeTask?task_filter=all'); ?>" class="btn btn-sm <?= $taskFilter === 'all' ? 'btn-primary' : 'btn-outline-primary'; ?>">
-                                    <i class="fas fa-users"></i> All Employees
-                                </a>
-                                <a href="<?= base_url('Page/employeeTask?task_filter=with_tasks'); ?>" class="btn btn-sm <?= $taskFilter === 'with_tasks' ? 'btn-warning' : 'btn-outline-warning'; ?>">
-                                    <i class="fas fa-tasks"></i> With Pending Tasks
-                                </a>
-                                <a href="<?= base_url('Page/employeeTask?task_filter=without_tasks'); ?>" class="btn btn-sm <?= $taskFilter === 'without_tasks' ? 'btn-success' : 'btn-outline-success'; ?>">
-                                    <i class="fas fa-check-circle"></i> Without Tasks
-                                </a>
-                            </div>
+                        <div class="et-hero__actions">
+                            <a class="et-hero-btn <?= $taskFilter === 'all' ? 'et-hero-btn--active' : ''; ?>" href="<?= base_url('Page/employeeTask?task_filter=all'); ?>">
+                                <i class="mdi mdi-account-group-outline"></i>
+                                <span>All Employees</span>
+                            </a>
+                            <a class="et-hero-btn <?= $taskFilter === 'with_tasks' ? 'et-hero-btn--active' : ''; ?>" href="<?= base_url('Page/employeeTask?task_filter=with_tasks'); ?>">
+                                <i class="mdi mdi-format-list-checks"></i>
+                                <span>With Pending</span>
+                            </a>
+                            <a class="et-hero-btn <?= $taskFilter === 'without_tasks' ? 'et-hero-btn--active' : ''; ?>" href="<?= base_url('Page/employeeTask?task_filter=without_tasks'); ?>">
+                                <i class="mdi mdi-check-circle-outline"></i>
+                                <span>Without Tasks</span>
+                            </a>
                         </div>
                     </div>
 

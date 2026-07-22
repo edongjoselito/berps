@@ -117,8 +117,8 @@ $notesJson = json_encode(
                 <section class="notes-hero">
                     <div class="notes-hero__top">
                         <div>
-                            <span class="notes-eyebrow">Notes workspace</span>
-                            <h1>Keep every note sharp and easy to revisit.</h1>
+                            <span class="notes-eyebrow"><i class="mdi mdi-notebook-outline"></i> Notes workspace</span>
+                            <h1>Keep every note sharp and easy to revisit. <span class="note-write">📝</span></h1>
                         </div>
 
                         <div class="notes-hero__actions">

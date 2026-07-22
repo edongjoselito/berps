@@ -839,25 +839,28 @@ $currentDateLabel = date('l, F j, Y');
                         </div>
                     <?php endif; ?>
 
-                    <header class="berps-page-header" id="noPrint">
-                        <div class="berps-page-header__content">
-                            <span class="berps-page-header__eyebrow">Attendance overview</span>
-                            <h1 class="berps-page-title">My Daily Time Record</h1>
-                            <p class="berps-page-subtitle">
+                    <div class="my-dtr-hero" id="noPrint">
+                        <div class="my-dtr-hero__content">
+                            <div class="my-dtr-hero__eyebrow">
+                                <i class="mdi mdi-calendar-clock-outline"></i>
+                                Attendance overview
+                            </div>
+                            <h1 class="my-dtr-hero__title">My Daily Time Record <span class="clock-tick">⏰</span></h1>
+                            <p class="my-dtr-hero__subtitle">
                                 Review your attendance, total worked hours, daily punch logs, and linked accomplishments for <?= h($selectedPeriodLabel); ?>.
                             </p>
                         </div>
-                        <div class="berps-page-header__actions">
-                            <button type="button" class="btn btn-outline-secondary" data-toggle="modal" data-target="#dtrFilterModal">
-                                <i class="mdi mdi-calendar-month-outline" aria-hidden="true"></i>
-                                Change Month
+                        <div class="my-dtr-hero__actions">
+                            <button type="button" class="my-dtr-hero-btn" data-toggle="modal" data-target="#dtrFilterModal">
+                                <i class="mdi mdi-calendar-month-outline"></i>
+                                <span>Change Month</span>
                             </button>
-                            <button id="printTable" type="button" class="btn btn-primary">
-                                <i class="mdi mdi-printer" aria-hidden="true"></i>
-                                Print
+                            <button id="printTable" type="button" class="my-dtr-hero-btn my-dtr-hero-btn--solid">
+                                <i class="mdi mdi-printer"></i>
+                                <span>Print</span>
                             </button>
                         </div>
-                    </header>
+                    </div>
 
                     <div class="stats-grid">
                         <div class="stat-card stat-hours">

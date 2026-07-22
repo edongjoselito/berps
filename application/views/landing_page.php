@@ -455,6 +455,64 @@
             background: var(--primary-dark);
         }
 
+        .btn-submit.is-loading {
+            pointer-events: none;
+            opacity: 0.75;
+        }
+
+        .password-field-wrap {
+            position: relative;
+        }
+
+        .password-field-wrap input {
+            width: 100%;
+            padding-right: 42px;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-muted, #6b7280);
+            font-size: 18px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .password-toggle:hover {
+            color: var(--primary);
+        }
+
+        .btn-submit .login-spinner {
+            display: none;
+            width: 18px;
+            height: 18px;
+            border: 2.5px solid rgba(255,255,255,0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: login-spin 0.7s linear infinite;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        .btn-submit.is-loading .login-spinner {
+            display: inline-block;
+        }
+
+        .btn-submit.is-loading .login-text {
+            display: inline-block;
+        }
+
+        @keyframes login-spin {
+            to { transform: rotate(360deg); }
+        }
+
         .auth-divider {
             text-align: center;
             margin: 32px 0;
@@ -672,14 +730,19 @@
                 </div>
             <?php endif; ?>
 
-            <form action="<?= site_url('Login/auth'); ?>" method="post">
+            <form action="<?= site_url('Login/auth'); ?>" method="post" id="loginForm">
                 <div class="form-group">
                     <label for="loginUsername">Username / Email</label>
                     <input type="text" id="loginUsername" name="username" autocomplete="username" required>
                 </div>
                 <div class="form-group">
                     <label for="loginPassword">Password</label>
-                    <input type="password" id="loginPassword" name="password" autocomplete="current-password" required>
+                    <div class="password-field-wrap">
+                        <input type="password" id="loginPassword" name="password" autocomplete="current-password" required>
+                        <button type="button" class="password-toggle" id="passwordToggle" aria-label="Show password">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
                 </div>
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                     <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 14px;">
@@ -688,7 +751,10 @@
                     </label>
                     <a href="<?= site_url('login/forgot'); ?>" style="color: var(--primary); text-decoration: none; font-size: 14px;">Forgot Password?</a>
                 </div>
-                <button type="submit" class="btn-submit">Login</button>
+                <button type="submit" class="btn-submit" id="loginSubmitBtn">
+                    <span class="login-spinner"></span>
+                    <span class="login-text">Login</span>
+                </button>
             </form>
         </div>
     </div>
@@ -699,6 +765,37 @@
     </footer>
 
     <script>
+        // Password show/hide toggle
+        (function() {
+            var toggle = document.getElementById('passwordToggle');
+            var pwd = document.getElementById('loginPassword');
+            if (toggle && pwd) {
+                toggle.addEventListener('click', function() {
+                    if (pwd.type === 'password') {
+                        pwd.type = 'text';
+                        toggle.innerHTML = '<i class="fas fa-eye-slash"></i>';
+                        toggle.setAttribute('aria-label', 'Hide password');
+                    } else {
+                        pwd.type = 'password';
+                        toggle.innerHTML = '<i class="fas fa-eye"></i>';
+                        toggle.setAttribute('aria-label', 'Show password');
+                    }
+                });
+            }
+        })();
+
+        // Login form spinner
+        (function() {
+            var loginForm = document.getElementById('loginForm');
+            var loginBtn = document.getElementById('loginSubmitBtn');
+            if (loginForm && loginBtn) {
+                loginForm.addEventListener('submit', function() {
+                    loginBtn.classList.add('is-loading');
+                    loginBtn.querySelector('.login-text').textContent = 'Signing in...';
+                });
+            }
+        })();
+
         const navbarToggle = document.getElementById('navbarToggle');
         const publicNavigation = document.getElementById('publicNavigation');
 

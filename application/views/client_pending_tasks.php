@@ -45,13 +45,168 @@ $priorityClasses = array('1' => 'priority-high', '2' => 'priority-medium', '3' =
                     .client-profile-page .empty-state { padding:30px 24px; text-align:center; color:var(--text-soft); }
                 </style>
 
-                <div class="cp-header">
-                    <div>
-                        <div class="cp-eyebrow">Client Portal</div>
-                        <h1 class="cp-title">Pending Tasks</h1>
-                        <!-- <p class="cp-subtitle">See all currently open tasks for <?= htmlspecialchars($clientName !== '' ? $clientName : 'your account', ENT_QUOTES, 'UTF-8'); ?>, along with schedule and assignee details.</p> -->
+                <style>
+                    /* Hero Banner */
+                    .client-profile-page .pt-hero {
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        flex-wrap: wrap;
+                        gap: 16px;
+                        padding: 28px 24px;
+                        margin: 0 0 22px;
+                        border-radius: 16px;
+                        background: #c2410c;
+                        box-shadow: 0 8px 32px rgba(194, 65, 12, 0.25);
+                        position: relative;
+                        overflow: hidden;
+                    }
+
+                    .client-profile-page .pt-hero::before {
+                        content: '';
+                        position: absolute;
+                        top: -50%;
+                        right: -10%;
+                        width: 400px;
+                        height: 400px;
+                        border-radius: 50%;
+                        background: rgba(255, 255, 255, 0.06);
+                        pointer-events: none;
+                    }
+
+                    .client-profile-page .pt-hero::after {
+                        content: '';
+                        position: absolute;
+                        bottom: -60%;
+                        right: 15%;
+                        width: 300px;
+                        height: 300px;
+                        border-radius: 50%;
+                        background: rgba(255, 255, 255, 0.04);
+                        pointer-events: none;
+                    }
+
+                    .client-profile-page .pt-hero__content {
+                        position: relative;
+                        z-index: 1;
+                    }
+
+                    .client-profile-page .pt-hero__eyebrow {
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 6px;
+                        margin-bottom: 8px;
+                        color: rgba(255, 255, 255, 0.85);
+                        font-size: 0.78rem;
+                        font-weight: 600;
+                        letter-spacing: 0.04em;
+                    }
+
+                    .client-profile-page .pt-hero__eyebrow i {
+                        font-size: 1rem;
+                    }
+
+                    .client-profile-page .pt-hero__title {
+                        margin: 0 0 4px 0;
+                        color: #fff;
+                        font-size: clamp(1.6rem, 2.5vw, 2.2rem);
+                        font-weight: 800;
+                        line-height: 1.15;
+                        letter-spacing: -0.02em;
+                        font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif), "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+                    }
+
+                    .client-profile-page .pt-hero__subtitle {
+                        margin: 0;
+                        color: rgba(255, 255, 255, 0.8);
+                        font-size: 0.88rem;
+                        max-width: 520px;
+                    }
+
+                    .client-profile-page .pt-hero__actions {
+                        display: flex;
+                        align-items: center;
+                        flex-wrap: wrap;
+                        gap: 10px;
+                        position: relative;
+                        z-index: 1;
+                    }
+
+                    .client-profile-page .pt-hero-btn {
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 6px;
+                        padding: 8px 16px;
+                        border-radius: 10px;
+                        border: 1px solid rgba(255, 255, 255, 0.3);
+                        background: rgba(255, 255, 255, 0.15);
+                        color: #fff;
+                        font-size: 0.82rem;
+                        font-weight: 600;
+                        text-decoration: none;
+                        cursor: pointer;
+                        transition: all 0.18s ease;
+                    }
+
+                    .client-profile-page .pt-hero-btn:hover,
+                    .client-profile-page .pt-hero-btn:focus {
+                        background: rgba(255, 255, 255, 0.25);
+                        border-color: rgba(255, 255, 255, 0.5);
+                        color: #fff;
+                        text-decoration: none;
+                        transform: translateY(-1px);
+                    }
+
+                    .client-profile-page .hourglass-shake {
+                        display: inline-block;
+                        animation: hourglass-shake 2.5s ease-in-out infinite;
+                    }
+
+                    @keyframes hourglass-shake {
+                        0%, 70%, 100% { transform: rotate(0deg); }
+                        15% { transform: rotate(-10deg); }
+                        30% { transform: rotate(8deg); }
+                        45% { transform: rotate(-5deg); }
+                        60% { transform: rotate(0deg); }
+                    }
+
+                    .client-profile-page .panel-card {
+                        border-top: 3px solid #c2410c;
+                    }
+
+                    @media (max-width: 767px) {
+                        .client-profile-page .pt-hero,
+                        .client-profile-page .pt-hero__actions {
+                            flex-direction: column;
+                            align-items: stretch;
+                        }
+
+                        .client-profile-page .pt-hero {
+                            padding: 20px;
+                        }
+
+                        .client-profile-page .pt-hero-btn {
+                            flex: 1 1 auto;
+                            justify-content: center;
+                        }
+                    }
+                </style>
+
+                <div class="pt-hero">
+                    <div class="pt-hero__content">
+                        <div class="pt-hero__eyebrow">
+                            <i class="mdi mdi-clock-outline"></i>
+                            Client Portal
+                        </div>
+                        <h1 class="pt-hero__title">Pending Tasks <span class="hourglass-shake">⏳</span></h1>
+                        <p class="pt-hero__subtitle">See all currently open tasks for <?= htmlspecialchars($clientName !== '' ? $clientName : 'your account', ENT_QUOTES, 'UTF-8'); ?>, along with schedule and assignee details.</p>
                     </div>
-                    <a class="btn-soft" href="<?= htmlspecialchars($backUrl, ENT_QUOTES, 'UTF-8'); ?>"><i class="fas fa-arrow-left"></i>Back to Dashboard</a>
+                    <div class="pt-hero__actions">
+                        <a class="pt-hero-btn" href="<?= htmlspecialchars($backUrl, ENT_QUOTES, 'UTF-8'); ?>">
+                            <i class="mdi mdi-arrow-left"></i>
+                            <span>Back to Dashboard</span>
+                        </a>
+                    </div>
                 </div>
 
                 <div class="panel-card">

@@ -281,13 +281,13 @@ class Settings extends CI_Controller{
 
       if ($unitName === '') {
         $this->session->set_flashdata('danger', 'Unit name is required.');
-        redirect($unitID > 0 ? ('Settings/InvoiceUnits?edit=' . $unitID) : 'Settings/InvoiceUnits');
+        redirect('Settings/InvoiceUnits');
         return;
       }
 
       if ($this->SettingsModel->invoiceUnitExists($settingsID, $unitName, $unitID > 0 ? $unitID : null)) {
         $this->session->set_flashdata('danger', 'That unit already exists.');
-        redirect($unitID > 0 ? ('Settings/InvoiceUnits?edit=' . $unitID) : 'Settings/InvoiceUnits');
+        redirect('Settings/InvoiceUnits');
         return;
       }
 

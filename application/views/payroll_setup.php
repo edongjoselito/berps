@@ -380,21 +380,174 @@ $money = function ($value) {
                         }
                     </style>
 
-                    <div class="ps-header">
-                        <div>
-                            <div class="ps-eyebrow">Payroll Configuration</div>
-                            <h1 class="ps-title">Employee Payroll Setup</h1>
-                           
+                    <style>
+                        /* Hero Banner */
+                        .payroll-setup-page .ps-hero {
+                            display: flex;
+                            align-items: center;
+                            justify-content: space-between;
+                            flex-wrap: wrap;
+                            gap: 16px;
+                            padding: 28px 24px;
+                            margin: 0 0 22px;
+                            border-radius: 16px;
+                            background: #155e75;
+                            box-shadow: 0 8px 32px rgba(21, 94, 117, 0.25);
+                            position: relative;
+                            overflow: hidden;
+                        }
+
+                        .payroll-setup-page .ps-hero::before {
+                            content: '';
+                            position: absolute;
+                            top: -50%;
+                            right: -10%;
+                            width: 400px;
+                            height: 400px;
+                            border-radius: 50%;
+                            background: rgba(255, 255, 255, 0.06);
+                            pointer-events: none;
+                        }
+
+                        .payroll-setup-page .ps-hero::after {
+                            content: '';
+                            position: absolute;
+                            bottom: -60%;
+                            right: 15%;
+                            width: 300px;
+                            height: 300px;
+                            border-radius: 50%;
+                            background: rgba(255, 255, 255, 0.04);
+                            pointer-events: none;
+                        }
+
+                        .payroll-setup-page .ps-hero__content {
+                            position: relative;
+                            z-index: 1;
+                        }
+
+                        .payroll-setup-page .ps-hero__eyebrow {
+                            display: inline-flex;
+                            align-items: center;
+                            gap: 6px;
+                            margin-bottom: 8px;
+                            color: rgba(255, 255, 255, 0.85);
+                            font-size: 0.78rem;
+                            font-weight: 600;
+                            letter-spacing: 0.04em;
+                        }
+
+                        .payroll-setup-page .ps-hero__eyebrow i {
+                            font-size: 1rem;
+                        }
+
+                        .payroll-setup-page .ps-hero__title {
+                            margin: 0 0 4px 0;
+                            color: #fff;
+                            font-size: clamp(1.6rem, 2.5vw, 2.2rem);
+                            font-weight: 800;
+                            line-height: 1.15;
+                            letter-spacing: -0.02em;
+                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif), "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+                        }
+
+                        .payroll-setup-page .ps-hero__subtitle {
+                            margin: 0;
+                            color: rgba(255, 255, 255, 0.8);
+                            font-size: 0.88rem;
+                            max-width: 520px;
+                        }
+
+                        .payroll-setup-page .ps-hero__actions {
+                            display: flex;
+                            align-items: center;
+                            flex-wrap: wrap;
+                            gap: 10px;
+                            position: relative;
+                            z-index: 1;
+                        }
+
+                        .payroll-setup-page .ps-hero-btn {
+                            display: inline-flex;
+                            align-items: center;
+                            gap: 6px;
+                            padding: 8px 16px;
+                            border-radius: 10px;
+                            border: 1px solid rgba(255, 255, 255, 0.3);
+                            background: rgba(255, 255, 255, 0.15);
+                            color: #fff;
+                            font-size: 0.82rem;
+                            font-weight: 600;
+                            text-decoration: none;
+                            cursor: pointer;
+                            transition: all 0.18s ease;
+                        }
+
+                        .payroll-setup-page .ps-hero-btn:hover,
+                        .payroll-setup-page .ps-hero-btn:focus {
+                            background: rgba(255, 255, 255, 0.25);
+                            border-color: rgba(255, 255, 255, 0.5);
+                            color: #fff;
+                            text-decoration: none;
+                            transform: translateY(-1px);
+                        }
+
+                        /* Gear spin animation */
+                        .payroll-setup-page .gear-spin {
+                            display: inline-block;
+                            animation: gear-spin 4s linear infinite;
+                        }
+
+                        @keyframes gear-spin {
+                            from { transform: rotate(0deg); }
+                            to { transform: rotate(360deg); }
+                        }
+
+                        /* Cyan accent on cards */
+                        .payroll-setup-page .panel-card {
+                            border-top: 3px solid #155e75;
+                        }
+
+                        /* Responsive hero */
+                        @media (max-width: 767px) {
+                            .payroll-setup-page .ps-hero,
+                            .payroll-setup-page .ps-hero__actions {
+                                flex-direction: column;
+                                align-items: stretch;
+                            }
+
+                            .payroll-setup-page .ps-hero {
+                                padding: 20px;
+                            }
+
+                            .payroll-setup-page .ps-hero-btn {
+                                flex: 1 1 auto;
+                                justify-content: center;
+                            }
+                        }
+                    </style>
+
+                    <div class="ps-hero">
+                        <div class="ps-hero__content">
+                            <div class="ps-hero__eyebrow">
+                                <i class="mdi mdi-cog-outline"></i>
+                                Payroll Configuration
+                            </div>
+                            <h1 class="ps-hero__title">Employee Payroll Setup <span class="gear-spin">⚙️</span></h1>
+                            <p class="ps-hero__subtitle">Configure monthly salaries, government deductions, loans, and cash advances for each employee.</p>
                         </div>
-                        <div class="ps-actions">
-                            <a href="<?= base_url(); ?>Page/payrollModule" class="btn-soft">
-                                <i class="mdi mdi-arrow-left"></i> Back to Payroll
+                        <div class="ps-hero__actions">
+                            <a class="ps-hero-btn" href="<?= base_url(); ?>Page/payrollModule">
+                                <i class="mdi mdi-arrow-left"></i>
+                                <span>Back to Payroll</span>
                             </a>
-                            <button type="button" class="btn-success-soft" data-toggle="modal" data-target="#loanModal">
-                                <i class="mdi mdi-bank-plus"></i> Add Loan
+                            <button type="button" class="ps-hero-btn" data-toggle="modal" data-target="#loanModal">
+                                <i class="mdi mdi-bank-plus"></i>
+                                <span>Add Loan</span>
                             </button>
-                            <button type="button" class="btn-warning-soft" data-toggle="modal" data-target="#cashAdvanceModal">
-                                <i class="mdi mdi-cash-fast"></i> Cash Advance
+                            <button type="button" class="ps-hero-btn" data-toggle="modal" data-target="#cashAdvanceModal">
+                                <i class="mdi mdi-cash-fast"></i>
+                                <span>Cash Advance</span>
                             </button>
                         </div>
                     </div>

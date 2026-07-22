@@ -31,6 +31,174 @@ foreach ($payrollEmployees as $payrollEmployee) {
                <div class="content">
                     <div class="container-fluid employee-list-page berps-page">
 
+                         <style>
+                             /* Hero Banner */
+                             .employee-list-page .el-hero {
+                                 display: flex;
+                                 align-items: center;
+                                 justify-content: space-between;
+                                 flex-wrap: wrap;
+                                 gap: 16px;
+                                 padding: 28px 24px;
+                                 margin: 0 0 22px;
+                                 border-radius: 16px;
+                                 background: #1e3a8a;
+                                 box-shadow: 0 8px 32px rgba(30, 58, 138, 0.25);
+                                 position: relative;
+                                 overflow: hidden;
+                             }
+
+                             .employee-list-page .el-hero::before {
+                                 content: '';
+                                 position: absolute;
+                                 top: -50%;
+                                 right: -10%;
+                                 width: 400px;
+                                 height: 400px;
+                                 border-radius: 50%;
+                                 background: rgba(255, 255, 255, 0.06);
+                                 pointer-events: none;
+                             }
+
+                             .employee-list-page .el-hero::after {
+                                 content: '';
+                                 position: absolute;
+                                 bottom: -60%;
+                                 right: 15%;
+                                 width: 300px;
+                                 height: 300px;
+                                 border-radius: 50%;
+                                 background: rgba(255, 255, 255, 0.04);
+                                 pointer-events: none;
+                             }
+
+                             .employee-list-page .el-hero__content {
+                                 position: relative;
+                                 z-index: 1;
+                             }
+
+                             .employee-list-page .el-hero__eyebrow {
+                                 display: inline-flex;
+                                 align-items: center;
+                                 gap: 6px;
+                                 margin-bottom: 8px;
+                                 color: rgba(255, 255, 255, 0.85);
+                                 font-size: 0.78rem;
+                                 font-weight: 600;
+                                 letter-spacing: 0.04em;
+                             }
+
+                             .employee-list-page .el-hero__eyebrow i {
+                                 font-size: 1rem;
+                             }
+
+                             .employee-list-page .el-hero__title {
+                                 margin: 0 0 4px 0;
+                                 color: #fff;
+                                 font-size: clamp(1.6rem, 2.5vw, 2.2rem);
+                                 font-weight: 800;
+                                 line-height: 1.15;
+                                 letter-spacing: -0.02em;
+                                 font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif), "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+                             }
+
+                             .employee-list-page .el-hero__subtitle {
+                                 margin: 0;
+                                 color: rgba(255, 255, 255, 0.8);
+                                 font-size: 0.88rem;
+                                 max-width: 520px;
+                             }
+
+                             .employee-list-page .el-hero__actions {
+                                 display: flex;
+                                 align-items: center;
+                                 flex-wrap: wrap;
+                                 gap: 10px;
+                                 position: relative;
+                                 z-index: 1;
+                             }
+
+                             .employee-list-page .el-hero-btn {
+                                 display: inline-flex;
+                                 align-items: center;
+                                 gap: 6px;
+                                 padding: 8px 16px;
+                                 border-radius: 10px;
+                                 border: 1px solid rgba(255, 255, 255, 0.3);
+                                 background: rgba(255, 255, 255, 0.15);
+                                 color: #fff;
+                                 font-size: 0.82rem;
+                                 font-weight: 600;
+                                 text-decoration: none;
+                                 cursor: pointer;
+                                 transition: all 0.18s ease;
+                             }
+
+                             .employee-list-page .el-hero-btn:hover,
+                             .employee-list-page .el-hero-btn:focus {
+                                 background: rgba(255, 255, 255, 0.25);
+                                 border-color: rgba(255, 255, 255, 0.5);
+                                 color: #fff;
+                                 text-decoration: none;
+                                 transform: translateY(-1px);
+                             }
+
+                             .employee-list-page .el-hero-btn--solid {
+                                 border-color: rgba(255, 255, 255, 0.6);
+                                 background: rgba(255, 255, 255, 0.95);
+                                 color: #1e3a8a;
+                                 font-weight: 700;
+                             }
+
+                             .employee-list-page .el-hero-btn--solid:hover,
+                             .employee-list-page .el-hero-btn--solid:focus {
+                                 background: #fff;
+                                 color: #1e2a6a;
+                             }
+
+                             /* People pulse animation */
+                             .employee-list-page .people-pulse {
+                                 display: inline-block;
+                                 animation: people-pulse 2s ease-in-out infinite;
+                             }
+
+                             @keyframes people-pulse {
+                                 0%, 70%, 100% { transform: scale(1); }
+                                 15% { transform: scale(1.15); }
+                                 30% { transform: scale(1); }
+                                 45% { transform: scale(1.08); }
+                                 60% { transform: scale(1); }
+                             }
+
+                             /* Blue accent on cards */
+                             .employee-list-page .berps-section-card,
+                             .employee-list-page .berps-table-card {
+                                 border-top: 3px solid #1e3a8a;
+                             }
+
+                             .employee-list-page .berps-section-title {
+                                 color: #1e3a8a;
+                             }
+
+                             /* Responsive hero */
+                             @media (max-width: 767px) {
+                                 .employee-list-page .el-hero,
+                                 .employee-list-page .el-hero__actions {
+                                     flex-direction: column;
+                                     align-items: stretch;
+                                 }
+
+                                 .employee-list-page .el-hero {
+                                     padding: 20px;
+                                 }
+
+                                 .employee-list-page .el-hero-btn {
+                                     flex: 1 1 auto;
+                                     justify-content: center;
+                                 }
+                             }
+                         </style>
+
 
                          <?php if ($msg = $this->session->flashdata('msg')): ?>
                               <?= $msg; ?>
@@ -54,21 +222,26 @@ foreach ($payrollEmployees as $payrollEmployee) {
                          $currentFilter = isset($statusFilter) ? $statusFilter : 'Active';
                          ?>
 
-                         <header class="berps-page-header">
-                              <div class="berps-page-header__content">
-                                   <span class="berps-page-header__eyebrow">People operations</span>
-                                   <h1 class="berps-page-title">Employee Directory</h1>
-                                   <p class="berps-page-subtitle">Manage employee profiles, employment records, documents, and payroll setup.</p>
+                         <div class="el-hero">
+                              <div class="el-hero__content">
+                                   <div class="el-hero__eyebrow">
+                                        <i class="mdi mdi-account-group-outline"></i>
+                                        People Operations
+                                   </div>
+                                   <h1 class="el-hero__title">Employee Directory <span class="people-pulse">👥</span></h1>
+                                   <p class="el-hero__subtitle">Manage employee profiles, employment records, documents, and payroll setup.</p>
                               </div>
-                              <div class="berps-page-header__actions">
-                                   <a href="<?= base_url(); ?>Page/payrollModule" class="btn btn-outline-primary">
-                                        <i class="mdi mdi-cash-multiple mr-1" aria-hidden="true"></i>Payroll module
+                              <div class="el-hero__actions">
+                                   <a class="el-hero-btn" href="<?= base_url(); ?>Page/payrollModule">
+                                        <i class="mdi mdi-cash-multiple"></i>
+                                        <span>Payroll Module</span>
                                    </a>
-                                   <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#newEmployeeModal">
-                                        <i class="mdi mdi-account-plus-outline mr-1" aria-hidden="true"></i>Add employee
+                                   <button type="button" class="el-hero-btn el-hero-btn--solid" data-toggle="modal" data-target="#newEmployeeModal">
+                                        <i class="mdi mdi-account-plus-outline"></i>
+                                        <span>Add Employee</span>
                                    </button>
                               </div>
-                         </header>
+                         </div>
 
                          <nav class="berps-section-card mb-4" aria-label="Employee information sections">
                               <div class="berps-section-card__header">

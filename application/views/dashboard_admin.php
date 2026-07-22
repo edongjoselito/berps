@@ -808,6 +808,188 @@ $quickActions = array(
                                 display: none;
                             }
                         }
+
+                        /* Hero Banner */
+                        .admin-dashboard-page .da-hero {
+                            display: flex;
+                            align-items: center;
+                            justify-content: space-between;
+                            flex-wrap: wrap;
+                            gap: 16px;
+                            padding: 28px 24px;
+                            margin: 24px 0 22px;
+                            border-radius: 16px;
+                            background: #1e40af;
+                            box-shadow: 0 8px 32px rgba(30, 64, 175, 0.25);
+                            position: relative;
+                            overflow: hidden;
+                        }
+
+                        .admin-dashboard-page .da-hero::before {
+                            content: '';
+                            position: absolute;
+                            top: -50%;
+                            right: -10%;
+                            width: 400px;
+                            height: 400px;
+                            border-radius: 50%;
+                            background: rgba(255, 255, 255, 0.06);
+                            pointer-events: none;
+                        }
+
+                        .admin-dashboard-page .da-hero::after {
+                            content: '';
+                            position: absolute;
+                            bottom: -60%;
+                            right: 15%;
+                            width: 300px;
+                            height: 300px;
+                            border-radius: 50%;
+                            background: rgba(255, 255, 255, 0.04);
+                            pointer-events: none;
+                        }
+
+                        .admin-dashboard-page .da-hero__content {
+                            position: relative;
+                            z-index: 1;
+                        }
+
+                        .admin-dashboard-page .da-hero__eyebrow {
+                            display: inline-flex;
+                            align-items: center;
+                            gap: 6px;
+                            margin-bottom: 8px;
+                            color: rgba(255, 255, 255, 0.85);
+                            font-size: 0.78rem;
+                            font-weight: 600;
+                            letter-spacing: 0.04em;
+                        }
+
+                        .admin-dashboard-page .da-hero__eyebrow i {
+                            font-size: 1rem;
+                        }
+
+                        .admin-dashboard-page .da-hero__title {
+                            margin: 0 0 4px 0;
+                            color: #fff;
+                            font-size: clamp(1.6rem, 2.5vw, 2.2rem);
+                            font-weight: 800;
+                            line-height: 1.15;
+                            letter-spacing: -0.02em;
+                        }
+
+                        .admin-dashboard-page .da-hero__subtitle {
+                            margin: 0;
+                            color: rgba(255, 255, 255, 0.8);
+                            font-size: 0.88rem;
+                            max-width: 520px;
+                        }
+
+                        .admin-dashboard-page .da-hero__actions {
+                            display: flex;
+                            align-items: center;
+                            flex-wrap: wrap;
+                            gap: 10px;
+                            position: relative;
+                            z-index: 1;
+                        }
+
+                        .admin-dashboard-page .da-hero-btn {
+                            display: inline-flex;
+                            align-items: center;
+                            gap: 6px;
+                            padding: 8px 16px;
+                            border-radius: 10px;
+                            border: 1px solid rgba(255, 255, 255, 0.3);
+                            background: rgba(255, 255, 255, 0.15);
+                            color: #fff;
+                            font-size: 0.82rem;
+                            font-weight: 600;
+                            text-decoration: none;
+                            cursor: pointer;
+                            transition: all 0.18s ease;
+                        }
+
+                        .admin-dashboard-page .da-hero-btn:hover,
+                        .admin-dashboard-page .da-hero-btn:focus {
+                            background: rgba(255, 255, 255, 0.25);
+                            border-color: rgba(255, 255, 255, 0.5);
+                            color: #fff;
+                            text-decoration: none;
+                            transform: translateY(-1px);
+                        }
+
+                        .admin-dashboard-page .da-hero-btn--solid {
+                            border-color: rgba(255, 255, 255, 0.6);
+                            background: rgba(255, 255, 255, 0.95);
+                            color: #1e40af;
+                            font-weight: 700;
+                        }
+
+                        .admin-dashboard-page .da-hero-btn--solid:hover,
+                        .admin-dashboard-page .da-hero-btn--solid:focus {
+                            background: #fff;
+                            color: #1a3596;
+                        }
+
+                        .admin-dashboard-page .da-hero-badge {
+                            display: inline-flex;
+                            align-items: center;
+                            justify-content: center;
+                            min-width: 20px;
+                            height: 20px;
+                            padding: 0 6px;
+                            border-radius: 999px;
+                            background: #ef4444;
+                            color: #fff;
+                            font-size: 0.72rem;
+                            font-weight: 700;
+                        }
+
+                        /* Building pulse animation */
+                        .admin-dashboard-page .dashboard-pulse {
+                            display: inline-block;
+                            animation: dashboard-pulse 2s ease-in-out infinite;
+                        }
+
+                        @keyframes dashboard-pulse {
+                            0%, 70%, 100% { transform: scale(1); }
+                            15% { transform: scale(1.2); }
+                            30% { transform: scale(1); }
+                            45% { transform: scale(1.1); }
+                            60% { transform: scale(1); }
+                        }
+
+                        /* Blue accent on cards */
+                        .admin-dashboard-page .theme-card {
+                            border-top: 3px solid #1e40af;
+                        }
+
+                        .admin-dashboard-page .theme-card-head {
+                            border-bottom: 2px solid #1e40af;
+                        }
+
+                        .admin-dashboard-page .theme-card-title {
+                            color: #1e40af;
+                        }
+
+                        /* Responsive hero */
+                        @media (max-width: 767px) {
+                            .admin-dashboard-page .da-hero,
+                            .admin-dashboard-page .da-hero__actions {
+                                flex-direction: column;
+                                align-items: stretch;
+                            }
+
+                            .admin-dashboard-page .da-hero {
+                                padding: 20px;
+                            }
+
+                            .admin-dashboard-page .da-hero-btn {
+                                flex: 1 1 auto;
+                                justify-content: center;
+                            }
+                        }
                     </style>
 
                     <?php if ($this->session->flashdata('success')): ?>
@@ -828,25 +1010,28 @@ $quickActions = array(
                         </div>
                     <?php endif; ?>
 
-                    <div class="page-header">
-                        <div>
-                            <div class="page-eyebrow">Admin Overview</div>
-                            <h4 class="page-title">Admin Dashboard</h4>
-                            <!-- <div class="page-subtitle">Monitor today’s financial activity, open receivables, client growth, and team accomplishments from one cleaner BERPS control center.</div> -->
+                    <div class="da-hero">
+                        <div class="da-hero__content">
+                            <div class="da-hero__eyebrow">
+                                <i class="mdi mdi-shield-account-outline"></i>
+                                Admin Overview
+                            </div>
+                            <h1 class="da-hero__title">Admin Dashboard <span class="dashboard-pulse">🏢</span></h1>
+                            <p class="da-hero__subtitle"><?= htmlspecialchars($currentDateLabel, ENT_QUOTES, 'UTF-8'); ?></p>
                         </div>
-                        <div class="page-actions">
-                            <a href="<?= base_url(); ?>Page/invList" class="btn-action">
+                        <div class="da-hero__actions">
+                            <a class="da-hero-btn" href="<?= base_url(); ?>Page/invList">
                                 <i class="mdi mdi-file-document-outline"></i>
-                                Invoice List
+                                <span>Invoice List</span>
                             </a>
-                            <a href="<?= base_url(); ?>Page/supportIssues?scope=unassigned" class="btn-action">
+                            <a class="da-hero-btn" href="<?= base_url(); ?>Page/supportIssues?scope=unassigned">
                                 <i class="mdi mdi-ticket-outline"></i>
-                                Unassigned Tickets
-                                <span class="badge badge-pill badge-danger ml-2"><?= number_format($unassignedTicketValue); ?></span>
+                                <span>Unassigned Tickets</span>
+                                <span class="da-hero-badge"><?= number_format($unassignedTicketValue); ?></span>
                             </a>
-                            <a href="<?= base_url(); ?>Page/recurringInvoices" class="btn-submit">
+                            <a class="da-hero-btn da-hero-btn--solid" href="<?= base_url(); ?>Page/recurringInvoices">
                                 <i class="mdi mdi-refresh-circle"></i>
-                                Recurring Invoices
+                                <span>Recurring Invoices</span>
                             </a>
                         </div>
                     </div>

@@ -174,6 +174,175 @@ $inventoryMovements = is_array($inventory_movements ?? null) ? $inventory_moveme
                                 grid-template-columns: minmax(0, 1fr);
                             }
                         }
+
+                        /* Hero Banner */
+                        .pos-reports-page .pr-hero {
+                            display: flex;
+                            align-items: center;
+                            justify-content: space-between;
+                            flex-wrap: wrap;
+                            gap: 16px;
+                            padding: 28px 24px;
+                            margin: 0 0 22px;
+                            border-radius: 16px;
+                            background: #047857;
+                            box-shadow: 0 8px 32px rgba(4, 120, 87, 0.25);
+                            position: relative;
+                            overflow: hidden;
+                        }
+
+                        .pos-reports-page .pr-hero::before {
+                            content: '';
+                            position: absolute;
+                            top: -50%;
+                            right: -10%;
+                            width: 400px;
+                            height: 400px;
+                            border-radius: 50%;
+                            background: rgba(255, 255, 255, 0.06);
+                            pointer-events: none;
+                        }
+
+                        .pos-reports-page .pr-hero::after {
+                            content: '';
+                            position: absolute;
+                            bottom: -60%;
+                            right: 15%;
+                            width: 300px;
+                            height: 300px;
+                            border-radius: 50%;
+                            background: rgba(255, 255, 255, 0.04);
+                            pointer-events: none;
+                        }
+
+                        .pos-reports-page .pr-hero__content {
+                            position: relative;
+                            z-index: 1;
+                        }
+
+                        .pos-reports-page .pr-hero__eyebrow {
+                            display: inline-flex;
+                            align-items: center;
+                            gap: 6px;
+                            margin-bottom: 8px;
+                            color: rgba(255, 255, 255, 0.85);
+                            font-size: 0.78rem;
+                            font-weight: 600;
+                            letter-spacing: 0.04em;
+                        }
+
+                        .pos-reports-page .pr-hero__eyebrow i {
+                            font-size: 1rem;
+                        }
+
+                        .pos-reports-page .pr-hero__title {
+                            margin: 0 0 4px 0;
+                            color: #fff;
+                            font-size: clamp(1.6rem, 2.5vw, 2.2rem);
+                            font-weight: 800;
+                            line-height: 1.15;
+                            letter-spacing: -0.02em;
+                        }
+
+                        .pos-reports-page .pr-hero__subtitle {
+                            margin: 0;
+                            color: rgba(255, 255, 255, 0.8);
+                            font-size: 0.88rem;
+                            max-width: 520px;
+                        }
+
+                        .pos-reports-page .pr-hero__actions {
+                            display: flex;
+                            align-items: center;
+                            flex-wrap: wrap;
+                            gap: 10px;
+                            position: relative;
+                            z-index: 1;
+                        }
+
+                        .pos-reports-page .pr-hero-btn {
+                            display: inline-flex;
+                            align-items: center;
+                            gap: 6px;
+                            padding: 8px 16px;
+                            border-radius: 10px;
+                            border: 1px solid rgba(255, 255, 255, 0.3);
+                            background: rgba(255, 255, 255, 0.15);
+                            color: #fff;
+                            font-size: 0.82rem;
+                            font-weight: 600;
+                            text-decoration: none;
+                            cursor: pointer;
+                            transition: all 0.18s ease;
+                        }
+
+                        .pos-reports-page .pr-hero-btn:hover,
+                        .pos-reports-page .pr-hero-btn:focus {
+                            background: rgba(255, 255, 255, 0.25);
+                            border-color: rgba(255, 255, 255, 0.5);
+                            color: #fff;
+                            text-decoration: none;
+                            transform: translateY(-1px);
+                        }
+
+                        .pos-reports-page .pr-hero-btn--solid {
+                            border-color: rgba(255, 255, 255, 0.6);
+                            background: rgba(255, 255, 255, 0.95);
+                            color: #047857;
+                            font-weight: 700;
+                        }
+
+                        .pos-reports-page .pr-hero-btn--solid:hover,
+                        .pos-reports-page .pr-hero-btn--solid:focus {
+                            background: #fff;
+                            color: #065f46;
+                        }
+
+                        /* Chart bounce animation */
+                        .pos-reports-page .chart-bounce {
+                            display: inline-block;
+                            animation: chart-bounce 2s ease-in-out infinite;
+                        }
+
+                        @keyframes chart-bounce {
+                            0%, 70%, 100% { transform: translateY(0); }
+                            15% { transform: translateY(-10px); }
+                            30% { transform: translateY(0); }
+                            45% { transform: translateY(-5px); }
+                            60% { transform: translateY(0); }
+                        }
+
+                        /* Emerald accent on cards */
+                        .pos-reports-page .stat-card,
+                        .pos-reports-page .theme-card {
+                            border-top: 3px solid #047857;
+                        }
+
+                        .pos-reports-page .theme-card-head {
+                            border-bottom: 2px solid #047857;
+                        }
+
+                        .pos-reports-page .theme-card-title {
+                            color: #047857;
+                        }
+
+                        /* Responsive hero */
+                        @media (max-width: 767px) {
+                            .pos-reports-page .pr-hero,
+                            .pos-reports-page .pr-hero__actions {
+                                flex-direction: column;
+                                align-items: stretch;
+                            }
+
+                            .pos-reports-page .pr-hero {
+                                padding: 20px;
+                            }
+
+                            .pos-reports-page .pr-hero-btn {
+                                flex: 1 1 auto;
+                                justify-content: center;
+                            }
+                        }
                     </style>
 
                     <?php if (!empty($notice)): ?>
@@ -185,17 +354,23 @@ $inventoryMovements = is_array($inventory_movements ?? null) ? $inventory_moveme
                         </div>
                     <?php endif; ?>
 
-                    <div class="page-header">
-                        <div>
-                            <h4 class="page-title"><?= htmlspecialchars($page_title ?? 'POS Reports', ENT_QUOTES, 'UTF-8'); ?></h4>
-                            <p class="page-subtitle"><?= htmlspecialchars($page_subtitle ?? '', ENT_QUOTES, 'UTF-8'); ?></p>
+                    <div class="pr-hero">
+                        <div class="pr-hero__content">
+                            <div class="pr-hero__eyebrow">
+                                <i class="mdi mdi-chart-arc"></i>
+                                POS Analytics
+                            </div>
+                            <h1 class="pr-hero__title"><?= htmlspecialchars($page_title ?? 'POS Reports', ENT_QUOTES, 'UTF-8'); ?> <span class="chart-bounce">📈</span></h1>
+                            <p class="pr-hero__subtitle"><?= htmlspecialchars($page_subtitle ?? '', ENT_QUOTES, 'UTF-8'); ?></p>
                         </div>
-                        <div class="page-actions">
-                            <a class="btn-action btn-ghost" href="<?= base_url('Pos/posNewTransaction'); ?>">
-                                <i class="mdi mdi-plus-box-outline"></i> New Sale
+                        <div class="pr-hero__actions">
+                            <a class="pr-hero-btn" href="<?= base_url('Pos/posNewTransaction'); ?>">
+                                <i class="mdi mdi-plus-box-outline"></i>
+                                <span>New Sale</span>
                             </a>
-                            <a class="btn-action btn-primary-soft" href="<?= base_url('Pos/posTransactionHistory'); ?>">
-                                <i class="mdi mdi-history"></i> Sales History
+                            <a class="pr-hero-btn pr-hero-btn--solid" href="<?= base_url('Pos/posTransactionHistory'); ?>">
+                                <i class="mdi mdi-history"></i>
+                                <span>Sales History</span>
                             </a>
                         </div>
                     </div>

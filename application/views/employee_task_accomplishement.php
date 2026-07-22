@@ -423,6 +423,157 @@
             }
           </style>
 
+          <style>
+            /* Hero Banner */
+            .employee-accomplishment-page .ea-hero {
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              flex-wrap: wrap;
+              gap: 16px;
+              padding: 28px 24px;
+              margin: 0 0 22px;
+              border-radius: 16px;
+              background: #0f766e;
+              box-shadow: 0 8px 32px rgba(15, 118, 110, 0.25);
+              position: relative;
+              overflow: hidden;
+            }
+
+            .employee-accomplishment-page .ea-hero::before {
+              content: '';
+              position: absolute;
+              top: -50%;
+              right: -10%;
+              width: 400px;
+              height: 400px;
+              border-radius: 50%;
+              background: rgba(255, 255, 255, 0.06);
+              pointer-events: none;
+            }
+
+            .employee-accomplishment-page .ea-hero::after {
+              content: '';
+              position: absolute;
+              bottom: -60%;
+              right: 15%;
+              width: 300px;
+              height: 300px;
+              border-radius: 50%;
+              background: rgba(255, 255, 255, 0.04);
+              pointer-events: none;
+            }
+
+            .employee-accomplishment-page .ea-hero__content {
+              position: relative;
+              z-index: 1;
+            }
+
+            .employee-accomplishment-page .ea-hero__eyebrow {
+              display: inline-flex;
+              align-items: center;
+              gap: 6px;
+              margin-bottom: 8px;
+              color: rgba(255, 255, 255, 0.85);
+              font-size: 0.78rem;
+              font-weight: 600;
+              letter-spacing: 0.04em;
+            }
+
+            .employee-accomplishment-page .ea-hero__eyebrow i {
+              font-size: 1rem;
+            }
+
+            .employee-accomplishment-page .ea-hero__title {
+              margin: 0 0 4px 0;
+              color: #fff;
+              font-size: clamp(1.6rem, 2.5vw, 2.2rem);
+              font-weight: 800;
+              line-height: 1.15;
+              letter-spacing: -0.02em;
+              font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif), "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+            }
+
+            .employee-accomplishment-page .ea-hero__subtitle {
+              margin: 0;
+              color: rgba(255, 255, 255, 0.8);
+              font-size: 0.88rem;
+              max-width: 520px;
+            }
+
+            .employee-accomplishment-page .ea-hero__actions {
+              display: flex;
+              align-items: center;
+              flex-wrap: wrap;
+              gap: 10px;
+              position: relative;
+              z-index: 1;
+            }
+
+            .employee-accomplishment-page .ea-hero-btn {
+              display: inline-flex;
+              align-items: center;
+              gap: 6px;
+              padding: 8px 16px;
+              border-radius: 10px;
+              border: 1px solid rgba(255, 255, 255, 0.3);
+              background: rgba(255, 255, 255, 0.15);
+              color: #fff;
+              font-size: 0.82rem;
+              font-weight: 600;
+              text-decoration: none;
+              cursor: pointer;
+              transition: all 0.18s ease;
+            }
+
+            .employee-accomplishment-page .ea-hero-btn:hover,
+            .employee-accomplishment-page .ea-hero-btn:focus {
+              background: rgba(255, 255, 255, 0.25);
+              border-color: rgba(255, 255, 255, 0.5);
+              color: #fff;
+              text-decoration: none;
+              transform: translateY(-1px);
+            }
+
+            /* Trophy bounce animation */
+            .employee-accomplishment-page .trophy-bounce {
+              display: inline-block;
+              animation: trophy-bounce 2s ease-in-out infinite;
+            }
+
+            @keyframes trophy-bounce {
+              0%, 70%, 100% { transform: translateY(0); }
+              15% { transform: translateY(-10px); }
+              30% { transform: translateY(0); }
+              45% { transform: translateY(-5px); }
+              60% { transform: translateY(0); }
+            }
+
+            /* Teal accent on cards */
+            .employee-accomplishment-page .top-card,
+            .employee-accomplishment-page .filter-card {
+              border-top: 3px solid #0f766e;
+            }
+
+            /* Responsive hero */
+            @media (max-width: 767px) {
+              .employee-accomplishment-page .ea-hero,
+              .employee-accomplishment-page .ea-hero__actions {
+                flex-direction: column;
+                align-items: stretch;
+              }
+
+              .employee-accomplishment-page .ea-hero {
+                padding: 20px;
+              }
+
+              .employee-accomplishment-page .ea-hero-btn {
+                flex: 1 1 auto;
+                justify-content: center;
+              }
+            }
+          </style>
+
           <?php
           $monthsBack     = 24;
           $selectedYm     = isset($_GET['report_period']) ? (string) $_GET['report_period'] : '';
@@ -433,10 +584,21 @@
 
           <div class="page-shell">
 
-            <div class="page-header">
-              <h4>Employee Accomplishment Report</h4>
-              <p>Generate accomplishment reports by staff member and reporting period.</p>
-              <hr class="title-divider">
+            <div class="ea-hero">
+              <div class="ea-hero__content">
+                <div class="ea-hero__eyebrow">
+                  <i class="mdi mdi-trophy-award"></i>
+                  Performance Tracking
+                </div>
+                <h1 class="ea-hero__title">Employee Accomplishment Report <span class="trophy-bounce">🏆</span></h1>
+                <p class="ea-hero__subtitle">Generate accomplishment reports by staff member and reporting period.</p>
+              </div>
+              <div class="ea-hero__actions">
+                <a class="ea-hero-btn" href="<?= base_url('Page/employeeTask'); ?>">
+                  <i class="mdi mdi-clipboard-list-outline"></i>
+                  <span>Pending Tasks</span>
+                </a>
+              </div>
             </div>
 
             <div class="row top-row">

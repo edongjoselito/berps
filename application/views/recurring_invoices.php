@@ -499,23 +499,190 @@ $generatedThisRun = (int) ($generationSummary['generatedCount'] ?? 0);
                                 font-size: 1.72rem;
                             }
                         }
+
+                        /* Hero Banner */
+                        .recurring-page .rp-hero {
+                            display: flex;
+                            align-items: center;
+                            justify-content: space-between;
+                            flex-wrap: wrap;
+                            gap: 16px;
+                            padding: 28px 24px;
+                            margin: 24px 0 22px;
+                            border-radius: 22px;
+                            background: #4361ee;
+                            box-shadow: 0 8px 32px rgba(67, 97, 238, 0.25);
+                            position: relative;
+                            overflow: hidden;
+                        }
+
+                        .recurring-page .rp-hero::before {
+                            content: '';
+                            position: absolute;
+                            top: -50%;
+                            right: -10%;
+                            width: 400px;
+                            height: 400px;
+                            border-radius: 50%;
+                            background: rgba(255, 255, 255, 0.06);
+                            pointer-events: none;
+                        }
+
+                        .recurring-page .rp-hero::after {
+                            content: '';
+                            position: absolute;
+                            bottom: -60%;
+                            right: 15%;
+                            width: 300px;
+                            height: 300px;
+                            border-radius: 50%;
+                            background: rgba(255, 255, 255, 0.04);
+                            pointer-events: none;
+                        }
+
+                        .recurring-page .rp-hero__content {
+                            position: relative;
+                            z-index: 1;
+                        }
+
+                        .recurring-page .rp-hero__eyebrow {
+                            display: inline-flex;
+                            align-items: center;
+                            gap: 6px;
+                            margin-bottom: 8px;
+                            color: rgba(255, 255, 255, 0.85);
+                            font-size: 0.78rem;
+                            font-weight: 600;
+                            letter-spacing: 0.04em;
+                        }
+
+                        .recurring-page .rp-hero__eyebrow i {
+                            font-size: 1rem;
+                        }
+
+                        .recurring-page .rp-hero__title {
+                            margin: 0 0 4px 0;
+                            color: #fff;
+                            font-size: clamp(1.6rem, 2.5vw, 2.2rem);
+                            font-weight: 800;
+                            line-height: 1.15;
+                            letter-spacing: -0.02em;
+                        }
+
+                        .recurring-page .rp-hero__subtitle {
+                            margin: 0;
+                            color: rgba(255, 255, 255, 0.8);
+                            font-size: 0.88rem;
+                            max-width: 480px;
+                        }
+
+                        .recurring-page .rp-hero__actions {
+                            display: flex;
+                            align-items: center;
+                            flex-wrap: wrap;
+                            gap: 10px;
+                            position: relative;
+                            z-index: 1;
+                        }
+
+                        .recurring-page .rp-hero-btn {
+                            display: inline-flex;
+                            align-items: center;
+                            gap: 6px;
+                            padding: 8px 16px;
+                            border-radius: 12px;
+                            border: 1px solid rgba(255, 255, 255, 0.3);
+                            background: rgba(255, 255, 255, 0.15);
+                            color: #fff;
+                            font-size: 0.82rem;
+                            font-weight: 600;
+                            text-decoration: none;
+                            cursor: pointer;
+                            transition: all 0.18s ease;
+                        }
+
+                        .recurring-page .rp-hero-btn:hover,
+                        .recurring-page .rp-hero-btn:focus {
+                            background: rgba(255, 255, 255, 0.25);
+                            border-color: rgba(255, 255, 255, 0.5);
+                            color: #fff;
+                            text-decoration: none;
+                            transform: translateY(-1px);
+                        }
+
+                        .recurring-page .rp-hero-btn--solid {
+                            border-color: rgba(255, 255, 255, 0.6);
+                            background: rgba(255, 255, 255, 0.95);
+                            color: #4361ee;
+                            font-weight: 700;
+                        }
+
+                        .recurring-page .rp-hero-btn--solid:hover,
+                        .recurring-page .rp-hero-btn--solid:focus {
+                            background: #fff;
+                            color: #3a56d4;
+                        }
+
+                        /* Recycle spin animation */
+                        .recurring-page .recur-spin {
+                            display: inline-block;
+                            animation: recur-spin 3s linear infinite;
+                        }
+
+                        @keyframes recur-spin {
+                            from { transform: rotate(0deg); }
+                            to { transform: rotate(360deg); }
+                        }
+
+                        /* Indigo-blue accent on cards */
+                        .recurring-page .panel-card {
+                            border-top: 3px solid #4361ee;
+                        }
+
+                        .recurring-page .panel-header {
+                            border-bottom: 2px solid #4361ee;
+                        }
+
+                        .recurring-page .panel-title {
+                            color: #4361ee;
+                        }
+
+                        /* Responsive hero */
+                        @media (max-width: 767px) {
+                            .recurring-page .rp-hero,
+                            .recurring-page .rp-hero__actions {
+                                flex-direction: column;
+                                align-items: stretch;
+                            }
+
+                            .recurring-page .rp-hero {
+                                padding: 20px;
+                            }
+
+                            .recurring-page .rp-hero-btn {
+                                flex: 1 1 auto;
+                                justify-content: center;
+                            }
+                        }
                     </style>
 
-                    <div class="rp-header">
-                        <div>
-                            <div class="rp-eyebrow">Recurring Invoice Monitor</div>
-                            <h1 class="rp-title">Recurring Invoices</h1>
-                            <!-- <p class="rp-subtitle">Monitor recurring templates, see the next due date for each billing cycle, and confirm which upcoming invoices are covered by the template itself versus those created by the generator.</p> -->
+                    <div class="rp-hero">
+                        <div class="rp-hero__content">
+                            <div class="rp-hero__eyebrow">
+                                <i class="mdi mdi-sync-circle-outline"></i>
+                                Recurring Invoice Monitor
+                            </div>
+                            <h1 class="rp-hero__title">Recurring Invoices <span class="recur-spin">🔄</span></h1>
+                            <p class="rp-hero__subtitle">Monitor recurring templates, see the next due date for each billing cycle, and confirm which upcoming invoices are covered.</p>
                         </div>
-
-                        <div class="rp-actions">
-                            <a href="<?= base_url(); ?>Page/runRecurringInvoiceGenerator" class="btn-generator">
-                                <i class="fa fa-sync-alt"></i>
-                                Run Invoice Generator
+                        <div class="rp-hero__actions">
+                            <a href="<?= base_url(); ?>Page/runRecurringInvoiceGenerator" class="rp-hero-btn rp-hero-btn--solid">
+                                <i class="mdi mdi-sync"></i>
+                                <span>Run Generator</span>
                             </a>
-                            <a href="<?= base_url(); ?>Page/invoiceEntry" class="btn-new-template">
-                                <i class="fa fa-plus"></i>
-                                Create Recurring Template
+                            <a href="<?= base_url(); ?>Page/invoiceEntry" class="rp-hero-btn">
+                                <i class="mdi mdi-plus-circle-outline"></i>
+                                <span>Create Template</span>
                             </a>
                         </div>
                     </div>

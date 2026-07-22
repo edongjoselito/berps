@@ -497,23 +497,194 @@ $reportSections = array($paidSection, $unpaidSection, $overdueSection, $draftSec
                                 font-size: 1.72rem;
                             }
                         }
+
+                        /* Hero Banner */
+                        .invoice-status-report-page .isr-hero {
+                            display: flex;
+                            align-items: center;
+                            justify-content: space-between;
+                            flex-wrap: wrap;
+                            gap: 16px;
+                            padding: 28px 24px;
+                            margin: 24px 0 22px;
+                            border-radius: 22px;
+                            background: #3a0ca3;
+                            box-shadow: 0 8px 32px rgba(58, 12, 163, 0.25);
+                            position: relative;
+                            overflow: hidden;
+                        }
+
+                        .invoice-status-report-page .isr-hero::before {
+                            content: '';
+                            position: absolute;
+                            top: -50%;
+                            right: -10%;
+                            width: 400px;
+                            height: 400px;
+                            border-radius: 50%;
+                            background: rgba(255, 255, 255, 0.06);
+                            pointer-events: none;
+                        }
+
+                        .invoice-status-report-page .isr-hero::after {
+                            content: '';
+                            position: absolute;
+                            bottom: -60%;
+                            right: 15%;
+                            width: 300px;
+                            height: 300px;
+                            border-radius: 50%;
+                            background: rgba(255, 255, 255, 0.04);
+                            pointer-events: none;
+                        }
+
+                        .invoice-status-report-page .isr-hero__content {
+                            position: relative;
+                            z-index: 1;
+                        }
+
+                        .invoice-status-report-page .isr-hero__eyebrow {
+                            display: inline-flex;
+                            align-items: center;
+                            gap: 6px;
+                            margin-bottom: 8px;
+                            color: rgba(255, 255, 255, 0.85);
+                            font-size: 0.78rem;
+                            font-weight: 600;
+                            letter-spacing: 0.04em;
+                        }
+
+                        .invoice-status-report-page .isr-hero__eyebrow i {
+                            font-size: 1rem;
+                        }
+
+                        .invoice-status-report-page .isr-hero__title {
+                            margin: 0 0 4px 0;
+                            color: #fff;
+                            font-size: clamp(1.6rem, 2.5vw, 2.2rem);
+                            font-weight: 800;
+                            line-height: 1.15;
+                            letter-spacing: -0.02em;
+                        }
+
+                        .invoice-status-report-page .isr-hero__subtitle {
+                            margin: 0;
+                            color: rgba(255, 255, 255, 0.8);
+                            font-size: 0.88rem;
+                            max-width: 480px;
+                        }
+
+                        .invoice-status-report-page .isr-hero__actions {
+                            display: flex;
+                            align-items: center;
+                            flex-wrap: wrap;
+                            gap: 10px;
+                            position: relative;
+                            z-index: 1;
+                        }
+
+                        .invoice-status-report-page .isr-hero-btn {
+                            display: inline-flex;
+                            align-items: center;
+                            gap: 6px;
+                            padding: 8px 16px;
+                            border-radius: 12px;
+                            border: 1px solid rgba(255, 255, 255, 0.3);
+                            background: rgba(255, 255, 255, 0.15);
+                            color: #fff;
+                            font-size: 0.82rem;
+                            font-weight: 600;
+                            text-decoration: none;
+                            cursor: pointer;
+                            transition: all 0.18s ease;
+                        }
+
+                        .invoice-status-report-page .isr-hero-btn:hover,
+                        .invoice-status-report-page .isr-hero-btn:focus {
+                            background: rgba(255, 255, 255, 0.25);
+                            border-color: rgba(255, 255, 255, 0.5);
+                            color: #fff;
+                            text-decoration: none;
+                            transform: translateY(-1px);
+                        }
+
+                        .invoice-status-report-page .isr-hero-btn--solid {
+                            border-color: rgba(255, 255, 255, 0.6);
+                            background: rgba(255, 255, 255, 0.95);
+                            color: #3a0ca3;
+                            font-weight: 700;
+                        }
+
+                        .invoice-status-report-page .isr-hero-btn--solid:hover,
+                        .invoice-status-report-page .isr-hero-btn--solid:focus {
+                            background: #fff;
+                            color: #2d0a82;
+                        }
+
+                        /* Receipt wiggle animation */
+                        .invoice-status-report-page .receipt-wiggle {
+                            display: inline-block;
+                            animation: receipt-wiggle 2.5s ease-in-out infinite;
+                            transform-origin: center bottom;
+                        }
+
+                        @keyframes receipt-wiggle {
+                            0%, 70%, 100% { transform: rotate(0deg) translateY(0); }
+                            10% { transform: rotate(-8deg) translateY(-4px); }
+                            20% { transform: rotate(6deg) translateY(0); }
+                            30% { transform: rotate(-4deg) translateY(-2px); }
+                            40% { transform: rotate(0deg) translateY(0); }
+                        }
+
+                        /* Deep blue-violet accent on cards */
+                        .invoice-status-report-page .panel-card {
+                            border-top: 3px solid #3a0ca3;
+                        }
+
+                        .invoice-status-report-page .panel-header {
+                            border-bottom: 2px solid #3a0ca3;
+                        }
+
+                        .invoice-status-report-page .panel-title {
+                            color: #3a0ca3;
+                        }
+
+                        /* Responsive hero */
+                        @media (max-width: 767px) {
+                            .invoice-status-report-page .isr-hero,
+                            .invoice-status-report-page .isr-hero__actions {
+                                flex-direction: column;
+                                align-items: stretch;
+                            }
+
+                            .invoice-status-report-page .isr-hero {
+                                padding: 20px;
+                            }
+
+                            .invoice-status-report-page .isr-hero-btn {
+                                flex: 1 1 auto;
+                                justify-content: center;
+                            }
+                        }
                     </style>
 
-                    <div class="isr-header">
-                        <div>
-                            <div class="isr-eyebrow">Invoice Reporting</div>
-                            <h1 class="isr-title">Invoice Status Report</h1>
-                            <!-- <p class="isr-subtitle">Track which invoices are already paid, still open but not yet due, already overdue, or currently saved as draft.</p> -->
+                    <div class="isr-hero">
+                        <div class="isr-hero__content">
+                            <div class="isr-hero__eyebrow">
+                                <i class="mdi mdi-file-document-outline"></i>
+                                Invoice Reporting
+                            </div>
+                            <h1 class="isr-hero__title">Invoice Status Report <span class="receipt-wiggle">🧾</span></h1>
+                            <p class="isr-hero__subtitle">Track which invoices are paid, still open, overdue, or saved as draft.</p>
                         </div>
-
-                        <div class="isr-actions">
-                            <a href="<?= base_url(); ?>Page/invList" class="btn-soft">
-                                <i class="fa fa-list"></i>
-                                Invoice List
+                        <div class="isr-hero__actions">
+                            <a href="<?= base_url(); ?>Page/invList" class="isr-hero-btn">
+                                <i class="mdi mdi-format-list-bulleted"></i>
+                                <span>Invoice List</span>
                             </a>
-                            <a href="<?= base_url(); ?>Page/invoiceEntry" class="btn-primary">
-                                <i class="fa fa-plus"></i>
-                                Add New Invoice
+                            <a href="<?= base_url(); ?>Page/invoiceEntry" class="isr-hero-btn isr-hero-btn--solid">
+                                <i class="mdi mdi-plus-circle-outline"></i>
+                                <span>Add New Invoice</span>
                             </a>
                         </div>
                     </div>

@@ -603,27 +603,186 @@ if (strcasecmp($clientStatus, 'Active') === 0) {
                     }
                 </style>
 
-                <div class="ch-header">
-                    <div>
-                        <div class="ch-eyebrow"><?= $clientPortalMode ? 'My Payment History' : 'Customer History'; ?></div>
-                        <h1 class="ch-title"><?= htmlspecialchars($resolvedCustomerName !== '' ? $resolvedCustomerName : 'Customer', ENT_QUOTES, 'UTF-8'); ?></h1>
-                        <p class="ch-subtitle">
-                            <?= $resolvedCustID !== '' ? 'Customer ID ' . htmlspecialchars($resolvedCustID, ENT_QUOTES, 'UTF-8') . ' · ' : ''; ?>
-                            <?= $clientPortalMode
-                                ? 'Review every payment recorded for your company across invoices in your portal.'
-                                : 'Review all recorded payments for this customer across invoices.'; ?>
-                        </p>
-                    </div>
+                <style>
+                    /* Hero Banner */
+                    .customer-history-page .ch-hero {
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        flex-wrap: wrap;
+                        gap: 16px;
+                        padding: 28px 24px;
+                        margin: 0 0 22px;
+                        border-radius: 16px;
+                        background: #047857;
+                        box-shadow: 0 8px 32px rgba(4, 120, 87, 0.25);
+                        position: relative;
+                        overflow: hidden;
+                    }
 
-                    <div class="ch-actions">
-                        <a class="btn-soft" href="<?= htmlspecialchars($backUrl, ENT_QUOTES, 'UTF-8'); ?>">
-                            <i class="fas fa-arrow-left"></i>
-                            <?= htmlspecialchars($backLabel, ENT_QUOTES, 'UTF-8'); ?>
+                    .customer-history-page .ch-hero::before {
+                        content: '';
+                        position: absolute;
+                        top: -50%;
+                        right: -10%;
+                        width: 400px;
+                        height: 400px;
+                        border-radius: 50%;
+                        background: rgba(255, 255, 255, 0.06);
+                        pointer-events: none;
+                    }
+
+                    .customer-history-page .ch-hero::after {
+                        content: '';
+                        position: absolute;
+                        bottom: -60%;
+                        right: 15%;
+                        width: 300px;
+                        height: 300px;
+                        border-radius: 50%;
+                        background: rgba(255, 255, 255, 0.04);
+                        pointer-events: none;
+                    }
+
+                    .customer-history-page .ch-hero__content {
+                        position: relative;
+                        z-index: 1;
+                    }
+
+                    .customer-history-page .ch-hero__eyebrow {
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 6px;
+                        margin-bottom: 8px;
+                        color: rgba(255, 255, 255, 0.85);
+                        font-size: 0.78rem;
+                        font-weight: 600;
+                        letter-spacing: 0.04em;
+                    }
+
+                    .customer-history-page .ch-hero__eyebrow i {
+                        font-size: 1rem;
+                    }
+
+                    .customer-history-page .ch-hero__title {
+                        margin: 0 0 4px 0;
+                        color: #fff;
+                        font-size: clamp(1.6rem, 2.5vw, 2.2rem);
+                        font-weight: 800;
+                        line-height: 1.15;
+                        letter-spacing: -0.02em;
+                        font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif), "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+                    }
+
+                    .customer-history-page .ch-hero__subtitle {
+                        margin: 0;
+                        color: rgba(255, 255, 255, 0.8);
+                        font-size: 0.88rem;
+                        max-width: 520px;
+                    }
+
+                    .customer-history-page .ch-hero__actions {
+                        display: flex;
+                        align-items: center;
+                        flex-wrap: wrap;
+                        gap: 10px;
+                        position: relative;
+                        z-index: 1;
+                    }
+
+                    .customer-history-page .ch-hero-btn {
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 6px;
+                        padding: 8px 16px;
+                        border-radius: 10px;
+                        border: 1px solid rgba(255, 255, 255, 0.3);
+                        background: rgba(255, 255, 255, 0.15);
+                        color: #fff;
+                        font-size: 0.82rem;
+                        font-weight: 600;
+                        text-decoration: none;
+                        cursor: pointer;
+                        transition: all 0.18s ease;
+                    }
+
+                    .customer-history-page .ch-hero-btn:hover,
+                    .customer-history-page .ch-hero-btn:focus {
+                        background: rgba(255, 255, 255, 0.25);
+                        border-color: rgba(255, 255, 255, 0.5);
+                        color: #fff;
+                        text-decoration: none;
+                        transform: translateY(-1px);
+                    }
+
+                    .customer-history-page .ch-hero-btn--solid {
+                        border-color: rgba(255, 255, 255, 0.6);
+                        background: rgba(255, 255, 255, 0.95);
+                        color: #047857;
+                        font-weight: 700;
+                    }
+
+                    .customer-history-page .ch-hero-btn--solid:hover,
+                    .customer-history-page .ch-hero-btn--solid:focus {
+                        background: #fff;
+                        color: #065f46;
+                    }
+
+                    .customer-history-page .card-pulse {
+                        display: inline-block;
+                        animation: card-pulse 2s ease-in-out infinite;
+                    }
+
+                    @keyframes card-pulse {
+                        0%, 70%, 100% { transform: scale(1); }
+                        15% { transform: scale(1.15); }
+                        30% { transform: scale(1); }
+                        45% { transform: scale(1.08); }
+                        60% { transform: scale(1); }
+                    }
+
+                    .customer-history-page .stat-card,
+                    .customer-history-page .panel-card,
+                    .customer-history-page .info-card {
+                        border-top: 3px solid #047857;
+                    }
+
+                    @media (max-width: 767px) {
+                        .customer-history-page .ch-hero,
+                        .customer-history-page .ch-hero__actions {
+                            flex-direction: column;
+                            align-items: stretch;
+                        }
+
+                        .customer-history-page .ch-hero {
+                            padding: 20px;
+                        }
+
+                        .customer-history-page .ch-hero-btn {
+                            flex: 1 1 auto;
+                            justify-content: center;
+                        }
+                    }
+                </style>
+
+                <div class="ch-hero">
+                    <div class="ch-hero__content">
+                        <div class="ch-hero__eyebrow">
+                            <i class="mdi mdi-history"></i>
+                            <?= $clientPortalMode ? 'My Payment History' : 'Customer History'; ?>
+                        </div>
+                        <h1 class="ch-hero__title"><?= htmlspecialchars($resolvedCustomerName !== '' ? $resolvedCustomerName : 'Customer', ENT_QUOTES, 'UTF-8'); ?> <span class="card-pulse">💳</span></h1>
+                        <p class="ch-hero__subtitle"><?= $resolvedCustID !== '' ? 'Customer ID ' . htmlspecialchars($resolvedCustID, ENT_QUOTES, 'UTF-8') . ' · ' : ''; ?><?= $clientPortalMode ? 'Review every payment recorded for your company across invoices in your portal.' : 'Review all recorded payments for this customer across invoices.'; ?></p>
+                    </div>
+                    <div class="ch-hero__actions">
+                        <a class="ch-hero-btn" href="<?= htmlspecialchars($backUrl, ENT_QUOTES, 'UTF-8'); ?>">
+                            <i class="mdi mdi-arrow-left"></i>
+                            <span><?= htmlspecialchars($backLabel, ENT_QUOTES, 'UTF-8'); ?></span>
                         </a>
                         <?php if ($showClientProfileAction && $clientProfileUrl !== ''): ?>
-                            <a class="btn-solid" href="<?= htmlspecialchars($clientProfileUrl, ENT_QUOTES, 'UTF-8'); ?>">
-                                <i class="fas fa-building"></i>
-                                <?= htmlspecialchars($clientProfileLabel, ENT_QUOTES, 'UTF-8'); ?>
+                            <a class="ch-hero-btn ch-hero-btn--solid" href="<?= htmlspecialchars($clientProfileUrl, ENT_QUOTES, 'UTF-8'); ?>">
+                                <i class="mdi mdi-domain"></i>
+                                <span><?= htmlspecialchars($clientProfileLabel, ENT_QUOTES, 'UTF-8'); ?></span>
                             </a>
                         <?php endif; ?>
                     </div>

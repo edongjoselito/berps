@@ -46,18 +46,22 @@
                          ?>
 
 
-                         <header class="berps-page-header">
-                              <div class="berps-page-header__content">
-                                   <span class="berps-page-header__eyebrow">Invoice Management</span>
-                                   <h1 class="berps-page-title">Invoices</h1>
-                                   <p class="berps-page-subtitle">Track billing records, payments, and outstanding balances.</p>
+                         <div class="inv-hero">
+                              <div class="inv-hero__content">
+                                   <div class="inv-hero__eyebrow">
+                                        <i class="mdi mdi-file-document-multiple-outline"></i>
+                                        Invoice Management
+                                   </div>
+                                   <h1 class="inv-hero__title">Invoices <span class="bill-flip">🧾</span></h1>
+                                   <p class="inv-hero__subtitle">Manage billing records, monitor payments, and track outstanding balances.</p>
                               </div>
-                              <div class="berps-page-header__actions">
-                                   <a href="<?= base_url(); ?>Page/invoiceEntry" class="btn btn-primary">
-                                        <i class="mdi mdi-plus-circle-outline mr-1" aria-hidden="true"></i>Add New Invoice
+                              <div class="inv-hero__actions">
+                                   <a href="<?= base_url(); ?>Page/invoiceEntry" class="inv-hero-btn inv-hero-btn--solid">
+                                        <i class="mdi mdi-plus-circle-outline"></i>
+                                        <span>Add New Invoice</span>
                                    </a>
                               </div>
-                         </header>
+                         </div>
 
                          <?php
                          // Helper function to calculate covered period for recurring invoices

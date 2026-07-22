@@ -271,23 +271,184 @@ $priorityClasses = array(
                     }
                 </style>
 
-                <div class="cr-header">
-                    <div>
-                        <div class="cr-eyebrow">Client Report</div>
-                        <h1 class="cr-title">Closed Task Report</h1>
-                        <!-- <p class="cr-subtitle">
-                            View a full report of completed tasks for <?= htmlspecialchars($clientName !== '' ? $clientName : 'your account', ENT_QUOTES, 'UTF-8'); ?>, including assignee, project, completion notes, and schedule details.
-                        </p> -->
-                    </div>
+                <style>
+                    /* Hero Banner */
+                    .client-report-page .cr-hero {
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        flex-wrap: wrap;
+                        gap: 16px;
+                        padding: 28px 24px;
+                        margin: 0 0 22px;
+                        border-radius: 16px;
+                        background: #065f46;
+                        box-shadow: 0 8px 32px rgba(6, 95, 70, 0.25);
+                        position: relative;
+                        overflow: hidden;
+                    }
 
-                    <div class="header-actions">
-                        <a class="btn-soft" href="<?= htmlspecialchars($backUrl, ENT_QUOTES, 'UTF-8'); ?>">
-                            <i class="fas fa-arrow-left"></i>
-                            Back to Dashboard
+                    .client-report-page .cr-hero::before {
+                        content: '';
+                        position: absolute;
+                        top: -50%;
+                        right: -10%;
+                        width: 400px;
+                        height: 400px;
+                        border-radius: 50%;
+                        background: rgba(255, 255, 255, 0.06);
+                        pointer-events: none;
+                    }
+
+                    .client-report-page .cr-hero::after {
+                        content: '';
+                        position: absolute;
+                        bottom: -60%;
+                        right: 15%;
+                        width: 300px;
+                        height: 300px;
+                        border-radius: 50%;
+                        background: rgba(255, 255, 255, 0.04);
+                        pointer-events: none;
+                    }
+
+                    .client-report-page .cr-hero__content {
+                        position: relative;
+                        z-index: 1;
+                    }
+
+                    .client-report-page .cr-hero__eyebrow {
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 6px;
+                        margin-bottom: 8px;
+                        color: rgba(255, 255, 255, 0.85);
+                        font-size: 0.78rem;
+                        font-weight: 600;
+                        letter-spacing: 0.04em;
+                    }
+
+                    .client-report-page .cr-hero__eyebrow i {
+                        font-size: 1rem;
+                    }
+
+                    .client-report-page .cr-hero__title {
+                        margin: 0 0 4px 0;
+                        color: #fff;
+                        font-size: clamp(1.6rem, 2.5vw, 2.2rem);
+                        font-weight: 800;
+                        line-height: 1.15;
+                        letter-spacing: -0.02em;
+                        font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif), "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+                    }
+
+                    .client-report-page .cr-hero__subtitle {
+                        margin: 0;
+                        color: rgba(255, 255, 255, 0.8);
+                        font-size: 0.88rem;
+                        max-width: 520px;
+                    }
+
+                    .client-report-page .cr-hero__actions {
+                        display: flex;
+                        align-items: center;
+                        flex-wrap: wrap;
+                        gap: 10px;
+                        position: relative;
+                        z-index: 1;
+                    }
+
+                    .client-report-page .cr-hero-btn {
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 6px;
+                        padding: 8px 16px;
+                        border-radius: 10px;
+                        border: 1px solid rgba(255, 255, 255, 0.3);
+                        background: rgba(255, 255, 255, 0.15);
+                        color: #fff;
+                        font-size: 0.82rem;
+                        font-weight: 600;
+                        text-decoration: none;
+                        cursor: pointer;
+                        transition: all 0.18s ease;
+                    }
+
+                    .client-report-page .cr-hero-btn:hover,
+                    .client-report-page .cr-hero-btn:focus {
+                        background: rgba(255, 255, 255, 0.25);
+                        border-color: rgba(255, 255, 255, 0.5);
+                        color: #fff;
+                        text-decoration: none;
+                        transform: translateY(-1px);
+                    }
+
+                    .client-report-page .cr-hero-btn--solid {
+                        border-color: rgba(255, 255, 255, 0.6);
+                        background: rgba(255, 255, 255, 0.95);
+                        color: #065f46;
+                        font-weight: 700;
+                    }
+
+                    .client-report-page .cr-hero-btn--solid:hover,
+                    .client-report-page .cr-hero-btn--solid:focus {
+                        background: #fff;
+                        color: #064e3b;
+                    }
+
+                    .client-report-page .check-pulse {
+                        display: inline-block;
+                        animation: check-pulse 2s ease-in-out infinite;
+                    }
+
+                    @keyframes check-pulse {
+                        0%, 70%, 100% { transform: scale(1); }
+                        15% { transform: scale(1.15); }
+                        30% { transform: scale(1); }
+                        45% { transform: scale(1.08); }
+                        60% { transform: scale(1); }
+                    }
+
+                    .client-report-page .summary-card,
+                    .client-report-page .panel-card {
+                        border-top: 3px solid #065f46;
+                    }
+
+                    @media (max-width: 767px) {
+                        .client-report-page .cr-hero,
+                        .client-report-page .cr-hero__actions {
+                            flex-direction: column;
+                            align-items: stretch;
+                        }
+
+                        .client-report-page .cr-hero {
+                            padding: 20px;
+                        }
+
+                        .client-report-page .cr-hero-btn {
+                            flex: 1 1 auto;
+                            justify-content: center;
+                        }
+                    }
+                </style>
+
+                <div class="cr-hero">
+                    <div class="cr-hero__content">
+                        <div class="cr-hero__eyebrow">
+                            <i class="mdi mdi-clipboard-check-outline"></i>
+                            Client Report
+                        </div>
+                        <h1 class="cr-hero__title">Closed Task Report <span class="check-pulse">✅</span></h1>
+                        <p class="cr-hero__subtitle">View a full report of completed tasks for <?= htmlspecialchars($clientName !== '' ? $clientName : 'your account', ENT_QUOTES, 'UTF-8'); ?>, including assignee, project, completion notes, and schedule details.</p>
+                    </div>
+                    <div class="cr-hero__actions">
+                        <a class="cr-hero-btn" href="<?= htmlspecialchars($backUrl, ENT_QUOTES, 'UTF-8'); ?>">
+                            <i class="mdi mdi-arrow-left"></i>
+                            <span>Back to Dashboard</span>
                         </a>
-                        <button type="button" class="btn-solid" onclick="window.print();">
-                            <i class="fas fa-print"></i>
-                            Print Report
+                        <button type="button" class="cr-hero-btn cr-hero-btn--solid" onclick="window.print();">
+                            <i class="mdi mdi-printer"></i>
+                            <span>Print Report</span>
                         </button>
                     </div>
                 </div>

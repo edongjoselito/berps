@@ -259,33 +259,225 @@ $generatedAt = isset($generatedAt) ? $generatedAt : date('F j, Y h:i A');
                                 gap: 16px;
                             }
                         }
+
+                        /* Hero Banner */
+                        .yearly-report-page .yr-hero {
+                            display: flex;
+                            align-items: center;
+                            justify-content: space-between;
+                            flex-wrap: wrap;
+                            gap: 16px;
+                            padding: 28px 24px;
+                            margin: 24px 0 22px;
+                            border-radius: 16px;
+                            background: #9d0208;
+                            box-shadow: 0 8px 32px rgba(157, 2, 8, 0.25);
+                            position: relative;
+                            overflow: hidden;
+                        }
+
+                        .yearly-report-page .yr-hero::before {
+                            content: '';
+                            position: absolute;
+                            top: -50%;
+                            right: -10%;
+                            width: 400px;
+                            height: 400px;
+                            border-radius: 50%;
+                            background: rgba(255, 255, 255, 0.06);
+                            pointer-events: none;
+                        }
+
+                        .yearly-report-page .yr-hero::after {
+                            content: '';
+                            position: absolute;
+                            bottom: -60%;
+                            right: 15%;
+                            width: 300px;
+                            height: 300px;
+                            border-radius: 50%;
+                            background: rgba(255, 255, 255, 0.04);
+                            pointer-events: none;
+                        }
+
+                        .yearly-report-page .yr-hero__content {
+                            position: relative;
+                            z-index: 1;
+                        }
+
+                        .yearly-report-page .yr-hero__eyebrow {
+                            display: inline-flex;
+                            align-items: center;
+                            gap: 6px;
+                            margin-bottom: 8px;
+                            color: rgba(255, 255, 255, 0.85);
+                            font-size: 0.78rem;
+                            font-weight: 600;
+                            letter-spacing: 0.04em;
+                        }
+
+                        .yearly-report-page .yr-hero__eyebrow i {
+                            font-size: 1rem;
+                        }
+
+                        .yearly-report-page .yr-hero__title {
+                            margin: 0 0 4px 0;
+                            color: #fff;
+                            font-size: clamp(1.6rem, 2.5vw, 2.2rem);
+                            font-weight: 800;
+                            line-height: 1.15;
+                            letter-spacing: -0.02em;
+                        }
+
+                        .yearly-report-page .yr-hero__subtitle {
+                            margin: 0;
+                            color: rgba(255, 255, 255, 0.8);
+                            font-size: 0.88rem;
+                            max-width: 480px;
+                        }
+
+                        .yearly-report-page .yr-hero__actions {
+                            position: relative;
+                            z-index: 1;
+                        }
+
+                        .yearly-report-page .yr-hero-form {
+                            display: flex;
+                            align-items: center;
+                            gap: 10px;
+                        }
+
+                        .yearly-report-page .yr-hero-select {
+                            padding: 8px 12px;
+                            border-radius: 10px;
+                            border: 1px solid rgba(255, 255, 255, 0.3);
+                            background: rgba(255, 255, 255, 0.15);
+                            color: #fff;
+                            font-size: 0.82rem;
+                            font-weight: 600;
+                            cursor: pointer;
+                        }
+
+                        .yearly-report-page .yr-hero-select option {
+                            color: #122033;
+                        }
+
+                        .yearly-report-page .yr-hero-btn {
+                            display: inline-flex;
+                            align-items: center;
+                            gap: 6px;
+                            padding: 8px 16px;
+                            border-radius: 10px;
+                            border: 1px solid rgba(255, 255, 255, 0.3);
+                            background: rgba(255, 255, 255, 0.15);
+                            color: #fff;
+                            font-size: 0.82rem;
+                            font-weight: 600;
+                            text-decoration: none;
+                            cursor: pointer;
+                            transition: all 0.18s ease;
+                        }
+
+                        .yearly-report-page .yr-hero-btn:hover,
+                        .yearly-report-page .yr-hero-btn:focus {
+                            background: rgba(255, 255, 255, 0.25);
+                            border-color: rgba(255, 255, 255, 0.5);
+                            color: #fff;
+                            text-decoration: none;
+                            transform: translateY(-1px);
+                        }
+
+                        .yearly-report-page .yr-hero-btn--solid {
+                            border-color: rgba(255, 255, 255, 0.6);
+                            background: rgba(255, 255, 255, 0.95);
+                            color: #9d0208;
+                            font-weight: 700;
+                        }
+
+                        .yearly-report-page .yr-hero-btn--solid:hover,
+                        .yearly-report-page .yr-hero-btn--solid:focus {
+                            background: #fff;
+                            color: #7d0206;
+                        }
+
+                        /* Calendar flip animation */
+                        .yearly-report-page .calendar-flip {
+                            display: inline-block;
+                            animation: calendar-flip 2.5s ease-in-out infinite;
+                            transform-origin: center;
+                        }
+
+                        @keyframes calendar-flip {
+                            0%, 70%, 100% { transform: rotateY(0deg) scale(1); }
+                            20% { transform: rotateY(180deg) scale(1.1); }
+                            40% { transform: rotateY(360deg) scale(1); }
+                        }
+
+                        /* Burgundy accent on cards */
+                        .yearly-report-page .stat-card {
+                            border-top: 3px solid #9d0208;
+                        }
+
+                        .yearly-report-page .chart-container {
+                            border-top: 3px solid #9d0208;
+                        }
+
+                        .yearly-report-page .chart-title {
+                            color: #9d0208;
+                        }
+
+                        /* Responsive hero */
+                        @media (max-width: 767px) {
+                            .yearly-report-page .yr-hero,
+                            .yearly-report-page .yr-hero__actions {
+                                flex-direction: column;
+                                align-items: stretch;
+                            }
+
+                            .yearly-report-page .yr-hero {
+                                padding: 20px;
+                            }
+
+                            .yearly-report-page .yr-hero-form {
+                                flex-direction: column;
+                                gap: 8px;
+                            }
+
+                            .yearly-report-page .yr-hero-btn {
+                                flex: 1 1 auto;
+                                justify-content: center;
+                            }
+                        }
                     </style>
 
-                    <div class="company-header">
-                        <?php if ($business): ?>
-                            <h1 class="company-name"><?= htmlspecialchars($business->CompName, ENT_QUOTES, 'UTF-8'); ?></h1>
-                        <?php else: ?>
-                            <h1 class="company-name">Business Report</h1>
-                        <?php endif; ?>
-                        <div class="report-title">Yearly Income Report - <?= htmlspecialchars($selectedYear, ENT_QUOTES, 'UTF-8'); ?></div>
-                        <div class="report-meta">Generated on <?= htmlspecialchars($generatedAt, ENT_QUOTES, 'UTF-8'); ?></div>
-                    </div>
-
-                    <div class="page-header">
-                        <div>
-                            <h1 class="page-title">Yearly Income Report</h1>
-                            <p class="page-subtitle">Comprehensive income analysis and comparison for <?= htmlspecialchars($selectedYear, ENT_QUOTES, 'UTF-8'); ?></p>
+                    <div class="yr-hero">
+                        <div class="yr-hero__content">
+                            <div class="yr-hero__eyebrow">
+                                <i class="mdi mdi-calendar-month-outline"></i>
+                                Financial Analytics
+                            </div>
+                            <h1 class="yr-hero__title">Yearly Income Report <span class="calendar-flip">📅</span></h1>
+                            <p class="yr-hero__subtitle">
+                                <?php if ($business): ?>
+                                    <strong><?= htmlspecialchars($business->CompName, ENT_QUOTES, 'UTF-8'); ?></strong> &middot;
+                                <?php endif; ?>
+                                <?= htmlspecialchars($selectedYear, ENT_QUOTES, 'UTF-8'); ?> &middot;
+                                Generated <?= htmlspecialchars($generatedAt, ENT_QUOTES, 'UTF-8'); ?>
+                            </p>
                         </div>
-                        <div class="year-selector">
-                            <form method="GET" action="<?= base_url(); ?>Page/yearlyReport" style="display: flex; align-items: center; gap: 12px;">
-                                <select name="year" id="yearSelect">
+                        <div class="yr-hero__actions">
+                            <form method="GET" action="<?= base_url(); ?>Page/yearlyReport" class="yr-hero-form">
+                                <select name="year" id="yearSelect" class="yr-hero-select">
                                     <?php foreach ($availableYears as $year): ?>
                                         <option value="<?= $year; ?>" <?= $year == $selectedYear ? 'selected' : ''; ?>>
                                             <?= $year; ?>
                                         </option>
                                     <?php endforeach; ?>
                                 </select>
-                                <button type="submit">View Report</button>
+                                <button type="submit" class="yr-hero-btn yr-hero-btn--solid">
+                                    <i class="mdi mdi-eye-outline"></i>
+                                    <span>View Report</span>
+                                </button>
                             </form>
                         </div>
                     </div>

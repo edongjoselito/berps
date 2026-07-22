@@ -62,15 +62,171 @@ $backUrl = $isClientView ? base_url('Page/clientMyTickets') : base_url('Page/sup
                     .client-profile-page .alert { border:none; border-radius:18px; box-shadow:0 10px 26px rgba(15,23,42,.04); }
                 </style>
 
-                <div class="cp-header">
-                    <div>
-                        <div class="cp-eyebrow"><?= $isClientView ? 'Client Portal' : 'Support Logs'; ?></div>
-                        <h1 class="cp-title">Cancelled Ticket Logs</h1>
+                <style>
+                    /* Hero Banner */
+                    .client-profile-page .cl-hero {
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        flex-wrap: wrap;
+                        gap: 16px;
+                        padding: 28px 24px;
+                        margin: 0 0 22px;
+                        border-radius: 16px;
+                        background: #7f1d1d;
+                        box-shadow: 0 8px 32px rgba(127, 29, 29, 0.25);
+                        position: relative;
+                        overflow: hidden;
+                    }
+
+                    .client-profile-page .cl-hero::before {
+                        content: '';
+                        position: absolute;
+                        top: -50%;
+                        right: -10%;
+                        width: 400px;
+                        height: 400px;
+                        border-radius: 50%;
+                        background: rgba(255, 255, 255, 0.06);
+                        pointer-events: none;
+                    }
+
+                    .client-profile-page .cl-hero::after {
+                        content: '';
+                        position: absolute;
+                        bottom: -60%;
+                        right: 15%;
+                        width: 300px;
+                        height: 300px;
+                        border-radius: 50%;
+                        background: rgba(255, 255, 255, 0.04);
+                        pointer-events: none;
+                    }
+
+                    .client-profile-page .cl-hero__content {
+                        position: relative;
+                        z-index: 1;
+                    }
+
+                    .client-profile-page .cl-hero__eyebrow {
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 6px;
+                        margin-bottom: 8px;
+                        color: rgba(255, 255, 255, 0.85);
+                        font-size: 0.78rem;
+                        font-weight: 600;
+                        letter-spacing: 0.04em;
+                    }
+
+                    .client-profile-page .cl-hero__eyebrow i {
+                        font-size: 1rem;
+                    }
+
+                    .client-profile-page .cl-hero__title {
+                        margin: 0 0 4px 0;
+                        color: #fff;
+                        font-size: clamp(1.6rem, 2.5vw, 2.2rem);
+                        font-weight: 800;
+                        line-height: 1.15;
+                        letter-spacing: -0.02em;
+                        font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif), "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+                    }
+
+                    .client-profile-page .cl-hero__subtitle {
+                        margin: 0;
+                        color: rgba(255, 255, 255, 0.8);
+                        font-size: 0.88rem;
+                        max-width: 520px;
+                    }
+
+                    .client-profile-page .cl-hero__actions {
+                        display: flex;
+                        align-items: center;
+                        flex-wrap: wrap;
+                        gap: 10px;
+                        position: relative;
+                        z-index: 1;
+                    }
+
+                    .client-profile-page .cl-hero-btn {
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 6px;
+                        padding: 8px 16px;
+                        border-radius: 10px;
+                        border: 1px solid rgba(255, 255, 255, 0.3);
+                        background: rgba(255, 255, 255, 0.15);
+                        color: #fff;
+                        font-size: 0.82rem;
+                        font-weight: 600;
+                        text-decoration: none;
+                        cursor: pointer;
+                        transition: all 0.18s ease;
+                    }
+
+                    .client-profile-page .cl-hero-btn:hover,
+                    .client-profile-page .cl-hero-btn:focus {
+                        background: rgba(255, 255, 255, 0.25);
+                        border-color: rgba(255, 255, 255, 0.5);
+                        color: #fff;
+                        text-decoration: none;
+                        transform: translateY(-1px);
+                    }
+
+                    .client-profile-page .trash-swing {
+                        display: inline-block;
+                        animation: trash-swing 2.5s ease-in-out infinite;
+                        transform-origin: 50% 80%;
+                    }
+
+                    @keyframes trash-swing {
+                        0%, 70%, 100% { transform: rotate(0deg); }
+                        15% { transform: rotate(-12deg); }
+                        30% { transform: rotate(10deg); }
+                        45% { transform: rotate(-6deg); }
+                        60% { transform: rotate(0deg); }
+                    }
+
+                    .client-profile-page .panel-card {
+                        border-top: 3px solid #7f1d1d;
+                    }
+
+                    @media (max-width: 767px) {
+                        .client-profile-page .cl-hero,
+                        .client-profile-page .cl-hero__actions {
+                            flex-direction: column;
+                            align-items: stretch;
+                        }
+
+                        .client-profile-page .cl-hero {
+                            padding: 20px;
+                        }
+
+                        .client-profile-page .cl-hero-btn {
+                            flex: 1 1 auto;
+                            justify-content: center;
+                        }
+                    }
+                </style>
+
+                <div class="cl-hero">
+                    <div class="cl-hero__content">
+                        <div class="cl-hero__eyebrow">
+                            <i class="mdi mdi-trash-can-outline"></i>
+                            <?= $isClientView ? 'Client Portal' : 'Support Logs'; ?>
+                        </div>
+                        <h1 class="cl-hero__title">Cancelled Ticket Logs <span class="trash-swing">🗑️</span></h1>
                         <?php if (!$isClientView): ?>
-                            <p class="cp-subtitle">Review all support tickets cancelled by clients and open each one for full context.</p>
+                            <p class="cl-hero__subtitle">Review all support tickets cancelled by clients and open each one for full context.</p>
                         <?php endif; ?>
                     </div>
-                    <a class="btn-soft" href="<?= htmlspecialchars($backUrl, ENT_QUOTES, 'UTF-8'); ?>"><i class="fas fa-arrow-left"></i>Back</a>
+                    <div class="cl-hero__actions">
+                        <a class="cl-hero-btn" href="<?= htmlspecialchars($backUrl, ENT_QUOTES, 'UTF-8'); ?>">
+                            <i class="mdi mdi-arrow-left"></i>
+                            <span>Back</span>
+                        </a>
+                    </div>
                 </div>
 
                 <?php if ($this->session->flashdata('success')): ?>

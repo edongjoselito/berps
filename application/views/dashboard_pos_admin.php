@@ -11,18 +11,193 @@
         <div class="content-page">
             <div class="content">
                 <div class="container-fluid berps-page pos-admin-dashboard-page">
-                    <header class="berps-page-header">
-                        <div class="berps-page-header__content">
-                            <span class="berps-page-header__eyebrow">Point of sale</span>
-                            <h1 class="berps-page-title">POS Admin Dashboard</h1>
-                            <p class="berps-page-subtitle">Monitor sales, inventory risk, and outstanding balances from one view.</p>
+                    <style>
+                        .pos-admin-dashboard-page .pa-hero {
+                            display: flex;
+                            align-items: center;
+                            justify-content: space-between;
+                            flex-wrap: wrap;
+                            gap: 16px;
+                            padding: 28px 24px;
+                            margin: 24px 0 22px;
+                            border-radius: 16px;
+                            background: #c2410c;
+                            box-shadow: 0 8px 32px rgba(194, 65, 12, 0.25);
+                            position: relative;
+                            overflow: hidden;
+                        }
+
+                        .pos-admin-dashboard-page .pa-hero::before {
+                            content: '';
+                            position: absolute;
+                            top: -50%;
+                            right: -10%;
+                            width: 400px;
+                            height: 400px;
+                            border-radius: 50%;
+                            background: rgba(255, 255, 255, 0.06);
+                            pointer-events: none;
+                        }
+
+                        .pos-admin-dashboard-page .pa-hero::after {
+                            content: '';
+                            position: absolute;
+                            bottom: -60%;
+                            right: 15%;
+                            width: 300px;
+                            height: 300px;
+                            border-radius: 50%;
+                            background: rgba(255, 255, 255, 0.04);
+                            pointer-events: none;
+                        }
+
+                        .pos-admin-dashboard-page .pa-hero__content {
+                            position: relative;
+                            z-index: 1;
+                        }
+
+                        .pos-admin-dashboard-page .pa-hero__eyebrow {
+                            display: inline-flex;
+                            align-items: center;
+                            gap: 6px;
+                            margin-bottom: 8px;
+                            color: rgba(255, 255, 255, 0.85);
+                            font-size: 0.78rem;
+                            font-weight: 600;
+                            letter-spacing: 0.04em;
+                        }
+
+                        .pos-admin-dashboard-page .pa-hero__eyebrow i {
+                            font-size: 1rem;
+                        }
+
+                        .pos-admin-dashboard-page .pa-hero__title {
+                            margin: 0 0 4px 0;
+                            color: #fff;
+                            font-size: clamp(1.6rem, 2.5vw, 2.2rem);
+                            font-weight: 800;
+                            line-height: 1.15;
+                            letter-spacing: -0.02em;
+                        }
+
+                        .pos-admin-dashboard-page .pa-hero__subtitle {
+                            margin: 0;
+                            color: rgba(255, 255, 255, 0.8);
+                            font-size: 0.88rem;
+                            max-width: 520px;
+                        }
+
+                        .pos-admin-dashboard-page .pa-hero__actions {
+                            display: flex;
+                            align-items: center;
+                            flex-wrap: wrap;
+                            gap: 10px;
+                            position: relative;
+                            z-index: 1;
+                        }
+
+                        .pos-admin-dashboard-page .pa-hero-btn {
+                            display: inline-flex;
+                            align-items: center;
+                            gap: 6px;
+                            padding: 8px 16px;
+                            border-radius: 10px;
+                            border: 1px solid rgba(255, 255, 255, 0.3);
+                            background: rgba(255, 255, 255, 0.15);
+                            color: #fff;
+                            font-size: 0.82rem;
+                            font-weight: 600;
+                            text-decoration: none;
+                            cursor: pointer;
+                            transition: all 0.18s ease;
+                        }
+
+                        .pos-admin-dashboard-page .pa-hero-btn:hover,
+                        .pos-admin-dashboard-page .pa-hero-btn:focus {
+                            background: rgba(255, 255, 255, 0.25);
+                            border-color: rgba(255, 255, 255, 0.5);
+                            color: #fff;
+                            text-decoration: none;
+                            transform: translateY(-1px);
+                        }
+
+                        .pos-admin-dashboard-page .pa-hero-btn--solid {
+                            border-color: rgba(255, 255, 255, 0.6);
+                            background: rgba(255, 255, 255, 0.95);
+                            color: #c2410c;
+                            font-weight: 700;
+                        }
+
+                        .pos-admin-dashboard-page .pa-hero-btn--solid:hover,
+                        .pos-admin-dashboard-page .pa-hero-btn--solid:focus {
+                            background: #fff;
+                            color: #9a3412;
+                        }
+
+                        /* Cart bounce animation */
+                        .pos-admin-dashboard-page .cart-bounce {
+                            display: inline-block;
+                            animation: cart-bounce 2s ease-in-out infinite;
+                        }
+
+                        @keyframes cart-bounce {
+                            0%, 70%, 100% { transform: translateY(0); }
+                            15% { transform: translateY(-10px); }
+                            30% { transform: translateY(0); }
+                            45% { transform: translateY(-5px); }
+                            60% { transform: translateY(0); }
+                        }
+
+                        /* Deep orange accent on cards */
+                        .pos-admin-dashboard-page .berps-section-card,
+                        .pos-admin-dashboard-page .berps-table-card {
+                            border-top: 3px solid #c2410c;
+                        }
+
+                        .pos-admin-dashboard-page .berps-section-card__header,
+                        .pos-admin-dashboard-page .berps-table-card__header {
+                            border-bottom: 2px solid #c2410c;
+                        }
+
+                        .pos-admin-dashboard-page .berps-section-title {
+                            color: #c2410c;
+                        }
+
+                        /* Responsive hero */
+                        @media (max-width: 767px) {
+                            .pos-admin-dashboard-page .pa-hero,
+                            .pos-admin-dashboard-page .pa-hero__actions {
+                                flex-direction: column;
+                                align-items: stretch;
+                            }
+
+                            .pos-admin-dashboard-page .pa-hero {
+                                padding: 20px;
+                            }
+
+                            .pos-admin-dashboard-page .pa-hero-btn {
+                                flex: 1 1 auto;
+                                justify-content: center;
+                            }
+                        }
+                    </style>
+
+                    <div class="pa-hero">
+                        <div class="pa-hero__content">
+                            <div class="pa-hero__eyebrow">
+                                <i class="mdi mdi-store-outline"></i>
+                                Point of Sale
+                            </div>
+                            <h1 class="pa-hero__title">POS Admin Dashboard <span class="cart-bounce">🛒</span></h1>
+                            <p class="pa-hero__subtitle">Monitor sales, inventory risk, and outstanding balances from one view.</p>
                         </div>
-                        <div class="berps-page-header__actions">
-                            <a href="<?= base_url(); ?>Pos/posNewTransaction" class="btn btn-primary btn-sm">
-                                <i class="mdi mdi-cart-plus mr-1" aria-hidden="true"></i>New sale
+                        <div class="pa-hero__actions">
+                            <a class="pa-hero-btn pa-hero-btn--solid" href="<?= base_url(); ?>Pos/posNewTransaction">
+                                <i class="mdi mdi-cart-plus"></i>
+                                <span>New Sale</span>
                             </a>
                         </div>
-                    </header>
+                    </div>
 
                     <section aria-labelledby="pos-summary-heading">
                         <h2 id="pos-summary-heading" class="sr-only">Sales and inventory summary</h2>

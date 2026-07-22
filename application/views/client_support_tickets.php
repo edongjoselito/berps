@@ -81,15 +81,184 @@ $backUrl = base_url() . 'Page/clientDashboard';
                     .client-profile-page .alert { border:none; border-radius:18px; box-shadow:0 10px 26px rgba(15,23,42,.04); }
                 </style>
 
-                <div class="cp-header">
-                    <div>
-                        <div class="cp-eyebrow">Client Portal</div>
-                        <h1 class="cp-title">My Tickets</h1>
-                        <!-- <p class="cp-subtitle">Track support concerns submitted for <?= htmlspecialchars($clientName !== '' ? $clientName : 'your account', ENT_QUOTES, 'UTF-8'); ?> and quickly open or cancel untouched tickets.</p> -->
+                <style>
+                    /* Hero Banner */
+                    .client-profile-page .ct-hero {
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        flex-wrap: wrap;
+                        gap: 16px;
+                        padding: 28px 24px;
+                        margin: 0 0 22px;
+                        border-radius: 16px;
+                        background: #be123c;
+                        box-shadow: 0 8px 32px rgba(190, 18, 60, 0.25);
+                        position: relative;
+                        overflow: hidden;
+                    }
+
+                    .client-profile-page .ct-hero::before {
+                        content: '';
+                        position: absolute;
+                        top: -50%;
+                        right: -10%;
+                        width: 400px;
+                        height: 400px;
+                        border-radius: 50%;
+                        background: rgba(255, 255, 255, 0.06);
+                        pointer-events: none;
+                    }
+
+                    .client-profile-page .ct-hero::after {
+                        content: '';
+                        position: absolute;
+                        bottom: -60%;
+                        right: 15%;
+                        width: 300px;
+                        height: 300px;
+                        border-radius: 50%;
+                        background: rgba(255, 255, 255, 0.04);
+                        pointer-events: none;
+                    }
+
+                    .client-profile-page .ct-hero__content {
+                        position: relative;
+                        z-index: 1;
+                    }
+
+                    .client-profile-page .ct-hero__eyebrow {
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 6px;
+                        margin-bottom: 8px;
+                        color: rgba(255, 255, 255, 0.85);
+                        font-size: 0.78rem;
+                        font-weight: 600;
+                        letter-spacing: 0.04em;
+                    }
+
+                    .client-profile-page .ct-hero__eyebrow i {
+                        font-size: 1rem;
+                    }
+
+                    .client-profile-page .ct-hero__title {
+                        margin: 0 0 4px 0;
+                        color: #fff;
+                        font-size: clamp(1.6rem, 2.5vw, 2.2rem);
+                        font-weight: 800;
+                        line-height: 1.15;
+                        letter-spacing: -0.02em;
+                        font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif), "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+                    }
+
+                    .client-profile-page .ct-hero__subtitle {
+                        margin: 0;
+                        color: rgba(255, 255, 255, 0.8);
+                        font-size: 0.88rem;
+                        max-width: 520px;
+                    }
+
+                    .client-profile-page .ct-hero__actions {
+                        display: flex;
+                        align-items: center;
+                        flex-wrap: wrap;
+                        gap: 10px;
+                        position: relative;
+                        z-index: 1;
+                    }
+
+                    .client-profile-page .ct-hero-btn {
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 6px;
+                        padding: 8px 16px;
+                        border-radius: 10px;
+                        border: 1px solid rgba(255, 255, 255, 0.3);
+                        background: rgba(255, 255, 255, 0.15);
+                        color: #fff;
+                        font-size: 0.82rem;
+                        font-weight: 600;
+                        text-decoration: none;
+                        cursor: pointer;
+                        transition: all 0.18s ease;
+                    }
+
+                    .client-profile-page .ct-hero-btn:hover,
+                    .client-profile-page .ct-hero-btn:focus {
+                        background: rgba(255, 255, 255, 0.25);
+                        border-color: rgba(255, 255, 255, 0.5);
+                        color: #fff;
+                        text-decoration: none;
+                        transform: translateY(-1px);
+                    }
+
+                    .client-profile-page .ct-hero-btn--solid {
+                        border-color: rgba(255, 255, 255, 0.6);
+                        background: rgba(255, 255, 255, 0.95);
+                        color: #be123c;
+                        font-weight: 700;
+                    }
+
+                    .client-profile-page .ct-hero-btn--solid:hover,
+                    .client-profile-page .ct-hero-btn--solid:focus {
+                        background: #fff;
+                        color: #9f1239;
+                    }
+
+                    .client-profile-page .ticket-shake {
+                        display: inline-block;
+                        animation: ticket-shake 2.5s ease-in-out infinite;
+                    }
+
+                    @keyframes ticket-shake {
+                        0%, 70%, 100% { transform: rotate(0deg); }
+                        15% { transform: rotate(-10deg); }
+                        30% { transform: rotate(8deg); }
+                        45% { transform: rotate(-5deg); }
+                        60% { transform: rotate(0deg); }
+                    }
+
+                    .client-profile-page .panel-card {
+                        border-top: 3px solid #be123c;
+                    }
+
+                    @media (max-width: 767px) {
+                        .client-profile-page .ct-hero,
+                        .client-profile-page .ct-hero__actions {
+                            flex-direction: column;
+                            align-items: stretch;
+                        }
+
+                        .client-profile-page .ct-hero {
+                            padding: 20px;
+                        }
+
+                        .client-profile-page .ct-hero-btn {
+                            flex: 1 1 auto;
+                            justify-content: center;
+                        }
+                    }
+                </style>
+
+                <div class="ct-hero">
+                    <div class="ct-hero__content">
+                        <div class="ct-hero__eyebrow">
+                            <i class="mdi mdi-ticket-outline"></i>
+                            Client Portal
+                        </div>
+                        <h1 class="ct-hero__title">My Tickets <span class="ticket-shake">🎫</span></h1>
+                        <p class="ct-hero__subtitle">Track support concerns submitted for <?= htmlspecialchars($clientName !== '' ? $clientName : 'your account', ENT_QUOTES, 'UTF-8'); ?> and quickly open or cancel untouched tickets.</p>
                     </div>
-                    <div class="header-actions">
-                        <a class="btn-soft" href="<?= htmlspecialchars($backUrl, ENT_QUOTES, 'UTF-8'); ?>"><i class="fas fa-arrow-left"></i>Back to Dashboard</a>
-                        <a class="btn-solid" href="<?= base_url('Page/clientReportIssue'); ?>"><i class="fas fa-plus-circle"></i>Report an Issue</a>
+                    <div class="ct-hero__actions">
+                        <a class="ct-hero-btn" href="<?= htmlspecialchars($backUrl, ENT_QUOTES, 'UTF-8'); ?>">
+                            <i class="mdi mdi-arrow-left"></i>
+                            <span>Back to Dashboard</span>
+                        </a>
+                        <a class="ct-hero-btn ct-hero-btn--solid" href="<?= base_url('Page/clientReportIssue'); ?>">
+                            <i class="mdi mdi-plus-circle-outline"></i>
+                            <span>Report an Issue</span>
+                        </a>
                     </div>
                 </div>
 

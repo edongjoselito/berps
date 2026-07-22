@@ -47,19 +47,22 @@ $portalPassword = trim((string) ($values['portal_password'] ?? ''));
                         </div>
                     <?php endif; ?>
 
-                    <header class="berps-page-header">
-                        <div class="berps-page-header__content">
-                            <span class="berps-page-header__eyebrow">Clients</span>
-                            <h1 class="berps-page-title">Add Client</h1>
-                            <p class="berps-page-subtitle">Create the company profile, primary contact details, and optional portal access.</p>
+                    <div class="client-entry-hero">
+                        <div class="client-entry-hero__content">
+                            <div class="client-entry-hero__eyebrow">
+                                <i class="mdi mdi-account-plus-outline"></i>
+                                Clients
+                            </div>
+                            <h1 class="client-entry-hero__title">Add Client <span class="client-wave">🤝</span></h1>
+                            <p class="client-entry-hero__subtitle">Create the company profile, primary contact details, and optional portal access.</p>
                         </div>
-                        <div class="berps-page-header__actions">
-                            <a href="<?= htmlspecialchars($backUrl, ENT_QUOTES, 'UTF-8'); ?>" class="btn btn-outline-secondary">
-                                <i class="mdi mdi-arrow-left" aria-hidden="true"></i>
-                                Back to Client List
+                        <div class="client-entry-hero__actions">
+                            <a href="<?= htmlspecialchars($backUrl, ENT_QUOTES, 'UTF-8'); ?>" class="client-entry-hero-btn">
+                                <i class="mdi mdi-arrow-left"></i>
+                                <span>Back to Client List</span>
                             </a>
                         </div>
-                    </header>
+                    </div>
 
                     <div class="berps-form-card">
                         <div class="berps-form-card__header">

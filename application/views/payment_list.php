@@ -80,24 +80,30 @@ $filterQueryString = http_build_query(array(
                 <div class="container-fluid payment-list-page berps-page">
 
 
-                    <header class="berps-page-header">
-                        <div class="berps-page-header__content">
-                            <span class="berps-page-header__eyebrow">Collections</span>
-                            <h1 class="berps-page-title">Payment Collections</h1>
-                            <p class="berps-page-subtitle">Review accepted payments and filter collection activity by date range.</p>
+                    <div class="pay-hero">
+                        <div class="pay-hero__content">
+                            <div class="pay-hero__eyebrow">
+                                <i class="mdi mdi-credit-card-clock-outline"></i>
+                                Collections
+                            </div>
+                            <h1 class="pay-hero__title">Payment Collections <span class="coin-spin">💰</span></h1>
+                            <p class="pay-hero__subtitle">Review collected payments and filter activity by date range.</p>
                         </div>
-                        <div class="berps-page-header__actions">
-                            <button type="button" class="btn btn-outline-secondary" data-toggle="modal" data-target="#searchPaymentModal">
-                                <i class="mdi mdi-magnify mr-1" aria-hidden="true"></i>Find Payment
+                        <div class="pay-hero__actions">
+                            <button type="button" class="pay-hero-btn" data-toggle="modal" data-target="#searchPaymentModal">
+                                <i class="mdi mdi-magnify"></i>
+                                <span>Find Payment</span>
                             </button>
-                            <button type="button" class="btn btn-outline-secondary" data-toggle="modal" data-target="#filterModal">
-                                <i class="mdi mdi-filter-outline mr-1" aria-hidden="true"></i>Filter
+                            <button type="button" class="pay-hero-btn" data-toggle="modal" data-target="#filterModal">
+                                <i class="mdi mdi-filter-outline"></i>
+                                <span>Filter</span>
                             </button>
-                            <a href="<?= base_url(); ?>Page/unifiedPayment" class="btn btn-primary">
-                                <i class="mdi mdi-credit-card-plus-outline mr-1" aria-hidden="true"></i>Add New Payment
+                            <a href="<?= base_url(); ?>Page/unifiedPayment" class="pay-hero-btn pay-hero-btn--solid">
+                                <i class="mdi mdi-credit-card-plus-outline"></i>
+                                <span>Add New Payment</span>
                             </a>
                         </div>
-                    </header>
+                    </div>
 
                     <div class="berps-stat-grid">
                         <div class="berps-stat-card berps-tone-success">

@@ -664,30 +664,197 @@ $supportProjects = isset($supportProjects) && is_array($supportProjects) ? array
                     }
                 </style>
 
-                <div class="cd-header">
-                    <div>
-                        <div class="cd-eyebrow">Client Portal</div>
-                        <h1 class="cd-title"><?= htmlspecialchars($clientName !== '' ? $clientName : 'Client Portal', ENT_QUOTES, 'UTF-8'); ?></h1>
-                        <p class="cd-subtitle">
-                            Access your invoices, payment history, and company details in one place.
-                        </p>
-                    </div>
+                <style>
+                    /* Hero Banner */
+                    .client-dashboard-page .cd-hero {
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        flex-wrap: wrap;
+                        gap: 16px;
+                        padding: 28px 24px;
+                        margin: 0 0 22px;
+                        border-radius: 16px;
+                        background: #1e40af;
+                        box-shadow: 0 8px 32px rgba(30, 64, 175, 0.25);
+                        position: relative;
+                        overflow: hidden;
+                    }
 
-                    <div class="cd-actions">
-                        
-                        <a class="btn-soft" href="<?= htmlspecialchars($reportIssueUrl, ENT_QUOTES, 'UTF-8'); ?>">
-                            <i class="fas fa-life-ring"></i>
-                            Report an Issue
+                    .client-dashboard-page .cd-hero::before {
+                        content: '';
+                        position: absolute;
+                        top: -50%;
+                        right: -10%;
+                        width: 400px;
+                        height: 400px;
+                        border-radius: 50%;
+                        background: rgba(255, 255, 255, 0.06);
+                        pointer-events: none;
+                    }
+
+                    .client-dashboard-page .cd-hero::after {
+                        content: '';
+                        position: absolute;
+                        bottom: -60%;
+                        right: 15%;
+                        width: 300px;
+                        height: 300px;
+                        border-radius: 50%;
+                        background: rgba(255, 255, 255, 0.04);
+                        pointer-events: none;
+                    }
+
+                    .client-dashboard-page .cd-hero__content {
+                        position: relative;
+                        z-index: 1;
+                    }
+
+                    .client-dashboard-page .cd-hero__eyebrow {
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 6px;
+                        margin-bottom: 8px;
+                        color: rgba(255, 255, 255, 0.85);
+                        font-size: 0.78rem;
+                        font-weight: 600;
+                        letter-spacing: 0.04em;
+                    }
+
+                    .client-dashboard-page .cd-hero__eyebrow i {
+                        font-size: 1rem;
+                    }
+
+                    .client-dashboard-page .cd-hero__title {
+                        margin: 0 0 4px 0;
+                        color: #fff;
+                        font-size: clamp(1.6rem, 2.5vw, 2.2rem);
+                        font-weight: 800;
+                        line-height: 1.15;
+                        letter-spacing: -0.02em;
+                        font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif), "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+                    }
+
+                    .client-dashboard-page .cd-hero__subtitle {
+                        margin: 0;
+                        color: rgba(255, 255, 255, 0.8);
+                        font-size: 0.88rem;
+                        max-width: 520px;
+                    }
+
+                    .client-dashboard-page .cd-hero__actions {
+                        display: flex;
+                        align-items: center;
+                        flex-wrap: wrap;
+                        gap: 10px;
+                        position: relative;
+                        z-index: 1;
+                    }
+
+                    .client-dashboard-page .cd-hero-btn {
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 6px;
+                        padding: 8px 16px;
+                        border-radius: 10px;
+                        border: 1px solid rgba(255, 255, 255, 0.3);
+                        background: rgba(255, 255, 255, 0.15);
+                        color: #fff;
+                        font-size: 0.82rem;
+                        font-weight: 600;
+                        text-decoration: none;
+                        cursor: pointer;
+                        transition: all 0.18s ease;
+                    }
+
+                    .client-dashboard-page .cd-hero-btn:hover,
+                    .client-dashboard-page .cd-hero-btn:focus {
+                        background: rgba(255, 255, 255, 0.25);
+                        border-color: rgba(255, 255, 255, 0.5);
+                        color: #fff;
+                        text-decoration: none;
+                        transform: translateY(-1px);
+                    }
+
+                    .client-dashboard-page .cd-hero-btn--solid {
+                        border-color: rgba(255, 255, 255, 0.6);
+                        background: rgba(255, 255, 255, 0.95);
+                        color: #1e40af;
+                        font-weight: 700;
+                    }
+
+                    .client-dashboard-page .cd-hero-btn--solid:hover,
+                    .client-dashboard-page .cd-hero-btn--solid:focus {
+                        background: #fff;
+                        color: #1e3a8a;
+                    }
+
+                    .client-dashboard-page .cd-hero-btn[disabled] {
+                        opacity: 0.6;
+                        cursor: not-allowed;
+                        pointer-events: none;
+                    }
+
+                    .client-dashboard-page .office-bounce {
+                        display: inline-block;
+                        animation: office-bounce 2s ease-in-out infinite;
+                    }
+
+                    @keyframes office-bounce {
+                        0%, 70%, 100% { transform: translateY(0); }
+                        15% { transform: translateY(-10px); }
+                        30% { transform: translateY(0); }
+                        45% { transform: translateY(-5px); }
+                        60% { transform: translateY(0); }
+                    }
+
+                    .client-dashboard-page .stat-card,
+                    .client-dashboard-page .panel-card,
+                    .client-dashboard-page .info-card {
+                        border-top: 3px solid #1e40af;
+                    }
+
+                    @media (max-width: 767px) {
+                        .client-dashboard-page .cd-hero,
+                        .client-dashboard-page .cd-hero__actions {
+                            flex-direction: column;
+                            align-items: stretch;
+                        }
+
+                        .client-dashboard-page .cd-hero {
+                            padding: 20px;
+                        }
+
+                        .client-dashboard-page .cd-hero-btn {
+                            flex: 1 1 auto;
+                            justify-content: center;
+                        }
+                    }
+                </style>
+
+                <div class="cd-hero">
+                    <div class="cd-hero__content">
+                        <div class="cd-hero__eyebrow">
+                            <i class="mdi mdi-briefcase-outline"></i>
+                            Client Portal
+                        </div>
+                        <h1 class="cd-hero__title"><?= htmlspecialchars($clientName !== '' ? $clientName : 'Client Portal', ENT_QUOTES, 'UTF-8'); ?> <span class="office-bounce">🏢</span></h1>
+                        <p class="cd-hero__subtitle">Access your invoices, payment history, and company details in one place.</p>
+                    </div>
+                    <div class="cd-hero__actions">
+                        <a class="cd-hero-btn" href="<?= htmlspecialchars($reportIssueUrl, ENT_QUOTES, 'UTF-8'); ?>">
+                            <i class="mdi mdi-lifebuoy"></i>
+                            <span>Report an Issue</span>
                         </a>
                         <?php if (isset($invoice_access_enabled) && $invoice_access_enabled): ?>
-                        <a class="btn-solid" href="<?= htmlspecialchars($myInvoicesUrl, ENT_QUOTES, 'UTF-8'); ?>">
-                            <i class="fas fa-file-invoice-dollar"></i>
-                            Open My Invoices
+                        <a class="cd-hero-btn cd-hero-btn--solid" href="<?= htmlspecialchars($myInvoicesUrl, ENT_QUOTES, 'UTF-8'); ?>">
+                            <i class="mdi mdi-file-document-outline"></i>
+                            <span>Open My Invoices</span>
                         </a>
                         <?php else: ?>
-                        <a class="btn-solid" disabled style="opacity: 0.6; cursor: not-allowed;">
-                            <i class="fas fa-file-invoice-dollar"></i>
-                            Invoice Access Disabled
+                        <a class="cd-hero-btn cd-hero-btn--solid" disabled>
+                            <i class="mdi mdi-file-document-outline"></i>
+                            <span>Invoice Access Disabled</span>
                         </a>
                         <?php endif; ?>
                     </div>

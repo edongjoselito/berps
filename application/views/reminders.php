@@ -60,18 +60,22 @@ if (!function_exists('page_reminders_preview')) {
             <div class="content">
                 <div class="container-fluid reminders-workspace-page berps-page">
                     <div class="notes-workspace">
-                        <header class="berps-page-header">
-                            <div class="berps-page-header__content">
-                                <span class="berps-page-header__eyebrow"><i class="mdi mdi-calendar mr-1"></i><?= htmlspecialchars($currentDateLabel, ENT_QUOTES, 'UTF-8'); ?></span>
-                                <h1 class="berps-page-title">My Reminders</h1>
-                                <p class="berps-page-subtitle">Track recurring dates without checking the calendar manually.</p>
+                        <div class="reminders-hero">
+                            <div class="reminders-hero__content">
+                                <div class="reminders-hero__eyebrow">
+                                    <i class="mdi mdi-calendar"></i>
+                                    <?= htmlspecialchars($currentDateLabel, ENT_QUOTES, 'UTF-8'); ?>
+                                </div>
+                                <h1 class="reminders-hero__title">My Reminders <span class="bell-ring">🔔</span></h1>
+                                <p class="reminders-hero__subtitle">Manage recurring alerts and stay ahead of important dates.</p>
                             </div>
-                            <div class="berps-page-header__actions">
-                                <button type="button" class="btn btn-primary" id="addReminderBtn">
-                                    <i class="mdi mdi-plus mr-1" aria-hidden="true"></i>Add Reminder
+                            <div class="reminders-hero__actions">
+                                <button type="button" class="reminders-hero-btn reminders-hero-btn--solid" id="addReminderBtn">
+                                    <i class="mdi mdi-plus"></i>
+                                    <span>Add Reminder</span>
                                 </button>
                             </div>
-                        </header>
+                        </div>
 
                         <div class="berps-stat-grid">
                             <div class="berps-stat-card berps-tone-success">

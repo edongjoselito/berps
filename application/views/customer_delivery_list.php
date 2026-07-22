@@ -19,13 +19,16 @@ $data2 = isset($data2) ? $data2 : array();
                 <div class="container-fluid customer-delivery-page berps-page">
 
 
-                    <header class="berps-page-header">
-                        <div class="berps-page-header__content">
-                            <span class="berps-page-header__eyebrow">Delivery Management</span>
-                            <h1 class="berps-page-title">Customer Deliveries</h1>
-                            <p class="berps-page-subtitle">Monitor delivery schedules, payments, and statuses.</p>
+                    <div class="cd-hero">
+                        <div class="cd-hero__content">
+                            <div class="cd-hero__eyebrow">
+                                <i class="mdi mdi-truck-fast-outline"></i>
+                                Delivery Management
+                            </div>
+                            <h1 class="cd-hero__title">Customer Deliveries <span class="truck-move">🚚</span></h1>
+                            <p class="cd-hero__subtitle">Monitor delivery schedules, payment status, and fulfillment progress.</p>
                         </div>
-                        <div class="berps-page-header__actions">
+                        <div class="cd-hero__actions">
                             <div class="berps-choice-pills">
                                 <a href="<?= base_url(); ?>Page/customerDeliveryList" class="berps-choice-pill <?= !isset($_GET['status']) ? 'is-active' : ''; ?>">
                                     <i class="mdi mdi-format-list-bulleted"></i> All
@@ -37,11 +40,12 @@ $data2 = isset($data2) ? $data2 : array();
                                     <i class="mdi mdi-clock"></i> Not Yet
                                 </a>
                             </div>
-                            <a href="<?= base_url(); ?>Page/newCustomerDelivery" class="btn btn-primary">
-                                <i class="mdi mdi-plus-circle-outline mr-1" aria-hidden="true"></i>Add New Delivery
+                            <a href="<?= base_url(); ?>Page/newCustomerDelivery" class="cd-hero-btn cd-hero-btn--solid">
+                                <i class="mdi mdi-plus-circle-outline"></i>
+                                <span>Add New Delivery</span>
                             </a>
                         </div>
-                    </header>
+                    </div>
 
                     <?php
                     // Calculate statistics

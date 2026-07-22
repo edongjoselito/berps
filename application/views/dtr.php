@@ -383,9 +383,106 @@
               margin-bottom: 16px;
             }
 
+            /* ─── Hero Banner ──────────────────────────────────────── */
+            .dtr-page .dtr-hero {
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              flex-wrap: wrap;
+              gap: 16px;
+              padding: 28px 24px;
+              margin-bottom: 22px;
+              border-radius: var(--r-xl);
+              background: #3d348b;
+              box-shadow: 0 8px 32px rgba(61, 52, 139, 0.25);
+              position: relative;
+              overflow: hidden;
+            }
+
+            .dtr-page .dtr-hero::before {
+              content: '';
+              position: absolute;
+              top: -50%;
+              right: -10%;
+              width: 400px;
+              height: 400px;
+              border-radius: 50%;
+              background: rgba(255, 255, 255, 0.06);
+              pointer-events: none;
+            }
+
+            .dtr-page .dtr-hero::after {
+              content: '';
+              position: absolute;
+              bottom: -60%;
+              right: 15%;
+              width: 300px;
+              height: 300px;
+              border-radius: 50%;
+              background: rgba(255, 255, 255, 0.04);
+              pointer-events: none;
+            }
+
+            .dtr-page .dtr-hero__content {
+              position: relative;
+              z-index: 1;
+            }
+
+            .dtr-page .dtr-hero__eyebrow {
+              display: inline-flex;
+              align-items: center;
+              gap: 6px;
+              margin-bottom: 8px;
+              color: rgba(255, 255, 255, 0.85);
+              font-size: 0.78rem;
+              font-weight: 600;
+              letter-spacing: 0.04em;
+            }
+
+            .dtr-page .dtr-hero__eyebrow i {
+              font-size: 1rem;
+            }
+
+            .dtr-page .dtr-hero__title {
+              margin: 0 0 4px 0;
+              color: #fff;
+              font-size: 1.55rem;
+              font-weight: 800;
+              line-height: 1.15;
+              letter-spacing: -0.02em;
+            }
+
+            .dtr-page .dtr-hero__subtitle {
+              margin: 0;
+              color: rgba(255, 255, 255, 0.8);
+              font-size: 0.82rem;
+              max-width: 480px;
+            }
+
+            /* Clock tick animation */
+            .dtr-page .clock-tick {
+              display: inline-block;
+              animation: clock-tick 2s ease-in-out infinite;
+              transform-origin: 50% 50%;
+            }
+
+            @keyframes clock-tick {
+              0%, 70%, 100% { transform: rotate(0deg); }
+              10% { transform: rotate(-15deg); }
+              20% { transform: rotate(0deg); }
+              30% { transform: rotate(12deg); }
+              40% { transform: rotate(0deg); }
+              50% { transform: rotate(-8deg); }
+              60% { transform: rotate(0deg); }
+            }
+
             /* ─── Responsive ────────────────────────────────────────── */
             @media (max-width: 767px) {
-              .dtr-page .page-title { font-size: 1.3rem; }
+              .dtr-page .dtr-hero {
+                padding: 20px;
+              }
+
+              .dtr-page .dtr-hero__title { font-size: 1.3rem; }
               .dtr-page .punch-grid { grid-template-columns: 1fr; }
             }
 
@@ -404,11 +501,14 @@
           <?php endif; ?>
 
           <!-- Page Header -->
-          <div class="page-header">
-            <div>
-              <div class="page-eyebrow"><span></span>Records</div>
-              <h4 class="page-title">Daily Time Record</h4>
-              <div class="page-subtitle">Your punch log &amp; attendance history</div>
+          <div class="dtr-hero">
+            <div class="dtr-hero__content">
+              <div class="dtr-hero__eyebrow">
+                <i class="mdi mdi-calendar-clock-outline"></i>
+                Records
+              </div>
+              <h1 class="dtr-hero__title">Daily Time Record <span class="clock-tick">⏰</span></h1>
+              <p class="dtr-hero__subtitle">Your punch log and attendance history.</p>
             </div>
           </div>
 

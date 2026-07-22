@@ -453,15 +453,188 @@ $footerDisclaimer = $invoiceFooter ? trim((string) ($invoiceFooter->footer_discl
                         }
                     </style>
 
-                    <div class="page-header">
-                        <div>
-                            <div class="page-eyebrow">System Configuration</div>
-                            <h4 class="page-title">Business Details</h4>
-                            <div class="page-subtitle">Keep the company profile current so invoices, printouts, and reports show the right business name, address, TIN, and tax setup.</div>
+                    <style>
+                        /* Hero Banner */
+                        .business-details-page .bd-hero {
+                            display: flex;
+                            align-items: center;
+                            justify-content: space-between;
+                            flex-wrap: wrap;
+                            gap: 16px;
+                            padding: 28px 24px;
+                            margin: 0 0 22px;
+                            border-radius: 16px;
+                            background: #9a3412;
+                            box-shadow: 0 8px 32px rgba(154, 52, 18, 0.25);
+                            position: relative;
+                            overflow: hidden;
+                        }
+
+                        .business-details-page .bd-hero::before {
+                            content: '';
+                            position: absolute;
+                            top: -50%;
+                            right: -10%;
+                            width: 400px;
+                            height: 400px;
+                            border-radius: 50%;
+                            background: rgba(255, 255, 255, 0.06);
+                            pointer-events: none;
+                        }
+
+                        .business-details-page .bd-hero::after {
+                            content: '';
+                            position: absolute;
+                            bottom: -60%;
+                            right: 15%;
+                            width: 300px;
+                            height: 300px;
+                            border-radius: 50%;
+                            background: rgba(255, 255, 255, 0.04);
+                            pointer-events: none;
+                        }
+
+                        .business-details-page .bd-hero__content {
+                            position: relative;
+                            z-index: 1;
+                        }
+
+                        .business-details-page .bd-hero__eyebrow {
+                            display: inline-flex;
+                            align-items: center;
+                            gap: 6px;
+                            margin-bottom: 8px;
+                            color: rgba(255, 255, 255, 0.85);
+                            font-size: 0.78rem;
+                            font-weight: 600;
+                            letter-spacing: 0.04em;
+                        }
+
+                        .business-details-page .bd-hero__eyebrow i {
+                            font-size: 1rem;
+                        }
+
+                        .business-details-page .bd-hero__title {
+                            margin: 0 0 4px 0;
+                            color: #fff;
+                            font-size: clamp(1.6rem, 2.5vw, 2.2rem);
+                            font-weight: 800;
+                            line-height: 1.15;
+                            letter-spacing: -0.02em;
+                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif), "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+                        }
+
+                        .business-details-page .bd-hero__subtitle {
+                            margin: 0;
+                            color: rgba(255, 255, 255, 0.8);
+                            font-size: 0.88rem;
+                            max-width: 520px;
+                        }
+
+                        .business-details-page .bd-hero__actions {
+                            display: flex;
+                            align-items: center;
+                            flex-wrap: wrap;
+                            gap: 10px;
+                            position: relative;
+                            z-index: 1;
+                        }
+
+                        .business-details-page .bd-hero-btn {
+                            display: inline-flex;
+                            align-items: center;
+                            gap: 6px;
+                            padding: 8px 16px;
+                            border-radius: 10px;
+                            border: 1px solid rgba(255, 255, 255, 0.3);
+                            background: rgba(255, 255, 255, 0.15);
+                            color: #fff;
+                            font-size: 0.82rem;
+                            font-weight: 600;
+                            text-decoration: none;
+                            cursor: pointer;
+                            transition: all 0.18s ease;
+                        }
+
+                        .business-details-page .bd-hero-btn:hover,
+                        .business-details-page .bd-hero-btn:focus {
+                            background: rgba(255, 255, 255, 0.25);
+                            border-color: rgba(255, 255, 255, 0.5);
+                            color: #fff;
+                            text-decoration: none;
+                            transform: translateY(-1px);
+                        }
+
+                        .business-details-page .bd-hero-btn--solid {
+                            border-color: rgba(255, 255, 255, 0.6);
+                            background: rgba(255, 255, 255, 0.95);
+                            color: #9a3412;
+                            font-weight: 700;
+                        }
+
+                        .business-details-page .bd-hero-btn--solid:hover,
+                        .business-details-page .bd-hero-btn--solid:focus {
+                            background: #fff;
+                            color: #7c2d12;
+                        }
+
+                        /* Building bounce animation */
+                        .business-details-page .building-bounce {
+                            display: inline-block;
+                            animation: building-bounce 2s ease-in-out infinite;
+                        }
+
+                        @keyframes building-bounce {
+                            0%, 70%, 100% { transform: translateY(0); }
+                            15% { transform: translateY(-10px); }
+                            30% { transform: translateY(0); }
+                            45% { transform: translateY(-5px); }
+                            60% { transform: translateY(0); }
+                        }
+
+                        /* Orange accent on cards */
+                        .business-details-page .stat-card,
+                        .business-details-page .form-card {
+                            border-top: 3px solid #9a3412;
+                        }
+
+                        /* Responsive hero */
+                        @media (max-width: 767px) {
+                            .business-details-page .bd-hero,
+                            .business-details-page .bd-hero__actions {
+                                flex-direction: column;
+                                align-items: stretch;
+                            }
+
+                            .business-details-page .bd-hero {
+                                padding: 20px;
+                            }
+
+                            .business-details-page .bd-hero-btn {
+                                flex: 1 1 auto;
+                                justify-content: center;
+                            }
+                        }
+                    </style>
+
+                    <div class="bd-hero">
+                        <div class="bd-hero__content">
+                            <div class="bd-hero__eyebrow">
+                                <i class="mdi mdi-domain"></i>
+                                System Configuration
+                            </div>
+                            <h1 class="bd-hero__title">Business Details <span class="building-bounce">🏢</span></h1>
+                            <p class="bd-hero__subtitle">Keep the company profile current so invoices, printouts, and reports show the right business name, address, TIN, and tax setup.</p>
                         </div>
-                        <div class="page-actions">
-                            <a href="<?= base_url(); ?>Page/admin" class="btn-action">Back to Dashboard</a>
-                            <button type="submit" form="businessDetailsForm" class="btn-submit">Save Company Profile</button>
+                        <div class="bd-hero__actions">
+                            <a class="bd-hero-btn" href="<?= base_url(); ?>Page/admin">
+                                <i class="mdi mdi-arrow-left"></i>
+                                <span>Back to Dashboard</span>
+                            </a>
+                            <button type="submit" form="businessDetailsForm" class="bd-hero-btn bd-hero-btn--solid">
+                                <i class="mdi mdi-content-save-outline"></i>
+                                <span>Save Company Profile</span>
+                            </button>
                         </div>
                     </div>
 
