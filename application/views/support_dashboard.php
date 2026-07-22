@@ -179,16 +179,192 @@ foreach ($byEmployee as $row) {
                     .support-dashboard-page .age-pill.ok { background:#ecfdf5; color:#059669; }
                 </style>
 
-                <div class="sd-header">
-                    <div>
-                        <div class="sd-eyebrow">Customer Support</div>
-                        <h1 class="sd-title">Support Dashboard</h1>
-                        <p class="sd-subtitle">Real-time overview of ticket activity, workload distribution, and resolution metrics. <?php if ($unreadNotificationCount > 0): ?><strong><?= number_format($unreadNotificationCount); ?></strong> unread notifications.<?php endif; ?></p>
+                <style>
+                    /* Hero Banner */
+                    .support-dashboard-page .sd-hero {
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        flex-wrap: wrap;
+                        gap: 16px;
+                        padding: 28px 24px;
+                        margin: 0 0 22px;
+                        border-radius: 16px;
+                        background: #1d4ed8;
+                        box-shadow: 0 8px 32px rgba(29, 78, 216, 0.25);
+                        position: relative;
+                        overflow: hidden;
+                    }
+
+                    .support-dashboard-page .sd-hero::before {
+                        content: '';
+                        position: absolute;
+                        top: -50%;
+                        right: -10%;
+                        width: 400px;
+                        height: 400px;
+                        border-radius: 50%;
+                        background: rgba(255, 255, 255, 0.06);
+                        pointer-events: none;
+                    }
+
+                    .support-dashboard-page .sd-hero::after {
+                        content: '';
+                        position: absolute;
+                        bottom: -60%;
+                        right: 15%;
+                        width: 300px;
+                        height: 300px;
+                        border-radius: 50%;
+                        background: rgba(255, 255, 255, 0.04);
+                        pointer-events: none;
+                    }
+
+                    .support-dashboard-page .sd-hero__content {
+                        position: relative;
+                        z-index: 1;
+                    }
+
+                    .support-dashboard-page .sd-hero__eyebrow {
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 6px;
+                        margin-bottom: 8px;
+                        color: rgba(255, 255, 255, 0.85);
+                        font-size: 0.78rem;
+                        font-weight: 600;
+                        letter-spacing: 0.04em;
+                    }
+
+                    .support-dashboard-page .sd-hero__eyebrow i {
+                        font-size: 1rem;
+                    }
+
+                    .support-dashboard-page .sd-hero__title {
+                        margin: 0 0 4px 0;
+                        color: #fff;
+                        font-size: clamp(1.6rem, 2.5vw, 2.2rem);
+                        font-weight: 800;
+                        line-height: 1.15;
+                        letter-spacing: -0.02em;
+                        font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif), "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+                    }
+
+                    .support-dashboard-page .sd-hero__subtitle {
+                        margin: 0;
+                        color: rgba(255, 255, 255, 0.8);
+                        font-size: 0.88rem;
+                        max-width: 520px;
+                    }
+
+                    .support-dashboard-page .sd-hero__actions {
+                        display: flex;
+                        align-items: center;
+                        flex-wrap: wrap;
+                        gap: 10px;
+                        position: relative;
+                        z-index: 1;
+                    }
+
+                    .support-dashboard-page .sd-hero-btn {
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 6px;
+                        padding: 8px 16px;
+                        border-radius: 10px;
+                        border: 1px solid rgba(255, 255, 255, 0.3);
+                        background: rgba(255, 255, 255, 0.15);
+                        color: #fff;
+                        font-size: 0.82rem;
+                        font-weight: 600;
+                        text-decoration: none;
+                        cursor: pointer;
+                        transition: all 0.18s ease;
+                    }
+
+                    .support-dashboard-page .sd-hero-btn:hover,
+                    .support-dashboard-page .sd-hero-btn:focus {
+                        background: rgba(255, 255, 255, 0.25);
+                        border-color: rgba(255, 255, 255, 0.5);
+                        color: #fff;
+                        text-decoration: none;
+                        transform: translateY(-1px);
+                    }
+
+                    .support-dashboard-page .sd-hero-btn--solid {
+                        border-color: rgba(255, 255, 255, 0.6);
+                        background: rgba(255, 255, 255, 0.95);
+                        color: #1d4ed8;
+                        font-weight: 700;
+                    }
+
+                    .support-dashboard-page .sd-hero-btn--solid:hover,
+                    .support-dashboard-page .sd-hero-btn--solid:focus {
+                        background: #fff;
+                        color: #1e40af;
+                    }
+
+                    .support-dashboard-page .headset-bounce {
+                        display: inline-block;
+                        animation: headset-bounce 2s ease-in-out infinite;
+                    }
+
+                    @keyframes headset-bounce {
+                        0%, 70%, 100% { transform: translateY(0); }
+                        15% { transform: translateY(-10px); }
+                        30% { transform: translateY(0); }
+                        45% { transform: translateY(-5px); }
+                        60% { transform: translateY(0); }
+                    }
+
+                    .support-dashboard-page .panel-card {
+                        border-top: 3px solid #1d4ed8;
+                    }
+
+                    .support-dashboard-page .stat-card {
+                        border-top: 3px solid #1d4ed8;
+                    }
+
+                    @media (max-width: 767px) {
+                        .support-dashboard-page .sd-hero,
+                        .support-dashboard-page .sd-hero__actions {
+                            flex-direction: column;
+                            align-items: stretch;
+                        }
+
+                        .support-dashboard-page .sd-hero {
+                            padding: 20px;
+                        }
+
+                        .support-dashboard-page .sd-hero-btn {
+                            flex: 1 1 auto;
+                            justify-content: center;
+                        }
+                    }
+                </style>
+
+                <div class="sd-hero">
+                    <div class="sd-hero__content">
+                        <div class="sd-hero__eyebrow">
+                            <i class="mdi mdi-headset"></i>
+                            Customer Support
+                        </div>
+                        <h1 class="sd-hero__title">Support Dashboard <span class="headset-bounce">🎧</span></h1>
+                        <p class="sd-hero__subtitle">Real-time overview of ticket activity, workload distribution, and resolution metrics.<?php if ($unreadNotificationCount > 0): ?> <strong><?= number_format($unreadNotificationCount); ?></strong> unread notifications.<?php endif; ?></p>
                     </div>
-                    <div class="sd-action-row">
-                        <a class="btn-soft" href="<?= base_url('Page/supportIssues?scope=unassigned'); ?>"><i class="mdi mdi-account-question-outline"></i> Unassigned</a>
-                        <a class="btn-soft" href="<?= base_url('Page/supportIssues?scope=awaiting_reply'); ?>"><i class="mdi mdi-message-reply-outline"></i> Awaiting Reply</a>
-                        <a class="btn-solid" href="<?= base_url('Page/supportIssues?scope=open'); ?>"><i class="mdi mdi-ticket-outline"></i> View All Tickets</a>
+                    <div class="sd-hero__actions">
+                        <a class="sd-hero-btn" href="<?= base_url('Page/supportIssues?scope=unassigned'); ?>">
+                            <i class="mdi mdi-account-question-outline"></i>
+                            <span>Unassigned</span>
+                        </a>
+                        <a class="sd-hero-btn" href="<?= base_url('Page/supportIssues?scope=awaiting_reply'); ?>">
+                            <i class="mdi mdi-message-reply-outline"></i>
+                            <span>Awaiting Reply</span>
+                        </a>
+                        <a class="sd-hero-btn sd-hero-btn--solid" href="<?= base_url('Page/supportIssues?scope=open'); ?>">
+                            <i class="mdi mdi-ticket-outline"></i>
+                            <span>View All Tickets</span>
+                        </a>
                     </div>
                 </div>
 

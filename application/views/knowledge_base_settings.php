@@ -168,13 +168,167 @@
                         }
                     </style>
 
-                    <div class="kb-header">
-                        <div>
-                            <div class="kb-eyebrow">
-                                <i class="fas fa-book-open"></i>
+                    <style>
+                        /* Hero Banner */
+                        .knowledge-base-page .kb-hero {
+                            display: flex;
+                            align-items: center;
+                            justify-content: space-between;
+                            flex-wrap: wrap;
+                            gap: 16px;
+                            padding: 28px 24px;
+                            margin: 0 0 22px;
+                            border-radius: 16px;
+                            background: #b45309;
+                            box-shadow: 0 8px 32px rgba(180, 83, 9, 0.25);
+                            position: relative;
+                            overflow: hidden;
+                        }
+
+                        .knowledge-base-page .kb-hero::before {
+                            content: '';
+                            position: absolute;
+                            top: -50%;
+                            right: -10%;
+                            width: 400px;
+                            height: 400px;
+                            border-radius: 50%;
+                            background: rgba(255, 255, 255, 0.06);
+                            pointer-events: none;
+                        }
+
+                        .knowledge-base-page .kb-hero::after {
+                            content: '';
+                            position: absolute;
+                            bottom: -60%;
+                            right: 15%;
+                            width: 300px;
+                            height: 300px;
+                            border-radius: 50%;
+                            background: rgba(255, 255, 255, 0.04);
+                            pointer-events: none;
+                        }
+
+                        .knowledge-base-page .kb-hero__content {
+                            position: relative;
+                            z-index: 1;
+                        }
+
+                        .knowledge-base-page .kb-hero__eyebrow {
+                            display: inline-flex;
+                            align-items: center;
+                            gap: 6px;
+                            margin-bottom: 8px;
+                            color: rgba(255, 255, 255, 0.85);
+                            font-size: 0.78rem;
+                            font-weight: 600;
+                            letter-spacing: 0.04em;
+                        }
+
+                        .knowledge-base-page .kb-hero__eyebrow i {
+                            font-size: 1rem;
+                        }
+
+                        .knowledge-base-page .kb-hero__title {
+                            margin: 0 0 4px 0;
+                            color: #fff;
+                            font-size: clamp(1.6rem, 2.5vw, 2.2rem);
+                            font-weight: 800;
+                            line-height: 1.15;
+                            letter-spacing: -0.02em;
+                            font-family: var(--font-primary, Montserrat, Segoe UI, Arial, sans-serif), "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+                        }
+
+                        .knowledge-base-page .kb-hero__subtitle {
+                            margin: 0;
+                            color: rgba(255, 255, 255, 0.8);
+                            font-size: 0.88rem;
+                            max-width: 520px;
+                        }
+
+                        .knowledge-base-page .kb-hero__actions {
+                            display: flex;
+                            align-items: center;
+                            flex-wrap: wrap;
+                            gap: 10px;
+                            position: relative;
+                            z-index: 1;
+                        }
+
+                        .knowledge-base-page .kb-hero-btn {
+                            display: inline-flex;
+                            align-items: center;
+                            gap: 6px;
+                            padding: 8px 16px;
+                            border-radius: 10px;
+                            border: 1px solid rgba(255, 255, 255, 0.3);
+                            background: rgba(255, 255, 255, 0.15);
+                            color: #fff;
+                            font-size: 0.82rem;
+                            font-weight: 600;
+                            text-decoration: none;
+                            cursor: pointer;
+                            transition: all 0.18s ease;
+                        }
+
+                        .knowledge-base-page .kb-hero-btn:hover,
+                        .knowledge-base-page .kb-hero-btn:focus {
+                            background: rgba(255, 255, 255, 0.25);
+                            border-color: rgba(255, 255, 255, 0.5);
+                            color: #fff;
+                            text-decoration: none;
+                            transform: translateY(-1px);
+                        }
+
+                        .knowledge-base-page .gear-pulse {
+                            display: inline-block;
+                            animation: gear-pulse 2s ease-in-out infinite;
+                        }
+
+                        @keyframes gear-pulse {
+                            0%, 70%, 100% { transform: scale(1); }
+                            15% { transform: scale(1.15); }
+                            30% { transform: scale(1); }
+                            45% { transform: scale(1.08); }
+                            60% { transform: scale(1); }
+                        }
+
+                        .knowledge-base-page .kb-card {
+                            border-top: 3px solid #b45309;
+                        }
+
+                        @media (max-width: 767px) {
+                            .knowledge-base-page .kb-hero,
+                            .knowledge-base-page .kb-hero__actions {
+                                flex-direction: column;
+                                align-items: stretch;
+                            }
+
+                            .knowledge-base-page .kb-hero {
+                                padding: 20px;
+                            }
+
+                            .knowledge-base-page .kb-hero-btn {
+                                flex: 1 1 auto;
+                                justify-content: center;
+                            }
+                        }
+                    </style>
+
+                    <div class="kb-hero">
+                        <div class="kb-hero__content">
+                            <div class="kb-hero__eyebrow">
+                                <i class="mdi mdi-book-open-variant"></i>
                                 Knowledge Base
                             </div>
-                            <h1 class="kb-title">Knowledge Base Settings</h1>
+                            <h1 class="kb-hero__title">Knowledge Base Settings <span class="gear-pulse">⚙️</span></h1>
+                            <p class="kb-hero__subtitle">Manage categories, articles, and publication settings for your organization's knowledge base.</p>
+                        </div>
+                        <div class="kb-hero__actions">
+                            <a class="kb-hero-btn" href="<?= base_url(); ?>Page/knowledgeBase">
+                                <i class="mdi mdi-book-multiple-outline"></i>
+                                <span>View Articles</span>
+                            </a>
                         </div>
                     </div>
 
