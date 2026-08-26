@@ -48,6 +48,7 @@ class Page extends CI_Controller
         'reopensupportissue',
         'submitclientsupportissue',
         'submitclientticketreply',
+        'clientattachment',
       );
 
       if (!in_array($method, $allowedClientMethods, true)) {
@@ -1316,6 +1317,86 @@ class Page extends CI_Controller
     if (is_file($fullPath)) {
       @unlink($fullPath);
     }
+  }
+
+  private function _ensureClientAttachmentsTable()
+  {
+    if ($this->db->table_exists('client_attachments')) {
+      return;
+    }
+
+    $this->db->query("CREATE TABLE IF NOT EXISTS `client_attachments` (
+      `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+      `settingsID` INT NOT NULL,
+      `CustID` VARCHAR(45) NOT NULL,
+      `document_name` VARCHAR(255) NOT NULL,
+      `original_file_name` VARCHAR(255) NOT NULL,
+      `file_path` VARCHAR(500) NOT NULL,
+      `file_size` BIGINT UNSIGNED DEFAULT NULL,
+      `uploaded_by` INT UNSIGNED DEFAULT NULL,
+      `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      PRIMARY KEY (`id`),
+      KEY `idx_client_attachments_client` (`settingsID`, `CustID`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+  }
+
+  private function _handleClientAttachmentUpload($fieldName = 'document_file')
+  {
+    $result = array('path' => null, 'name' => null, 'size' => null, 'error' => '');
+
+    if (!isset($_FILES[$fieldName]) || !is_array($_FILES[$fieldName])) {
+      $result['error'] = 'Please choose a PDF file to attach.';
+      return $result;
+    }
+
+    $file = $_FILES[$fieldName];
+    $uploadError = (int) ($file['error'] ?? UPLOAD_ERR_NO_FILE);
+    if ($uploadError !== UPLOAD_ERR_OK) {
+      $result['error'] = $uploadError === UPLOAD_ERR_NO_FILE
+        ? 'Please choose a PDF file to attach.'
+        : 'PDF attachment upload failed (error code ' . $uploadError . ').';
+      return $result;
+    }
+
+    $originalName = trim((string) ($file['name'] ?? ''));
+    $fileSize = (int) ($file['size'] ?? 0);
+    if (strtolower(pathinfo($originalName, PATHINFO_EXTENSION)) !== 'pdf') {
+      $result['error'] = 'Only PDF attachments are allowed.';
+      return $result;
+    }
+    if ($fileSize <= 0) {
+      $result['error'] = 'The uploaded PDF appears to be empty.';
+      return $result;
+    }
+    if ($fileSize > (10 * 1024 * 1024)) {
+      $result['error'] = 'PDF attachment exceeds the 10MB size limit.';
+      return $result;
+    }
+
+    $mimeType = function_exists('mime_content_type') ? (string) @mime_content_type($file['tmp_name']) : '';
+    if ($mimeType !== '' && !in_array($mimeType, array('application/pdf', 'application/x-pdf', 'application/octet-stream'), true)) {
+      $result['error'] = 'The uploaded file is not recognized as a valid PDF.';
+      return $result;
+    }
+
+    $uploadDir = FCPATH . 'uploads/client_attachments/';
+    if (!is_dir($uploadDir) && !@mkdir($uploadDir, 0777, true) && !is_dir($uploadDir)) {
+      $result['error'] = 'Unable to create the client attachment upload directory.';
+      return $result;
+    }
+    @chmod($uploadDir, 0777);
+
+    $storedName = 'client_' . date('Ymd_His') . '_' . substr(sha1(uniqid((string) mt_rand(), true)), 0, 12) . '.pdf';
+    $relativePath = 'uploads/client_attachments/' . $storedName;
+    if (!move_uploaded_file($file['tmp_name'], FCPATH . $relativePath)) {
+      $result['error'] = 'Unable to save the uploaded PDF attachment.';
+      return $result;
+    }
+
+    $result['path'] = $relativePath;
+    $result['name'] = $originalName;
+    $result['size'] = $fileSize;
+    return $result;
   }
 
   private function _ensurePosCategoryTable()
@@ -15378,10 +15459,55 @@ class Page extends CI_Controller
 
     // Ensure invoice access column exists
     $this->_ensureInvoiceAccessColumn();
+    $this->_ensureClientAttachmentsTable();
 
     // ADD CLIENT
     if ($this->input->post('addclient')) {
       $this->_handle_client_create($settingsID, 'Page/clientList');
+      return;
+    }
+
+    // ADD CLIENT ATTACHMENT
+    if ($this->input->post('add_client_attachment')) {
+      if (!$this->_is_admin_user()) {
+        $this->session->set_flashdata('danger', 'Only admins can add client attachments.');
+        redirect('Page/clientList');
+        return;
+      }
+
+      $custID = trim((string) $this->input->post('CustID', true));
+      $documentName = trim((string) $this->input->post('document_name', true));
+      $client = $this->db->where('CustID', $custID)->where('settingsID', $settingsID)->get('customers')->row();
+
+      if (!$client) {
+        $this->session->set_flashdata('danger', 'Client record not found.');
+      } elseif ($documentName === '') {
+        $this->session->set_flashdata('danger', 'Document Name is required.');
+      } else {
+        $upload = $this->_handleClientAttachmentUpload('document_file');
+        if ($upload['error'] !== '') {
+          $this->session->set_flashdata('danger', $upload['error']);
+        } else {
+          $saved = $this->db->insert('client_attachments', array(
+            'settingsID' => $settingsID,
+            'CustID' => $custID,
+            'document_name' => $documentName,
+            'original_file_name' => $upload['name'],
+            'file_path' => $upload['path'],
+            'file_size' => $upload['size'],
+            'uploaded_by' => (int) $this->session->userdata('user_id'),
+          ));
+
+          if ($saved) {
+            $this->session->set_flashdata('success', 'Client attachment added successfully.');
+          } else {
+            @unlink(FCPATH . $upload['path']);
+            $this->session->set_flashdata('danger', 'Unable to save the client attachment record.');
+          }
+        }
+      }
+
+      redirect('Page/clientList');
       return;
     }
 
@@ -15527,6 +15653,7 @@ class Page extends CI_Controller
   public function clientProfile()
   {
     $settingsID = $this->session->userdata('settingsID');
+    $this->_ensureClientAttachmentsTable();
     $custID = trim((string) $this->input->get('cust_id'));
     $customer = trim((string) $this->input->get('customer'));
     $activeTab = trim((string) $this->input->get('tab'));
@@ -15569,6 +15696,12 @@ class Page extends CI_Controller
     }
 
     $result['client'] = $client;
+    $result['attachments'] = $this->db
+      ->where('settingsID', $settingsID)
+      ->where('CustID', $custID)
+      ->order_by('created_at', 'DESC')
+      ->get('client_attachments')
+      ->result();
 
     // Check invoice access permission
     $invoiceAccessEnabled = !empty($client->invoice_access_enabled);
@@ -15618,8 +15751,49 @@ class Page extends CI_Controller
 
     $result['backUrl'] = $this->_is_client_user() ? base_url() . 'Page/clientDashboard' : base_url() . 'Page/clientList';
     $result['backLabel'] = $this->_is_client_user() ? 'Back to Dashboard' : 'Back to Client List';
-    $result['activeTab'] = in_array($activeTab, ['invoices', 'payments', 'tickets']) ? $activeTab : 'info';
+    $result['activeTab'] = in_array($activeTab, ['invoices', 'payments', 'tickets', 'attachments']) ? $activeTab : 'info';
     $this->load->view('client_profile', $result);
+  }
+
+  public function clientAttachment()
+  {
+    $settingsID = $this->session->userdata('settingsID');
+    $attachmentId = (int) $this->input->get('id');
+    $this->_ensureClientAttachmentsTable();
+
+    $attachment = $this->db
+      ->where('id', $attachmentId)
+      ->where('settingsID', $settingsID)
+      ->get('client_attachments')
+      ->row();
+
+    if (!$attachment) {
+      show_404();
+      return;
+    }
+
+    if ($this->_is_client_user() && !$this->_current_client_matches($attachment->CustID ?? '', '')) {
+      show_404();
+      return;
+    }
+
+    $relativePath = ltrim(trim((string) ($attachment->file_path ?? '')), '/');
+    if (strpos($relativePath, 'uploads/client_attachments/') !== 0 || !is_file(FCPATH . $relativePath)) {
+      show_404();
+      return;
+    }
+
+    $downloadName = trim((string) ($attachment->original_file_name ?? ''));
+    if ($downloadName === '') {
+      $downloadName = trim((string) ($attachment->document_name ?? 'Document')) . '.pdf';
+    }
+    $downloadName = str_replace(array("\r", "\n", '"'), '', $downloadName);
+
+    header('Content-Type: application/pdf');
+    header('Content-Length: ' . filesize(FCPATH . $relativePath));
+    header('Content-Disposition: inline; filename="' . $downloadName . '"');
+    header('X-Content-Type-Options: nosniff');
+    readfile(FCPATH . $relativePath);
   }
 
 

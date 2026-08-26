@@ -217,6 +217,16 @@ foreach ($clientRecords as $clientSummaryRow) {
                                                                     <?php if ($isAdmin): ?>
                                                                         <button
                                                                             type="button"
+                                                                            class="action-btn"
+                                                                            data-label="Add Attachment"
+                                                                            title="Add Attachment"
+                                                                            data-toggle="modal"
+                                                                            data-target="#addAttachmentModal<?= htmlspecialchars($clientId, ENT_QUOTES, 'UTF-8'); ?>">
+                                                                            <i class="mdi mdi-paperclip"></i>
+                                                                        </button>
+
+                                                                        <button
+                                                                            type="button"
                                                                             class="action-btn edit"
                                                                             data-label="Edit"
                                                                             title="Edit Client"
@@ -241,6 +251,38 @@ foreach ($clientRecords as $clientSummaryRow) {
                                                     </tr>
 
                                                     <?php if ($isAdmin): ?>
+                                                        <div class="modal fade client-modal berps-form-modal" id="addAttachmentModal<?= htmlspecialchars($clientId, ENT_QUOTES, 'UTF-8'); ?>" tabindex="-1" role="dialog" aria-labelledby="addAttachmentModal<?= htmlspecialchars($clientId, ENT_QUOTES, 'UTF-8'); ?>Title" aria-hidden="true">
+                                                            <div class="modal-dialog modal-dialog-centered" role="document">
+                                                                <div class="modal-content">
+                                                                    <div class="modal-header">
+                                                                        <div>
+                                                                            <h2 class="modal-title mb-0" id="addAttachmentModal<?= htmlspecialchars($clientId, ENT_QUOTES, 'UTF-8'); ?>Title">Add Attachment</h2>
+                                                                            <p class="berps-modal-subtitle">Add a PDF document for <?= htmlspecialchars($clientName, ENT_QUOTES, 'UTF-8'); ?>.</p>
+                                                                        </div>
+                                                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span>&times;</span></button>
+                                                                    </div>
+                                                                    <form method="post" action="" enctype="multipart/form-data">
+                                                                        <div class="modal-body">
+                                                                            <input type="hidden" name="CustID" value="<?= htmlspecialchars($clientId, ENT_QUOTES, 'UTF-8'); ?>">
+                                                                            <div class="form-group">
+                                                                                <label for="documentName<?= htmlspecialchars($clientId, ENT_QUOTES, 'UTF-8'); ?>">Document Name</label>
+                                                                                <input type="text" class="form-control" id="documentName<?= htmlspecialchars($clientId, ENT_QUOTES, 'UTF-8'); ?>" name="document_name" maxlength="255" required>
+                                                                            </div>
+                                                                            <div class="form-group mb-0">
+                                                                                <label for="documentFile<?= htmlspecialchars($clientId, ENT_QUOTES, 'UTF-8'); ?>">PDF File</label>
+                                                                                <input type="file" class="form-control-file" id="documentFile<?= htmlspecialchars($clientId, ENT_QUOTES, 'UTF-8'); ?>" name="document_file" accept=".pdf,application/pdf" required>
+                                                                                <small class="form-text text-muted">PDF only, maximum 10MB.</small>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="modal-footer">
+                                                                            <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Cancel</button>
+                                                                            <button type="submit" name="add_client_attachment" value="1" class="btn btn-primary">Add Attachment</button>
+                                                                        </div>
+                                                                    </form>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
                                                         <div class="modal fade client-modal berps-form-modal" id="editClientModal<?= htmlspecialchars($clientId, ENT_QUOTES, 'UTF-8'); ?>" tabindex="-1" role="dialog" aria-labelledby="editClientModal<?= htmlspecialchars($clientId, ENT_QUOTES, 'UTF-8'); ?>Title" aria-hidden="true">
                                                             <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
                                                                 <div class="modal-content">

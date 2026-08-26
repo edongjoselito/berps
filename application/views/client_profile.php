@@ -2,6 +2,7 @@
 $clientData = isset($client) ? $client : null;
 $clientInvoices = isset($invoices) && is_array($invoices) ? $invoices : array();
 $clientPayments = isset($payments) && is_array($payments) ? $payments : array();
+$clientAttachments = isset($attachments) && is_array($attachments) ? $attachments : array();
 
 $clientName = trim((string) ($clientData->Customer ?? 'Company'));
 $custID = trim((string) ($clientData->CustID ?? ''));
@@ -85,7 +86,7 @@ $backUrl = isset($backUrl) && trim((string) $backUrl) !== ''
 $backLabel = isset($backLabel) && trim((string) $backLabel) !== ''
     ? (string) $backLabel
     : 'Back to Client List';
-$activeTab = isset($activeTab) && in_array((string) $activeTab, ['invoices', 'payments', 'tickets']) ? (string) $activeTab : 'info';
+$activeTab = isset($activeTab) && in_array((string) $activeTab, ['invoices', 'payments', 'tickets', 'attachments']) ? (string) $activeTab : 'info';
 $clientPortalMode = strtolower(trim((string) $this->session->userdata('level'))) === 'client';
 $customerHistoryUrl = $custID !== ''
     ? base_url() . 'Page/customerHistory?cust_id=' . rawurlencode($custID)
@@ -878,6 +879,12 @@ $customerHistoryUrl = $custID !== ''
                                         Company Information
                                     </a>
                                 </li>
+                                <li class="nav-item">
+                                    <a class="nav-link <?= $activeTab === 'attachments' ? 'active' : ''; ?>" data-toggle="tab" href="#company-attachments" role="tab">
+                                        Documents
+                                        <span class="tab-count"><?= number_format(count($clientAttachments)); ?></span>
+                                    </a>
+                                </li>
                                 <?php if (isset($invoice_access_enabled) && $invoice_access_enabled): ?>
                                 <li class="nav-item">
                                     <a class="nav-link <?= $activeTab === 'invoices' ? 'active' : ''; ?>" data-toggle="tab" href="#company-invoices" role="tab">
@@ -988,6 +995,58 @@ $customerHistoryUrl = $custID !== ''
                                         <div class="info-panel full">
                                             <div class="info-title">Notes</div>
                                             <div class="detail-value"><?= $notes !== '' ? nl2br(htmlspecialchars($notes, ENT_QUOTES, 'UTF-8')) : 'No notes added for this company.'; ?></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="tab-pane fade <?= $activeTab === 'attachments' ? 'show active' : ''; ?>" id="company-attachments" role="tabpanel">
+                                    <div class="invoice-section">
+                                        <div class="section-header">
+                                            <div>
+                                                <h3 class="section-title">Attached Documents</h3>
+                                                <div class="section-subtitle">PDF documents saved for this client.</div>
+                                            </div>
+                                            <span class="status-badge status-prospect"><?= number_format(count($clientAttachments)); ?> document<?= count($clientAttachments) === 1 ? '' : 's'; ?></span>
+                                        </div>
+
+                                        <div class="table-responsive">
+                                            <table class="table table-hover mb-0">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Document Name</th>
+                                                        <th>File Name</th>
+                                                        <th>Date Added</th>
+                                                        <th class="text-right">Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <?php if (!empty($clientAttachments)): ?>
+                                                        <?php foreach ($clientAttachments as $attachment): ?>
+                                                            <?php
+                                                            $attachmentId = (int) ($attachment->id ?? 0);
+                                                            $attachmentName = trim((string) ($attachment->document_name ?? ''));
+                                                            $originalFileName = trim((string) ($attachment->original_file_name ?? ''));
+                                                            $createdAt = trim((string) ($attachment->created_at ?? ''));
+                                                            $attachmentUrl = base_url() . 'Page/clientAttachment?id=' . $attachmentId;
+                                                            ?>
+                                                            <tr>
+                                                                <td><?= htmlspecialchars($attachmentName !== '' ? $attachmentName : 'Untitled document', ENT_QUOTES, 'UTF-8'); ?></td>
+                                                                <td><?= htmlspecialchars($originalFileName !== '' ? $originalFileName : 'PDF attachment', ENT_QUOTES, 'UTF-8'); ?></td>
+                                                                <td><?= $createdAt !== '' ? htmlspecialchars(date('M d, Y g:i A', strtotime($createdAt)), ENT_QUOTES, 'UTF-8') : '-'; ?></td>
+                                                                <td class="text-right">
+                                                                    <a class="invoice-link" href="<?= htmlspecialchars($attachmentUrl, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener noreferrer">
+                                                                        <i class="mdi mdi-file-pdf-outline"></i> View PDF
+                                                                    </a>
+                                                                </td>
+                                                            </tr>
+                                                        <?php endforeach; ?>
+                                                    <?php else: ?>
+                                                        <tr>
+                                                            <td colspan="4" class="text-center text-muted py-4">No documents have been attached to this client yet.</td>
+                                                        </tr>
+                                                    <?php endif; ?>
+                                                </tbody>
+                                            </table>
                                         </div>
                                     </div>
                                 </div>
