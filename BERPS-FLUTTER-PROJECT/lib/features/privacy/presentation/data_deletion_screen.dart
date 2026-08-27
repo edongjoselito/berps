@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/haptics.dart';
@@ -21,7 +21,7 @@ class DataDeletionScreen extends StatelessWidget {
                 padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
                 child: MobileHeader(
                   title: 'Delete My Data',
-                  leadingIcon: PhosphorIconsBold.arrowLeft,
+                  leadingIcon: LucideIcons.arrowLeft,
                   onLeadingTap: () {
                     Haptics.light();
                     Navigator.of(context).pop();
@@ -56,7 +56,7 @@ class DataDeletionScreen extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: const Icon(
-                                PhosphorIconsBold.warning,
+                                LucideIcons.triangleAlert,
                                 color: AppTheme.danger,
                                 size: 20,
                               ),
@@ -105,23 +105,23 @@ class DataDeletionScreen extends StatelessWidget {
                             ),
                             const SizedBox(height: 12),
                             _DeletionItem(
-                              icon: PhosphorIconsBold.user,
+                              icon: LucideIcons.user,
                               label: 'Profile & account data',
                             ),
                             _DeletionItem(
-                              icon: PhosphorIconsBold.calendarCheck,
+                              icon: LucideIcons.calendarCheck,
                               label: 'Attendance & DTR records',
                             ),
                             _DeletionItem(
-                              icon: PhosphorIconsBold.listChecks,
+                              icon: LucideIcons.listChecks,
                               label: 'Tasks & assignments',
                             ),
                             _DeletionItem(
-                              icon: PhosphorIconsBold.ticket,
+                              icon: LucideIcons.ticket,
                               label: 'Support tickets & comments',
                             ),
                             _DeletionItem(
-                              icon: PhosphorIconsBold.image,
+                              icon: LucideIcons.image,
                               label: 'Uploaded profile photo',
                             ),
                           ],
@@ -156,15 +156,15 @@ class DataDeletionScreen extends StatelessWidget {
                             ),
                             const SizedBox(height: 12),
                             _DeletionItem(
-                              icon: PhosphorIconsBold.key,
+                              icon: LucideIcons.key,
                               label: 'Cached session token',
                             ),
                             _DeletionItem(
-                              icon: PhosphorIconsBold.fingerprint,
+                              icon: LucideIcons.fingerprint,
                               label: 'Biometric login preference',
                             ),
                             _DeletionItem(
-                              icon: PhosphorIconsBold.hardDrives,
+                              icon: LucideIcons.hardDrive,
                               label: 'Locally cached work data',
                             ),
                           ],
@@ -179,7 +179,7 @@ class DataDeletionScreen extends StatelessWidget {
                           Haptics.medium();
                           Navigator.of(context).pop();
                         },
-                        icon: const Icon(PhosphorIconsBold.signOut, size: 18),
+                        icon: const Icon(LucideIcons.logOut, size: 18),
                         label: const Text('Sign Out & Clear Device Data'),
                         style: FilledButton.styleFrom(
                           backgroundColor: AppTheme.danger,

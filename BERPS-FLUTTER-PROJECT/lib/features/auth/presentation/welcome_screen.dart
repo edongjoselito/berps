@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/network/api_exception.dart';
 import '../../../core/theme/app_theme.dart';
@@ -191,7 +191,7 @@ class _ConnectCard extends StatelessWidget {
             decoration: const InputDecoration(
               labelText: 'Workspace URL',
               hintText: 'https://your-workspace.com/berps',
-              prefixIcon: Icon(PhosphorIconsRegular.globeHemisphereWest),
+              prefixIcon: Icon(LucideIcons.globe),
             ),
             validator: (value) {
               final v = (value ?? '').trim();
@@ -232,7 +232,7 @@ class _ErrorBanner extends StatelessWidget {
       child: Row(
         children: [
           const Icon(
-            PhosphorIconsFill.warningCircle,
+            LucideIcons.circleAlert,
             color: AppTheme.danger,
             size: 18,
           ),

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/responsive.dart';
@@ -38,8 +38,8 @@ class AdminHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final IconData leading = onBack != null
-        ? PhosphorIconsBold.caretLeft
-        : PhosphorIconsBold.list;
+        ? LucideIcons.chevronLeft
+        : LucideIcons.list;
     return SafeArea(
       bottom: false,
       child: MobileHeader(
@@ -86,9 +86,9 @@ class AdminGreetingCard extends StatelessWidget {
 
   IconData _greetingIcon() {
     final h = DateTime.now().hour;
-    if (h < 12) return PhosphorIconsFill.sunHorizon;
-    if (h < 18) return PhosphorIconsFill.sun;
-    return PhosphorIconsFill.moonStars;
+    if (h < 12) return LucideIcons.sunrise;
+    if (h < 18) return LucideIcons.sun;
+    return LucideIcons.moonStar;
   }
 
   @override
@@ -375,7 +375,7 @@ class AdminErrorView extends StatelessWidget {
               borderRadius: BorderRadius.circular(16),
             ),
             child: const Icon(
-              PhosphorIconsFill.warningCircle,
+              LucideIcons.circleAlert,
               color: AppTheme.danger,
               size: 24,
             ),
@@ -398,7 +398,7 @@ class AdminErrorView extends StatelessWidget {
           const SizedBox(height: 16),
           OutlinedButton.icon(
             onPressed: onRetry,
-            icon: const Icon(PhosphorIconsBold.arrowClockwise, size: 18),
+            icon: const Icon(LucideIcons.rotateCw, size: 18),
             label: const Text('Try again'),
             style: OutlinedButton.styleFrom(minimumSize: const Size(0, 46)),
           ),
@@ -584,8 +584,8 @@ class AccomplishmentCard extends StatelessWidget {
             children: [
               Icon(
                 isCalendar
-                    ? PhosphorIconsFill.calendarCheck
-                    : PhosphorIconsFill.checkCircle,
+                    ? LucideIcons.calendarCheck
+                    : LucideIcons.circleCheck,
                 size: 18,
                 color: isCalendar ? AppTheme.primaryDark : AppTheme.success,
               ),
@@ -640,12 +640,12 @@ class AccomplishmentCard extends StatelessWidget {
             runSpacing: 6,
             children: [
               if (item.assignedName.trim().isNotEmpty)
-                _meta(PhosphorIconsBold.user, item.assignedName),
+                _meta(LucideIcons.user, item.assignedName),
               if (item.projectName.trim().isNotEmpty)
-                _meta(PhosphorIconsBold.folderSimple, item.projectName),
+                _meta(LucideIcons.folder, item.projectName),
               if (item.datePosted.trim().isNotEmpty)
                 _meta(
-                  PhosphorIconsBold.calendarBlank,
+                  LucideIcons.calendarDays,
                   item.datePosted.split(' ').first,
                 ),
             ],
@@ -832,7 +832,7 @@ class MonthYearButton extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             const Icon(
-              PhosphorIconsBold.calendarDots,
+              LucideIcons.calendarDays,
               size: 16,
               color: AppTheme.primaryDark,
             ),
@@ -850,7 +850,7 @@ class MonthYearButton extends StatelessWidget {
             ),
             const SizedBox(width: 6),
             const Icon(
-              PhosphorIconsBold.caretDown,
+              LucideIcons.chevronDown,
               size: 13,
               color: AppTheme.textMuted,
             ),

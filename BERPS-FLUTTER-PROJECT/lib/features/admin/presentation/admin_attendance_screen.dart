@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/date_formatters.dart';
@@ -95,7 +95,7 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
                     ),
                     child: Row(
                       children: [
-                        const Icon(PhosphorIconsBold.calendarDots,
+                        const Icon(LucideIcons.calendarDays,
                             size: 18, color: AppTheme.primaryDark),
                         const SizedBox(width: 10),
                         Expanded(
@@ -108,7 +108,7 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
                             ),
                           ),
                         ),
-                        const Icon(PhosphorIconsBold.caretRight,
+                        const Icon(LucideIcons.chevronRight,
                             size: 15, color: AppTheme.textMuted),
                       ],
                     ),
@@ -124,7 +124,7 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
                     ),
                     child: Row(
                       children: [
-                        const Icon(PhosphorIconsFill.clock,
+                        const Icon(LucideIcons.clock,
                             color: Colors.white, size: 20),
                         const SizedBox(width: 10),
                         const Text(
@@ -168,7 +168,7 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
                   const Padding(
                     padding: EdgeInsets.only(top: 40),
                     child: AdminEmptyView(
-                      icon: PhosphorIconsFill.clock,
+                      icon: LucideIcons.clock,
                       title: 'No attendance logs',
                       message: 'No time records for this range.',
                     ),
@@ -229,7 +229,7 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
           const SizedBox(height: 4),
           Row(
             children: [
-              Icon(PhosphorIconsBold.calendarBlank,
+              Icon(LucideIcons.calendarDays,
                   size: 12, color: AppTheme.textMuted),
               const SizedBox(width: 4),
               Text(
@@ -238,7 +238,7 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
                     const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
               ),
               const SizedBox(width: 12),
-              Icon(PhosphorIconsBold.checkSquareOffset,
+              Icon(LucideIcons.squareCheck,
                   size: 12, color: AppTheme.textMuted),
               const SizedBox(width: 4),
               Text(

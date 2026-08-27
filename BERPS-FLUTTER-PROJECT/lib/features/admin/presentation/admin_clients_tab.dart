@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/network/api_exception.dart';
 import '../../../core/theme/app_theme.dart';
@@ -107,7 +107,7 @@ class _AdminClientsTabState extends State<AdminClientsTab> {
           return FloatingActionButton.extended(
             onPressed: () => _openForm(nextId: snapshot.data?.nextCustId),
             backgroundColor: AppTheme.primaryDark,
-            icon: const Icon(PhosphorIconsBold.plus, color: Colors.white),
+            icon: const Icon(LucideIcons.plus, color: Colors.white),
             label: const Text('Add client',
                 style:
                     TextStyle(color: Colors.white, fontWeight: FontWeight.w800)),
@@ -137,7 +137,7 @@ class _AdminClientsTabState extends State<AdminClientsTab> {
                   onChanged: (v) => setState(() => _query = v.toLowerCase()),
                   decoration: InputDecoration(
                     hintText: 'Search clients…',
-                    prefixIcon: const Icon(PhosphorIconsBold.magnifyingGlass,
+                    prefixIcon: const Icon(LucideIcons.search,
                         size: 18),
                   ),
                 ),
@@ -183,7 +183,7 @@ class _AdminClientsTabState extends State<AdminClientsTab> {
         Padding(
           padding: EdgeInsets.only(top: 50),
           child: AdminEmptyView(
-            icon: PhosphorIconsFill.usersThree,
+            icon: LucideIcons.users,
             title: 'No clients found',
           ),
         ),
@@ -265,7 +265,7 @@ class _AdminClientsTabState extends State<AdminClientsTab> {
               ),
             ),
             IconButton(
-              icon: const Icon(PhosphorIconsBold.trash,
+              icon: const Icon(LucideIcons.trash2,
                   size: 18, color: AppTheme.danger),
               onPressed: () {
                 Haptics.light();

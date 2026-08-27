@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/network/api_exception.dart';
 import '../../../core/theme/app_theme.dart';
@@ -329,7 +329,7 @@ class _StaffTaskEditorScreenState extends State<StaffTaskEditorScreen> {
           if (widget.isEditing)
             IconButton(
               onPressed: _forwardTask,
-              icon: const Icon(PhosphorIconsBold.arrowsLeftRight),
+              icon: const Icon(LucideIcons.arrowLeftRight),
             ),
         ],
       ),
@@ -557,7 +557,7 @@ class _EditorBody extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 14),
-                _SectionLabel(icon: PhosphorIconsBold.flag, text: 'Priority'),
+                _SectionLabel(icon: LucideIcons.flag, text: 'Priority'),
                 const SizedBox(height: 8),
                 Row(
                   children: [
@@ -604,7 +604,7 @@ class _EditorBody extends StatelessWidget {
                     ),
                     TextButton.icon(
                       onPressed: onAddChecklist,
-                      icon: const Icon(PhosphorIconsBold.plus),
+                      icon: const Icon(LucideIcons.plus),
                       label: const Text('Add Item'),
                     ),
                   ],
@@ -633,7 +633,7 @@ class _EditorBody extends StatelessWidget {
                           onPressed: checklist.length == 1
                               ? null
                               : () => onRemoveChecklist(item),
-                          icon: const Icon(PhosphorIconsBold.minusCircle),
+                          icon: const Icon(LucideIcons.circleMinus),
                         ),
                       ],
                     ),
@@ -780,8 +780,8 @@ class _StatusBanner extends StatelessWidget {
         children: [
           Icon(
             task.isClosed
-                ? PhosphorIconsBold.checkCircle
-                : PhosphorIconsBold.clockCountdown,
+                ? LucideIcons.circleCheck
+                : LucideIcons.timer,
             color: color,
           ),
           const SizedBox(width: 10),

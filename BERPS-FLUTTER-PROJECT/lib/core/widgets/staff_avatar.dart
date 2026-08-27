@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../theme/app_theme.dart';
 
@@ -24,7 +24,7 @@ class StaffAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final fallback = Icon(
-      PhosphorIconsFill.userCircle,
+      LucideIcons.circleUser,
       color: placeholderColor,
       size: placeholderSize ?? (size * 0.6),
     );

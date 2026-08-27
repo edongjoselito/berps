@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/network/api_exception.dart';
 import '../../../core/theme/app_theme.dart';
@@ -104,7 +104,7 @@ class _SignupScreenState extends State<SignupScreen> {
                         child: Row(
                           children: [
                             MobileHeaderButton(
-                              icon: PhosphorIconsBold.arrowLeft,
+                              icon: LucideIcons.arrowLeft,
                               onTap: _submitting
                                   ? () {}
                                   : () => Navigator.of(context).pop(),
@@ -153,7 +153,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     const _FieldLabel(
-                      icon: PhosphorIconsBold.user,
+                      icon: LucideIcons.user,
                       text: 'First name',
                     ),
                     TextFormField(
@@ -178,7 +178,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     const _FieldLabel(
-                      icon: PhosphorIconsBold.user,
+                      icon: LucideIcons.user,
                       text: 'Last name',
                     ),
                     TextFormField(
@@ -200,7 +200,7 @@ class _SignupScreenState extends State<SignupScreen> {
             ],
           ),
           const SizedBox(height: 14),
-          const _FieldLabel(icon: PhosphorIconsBold.envelope, text: 'Email'),
+          const _FieldLabel(icon: LucideIcons.mail, text: 'Email'),
           TextFormField(
             controller: _emailController,
             autocorrect: false,
@@ -222,7 +222,7 @@ class _SignupScreenState extends State<SignupScreen> {
             },
           ),
           const SizedBox(height: 14),
-          const _FieldLabel(icon: PhosphorIconsBold.lockKey, text: 'Password'),
+          const _FieldLabel(icon: LucideIcons.lockKeyhole, text: 'Password'),
           TextFormField(
             controller: _passwordController,
             obscureText: _obscure,
@@ -234,8 +234,8 @@ class _SignupScreenState extends State<SignupScreen> {
               suffixIcon: IconButton(
                 icon: Icon(
                   _obscure
-                      ? PhosphorIconsBold.eye
-                      : PhosphorIconsBold.eyeSlash,
+                      ? LucideIcons.eye
+                      : LucideIcons.eyeOff,
                   color: _obscure ? AppTheme.textMuted : AppTheme.primary,
                   size: 18,
                 ),
@@ -278,7 +278,7 @@ class _SignupScreenState extends State<SignupScreen> {
               borderRadius: BorderRadius.circular(20),
             ),
             child: const Icon(
-              PhosphorIconsFill.checkCircle,
+              LucideIcons.circleCheck,
               color: AppTheme.success,
               size: 36,
             ),
@@ -330,7 +330,7 @@ class _SignupHero extends StatelessWidget {
               borderRadius: BorderRadius.circular(18),
             ),
             child: const Icon(
-              PhosphorIconsBold.userPlus,
+              LucideIcons.userPlus,
               color: AppTheme.primaryDark,
               size: 26,
             ),
@@ -406,7 +406,7 @@ class _StatusBanner extends StatelessWidget {
       child: Row(
         children: [
           const Icon(
-            PhosphorIconsFill.warningCircle,
+            LucideIcons.circleAlert,
             color: AppTheme.danger,
             size: 18,
           ),

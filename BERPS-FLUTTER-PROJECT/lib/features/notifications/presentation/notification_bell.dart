@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/haptics.dart';
@@ -91,7 +91,7 @@ class _NotificationBellState extends State<NotificationBell>
                 boxShadow: AppTheme.shadowSoft,
               ),
               child: const Icon(
-                PhosphorIconsBold.bell,
+                LucideIcons.bell,
                 size: 18,
                 color: Colors.white,
               ),

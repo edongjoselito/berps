@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/haptics.dart';
@@ -52,14 +52,14 @@ class AdminMoreTab extends StatelessWidget {
         const SizedBox(height: 10),
         _menuCard([
           _MenuItem(
-            icon: PhosphorIconsFill.listChecks,
+            icon: LucideIcons.listChecks,
             color: AppTheme.primary,
             title: 'Employee tasks',
             subtitle: 'Pending tasks per employee',
             onTap: () => _push(context, EmployeeTasksScreen(session: session)),
           ),
           _MenuItem(
-            icon: PhosphorIconsFill.trophy,
+            icon: LucideIcons.trophy,
             color: AppTheme.accent,
             title: 'Accomplishments',
             subtitle: 'Closed tasks across the team',
@@ -67,7 +67,7 @@ class AdminMoreTab extends StatelessWidget {
                 _push(context, AdminAccomplishmentsScreen(session: session)),
           ),
           _MenuItem(
-            icon: PhosphorIconsFill.userFocus,
+            icon: LucideIcons.userSearch,
             color: AppTheme.primaryDeeper,
             title: 'Employee accomplishment',
             subtitle: 'Per-employee report by period',
@@ -80,7 +80,7 @@ class AdminMoreTab extends StatelessWidget {
         const SizedBox(height: 10),
         _menuCard([
           _MenuItem(
-            icon: PhosphorIconsFill.clock,
+            icon: LucideIcons.clock,
             color: AppTheme.success,
             title: 'Attendance list',
             subtitle: 'Daily time logs (all staff)',
@@ -88,7 +88,7 @@ class AdminMoreTab extends StatelessWidget {
                 _push(context, AdminAttendanceScreen(session: session)),
           ),
           _MenuItem(
-            icon: PhosphorIconsFill.calendarCheck,
+            icon: LucideIcons.calendarCheck,
             color: AppTheme.warning,
             title: 'Employee DTR',
             subtitle: 'Monthly daily time record',
@@ -100,7 +100,7 @@ class AdminMoreTab extends StatelessWidget {
         const SizedBox(height: 10),
         _menuCard([
           _MenuItem(
-            icon: PhosphorIconsFill.calendarBlank,
+            icon: LucideIcons.calendarDays,
             color: AppTheme.primaryDark,
             title: 'Calendar',
             subtitle: 'Your events & schedule',
@@ -112,7 +112,7 @@ class AdminMoreTab extends StatelessWidget {
         const SizedBox(height: 10),
         _menuCard([
           _MenuItem(
-            icon: PhosphorIconsFill.signOut,
+            icon: LucideIcons.logOut,
             color: AppTheme.danger,
             title: 'Sign out',
             subtitle: 'End this admin session',
@@ -139,7 +139,7 @@ class AdminMoreTab extends StatelessWidget {
               borderRadius: BorderRadius.circular(16),
             ),
             child: const Icon(
-              PhosphorIconsFill.shieldStar,
+              LucideIcons.shieldCheck,
               color: AppTheme.primaryDark,
               size: 26,
             ),
@@ -171,7 +171,7 @@ class AdminMoreTab extends StatelessWidget {
                 ),
                 const SizedBox(height: 6),
                 const MobileInlineBadge(
-                  icon: PhosphorIconsFill.shieldCheck,
+                  icon: LucideIcons.shieldCheck,
                   label: 'Administrator',
                 ),
               ],
@@ -262,7 +262,7 @@ class _MenuItem extends StatelessWidget {
               ),
             ),
             const Icon(
-              PhosphorIconsBold.caretRight,
+              LucideIcons.chevronRight,
               size: 16,
               color: AppTheme.textMuted,
             ),

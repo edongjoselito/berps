@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/network/api_exception.dart';
 import '../../../core/theme/app_theme.dart';
@@ -214,7 +214,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                         child: Row(
                           children: [
                             MobileHeaderButton(
-                              icon: PhosphorIconsBold.arrowLeft,
+                              icon: LucideIcons.arrowLeft,
                               onTap: _submitting ? () {} : _back,
                             ),
                             const Spacer(),
@@ -264,7 +264,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           _StatusBanner(message: _error!, isError: true),
           const SizedBox(height: 16),
         ],
-        const _FieldLabel(icon: PhosphorIconsBold.envelope, text: 'Email'),
+        const _FieldLabel(icon: LucideIcons.mail, text: 'Email'),
         TextField(
           controller: _emailController,
           autocorrect: false,
@@ -293,7 +293,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           _StatusBanner(message: _info!, isError: false),
           const SizedBox(height: 16),
         ],
-        const _FieldLabel(icon: PhosphorIconsBold.numpad, text: '6-digit code'),
+        const _FieldLabel(icon: LucideIcons.grid3x3, text: '6-digit code'),
         TextField(
           controller: _otpController,
           autocorrect: false,
@@ -345,7 +345,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           const SizedBox(height: 16),
         ],
         const _FieldLabel(
-          icon: PhosphorIconsBold.lockKey,
+          icon: LucideIcons.lockKeyhole,
           text: 'New password',
         ),
         TextField(
@@ -355,7 +355,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             hintText: 'At least 8 characters',
             suffixIcon: IconButton(
               icon: Icon(
-                _obscure ? PhosphorIconsBold.eye : PhosphorIconsBold.eyeSlash,
+                _obscure ? LucideIcons.eye : LucideIcons.eyeOff,
                 color: _obscure ? AppTheme.textMuted : AppTheme.primary,
                 size: 18,
               ),
@@ -365,7 +365,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         ),
         const SizedBox(height: 16),
         const _FieldLabel(
-          icon: PhosphorIconsBold.lockKey,
+          icon: LucideIcons.lockKeyhole,
           text: 'Confirm password',
         ),
         TextField(
@@ -376,8 +376,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             suffixIcon: IconButton(
               icon: Icon(
                 _obscureConfirm
-                    ? PhosphorIconsBold.eye
-                    : PhosphorIconsBold.eyeSlash,
+                    ? LucideIcons.eye
+                    : LucideIcons.eyeOff,
                 color: _obscureConfirm ? AppTheme.textMuted : AppTheme.primary,
                 size: 18,
               ),
@@ -410,7 +410,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               borderRadius: BorderRadius.circular(20),
             ),
             child: const Icon(
-              PhosphorIconsFill.checkCircle,
+              LucideIcons.circleCheck,
               color: AppTheme.success,
               size: 36,
             ),
@@ -469,7 +469,7 @@ class _StepPill extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           const Icon(
-            PhosphorIconsBold.shieldCheck,
+            LucideIcons.shieldCheck,
             size: 14,
             color: AppTheme.primaryDark,
           ),
@@ -521,7 +521,7 @@ class _ResetHero extends StatelessWidget {
               borderRadius: BorderRadius.circular(18),
             ),
             child: const Icon(
-              PhosphorIconsBold.lockKeyOpen,
+              LucideIcons.lockKeyholeOpen,
               color: AppTheme.primaryDark,
               size: 26,
             ),
@@ -589,8 +589,8 @@ class _StatusBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = isError ? AppTheme.danger : AppTheme.primaryDark;
     final icon = isError
-        ? PhosphorIconsFill.warningCircle
-        : PhosphorIconsFill.info;
+        ? LucideIcons.circleAlert
+        : LucideIcons.info;
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(

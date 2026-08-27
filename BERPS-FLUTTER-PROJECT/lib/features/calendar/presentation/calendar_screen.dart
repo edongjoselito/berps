@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/network/api_exception.dart';
@@ -199,7 +199,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
         backgroundColor: AppTheme.primaryDark,
         foregroundColor: Colors.white,
         onPressed: _openCreate,
-        icon: const Icon(PhosphorIconsBold.plus, size: 18),
+        icon: const Icon(LucideIcons.plus, size: 18),
         label: const Text(
           'New note',
           style: TextStyle(fontWeight: FontWeight.w800),
@@ -440,7 +440,7 @@ class _CalendarDashboardTabState extends State<CalendarDashboardTab> {
         backgroundColor: AppTheme.primaryDark,
         foregroundColor: Colors.white,
         onPressed: _openCreate,
-        icon: const Icon(PhosphorIconsBold.plus, size: 18),
+        icon: const Icon(LucideIcons.plus, size: 18),
         label: const Text(
           'New note',
           style: TextStyle(fontWeight: FontWeight.w800),
@@ -460,12 +460,12 @@ class _CalendarDashboardTabState extends State<CalendarDashboardTab> {
                   child: MobileHeader(
                     title: 'Calendar',
                     subtitle: '${_monthNamesFull[_month - 1]} $_year',
-                    leadingIcon: PhosphorIconsBold.list,
+                    leadingIcon: LucideIcons.list,
                     onLeadingTap: () {
                       Haptics.light();
                       widget.onMenu();
                     },
-                    trailingIcon: PhosphorIconsBold.arrowClockwise,
+                    trailingIcon: LucideIcons.rotateCw,
                     onTrailingTap: () {
                       Haptics.light();
                       _reload();
@@ -521,7 +521,7 @@ class _DashboardMonthBar extends StatelessWidget {
           IconButton(
             onPressed: onPrev,
             icon: const Icon(
-              PhosphorIconsBold.caretLeft,
+              LucideIcons.chevronLeft,
               color: AppTheme.textSecondary,
               size: 18,
             ),
@@ -541,7 +541,7 @@ class _DashboardMonthBar extends StatelessWidget {
           IconButton(
             onPressed: onNext,
             icon: const Icon(
-              PhosphorIconsBold.caretRight,
+              LucideIcons.chevronRight,
               color: AppTheme.textSecondary,
               size: 18,
             ),
@@ -577,7 +577,7 @@ class _TopBar extends StatelessWidget {
           IconButton(
             onPressed: onBack,
             icon: const Icon(
-              PhosphorIconsBold.caretLeft,
+              LucideIcons.chevronLeft,
               color: AppTheme.textPrimary,
               size: 20,
             ),
@@ -993,7 +993,7 @@ class _MonthHeader extends StatelessWidget {
           IconButton(
             onPressed: onBack,
             icon: const Icon(
-              PhosphorIconsBold.caretLeft,
+              LucideIcons.chevronLeft,
               color: kAppleRed,
               size: 20,
             ),
@@ -1012,7 +1012,7 @@ class _MonthHeader extends StatelessWidget {
           IconButton(
             onPressed: onPrev,
             icon: const Icon(
-              PhosphorIconsBold.caretLeft,
+              LucideIcons.chevronLeft,
               color: AppTheme.textSecondary,
               size: 18,
             ),
@@ -1020,7 +1020,7 @@ class _MonthHeader extends StatelessWidget {
           IconButton(
             onPressed: onNext,
             icon: const Icon(
-              PhosphorIconsBold.caretRight,
+              LucideIcons.chevronRight,
               color: AppTheme.textSecondary,
               size: 18,
             ),
@@ -1205,7 +1205,7 @@ Widget _dayNotes(List<Note> notes, _DaySheetState sheet) {
         child: Row(
           children: [
             Icon(
-              PhosphorIconsBold.notebook,
+              LucideIcons.notebookText,
               size: 16,
               color: AppTheme.textMuted,
             ),
@@ -1253,7 +1253,7 @@ class _DayRemindersSection extends StatelessWidget {
         Row(
           children: [
             const Icon(
-              PhosphorIconsBold.bellSimpleRinging,
+              LucideIcons.bellRing,
               size: 15,
               color: AppTheme.primaryDark,
             ),
@@ -1285,7 +1285,7 @@ class _DayRemindersSection extends StatelessWidget {
             child: Row(
               children: [
                 Icon(
-                  PhosphorIconsBold.bellSimpleSlash,
+                  LucideIcons.bellOff,
                   size: 16,
                   color: AppTheme.textMuted,
                 ),
@@ -1331,7 +1331,7 @@ class _DayReminderRow extends StatelessWidget {
       child: Row(
         children: [
           const Icon(
-            PhosphorIconsFill.bellSimpleRinging,
+            LucideIcons.bellRing,
             size: 16,
             color: Color(0xFFEA580C),
           ),
@@ -1482,7 +1482,7 @@ class _DaySheetState extends State<_DaySheet> {
                       child: Row(
                         children: [
                           const Icon(
-                            PhosphorIconsBold.notebook,
+                            LucideIcons.notebookText,
                             size: 15,
                             color: AppTheme.primaryDark,
                           ),
@@ -1500,7 +1500,7 @@ class _DaySheetState extends State<_DaySheet> {
                           TextButton.icon(
                             onPressed: widget.onAddNote,
                             icon: const Icon(
-                              PhosphorIconsBold.plus,
+                              LucideIcons.plus,
                               size: 14,
                             ),
                             label: const Text('Add note'),
@@ -1535,7 +1535,7 @@ class _DaySheetState extends State<_DaySheet> {
                             backgroundColor: AppTheme.primaryDark,
                           ),
                           onPressed: widget.onAddNote,
-                          icon: const Icon(PhosphorIconsBold.plus, size: 16),
+                          icon: const Icon(LucideIcons.plus, size: 16),
                           label: const Text('Add note'),
                         ),
                       ),
@@ -1653,7 +1653,7 @@ class _DayNoteRow extends StatelessWidget {
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
                 icon: const Icon(
-                  PhosphorIconsBold.trash,
+                  LucideIcons.trash2,
                   size: 16,
                   color: AppTheme.danger,
                 ),

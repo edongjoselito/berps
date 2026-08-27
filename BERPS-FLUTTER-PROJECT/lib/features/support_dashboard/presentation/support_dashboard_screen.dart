@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/network/api_exception.dart';
 import '../../../core/theme/app_theme.dart';
@@ -78,7 +78,7 @@ class _SupportDashboardScreenState extends State<SupportDashboardScreen> {
                   MobileHeader(
                     title: 'Support Dashboard',
                     subtitle: 'Tickets across your workspace',
-                    leadingIcon: PhosphorIconsBold.caretLeft,
+                    leadingIcon: LucideIcons.chevronLeft,
                     onLeadingTap: () {
                       Haptics.light();
                       Navigator.of(context).maybePop();
@@ -118,7 +118,7 @@ class _SupportDashboardScreenState extends State<SupportDashboardScreen> {
                     if (data.byPriority.isNotEmpty) ...[
                       const SizedBox(height: 18),
                       _SectionHeader(
-                        icon: PhosphorIconsBold.warning,
+                        icon: LucideIcons.triangleAlert,
                         title: 'By priority',
                       ),
                       const SizedBox(height: 10),
@@ -140,7 +140,7 @@ class _SupportDashboardScreenState extends State<SupportDashboardScreen> {
                     if (data.byStatus.isNotEmpty) ...[
                       const SizedBox(height: 18),
                       _SectionHeader(
-                        icon: PhosphorIconsBold.clipboardText,
+                        icon: LucideIcons.clipboardList,
                         title: 'By status',
                       ),
                       const SizedBox(height: 10),
@@ -162,7 +162,7 @@ class _SupportDashboardScreenState extends State<SupportDashboardScreen> {
                     if (data.byDepartment.isNotEmpty) ...[
                       const SizedBox(height: 18),
                       _SectionHeader(
-                        icon: PhosphorIconsBold.buildings,
+                        icon: LucideIcons.building2,
                         title: 'By department',
                       ),
                       const SizedBox(height: 10),
@@ -174,7 +174,7 @@ class _SupportDashboardScreenState extends State<SupportDashboardScreen> {
                     if (data.trend.isNotEmpty) ...[
                       const SizedBox(height: 18),
                       _SectionHeader(
-                        icon: PhosphorIconsBold.trendUp,
+                        icon: LucideIcons.trendingUp,
                         title: 'Last 14 days',
                       ),
                       const SizedBox(height: 10),
@@ -186,7 +186,7 @@ class _SupportDashboardScreenState extends State<SupportDashboardScreen> {
                     if (data.recent.isNotEmpty) ...[
                       const SizedBox(height: 18),
                       _SectionHeader(
-                        icon: PhosphorIconsBold.ticket,
+                        icon: LucideIcons.ticket,
                         title: 'Recent tickets',
                       ),
                       const SizedBox(height: 10),
@@ -202,7 +202,7 @@ class _SupportDashboardScreenState extends State<SupportDashboardScreen> {
                     if (data.oldestOpen.isNotEmpty) ...[
                       const SizedBox(height: 18),
                       _SectionHeader(
-                        icon: PhosphorIconsBold.hourglass,
+                        icon: LucideIcons.hourglass,
                         title: 'Oldest open',
                       ),
                       const SizedBox(height: 10),
@@ -270,30 +270,30 @@ class _TotalsGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cells = <_TotalCellData>[
-      _TotalCellData('Total', totals.total, PhosphorIconsBold.ticket, const [
+      _TotalCellData('Total', totals.total, LucideIcons.ticket, const [
         Color(0xFF1E3A5F),
         Color(0xFF2D5A8A),
       ]),
-      _TotalCellData('Open', totals.open, PhosphorIconsBold.folderOpen, const [
+      _TotalCellData('Open', totals.open, LucideIcons.folderOpen, const [
         Color(0xFF2563EB),
         Color(0xFF1D4ED8),
       ]),
       _TotalCellData(
         'Closed',
         totals.closed,
-        PhosphorIconsBold.checkCircle,
+        LucideIcons.circleCheck,
         const [Color(0xFF16A34A), Color(0xFF15803D)],
       ),
       _TotalCellData(
         'Unassigned',
         totals.unassigned,
-        PhosphorIconsBold.warningCircle,
+        LucideIcons.circleAlert,
         const [Color(0xFFDC2626), Color(0xFFB91C1C)],
       ),
       _TotalCellData(
         'Awaiting reply',
         totals.awaitingReply,
-        PhosphorIconsBold.chatCircleDots,
+        LucideIcons.messageCircleMore,
         const [Color(0xFF0891B2), Color(0xFF0E7490)],
       ),
     ];
@@ -876,7 +876,7 @@ class _TicketRow extends StatelessWidget {
               ),
             ),
             const Icon(
-              PhosphorIconsBold.caretRight,
+              LucideIcons.chevronRight,
               size: 14,
               color: AppTheme.textMuted,
             ),

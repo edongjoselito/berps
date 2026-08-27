@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/theme/app_theme.dart';
@@ -37,7 +37,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
                 padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
                 child: MobileHeader(
                   title: 'Privacy Policy',
-                  leadingIcon: PhosphorIconsBold.arrowLeft,
+                  leadingIcon: LucideIcons.arrowLeft,
                   onLeadingTap: () {
                     Haptics.light();
                     Navigator.of(context).pop();
@@ -52,7 +52,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
                   FadeSlide(
                     delay: const Duration(milliseconds: 60),
                     child: _SectionCard(
-                      icon: PhosphorIconsBold.shield,
+                      icon: LucideIcons.shield,
                       title: 'Your Data in BERPS',
                       children: [
                         const _BodyText(
@@ -62,13 +62,13 @@ class PrivacyPolicyScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 8),
                         _MetaRow(
-                          icon: PhosphorIconsBold.calendar,
+                          icon: LucideIcons.calendar,
                           label: 'Last updated: $_lastUpdated',
                         ),
                         if (domain.isNotEmpty) ...[
                           const SizedBox(height: 4),
                           _MetaRow(
-                            icon: PhosphorIconsBold.globe,
+                            icon: LucideIcons.globe,
                             label: 'Workspace: $domain',
                           ),
                         ],
@@ -79,7 +79,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
                   FadeSlide(
                     delay: const Duration(milliseconds: 120),
                     child: _SectionCard(
-                      icon: PhosphorIconsBold.database,
+                      icon: LucideIcons.database,
                       title: 'What Data BERPS Stores',
                       children: const [
                         _BulletItem(
@@ -109,7 +109,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
                   FadeSlide(
                     delay: const Duration(milliseconds: 180),
                     child: _SectionCard(
-                      icon: PhosphorIconsBold.lockKey,
+                      icon: LucideIcons.lockKeyhole,
                       title: 'How Your Data Is Used',
                       children: const [
                         _BulletItem(
@@ -139,7 +139,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
                   FadeSlide(
                     delay: const Duration(milliseconds: 240),
                     child: _SectionCard(
-                      icon: PhosphorIconsBold.users,
+                      icon: LucideIcons.users,
                       title: 'Who Can See Your Data',
                       children: const [
                         _BodyText(
@@ -168,7 +168,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
                   FadeSlide(
                     delay: const Duration(milliseconds: 300),
                     child: _SectionCard(
-                      icon: PhosphorIconsBold.userGear,
+                      icon: LucideIcons.userCog,
                       title: 'Your Rights',
                       children: const [
                         _BulletItem(
@@ -198,7 +198,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
                   FadeSlide(
                     delay: const Duration(milliseconds: 360),
                     child: _SectionCard(
-                      icon: PhosphorIconsBold.trash,
+                      icon: LucideIcons.trash2,
                       title: 'Data Retention',
                       children: const [
                         _BodyText(
@@ -214,7 +214,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
                   FadeSlide(
                     delay: const Duration(milliseconds: 420),
                     child: _SectionCard(
-                      icon: PhosphorIconsBold.envelopeSimple,
+                      icon: LucideIcons.mail,
                       title: 'Contact',
                       children: [
                         const _BodyText(
@@ -224,7 +224,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
                         if (domain.isNotEmpty) ...[
                           const SizedBox(height: 12),
                           _ContactRow(
-                            icon: PhosphorIconsBold.globe,
+                            icon: LucideIcons.globe,
                             label: domain,
                             onTap: () {},
                           ),
@@ -236,7 +236,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
                   FadeSlide(
                     delay: const Duration(milliseconds: 480),
                     child: _SectionCard(
-                      icon: PhosphorIconsBold.arrowSquareOut,
+                      icon: LucideIcons.externalLink,
                       title: 'External Policy Link',
                       children: [
                         const _BodyText(
@@ -245,7 +245,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
                         const SizedBox(height: 12),
                         if (workspaceUrl.isNotEmpty)
                           _ContactRow(
-                            icon: PhosphorIconsBold.link,
+                            icon: LucideIcons.link,
                             label: 'Open in Browser',
                             onTap: () async {
                               Haptics.light();

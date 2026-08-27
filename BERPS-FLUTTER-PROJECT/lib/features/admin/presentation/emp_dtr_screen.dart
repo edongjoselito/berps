@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/responsive.dart';
@@ -91,7 +91,7 @@ class _EmpDtrScreenState extends State<EmpDtrScreen> {
                       ? '${data!.selectedEmployeeName} - ${_periodLabel()}'
                       : 'Monthly attendance audit',
                   onBack: () => Navigator.pop(context),
-                  trailingIcon: PhosphorIconsBold.arrowClockwise,
+                  trailingIcon: LucideIcons.rotateCw,
                   onTrailingTap: _reload,
                 ),
                 const SizedBox(height: 12),
@@ -120,7 +120,7 @@ class _EmpDtrScreenState extends State<EmpDtrScreen> {
                   const Padding(
                     padding: EdgeInsets.only(top: 32),
                     child: AdminEmptyView(
-                      icon: PhosphorIconsFill.userFocus,
+                      icon: LucideIcons.userSearch,
                       title: 'Select an employee',
                       message: 'Choose an employee to view their monthly DTR.',
                     ),
@@ -132,7 +132,7 @@ class _EmpDtrScreenState extends State<EmpDtrScreen> {
                   const SizedBox(height: 8),
                   if (data.days.isEmpty)
                     const AdminEmptyView(
-                      icon: PhosphorIconsFill.calendarX,
+                      icon: LucideIcons.calendarX,
                       title: 'No records',
                       message: 'No DTR days were found for this period.',
                     )
@@ -171,7 +171,7 @@ class _EmpDtrScreenState extends State<EmpDtrScreen> {
         children: [
           Expanded(
             child: _ControlButton(
-              icon: PhosphorIconsBold.userCircle,
+              icon: LucideIcons.circleUser,
               label: employeeName,
               meta: meta,
               onTap: () => _openEmployeePicker(data.employees, currentValue),
@@ -237,7 +237,7 @@ class _EmpDtrScreenState extends State<EmpDtrScreen> {
               _StatusPill(
                 label: d.monthTotalLabel,
                 color: AppTheme.primaryDark,
-                icon: PhosphorIconsBold.clock,
+                icon: LucideIcons.clock,
               ),
             ],
           ),
@@ -340,13 +340,13 @@ class _EmpDtrScreenState extends State<EmpDtrScreen> {
                       _StatusPill(
                         label: day.totalLabel,
                         color: AppTheme.primaryDark,
-                        icon: PhosphorIconsBold.timer,
+                        icon: LucideIcons.timer,
                       ),
                     if (day.taskCount > 0)
                       _StatusPill(
                         label: '${day.taskCount} task',
                         color: AppTheme.textSecondary,
-                        icon: PhosphorIconsBold.checkSquareOffset,
+                        icon: LucideIcons.squareCheck,
                       ),
                   ],
                 ),
@@ -499,7 +499,7 @@ class _ControlButton extends StatelessWidget {
               ),
             ),
             const Icon(
-              PhosphorIconsBold.caretDown,
+              LucideIcons.chevronDown,
               size: 13,
               color: AppTheme.textMuted,
             ),
@@ -725,7 +725,7 @@ class _EmployeePickerSheetState extends State<_EmployeePickerSheet> {
                 ),
                 IconButton(
                   onPressed: () => Navigator.pop(context),
-                  icon: const Icon(PhosphorIconsBold.x),
+                  icon: const Icon(LucideIcons.x),
                   tooltip: 'Close',
                 ),
               ],
@@ -737,7 +737,7 @@ class _EmployeePickerSheetState extends State<_EmployeePickerSheet> {
               textInputAction: TextInputAction.search,
               decoration: const InputDecoration(
                 hintText: 'Search name or ID',
-                prefixIcon: Icon(PhosphorIconsBold.magnifyingGlass),
+                prefixIcon: Icon(LucideIcons.search),
                 contentPadding: EdgeInsets.symmetric(horizontal: 12),
               ),
             ),
@@ -824,8 +824,8 @@ class _EmployeeTile extends StatelessWidget {
               ),
               child: Icon(
                 selected
-                    ? PhosphorIconsFill.checkCircle
-                    : PhosphorIconsBold.user,
+                    ? LucideIcons.circleCheck
+                    : LucideIcons.user,
                 size: 18,
                 color: selected ? Colors.white : AppTheme.primaryDark,
               ),

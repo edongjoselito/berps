@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../theme/app_theme.dart';
 import '../utils/haptics.dart';
@@ -141,25 +141,25 @@ class _ToastWidgetState extends State<_ToastWidget>
       case AppToastVariant.success:
         return const _ToastStyle(
           accent: AppTheme.success,
-          icon: PhosphorIconsFill.checkCircle,
+          icon: LucideIcons.circleCheck,
           fallbackTitle: 'Success',
         );
       case AppToastVariant.error:
         return const _ToastStyle(
           accent: AppTheme.danger,
-          icon: PhosphorIconsFill.xCircle,
+          icon: LucideIcons.circleX,
           fallbackTitle: 'Error',
         );
       case AppToastVariant.warning:
         return const _ToastStyle(
           accent: AppTheme.warning,
-          icon: PhosphorIconsFill.warningCircle,
+          icon: LucideIcons.circleAlert,
           fallbackTitle: 'Heads up',
         );
       case AppToastVariant.info:
         return _ToastStyle(
           accent: AppTheme.primaryDark,
-          icon: PhosphorIconsFill.info,
+          icon: LucideIcons.info,
           fallbackTitle: 'Info',
         );
     }
@@ -250,7 +250,7 @@ class _ToastWidgetState extends State<_ToastWidget>
                       child: const Padding(
                         padding: EdgeInsets.all(4),
                         child: Icon(
-                          PhosphorIconsBold.x,
+                          LucideIcons.x,
                           size: 14,
                           color: AppTheme.textMuted,
                         ),

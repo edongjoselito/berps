@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/haptics.dart';
@@ -61,78 +61,78 @@ class AdminDrawer extends StatelessWidget {
               child: ListView(
                 padding: const EdgeInsets.symmetric(vertical: 4),
                 children: [
-                  const _SectionLabel('Navigation', PhosphorIconsBold.compass),
+                  const _SectionLabel('Navigation', LucideIcons.compass),
                   _NavItem(
                     id: 'dashboard',
-                    icon: PhosphorIconsRegular.squaresFour,
-                    iconActive: PhosphorIconsFill.squaresFour,
+                    icon: LucideIcons.layoutGrid,
+                    iconActive: LucideIcons.layoutGrid,
                     label: 'Dashboard',
                     activeItemId: activeItemId,
                     onTap: onSelectDashboard,
                   ),
                   _NavItem(
                     id: 'tasks',
-                    icon: PhosphorIconsRegular.listChecks,
-                    iconActive: PhosphorIconsFill.listChecks,
+                    icon: LucideIcons.listChecks,
+                    iconActive: LucideIcons.listChecks,
                     label: 'Tasks',
                     activeItemId: activeItemId,
                     onTap: onSelectTasks,
                   ),
                   _NavItem(
                     id: 'clients',
-                    icon: PhosphorIconsRegular.usersThree,
-                    iconActive: PhosphorIconsFill.usersThree,
+                    icon: LucideIcons.users,
+                    iconActive: LucideIcons.users,
                     label: 'Clients',
                     activeItemId: activeItemId,
                     onTap: onSelectClients,
                   ),
-                  const _SectionLabel('Workforce', PhosphorIconsBold.briefcase),
+                  const _SectionLabel('Workforce', LucideIcons.briefcase),
                   _NavItem(
                     id: 'employee-tasks',
-                    icon: PhosphorIconsRegular.userList,
-                    iconActive: PhosphorIconsFill.userList,
+                    icon: LucideIcons.users,
+                    iconActive: LucideIcons.users,
                     label: 'Employee Tasks',
                     activeItemId: activeItemId,
                     onTap: onSelectEmployeeTasks,
                   ),
                   _NavItem(
                     id: 'accomplishments',
-                    icon: PhosphorIconsRegular.trophy,
-                    iconActive: PhosphorIconsFill.trophy,
+                    icon: LucideIcons.trophy,
+                    iconActive: LucideIcons.trophy,
                     label: 'Accomplishments',
                     activeItemId: activeItemId,
                     onTap: onSelectAccomplishments,
                   ),
                   _NavItem(
                     id: 'employee-accomplishment',
-                    icon: PhosphorIconsRegular.userFocus,
-                    iconActive: PhosphorIconsFill.userFocus,
+                    icon: LucideIcons.userSearch,
+                    iconActive: LucideIcons.userSearch,
                     label: 'Employee Report',
                     activeItemId: activeItemId,
                     onTap: onSelectEmployeeAccomplishment,
                   ),
-                  const _SectionLabel('Attendance', PhosphorIconsBold.clock),
+                  const _SectionLabel('Attendance', LucideIcons.clock),
                   _NavItem(
                     id: 'attendance',
-                    icon: PhosphorIconsRegular.calendarDots,
-                    iconActive: PhosphorIconsFill.calendarDots,
+                    icon: LucideIcons.calendarDays,
+                    iconActive: LucideIcons.calendarDays,
                     label: 'Attendance List',
                     activeItemId: activeItemId,
                     onTap: onSelectAttendance,
                   ),
                   _NavItem(
                     id: 'dtr',
-                    icon: PhosphorIconsRegular.calendarCheck,
-                    iconActive: PhosphorIconsFill.calendarCheck,
+                    icon: LucideIcons.calendarCheck,
+                    iconActive: LucideIcons.calendarCheck,
                     label: 'Employee DTR',
                     activeItemId: activeItemId,
                     onTap: onSelectDtr,
                   ),
-                  const _SectionLabel('Workspace', PhosphorIconsBold.buildings),
+                  const _SectionLabel('Workspace', LucideIcons.building2),
                   _NavItem(
                     id: 'calendar',
-                    icon: PhosphorIconsRegular.calendarBlank,
-                    iconActive: PhosphorIconsFill.calendarBlank,
+                    icon: LucideIcons.calendarDays,
+                    iconActive: LucideIcons.calendarDays,
                     label: 'Calendar',
                     activeItemId: activeItemId,
                     onTap: onSelectCalendar,
@@ -144,7 +144,7 @@ class AdminDrawer extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.fromLTRB(12, 8, 12, 6),
               child: _DrawerAction(
-                icon: PhosphorIconsRegular.signOut,
+                icon: LucideIcons.logOut,
                 label: 'Sign out',
                 danger: true,
                 onTap: () async {
@@ -377,7 +377,7 @@ class _NavItem extends StatelessWidget {
                   duration: const Duration(milliseconds: 220),
                   opacity: isActive ? 1 : 0,
                   child: const Icon(
-                    PhosphorIconsBold.caretRight,
+                    LucideIcons.chevronRight,
                     size: 12,
                     color: AppTheme.primaryDark,
                   ),
@@ -441,7 +441,7 @@ class _DrawerFooter extends StatelessWidget {
       child: Row(
         children: [
           Icon(
-            PhosphorIconsBold.shieldCheck,
+            LucideIcons.shieldCheck,
             size: 11,
             color: AppTheme.textMuted.withValues(alpha: 0.9),
           ),

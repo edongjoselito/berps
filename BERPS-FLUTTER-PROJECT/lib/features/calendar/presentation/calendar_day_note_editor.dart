@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/network/api_exception.dart';
 import '../../../core/theme/app_theme.dart';
@@ -227,7 +227,7 @@ class _CalendarDayNoteEditorState extends State<CalendarDayNoteEditor> {
             MobileHeader(
               title: _formatDate(widget.date),
               subtitle: _isEditing ? 'Edit note' : 'New note',
-              leadingIcon: PhosphorIconsBold.caretLeft,
+              leadingIcon: LucideIcons.chevronLeft,
               onLeadingTap: () {
                 Haptics.light();
                 Navigator.of(context).maybePop();
@@ -239,7 +239,7 @@ class _CalendarDayNoteEditorState extends State<CalendarDayNoteEditor> {
                     IconButton(
                       onPressed: _deleting ? null : _delete,
                       icon: Icon(
-                        PhosphorIconsBold.trash,
+                        LucideIcons.trash2,
                         color: _deleting ? AppTheme.textMuted : AppTheme.danger,
                       ),
                     ),

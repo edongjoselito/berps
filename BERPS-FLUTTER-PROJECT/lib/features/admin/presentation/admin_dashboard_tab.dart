@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/network/api_exception.dart';
 import '../../../core/theme/app_theme.dart';
@@ -77,7 +77,7 @@ class _AdminDashboardTabState extends State<AdminDashboardTab> {
               AdminHeader(
                 title: 'Dashboard',
                 onMenu: widget.onMenu,
-                trailingIcon: PhosphorIconsBold.arrowClockwise,
+                trailingIcon: LucideIcons.rotateCw,
                 onTrailingTap: _reload,
               ),
               const SizedBox(height: 14),
@@ -133,25 +133,25 @@ class _AdminDashboardTabState extends State<AdminDashboardTab> {
               AdminMetricCardData(
                 label: 'Payments',
                 value: _peso(d.todaysPayments),
-                icon: PhosphorIconsBold.coins,
+                icon: LucideIcons.coins,
                 accent: AppTheme.success,
               ),
               AdminMetricCardData(
                 label: 'Expenses',
                 value: _peso(d.todaysExpenses),
-                icon: PhosphorIconsBold.receipt,
+                icon: LucideIcons.receipt,
                 accent: AppTheme.danger,
               ),
               AdminMetricCardData(
                 label: 'Receivables',
                 value: _peso(d.openReceivable),
-                icon: PhosphorIconsBold.scales,
+                icon: LucideIcons.scale,
                 accent: AppTheme.warning,
               ),
               AdminMetricCardData(
                 label: 'Clients',
                 value: '${d.totalClients}',
-                icon: PhosphorIconsBold.usersThree,
+                icon: LucideIcons.users,
                 accent: AppTheme.primary,
                 onTap: widget.onOpenClients,
               ),
@@ -298,21 +298,21 @@ class _AdminDashboardTabState extends State<AdminDashboardTab> {
           'Due today',
           c.dueToday,
           AppTheme.warning,
-          PhosphorIconsBold.clock,
+          LucideIcons.clock,
         ),
         const SizedBox(width: 10),
         chip(
           'Due soon',
           c.dueSoon,
           AppTheme.primaryDark,
-          PhosphorIconsBold.calendarDots,
+          LucideIcons.calendarDays,
         ),
         const SizedBox(width: 10),
         chip(
           'Overdue',
           c.overdue,
           AppTheme.danger,
-          PhosphorIconsBold.warningCircle,
+          LucideIcons.circleAlert,
         ),
       ],
     );
@@ -352,7 +352,7 @@ class _AdminDashboardTabState extends State<AdminDashboardTab> {
           Row(
             children: [
               const Icon(
-                PhosphorIconsBold.calendarBlank,
+                LucideIcons.calendarDays,
                 size: 13,
                 color: AppTheme.textMuted,
               ),

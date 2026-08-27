@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/network/api_exception.dart';
 import '../../../core/theme/app_theme.dart';
@@ -107,7 +107,7 @@ class _RemindersScreenState extends State<RemindersScreen> {
         backgroundColor: AppTheme.primaryDark,
         foregroundColor: Colors.white,
         onPressed: () => _openEditor(),
-        icon: const Icon(PhosphorIconsBold.plus, size: 18),
+        icon: const Icon(LucideIcons.plus, size: 18),
         label: const Text(
           'New reminder',
           style: TextStyle(fontWeight: FontWeight.w800),
@@ -140,7 +140,7 @@ class _RemindersScreenState extends State<RemindersScreen> {
                     subtitle: data != null && data.dueTodayCount > 0
                         ? '${data.dueTodayCount} due today'
                         : 'Stay on top of what matters',
-                    leadingIcon: PhosphorIconsBold.caretLeft,
+                    leadingIcon: LucideIcons.chevronLeft,
                     onLeadingTap: () {
                       Haptics.light();
                       Navigator.of(context).maybePop();
@@ -229,7 +229,7 @@ class _ReminderCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
-                PhosphorIconsBold.bellRinging,
+                LucideIcons.bellRing,
                 size: 18,
                 color: accent,
               ),
@@ -266,7 +266,7 @@ class _ReminderCard extends StatelessWidget {
                   Row(
                     children: [
                       Icon(
-                        PhosphorIconsBold.clock,
+                        LucideIcons.clock,
                         size: 12,
                         color: accent,
                       ),
@@ -316,7 +316,7 @@ class _ReminderCard extends StatelessWidget {
               child: const Padding(
                 padding: EdgeInsets.only(left: 8),
                 child: Icon(
-                  PhosphorIconsBold.trash,
+                  LucideIcons.trash2,
                   size: 17,
                   color: AppTheme.danger,
                 ),
@@ -534,7 +534,7 @@ class _ReminderEditorSheetState extends State<_ReminderEditorSheet> {
                     child: _PickerField(
                       label: 'Date',
                       value: _dateLabel,
-                      icon: PhosphorIconsBold.calendarBlank,
+                      icon: LucideIcons.calendarDays,
                       onTap: _pickDate,
                     ),
                   ),
@@ -543,7 +543,7 @@ class _ReminderEditorSheetState extends State<_ReminderEditorSheet> {
                     child: _PickerField(
                       label: 'Time',
                       value: _timeLabel,
-                      icon: PhosphorIconsBold.clock,
+                      icon: LucideIcons.clock,
                       onTap: _pickTime,
                     ),
                   ),
@@ -723,7 +723,7 @@ class _EmptyState extends StatelessWidget {
               borderRadius: BorderRadius.circular(18),
             ),
             child: const Icon(
-              PhosphorIconsBold.bellRinging,
+              LucideIcons.bellRing,
               color: AppTheme.primary,
               size: 28,
             ),
@@ -780,7 +780,7 @@ class _ErrorCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Icon(
-                  PhosphorIconsBold.warningCircle,
+                  LucideIcons.circleAlert,
                   color: AppTheme.danger,
                   size: 18,
                 ),
@@ -808,7 +808,7 @@ class _ErrorCard extends StatelessWidget {
           const SizedBox(height: 14),
           FilledButton.icon(
             onPressed: onRetry,
-            icon: const Icon(PhosphorIconsBold.arrowsClockwise, size: 16),
+            icon: const Icon(LucideIcons.refreshCw, size: 16),
             label: const Text('Try again'),
           ),
         ],

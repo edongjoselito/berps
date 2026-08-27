@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/responsive.dart';
@@ -113,7 +113,7 @@ class _AdminAccomplishmentsScreenState
                   const Padding(
                     padding: EdgeInsets.only(top: 50),
                     child: AdminEmptyView(
-                      icon: PhosphorIconsFill.trophy,
+                      icon: LucideIcons.trophy,
                       title: 'No accomplishments',
                       message: 'Nothing was closed in this period.',
                     ),

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/haptics.dart';
@@ -75,7 +75,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                 shape: BoxShape.circle,
               ),
               child: const Icon(
-                PhosphorIconsBold.signOut,
+                LucideIcons.logOut,
                 color: AppTheme.danger,
                 size: 28,
               ),
@@ -197,23 +197,23 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
           labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
           destinations: const [
             NavigationDestination(
-              icon: Icon(PhosphorIconsRegular.squaresFour),
-              selectedIcon: Icon(PhosphorIconsFill.squaresFour),
+              icon: Icon(LucideIcons.layoutGrid),
+              selectedIcon: Icon(LucideIcons.layoutGrid),
               label: 'Dashboard',
             ),
             NavigationDestination(
-              icon: Icon(PhosphorIconsRegular.listChecks),
-              selectedIcon: Icon(PhosphorIconsFill.listChecks),
+              icon: Icon(LucideIcons.listChecks),
+              selectedIcon: Icon(LucideIcons.listChecks),
               label: 'Tasks',
             ),
             NavigationDestination(
-              icon: Icon(PhosphorIconsRegular.usersThree),
-              selectedIcon: Icon(PhosphorIconsFill.usersThree),
+              icon: Icon(LucideIcons.users),
+              selectedIcon: Icon(LucideIcons.users),
               label: 'Clients',
             ),
             NavigationDestination(
-              icon: Icon(PhosphorIconsRegular.dotsThreeOutline),
-              selectedIcon: Icon(PhosphorIconsFill.dotsThreeOutline),
+              icon: Icon(LucideIcons.ellipsisVertical),
+              selectedIcon: Icon(LucideIcons.ellipsisVertical),
               label: 'More',
             ),
           ],

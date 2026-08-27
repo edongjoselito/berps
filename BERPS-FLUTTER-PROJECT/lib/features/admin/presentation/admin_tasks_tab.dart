@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/network/api_exception.dart';
 import '../../../core/theme/app_theme.dart';
@@ -76,7 +76,7 @@ class _AdminTasksTabState extends State<AdminTasksTab> {
           return FloatingActionButton.extended(
             onPressed: () => _openCreate(snapshot.data!),
             backgroundColor: AppTheme.primaryDark,
-            icon: const Icon(PhosphorIconsBold.plus, color: Colors.white),
+            icon: const Icon(LucideIcons.plus, color: Colors.white),
             label: const Text('New task',
                 style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800)),
           );
@@ -131,7 +131,7 @@ class _AdminTasksTabState extends State<AdminTasksTab> {
                   const Padding(
                     padding: EdgeInsets.only(top: 50),
                     child: AdminEmptyView(
-                      icon: PhosphorIconsFill.checkCircle,
+                      icon: LucideIcons.circleCheck,
                       title: 'No tasks here',
                       message: 'Tap “New task” to assign one.',
                     ),
@@ -195,7 +195,7 @@ class _AdminTasksTabState extends State<AdminTasksTab> {
           const SizedBox(height: 6),
           Row(
             children: [
-              Icon(PhosphorIconsBold.user, size: 13, color: AppTheme.textMuted),
+              Icon(LucideIcons.user, size: 13, color: AppTheme.textMuted),
               const SizedBox(width: 5),
               Expanded(
                 child: Text(
@@ -214,7 +214,7 @@ class _AdminTasksTabState extends State<AdminTasksTab> {
           const SizedBox(height: 3),
           Row(
             children: [
-              Icon(PhosphorIconsBold.folderSimple,
+              Icon(LucideIcons.folder,
                   size: 13, color: AppTheme.textMuted),
               const SizedBox(width: 5),
               Expanded(
@@ -579,7 +579,7 @@ class _CreateTaskSheetState extends State<_CreateTaskSheet> {
             ),
             child: Row(
               children: [
-                Icon(PhosphorIconsBold.calendarBlank,
+                Icon(LucideIcons.calendarDays,
                     size: 16, color: AppTheme.textSecondary),
                 const SizedBox(width: 8),
                 Expanded(

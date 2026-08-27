@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/network/api_exception.dart';
 import '../../../core/theme/app_theme.dart';
@@ -246,7 +246,7 @@ class _Header extends StatelessWidget {
                 child: const Padding(
                   padding: EdgeInsets.all(8),
                   child: Icon(
-                    PhosphorIconsBold.caretLeft,
+                    LucideIcons.chevronLeft,
                     color: Colors.white,
                     size: 20,
                   ),
@@ -286,7 +286,7 @@ class _Header extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Icon(
-                PhosphorIconsBold.clock,
+                LucideIcons.clock,
                 color: Colors.white,
                 size: 22,
               ),
@@ -366,7 +366,7 @@ class _MonthSelector extends StatelessWidget {
                     borderRadius: BorderRadius.all(Radius.circular(12)),
                   ),
                   child: const Icon(
-                    PhosphorIconsBold.calendarBlank,
+                    LucideIcons.calendarDays,
                     color: Colors.white,
                     size: 20,
                   ),
@@ -400,12 +400,12 @@ class _MonthSelector extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     _MonthArrow(
-                      icon: PhosphorIconsBold.caretLeft,
+                      icon: LucideIcons.chevronLeft,
                       onTap: onPrev,
                     ),
                     const SizedBox(width: 6),
                     _MonthArrow(
-                      icon: PhosphorIconsBold.caretRight,
+                      icon: LucideIcons.chevronRight,
                       onTap: onNext,
                     ),
                     const SizedBox(width: 8),
@@ -424,7 +424,7 @@ class _MonthSelector extends StatelessWidget {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Icon(
-                                PhosphorIconsBold.calendarDots,
+                                LucideIcons.calendarDays,
                                 size: 14,
                                 color: AppTheme.primaryDark,
                               ),
@@ -485,7 +485,7 @@ class _SummaryCard extends StatelessWidget {
           children: [
             Expanded(
               child: _StatCard(
-                icon: PhosphorIconsBold.checkCircle,
+                icon: LucideIcons.circleCheck,
                 label: 'Present',
                 value: data.presentDays.toString(),
                 color: AppTheme.success,
@@ -495,7 +495,7 @@ class _SummaryCard extends StatelessWidget {
             const SizedBox(width: 10),
             Expanded(
               child: _StatCard(
-                icon: PhosphorIconsBold.xCircle,
+                icon: LucideIcons.circleX,
                 label: 'Absent',
                 value: data.absentDays.toString(),
                 color: AppTheme.danger,
@@ -505,7 +505,7 @@ class _SummaryCard extends StatelessWidget {
             const SizedBox(width: 10),
             Expanded(
               child: _StatCard(
-                icon: PhosphorIconsBold.clock,
+                icon: LucideIcons.clock,
                 label: 'Pending',
                 value: data.pendingDays.toString(),
                 color: AppTheme.warning,
@@ -533,7 +533,7 @@ class _SummaryCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Icon(
-                  PhosphorIconsBold.timer,
+                  LucideIcons.timer,
                   color: Colors.white,
                   size: 18,
                 ),
@@ -732,13 +732,13 @@ class _DtrRowCard extends StatelessWidget {
   IconData get _statusIcon {
     switch (row.status) {
       case 'Present':
-        return PhosphorIconsBold.checkCircle;
+        return LucideIcons.circleCheck;
       case 'Absent':
-        return PhosphorIconsBold.xCircle;
+        return LucideIcons.circleX;
       case 'Pending':
-        return PhosphorIconsBold.clock;
+        return LucideIcons.clock;
       default:
-        return PhosphorIconsBold.question;
+        return LucideIcons.circleHelp;
     }
   }
 
@@ -867,14 +867,14 @@ class _DtrRowCard extends StatelessWidget {
                         _TimelineBreakdown(
                           label: 'AM',
                           intervals: row.amBreakdown,
-                          icon: PhosphorIconsBold.sun,
+                          icon: LucideIcons.sun,
                           color: AppTheme.warning,
                         ),
                         const SizedBox(height: 8),
                         _TimelineBreakdown(
                           label: 'PM',
                           intervals: row.pmBreakdown,
-                          icon: PhosphorIconsBold.moon,
+                          icon: LucideIcons.moon,
                           color: AppTheme.primaryDark,
                         ),
                         if (row.totalSeconds > 0) ...[
@@ -884,7 +884,7 @@ class _DtrRowCard extends StatelessWidget {
                           Row(
                             children: [
                               const Icon(
-                                PhosphorIconsBold.timer,
+                                LucideIcons.timer,
                                 size: 14,
                                 color: AppTheme.textSecondary,
                               ),
@@ -1135,7 +1135,7 @@ class _ErrorCard extends StatelessWidget {
               shape: BoxShape.circle,
             ),
             child: const Icon(
-              PhosphorIconsBold.warningCircle,
+              LucideIcons.circleAlert,
               color: AppTheme.danger,
               size: 26,
             ),
@@ -1162,7 +1162,7 @@ class _ErrorCard extends StatelessWidget {
           const SizedBox(height: 18),
           FilledButton.icon(
             onPressed: onRetry,
-            icon: const Icon(PhosphorIconsBold.arrowsClockwise, size: 16),
+            icon: const Icon(LucideIcons.refreshCw, size: 16),
             label: const Text('Try again'),
           ),
         ],
@@ -1214,7 +1214,7 @@ class _EmptyState extends StatelessWidget {
               shape: BoxShape.circle,
             ),
             child: const Icon(
-              PhosphorIconsBold.clipboardText,
+              LucideIcons.clipboardList,
               size: 32,
               color: AppTheme.primaryDark,
             ),

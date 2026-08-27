@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/network/api_exception.dart';
 import '../../../core/theme/app_theme.dart';
@@ -139,7 +139,7 @@ class _StaffAttendanceTabState extends State<StaffAttendanceTab> {
                 bottom: false,
                 child: MobileHeader(
                   title: 'Attendance',
-                  leadingIcon: PhosphorIconsBold.list,
+                  leadingIcon: LucideIcons.list,
                   onLeadingTap: () {
                     Haptics.light();
                     widget.onMenu();
@@ -220,7 +220,7 @@ class _StaffAttendanceTabState extends State<StaffAttendanceTab> {
                   delay: const Duration(milliseconds: 240),
                   child: const _SectionTitle(
                     'Recent Entries',
-                    icon: PhosphorIconsBold.clockCounterClockwise,
+                    icon: LucideIcons.rotateCcw,
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -319,7 +319,7 @@ class _RangeCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(9),
                 ),
                 child: const Icon(
-                  PhosphorIconsBold.calendarBlank,
+                  LucideIcons.calendarDays,
                   color: AppTheme.primary,
                   size: 14,
                 ),
@@ -373,7 +373,7 @@ class _RangeCard extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: const [
                       Icon(
-                        PhosphorIconsBold.funnel,
+                        LucideIcons.filter,
                         size: 12,
                         color: AppTheme.primaryDark,
                       ),
@@ -548,7 +548,7 @@ class _PunchHeroCard extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         const Icon(
-                          PhosphorIconsBold.clockClockwise,
+                          LucideIcons.clock,
                           color: Colors.white,
                           size: 12,
                         ),
@@ -577,7 +577,7 @@ class _PunchHeroCard extends StatelessWidget {
                   value: data.status.latestTimeInLabel.isEmpty
                       ? '--'
                       : data.status.latestTimeInLabel,
-                  icon: PhosphorIconsBold.signIn,
+                  icon: LucideIcons.logIn,
                   color: AppTheme.success,
                 ),
               ),
@@ -588,7 +588,7 @@ class _PunchHeroCard extends StatelessWidget {
                   value: data.status.latestTimeOutLabel.isEmpty
                       ? '--'
                       : data.status.latestTimeOutLabel,
-                  icon: PhosphorIconsBold.signOut,
+                  icon: LucideIcons.logOut,
                   color: AppTheme.primaryDark,
                 ),
               ),
@@ -600,7 +600,7 @@ class _PunchHeroCard extends StatelessWidget {
               Expanded(
                 child: _PunchButton(
                   label: 'Time In',
-                  icon: PhosphorIconsBold.signIn,
+                  icon: LucideIcons.logIn,
                   primary: true,
                   onTap: onTimeIn,
                 ),
@@ -609,7 +609,7 @@ class _PunchHeroCard extends StatelessWidget {
               Expanded(
                 child: _PunchButton(
                   label: 'Time Out',
-                  icon: PhosphorIconsBold.signOut,
+                  icon: LucideIcons.logOut,
                   primary: false,
                   onTap: onTimeOut,
                 ),
@@ -756,28 +756,28 @@ class _SummaryRow extends StatelessWidget {
         'Present',
         '${summary.presentDays}',
         AppTheme.success,
-        PhosphorIconsBold.checkCircle,
+        LucideIcons.circleCheck,
         const [Color(0xFF16A34A), Color(0xFF15803D)],
       ),
       _SummaryItem(
         'Pending',
         '${summary.pendingDays}',
         AppTheme.warning,
-        PhosphorIconsBold.clock,
+        LucideIcons.clock,
         const [Color(0xFFF59E0B), Color(0xFFD97706)],
       ),
       _SummaryItem(
         'Hours',
         summary.totalHoursLabel,
         AppTheme.primaryDark,
-        PhosphorIconsBold.clockCounterClockwise,
+        LucideIcons.rotateCcw,
         const [Color(0xFF1E3A5F), Color(0xFF2D5A8A)],
       ),
       _SummaryItem(
         'Accomplishments',
         '${summary.accomplishmentCount}',
         AppTheme.primary,
-        PhosphorIconsBold.checkSquareOffset,
+        LucideIcons.squareCheck,
         const [Color(0xFF2563EB), Color(0xFF1D4ED8)],
       ),
     ];
@@ -949,12 +949,12 @@ class _AttendanceRecordCard extends StatelessWidget {
           Row(
             children: [
               _MetricPill(
-                icon: PhosphorIconsBold.clockCountdown,
+                icon: LucideIcons.timer,
                 label: record.totalHoursLabel,
               ),
               const SizedBox(width: 8),
               _MetricPill(
-                icon: PhosphorIconsBold.checkSquareOffset,
+                icon: LucideIcons.squareCheck,
                 label: '${record.accomplishmentCount} done',
               ),
             ],
@@ -995,7 +995,7 @@ class _IntervalRow extends StatelessWidget {
           Row(
             children: [
               const Icon(
-                PhosphorIconsBold.signIn,
+                LucideIcons.logIn,
                 size: 14,
                 color: AppTheme.success,
               ),
@@ -1024,8 +1024,8 @@ class _IntervalRow extends StatelessWidget {
             children: [
               Icon(
                 interval.isOpen
-                    ? PhosphorIconsBold.clockAfternoon
-                    : PhosphorIconsBold.signOut,
+                    ? LucideIcons.clock4
+                    : LucideIcons.logOut,
                 size: 14,
                 color: interval.isOpen
                     ? AppTheme.warning
@@ -1190,7 +1190,7 @@ class _AttendanceError extends StatelessWidget {
           const SizedBox(height: 14),
           FilledButton.icon(
             onPressed: onRetry,
-            icon: const Icon(PhosphorIconsBold.arrowsClockwise, size: 16),
+            icon: const Icon(LucideIcons.refreshCw, size: 16),
             label: const Text('Try again'),
           ),
         ],
@@ -1223,7 +1223,7 @@ class _EmptyState extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
             ),
             child: const Icon(
-              PhosphorIconsBold.tray,
+              LucideIcons.inbox,
               color: AppTheme.primaryDark,
               size: 18,
             ),

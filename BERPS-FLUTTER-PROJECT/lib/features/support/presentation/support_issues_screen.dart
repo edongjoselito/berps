@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/network/api_exception.dart';
 import '../../../core/theme/app_theme.dart';
@@ -34,10 +34,10 @@ class _SupportIssuesScreenState extends State<SupportIssuesScreen> {
   Future<SupportIssuesData>? _future;
 
   static const _scopes = <_ScopeOption>[
-    _ScopeOption('open', 'Open', PhosphorIconsBold.envelopeOpen),
-    _ScopeOption('unassigned', 'Unassigned', PhosphorIconsBold.userMinus),
-    _ScopeOption('closed', 'Closed', PhosphorIconsBold.checkCircle),
-    _ScopeOption('all', 'All', PhosphorIconsBold.rows),
+    _ScopeOption('open', 'Open', LucideIcons.mailOpen),
+    _ScopeOption('unassigned', 'Unassigned', LucideIcons.userMinus),
+    _ScopeOption('closed', 'Closed', LucideIcons.circleCheck),
+    _ScopeOption('all', 'All', LucideIcons.rows3),
   ];
 
   @override
@@ -96,7 +96,7 @@ class _SupportIssuesScreenState extends State<SupportIssuesScreen> {
                   child: MobileHeader(
                     title: 'Support',
                     subtitle: 'Customer issues and follow-ups',
-                    leadingIcon: PhosphorIconsBold.arrowLeft,
+                    leadingIcon: LucideIcons.arrowLeft,
                     onLeadingTap: () => Navigator.of(context).maybePop(),
                   ),
                 ),
@@ -398,7 +398,7 @@ class _IssueCard extends StatelessWidget {
               child: Row(
                 children: [
                   const Icon(
-                    PhosphorIconsBold.user,
+                    LucideIcons.user,
                     size: 11,
                     color: AppTheme.textSecondary,
                   ),
@@ -428,23 +428,23 @@ class _IssueCard extends StatelessWidget {
                 children: [
                   if (issue.departmentName.isNotEmpty)
                     _MetaPill(
-                      icon: PhosphorIconsBold.buildingOffice,
+                      icon: LucideIcons.building2,
                       label: issue.departmentName,
                     ),
                   _MetaPill(
-                    icon: PhosphorIconsBold.flag,
+                    icon: LucideIcons.flag,
                     label: issue.priority.toUpperCase(),
                     accent: priority,
                   ),
                   if (issue.assignedToMe)
                     const _MetaPill(
-                      icon: PhosphorIconsBold.userCircleCheck,
+                      icon: LucideIcons.userCheck,
                       label: 'YOU',
                       accent: AppTheme.success,
                     ),
                   if (issue.createdLabel.isNotEmpty)
                     _MetaPill(
-                      icon: PhosphorIconsBold.clock,
+                      icon: LucideIcons.clock,
                       label: issue.createdLabel,
                     ),
                 ],
@@ -550,7 +550,7 @@ class _EmptyState extends StatelessWidget {
               shape: BoxShape.circle,
             ),
             child: const Icon(
-              PhosphorIconsBold.tray,
+              LucideIcons.inbox,
               size: 26,
               color: AppTheme.primaryDark,
             ),
@@ -619,7 +619,7 @@ class _ErrorState extends StatelessWidget {
               onRetry();
               AppToast.info(context, 'Reloading…');
             },
-            icon: const Icon(PhosphorIconsBold.arrowsClockwise, size: 16),
+            icon: const Icon(LucideIcons.refreshCw, size: 16),
             label: const Text('Try again'),
           ),
         ],

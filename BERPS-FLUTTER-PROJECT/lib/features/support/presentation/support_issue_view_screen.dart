@@ -4,7 +4,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/network/api_exception.dart';
@@ -435,7 +435,7 @@ class _SupportIssueViewScreenState extends State<SupportIssueViewScreen> {
                         snapshot.data?.issue.ticketNumber.isNotEmpty == true
                         ? snapshot.data!.issue.ticketNumber
                         : 'Ticket details',
-                    leadingIcon: PhosphorIconsBold.arrowLeft,
+                    leadingIcon: LucideIcons.arrowLeft,
                     onLeadingTap: () => Navigator.of(context).maybePop(),
                   ),
                 ),
@@ -496,7 +496,7 @@ class _SupportIssueViewScreenState extends State<SupportIssueViewScreen> {
                   child: const Row(
                     children: [
                       Icon(
-                        PhosphorIconsBold.lock,
+                        LucideIcons.lock,
                         size: 13,
                         color: AppTheme.textMuted,
                       ),
@@ -569,7 +569,7 @@ class _ChatBody extends StatelessWidget {
         ),
         const SizedBox(height: 14),
         _SectionHeader(
-          icon: PhosphorIconsBold.chatTeardropText,
+          icon: LucideIcons.messageSquareText,
           title: 'Conversation',
           count: detail.canViewChat ? detail.comments.length : 0,
         ),
@@ -613,7 +613,7 @@ class _ConversationCard extends StatelessWidget {
           const Row(
             children: [
               Icon(
-                PhosphorIconsBold.chatsCircle,
+                LucideIcons.messagesSquare,
                 size: 16,
                 color: AppTheme.primaryDark,
               ),
@@ -720,7 +720,7 @@ class _IssueSummaryCardState extends State<_IssueSummaryCard> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Icon(
-                      PhosphorIconsFill.lifebuoy,
+                      LucideIcons.lifeBuoy,
                       color: _priorityColor,
                       size: 18,
                     ),
@@ -787,7 +787,7 @@ class _IssueSummaryCardState extends State<_IssueSummaryCard> {
                     duration: const Duration(milliseconds: 220),
                     turns: _expanded ? 0.5 : 0,
                     child: const Icon(
-                      PhosphorIconsBold.caretDown,
+                      LucideIcons.chevronDown,
                       size: 14,
                       color: AppTheme.textSecondary,
                     ),
@@ -814,7 +814,7 @@ class _IssueSummaryCardState extends State<_IssueSummaryCard> {
                             child: Row(
                               children: [
                                 const Icon(
-                                  PhosphorIconsBold.envelopeSimple,
+                                  LucideIcons.mail,
                                   size: 13,
                                   color: AppTheme.textSecondary,
                                 ),
@@ -858,22 +858,22 @@ class _IssueSummaryCardState extends State<_IssueSummaryCard> {
                           children: [
                             if (issue.departmentName.isNotEmpty)
                               _SummaryPill(
-                                icon: PhosphorIconsBold.buildingOffice,
+                                icon: LucideIcons.building2,
                                 label: issue.departmentName,
                               ),
                             if (issue.projectName.isNotEmpty)
                               _SummaryPill(
-                                icon: PhosphorIconsBold.folder,
+                                icon: LucideIcons.folder,
                                 label: issue.projectName,
                               ),
                             _SummaryPill(
-                              icon: PhosphorIconsBold.flag,
+                              icon: LucideIcons.flag,
                               label: issue.priority.toUpperCase(),
                               accent: _priorityColor,
                             ),
                             if (issue.assignedName.isNotEmpty)
                               _SummaryPill(
-                                icon: PhosphorIconsBold.user,
+                                icon: LucideIcons.user,
                                 label: issue.assignedToMe
                                     ? 'Assigned to you'
                                     : issue.assignedName,
@@ -883,7 +883,7 @@ class _IssueSummaryCardState extends State<_IssueSummaryCard> {
                               ),
                             if (issue.createdLabel.isNotEmpty)
                               _SummaryPill(
-                                icon: PhosphorIconsBold.clock,
+                                icon: LucideIcons.clock,
                                 label: issue.createdLabel,
                               ),
                           ],
@@ -924,7 +924,7 @@ class _IssueActionsCard extends StatelessWidget {
     if (issue.isUnassigned && !issue.isClosed) {
       actions.add(
         _ActionChip(
-          icon: PhosphorIconsBold.userPlus,
+          icon: LucideIcons.userPlus,
           label: 'Assign to me',
           accent: AppTheme.success,
           onTap: onAssignToMe,
@@ -934,7 +934,7 @@ class _IssueActionsCard extends StatelessWidget {
     if (!issue.isClosed) {
       actions.add(
         _ActionChip(
-          icon: PhosphorIconsBold.arrowBendUpRight,
+          icon: LucideIcons.cornerUpRight,
           label: 'Forward',
           accent: AppTheme.warning,
           onTap: onForward,
@@ -942,7 +942,7 @@ class _IssueActionsCard extends StatelessWidget {
       );
       actions.add(
         _ActionChip(
-          icon: PhosphorIconsBold.usersThree,
+          icon: LucideIcons.users,
           label: 'Tag',
           accent: AppTheme.primaryDark,
           onTap: onTag,
@@ -951,8 +951,8 @@ class _IssueActionsCard extends StatelessWidget {
       actions.add(
         _ActionChip(
           icon: closing
-              ? PhosphorIconsBold.arrowsClockwise
-              : PhosphorIconsBold.checkCircle,
+              ? LucideIcons.refreshCw
+              : LucideIcons.circleCheck,
           label: closing ? 'Closing…' : 'Close',
           accent: AppTheme.danger,
           onTap: closing ? null : onCloseTicket,
@@ -1459,7 +1459,7 @@ class _ChatLocked extends StatelessWidget {
               shape: BoxShape.circle,
             ),
             child: const Icon(
-              PhosphorIconsBold.lock,
+              LucideIcons.lock,
               size: 26,
               color: AppTheme.warning,
             ),
@@ -1512,7 +1512,7 @@ class _ChatEmpty extends StatelessWidget {
               shape: BoxShape.circle,
             ),
             child: const Icon(
-              PhosphorIconsBold.chatTeardropText,
+              LucideIcons.messageSquareText,
               size: 26,
               color: AppTheme.primaryDark,
             ),
@@ -1613,7 +1613,7 @@ class _ErrorState extends StatelessWidget {
               const SizedBox(height: 12),
               FilledButton.icon(
                 onPressed: onRetry,
-                icon: const Icon(PhosphorIconsBold.arrowsClockwise, size: 16),
+                icon: const Icon(LucideIcons.refreshCw, size: 16),
                 label: const Text('Try again'),
               ),
             ],
@@ -1687,7 +1687,7 @@ class _ReplyComposer extends StatelessWidget {
                       border: Border.all(color: AppTheme.border),
                     ),
                     child: const Icon(
-                      PhosphorIconsBold.plus,
+                      LucideIcons.plus,
                       color: AppTheme.primaryDark,
                       size: 17,
                     ),
@@ -1743,7 +1743,7 @@ class _ReplyComposer extends StatelessWidget {
                             ),
                           )
                         : const Icon(
-                            PhosphorIconsBold.paperPlaneTilt,
+                            LucideIcons.send,
                             color: Colors.white,
                             size: 17,
                           ),
@@ -1767,23 +1767,23 @@ class _AttachmentActionSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final items = <({IconData icon, String label, _AttachmentAction value})>[
       (
-        icon: PhosphorIconsBold.paperclip,
+        icon: LucideIcons.paperclip,
         label: 'Choose File',
         value: _AttachmentAction.file,
       ),
       if (!kIsWeb) ...[
         (
-          icon: PhosphorIconsBold.image,
+          icon: LucideIcons.image,
           label: 'Photo Library',
           value: _AttachmentAction.photo,
         ),
         (
-          icon: PhosphorIconsBold.camera,
+          icon: LucideIcons.camera,
           label: 'Take Photo',
           value: _AttachmentAction.camera,
         ),
         (
-          icon: PhosphorIconsBold.videoCamera,
+          icon: LucideIcons.video,
           label: 'Record Video',
           value: _AttachmentAction.video,
         ),
@@ -1874,7 +1874,7 @@ class _SelectedAttachmentBanner extends StatelessWidget {
       child: Row(
         children: [
           const Icon(
-            PhosphorIconsBold.paperclip,
+            LucideIcons.paperclip,
             size: 14,
             color: AppTheme.primaryDark,
           ),
@@ -1902,7 +1902,7 @@ class _SelectedAttachmentBanner extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8),
               ),
               child: const Icon(
-                PhosphorIconsBold.x,
+                LucideIcons.x,
                 size: 12,
                 color: AppTheme.textSecondary,
               ),
@@ -2151,7 +2151,7 @@ class _AttachmentChip extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
-              PhosphorIconsBold.paperclip,
+              LucideIcons.paperclip,
               size: 12,
               color: dark ? Colors.white : AppTheme.primaryDark,
             ),

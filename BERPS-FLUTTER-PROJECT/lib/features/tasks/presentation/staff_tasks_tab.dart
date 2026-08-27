@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/network/api_exception.dart';
 import '../../../core/theme/app_theme.dart';
@@ -169,7 +169,7 @@ class _StaffTasksTabState extends State<StaffTasksTab> {
             return _SheetContainer(
               title: 'Add Task Status',
               subtitle: task.title,
-              icon: PhosphorIconsBold.clipboardText,
+              icon: LucideIcons.clipboardList,
               child: Padding(
                 padding: EdgeInsets.fromLTRB(
                   16,
@@ -196,7 +196,7 @@ class _StaffTasksTabState extends State<StaffTasksTab> {
                         Expanded(
                           child: _StatusChoice(
                             label: 'Open',
-                            icon: PhosphorIconsBold.clock,
+                            icon: LucideIcons.clock,
                             selected: selectedStatus == '1',
                             onTap: () => setSheet(() => selectedStatus = '1'),
                           ),
@@ -205,7 +205,7 @@ class _StaffTasksTabState extends State<StaffTasksTab> {
                         Expanded(
                           child: _StatusChoice(
                             label: 'Closed',
-                            icon: PhosphorIconsBold.checkCircle,
+                            icon: LucideIcons.circleCheck,
                             selected: selectedStatus == '0',
                             onTap: () => setSheet(() => selectedStatus = '0'),
                           ),
@@ -285,7 +285,7 @@ class _StaffTasksTabState extends State<StaffTasksTab> {
             return _SheetContainer(
               title: 'Forward Task',
               subtitle: task.title,
-              icon: PhosphorIconsBold.arrowsLeftRight,
+              icon: LucideIcons.arrowLeftRight,
               child: Padding(
                 padding: EdgeInsets.fromLTRB(
                   16,
@@ -451,7 +451,7 @@ class _StaffTasksTabState extends State<StaffTasksTab> {
                 bottom: false,
                 child: MobileHeader(
                   title: 'Tasks',
-                  leadingIcon: PhosphorIconsBold.list,
+                  leadingIcon: LucideIcons.list,
                   onLeadingTap: () {
                     Haptics.light();
                     widget.onMenu();
@@ -519,7 +519,7 @@ class _StaffTasksTabState extends State<StaffTasksTab> {
                 FadeSlide(
                   delay: const Duration(milliseconds: 190),
                   child: _TaskSectionHeader(
-                    icon: PhosphorIconsBold.listChecks,
+                    icon: LucideIcons.listChecks,
                     title: _sectionTitle(),
                     count: snapshot.data!.tasks.length,
                   ),
@@ -566,7 +566,7 @@ class _TaskStatsRow extends StatelessWidget {
         'Open',
         '${stats.open}',
         AppTheme.primary,
-        PhosphorIconsBold.folderOpen,
+        LucideIcons.folderOpen,
         const [Color(0xFF2563EB), Color(0xFF1D4ED8)],
         'open',
       ),
@@ -574,7 +574,7 @@ class _TaskStatsRow extends StatelessWidget {
         'Due Today',
         '${stats.dueToday}',
         AppTheme.accent,
-        PhosphorIconsBold.calendarCheck,
+        LucideIcons.calendarCheck,
         const [Color(0xFF0891B2), Color(0xFF0E7490)],
         'due_today',
       ),
@@ -582,7 +582,7 @@ class _TaskStatsRow extends StatelessWidget {
         'Overdue',
         '${stats.overdue}',
         AppTheme.danger,
-        PhosphorIconsBold.warningCircle,
+        LucideIcons.circleAlert,
         const [Color(0xFFDC2626), Color(0xFFB91C1C)],
         'overdue',
       ),
@@ -590,7 +590,7 @@ class _TaskStatsRow extends StatelessWidget {
         'Done',
         '${stats.closed}',
         AppTheme.success,
-        PhosphorIconsBold.checkCircle,
+        LucideIcons.circleCheck,
         const [Color(0xFF16A34A), Color(0xFF15803D)],
         'done',
       ),
@@ -672,7 +672,7 @@ class _TaskStatsRow extends StatelessWidget {
                                   shape: BoxShape.circle,
                                 ),
                                 child: const Icon(
-                                  PhosphorIconsBold.check,
+                                  LucideIcons.check,
                                   size: 10,
                                   color: Colors.white,
                                 ),
@@ -780,7 +780,7 @@ class _AddTaskButton extends StatelessWidget {
                   borderRadius: BorderRadius.circular(9),
                 ),
                 child: const Icon(
-                  PhosphorIconsBold.plus,
+                  LucideIcons.plus,
                   size: 14,
                   color: Colors.white,
                 ),
@@ -798,7 +798,7 @@ class _AddTaskButton extends StatelessWidget {
                 ),
               ),
               const Icon(
-                PhosphorIconsBold.arrowRight,
+                LucideIcons.arrowRight,
                 size: 14,
                 color: Colors.white,
               ),
@@ -846,7 +846,7 @@ class _TaskFilters extends StatelessWidget {
               Expanded(
                 child: _SegmentPill(
                   label: 'Open',
-                  icon: PhosphorIconsBold.listChecks,
+                  icon: LucideIcons.listChecks,
                   active: status == 'open',
                   onTap: () => onStatusChanged('open'),
                 ),
@@ -854,7 +854,7 @@ class _TaskFilters extends StatelessWidget {
               Expanded(
                 child: _SegmentPill(
                   label: 'Closed',
-                  icon: PhosphorIconsBold.checkCircle,
+                  icon: LucideIcons.circleCheck,
                   active: status == 'closed',
                   onTap: () => onStatusChanged('closed'),
                 ),
@@ -862,7 +862,7 @@ class _TaskFilters extends StatelessWidget {
               Expanded(
                 child: _SegmentPill(
                   label: 'All',
-                  icon: PhosphorIconsBold.rows,
+                  icon: LucideIcons.rows3,
                   active: status == 'all',
                   onTap: () => onStatusChanged('all'),
                 ),
@@ -873,7 +873,7 @@ class _TaskFilters extends StatelessWidget {
         const SizedBox(height: 10),
         _FilterChip(
           label: 'Forwarded Queue',
-          icon: PhosphorIconsBold.arrowsLeftRight,
+          icon: LucideIcons.arrowLeftRight,
           selected: scope == 'forwarded',
           onSelected: (selected) => onScopeChanged(selected ? 'forwarded' : ''),
         ),
@@ -1017,7 +1017,7 @@ class _TimeInWarning extends StatelessWidget {
               borderRadius: BorderRadius.circular(10),
             ),
             child: const Icon(
-              PhosphorIconsBold.warningCircle,
+              LucideIcons.circleAlert,
               color: AppTheme.warning,
               size: 16,
             ),
@@ -1185,7 +1185,7 @@ class _TaskCard extends StatelessWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(PhosphorIconsBold.flag, size: 10, color: _priorityColor),
+                  Icon(LucideIcons.flag, size: 10, color: _priorityColor),
                   const SizedBox(width: 4),
                   Text(
                     task.priorityLabel,
@@ -1205,17 +1205,17 @@ class _TaskCard extends StatelessWidget {
               runSpacing: 6,
               children: [
                 _TaskMetaPill(
-                  icon: PhosphorIconsBold.calendarBlank,
+                  icon: LucideIcons.calendarDays,
                   label: 'Reported ${formatCompactDate(task.reportedDate)}',
                 ),
                 _TaskMetaPill(
-                  icon: PhosphorIconsBold.clock,
+                  icon: LucideIcons.clock,
                   label: task.dueMetaLabel,
                   accent: dueColor,
                 ),
                 if (task.isForwardedPending)
                   _TaskMetaPill(
-                    icon: PhosphorIconsBold.arrowsLeftRight,
+                    icon: LucideIcons.arrowLeftRight,
                     label: 'Needs your first action',
                     accent: AppTheme.warning,
                   ),
@@ -1244,7 +1244,7 @@ class _TaskCard extends StatelessWidget {
               Row(
                 children: const [
                   Icon(
-                    PhosphorIconsBold.paperclip,
+                    LucideIcons.paperclip,
                     size: 12,
                     color: AppTheme.textSecondary,
                   ),
@@ -1411,7 +1411,7 @@ class _TaskTabError extends StatelessWidget {
           const SizedBox(height: 14),
           FilledButton.icon(
             onPressed: onRetry,
-            icon: const Icon(PhosphorIconsBold.arrowsClockwise, size: 16),
+            icon: const Icon(LucideIcons.refreshCw, size: 16),
             label: const Text('Try again'),
           ),
         ],
@@ -1432,7 +1432,7 @@ class _TaskActionSheet extends StatelessWidget {
     return _SheetContainer(
       title: 'Task Actions',
       subtitle: task.title,
-      icon: PhosphorIconsBold.dotsThreeOutlineVertical,
+      icon: LucideIcons.ellipsisVertical,
       child: Padding(
         padding: EdgeInsets.fromLTRB(
           12,
@@ -1444,21 +1444,21 @@ class _TaskActionSheet extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             _ActionRow(
-              icon: PhosphorIconsBold.pencilSimpleLine,
+              icon: LucideIcons.pencilLine,
               label: 'View / Update Task',
               subtitle: 'Edit details, checklist, mark complete',
               accent: AppTheme.primaryDark,
               onTap: () => Navigator.of(context).pop(_TaskAction.view),
             ),
             _ActionRow(
-              icon: PhosphorIconsBold.clipboardText,
+              icon: LucideIcons.clipboardList,
               label: 'Add Status',
               subtitle: 'Post a note and update task status',
               accent: AppTheme.primary,
               onTap: () => Navigator.of(context).pop(_TaskAction.status),
             ),
             _ActionRow(
-              icon: PhosphorIconsBold.arrowsLeftRight,
+              icon: LucideIcons.arrowLeftRight,
               label: 'Forward Task',
               subtitle: 'Hand it off to a teammate',
               accent: AppTheme.warning,
@@ -1466,7 +1466,7 @@ class _TaskActionSheet extends StatelessWidget {
             ),
             if (canDelete)
               _ActionRow(
-                icon: PhosphorIconsBold.trash,
+                icon: LucideIcons.trash2,
                 label: 'Delete Task',
                 subtitle: 'Only the creator can delete',
                 accent: AppTheme.danger,
@@ -1641,7 +1641,7 @@ class _ActionRow extends StatelessWidget {
                 ),
               ),
               Icon(
-                PhosphorIconsBold.caretRight,
+                LucideIcons.chevronRight,
                 size: 14,
                 color: danger ? AppTheme.danger : AppTheme.textMuted,
               ),
@@ -1750,7 +1750,7 @@ class _TaskEmptyState extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
             ),
             child: const Icon(
-              PhosphorIconsBold.checkSquareOffset,
+              LucideIcons.squareCheck,
               color: AppTheme.primaryDark,
               size: 18,
             ),

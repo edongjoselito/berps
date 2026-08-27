@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../core/theme/app_theme.dart';
@@ -219,7 +219,7 @@ class _StartupError extends StatelessWidget {
                   borderRadius: BorderRadius.circular(18),
                 ),
                 child: const Icon(
-                  PhosphorIconsFill.warningCircle,
+                  LucideIcons.circleAlert,
                   color: AppTheme.danger,
                   size: 28,
                 ),

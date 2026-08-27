@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/network/api_exception.dart';
 import '../../../core/theme/app_theme.dart';
@@ -103,7 +103,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                         snapshot.hasData && snapshot.data!.notifications.isEmpty
                         ? 'You are all caught up'
                         : 'Recent activity for your account',
-                    leadingIcon: PhosphorIconsBold.arrowLeft,
+                    leadingIcon: LucideIcons.arrowLeft,
                     onLeadingTap: () => Navigator.of(context).maybePop(),
                   ),
                 ),
@@ -149,8 +149,8 @@ class _NotificationCard extends StatelessWidget {
   final VoidCallback onTap;
 
   IconData get _icon {
-    if (item.isSupport) return PhosphorIconsBold.lifebuoy;
-    return PhosphorIconsBold.checkCircle;
+    if (item.isSupport) return LucideIcons.lifeBuoy;
+    return LucideIcons.circleCheck;
   }
 
   Color get _accent {
@@ -235,7 +235,7 @@ class _NotificationCard extends StatelessWidget {
                   Row(
                     children: [
                       Icon(
-                        PhosphorIconsBold.user,
+                        LucideIcons.user,
                         size: 11,
                         color: AppTheme.textMuted,
                       ),
@@ -311,7 +311,7 @@ class _EmptyState extends StatelessWidget {
               shape: BoxShape.circle,
             ),
             child: const Icon(
-              PhosphorIconsBold.bellSlash,
+              LucideIcons.bellOff,
               size: 26,
               color: AppTheme.primaryDark,
             ),
@@ -413,7 +413,7 @@ class _ErrorCard extends StatelessWidget {
           const SizedBox(height: 14),
           FilledButton.icon(
             onPressed: onRetry,
-            icon: const Icon(PhosphorIconsBold.arrowsClockwise, size: 16),
+            icon: const Icon(LucideIcons.refreshCw, size: 16),
             label: const Text('Try again'),
           ),
         ],

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/network/api_exception.dart';
@@ -125,7 +125,7 @@ class _NotesScreenState extends State<NotesScreen> {
         backgroundColor: AppTheme.primaryDark,
         foregroundColor: Colors.white,
         onPressed: () => _openEditor(),
-        icon: const Icon(PhosphorIconsBold.plus, size: 18),
+        icon: const Icon(LucideIcons.plus, size: 18),
         label: const Text(
           'New note',
           style: TextStyle(fontWeight: FontWeight.w800),
@@ -157,7 +157,7 @@ class _NotesScreenState extends State<NotesScreen> {
                   MobileHeader(
                     title: 'Notes',
                     subtitle: 'Your saved notes',
-                    leadingIcon: PhosphorIconsBold.caretLeft,
+                    leadingIcon: LucideIcons.chevronLeft,
                     onLeadingTap: () {
                       Haptics.light();
                       Navigator.of(context).maybePop();
@@ -186,7 +186,7 @@ class _NotesScreenState extends State<NotesScreen> {
                   else ...[
                     if (favorites.isNotEmpty) ...[
                       const _SectionHeader(
-                        icon: PhosphorIconsFill.star,
+                        icon: LucideIcons.star,
                         title: 'Favorites',
                       ),
                       const SizedBox(height: 10),
@@ -205,7 +205,7 @@ class _NotesScreenState extends State<NotesScreen> {
                     if (others.isNotEmpty) ...[
                       if (favorites.isNotEmpty)
                         const _SectionHeader(
-                          icon: PhosphorIconsBold.notebook,
+                          icon: LucideIcons.notebookText,
                           title: 'All notes',
                         ),
                       if (favorites.isNotEmpty) const SizedBox(height: 10),
@@ -307,8 +307,8 @@ class _NoteCard extends StatelessWidget {
                     padding: const EdgeInsets.only(left: 6),
                     child: Icon(
                       note.isFavorite
-                          ? PhosphorIconsFill.star
-                          : PhosphorIconsBold.star,
+                          ? LucideIcons.star
+                          : LucideIcons.star,
                       size: 18,
                       color: note.isFavorite
                           ? const Color(0xFFF59E0B)
@@ -322,7 +322,7 @@ class _NoteCard extends StatelessWidget {
                   child: const Padding(
                     padding: EdgeInsets.only(left: 12),
                     child: Icon(
-                      PhosphorIconsBold.trash,
+                      LucideIcons.trash2,
                       size: 17,
                       color: AppTheme.danger,
                     ),
@@ -374,7 +374,7 @@ class _NoteCard extends StatelessWidget {
             Row(
               children: [
                 const Icon(
-                  PhosphorIconsBold.calendarBlank,
+                  LucideIcons.calendarDays,
                   size: 12,
                   color: AppTheme.textMuted,
                 ),
@@ -653,7 +653,7 @@ class _EmptyState extends StatelessWidget {
               borderRadius: BorderRadius.circular(18),
             ),
             child: const Icon(
-              PhosphorIconsBold.notebook,
+              LucideIcons.notebookText,
               color: AppTheme.primary,
               size: 28,
             ),
@@ -710,7 +710,7 @@ class _ErrorCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Icon(
-                  PhosphorIconsBold.warningCircle,
+                  LucideIcons.circleAlert,
                   color: AppTheme.danger,
                   size: 18,
                 ),
@@ -738,7 +738,7 @@ class _ErrorCard extends StatelessWidget {
           const SizedBox(height: 14),
           FilledButton.icon(
             onPressed: onRetry,
-            icon: const Icon(PhosphorIconsBold.arrowsClockwise, size: 16),
+            icon: const Icon(LucideIcons.refreshCw, size: 16),
             label: const Text('Try again'),
           ),
         ],

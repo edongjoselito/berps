@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/haptics.dart';
@@ -83,7 +83,7 @@ class _StaffHomeScreenState extends State<StaffHomeScreen> {
                 shape: BoxShape.circle,
               ),
               child: const Icon(
-                PhosphorIconsBold.signOut,
+                LucideIcons.logOut,
                 color: AppTheme.danger,
                 size: 28,
               ),
@@ -284,6 +284,8 @@ class _StaffHomeScreenState extends State<StaffHomeScreen> {
         onSelectAnnualGoals: _openAnnualGoals,
         onSelectSupportDashboard: _openSupportDashboard,
         onSelectUnassignedTickets: () => _openSupportIssues(scope: 'unassigned'),
+        onSelectForwardedTasks: _openForwardedTasks,
+        onSelectTickets: () => _openSupportIssues(scope: 'open'),
         onSignOut: _confirmSignOut,
       ),
       body: AnimatedSwitcher(
@@ -333,26 +335,26 @@ class _StaffHomeScreenState extends State<StaffHomeScreen> {
     switch (tab) {
       case _StaffTab.dashboard:
         return const NavigationDestination(
-          icon: Icon(PhosphorIconsRegular.squaresFour),
-          selectedIcon: Icon(PhosphorIconsFill.squaresFour),
+          icon: Icon(LucideIcons.layoutGrid),
+          selectedIcon: Icon(LucideIcons.layoutGrid),
           label: 'Dashboard',
         );
       case _StaffTab.attendance:
         return const NavigationDestination(
-          icon: Icon(PhosphorIconsRegular.calendarDots),
-          selectedIcon: Icon(PhosphorIconsFill.calendarDots),
+          icon: Icon(LucideIcons.calendarDays),
+          selectedIcon: Icon(LucideIcons.calendarDays),
           label: 'Attendance',
         );
       case _StaffTab.tasks:
         return const NavigationDestination(
-          icon: Icon(PhosphorIconsRegular.listChecks),
-          selectedIcon: Icon(PhosphorIconsFill.listChecks),
+          icon: Icon(LucideIcons.listChecks),
+          selectedIcon: Icon(LucideIcons.listChecks),
           label: 'Tasks',
         );
       case _StaffTab.account:
         return const NavigationDestination(
-          icon: Icon(PhosphorIconsRegular.userCircle),
-          selectedIcon: Icon(PhosphorIconsFill.userCircle),
+          icon: Icon(LucideIcons.circleUser),
+          selectedIcon: Icon(LucideIcons.circleUser),
           label: 'Account',
         );
     }

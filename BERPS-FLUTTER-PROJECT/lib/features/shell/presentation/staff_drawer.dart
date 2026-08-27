@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/haptics.dart';
@@ -23,6 +23,8 @@ class StaffDrawer extends StatelessWidget {
     required this.onSelectAnnualGoals,
     required this.onSelectSupportDashboard,
     required this.onSelectUnassignedTickets,
+    required this.onSelectForwardedTasks,
+    required this.onSelectTickets,
     required this.onSignOut,
     this.activeItemId = 'dashboard',
   });
@@ -40,6 +42,8 @@ class StaffDrawer extends StatelessWidget {
   final VoidCallback onSelectAnnualGoals;
   final VoidCallback onSelectSupportDashboard;
   final VoidCallback onSelectUnassignedTickets;
+  final VoidCallback onSelectForwardedTasks;
+  final VoidCallback onSelectTickets;
   final Future<void> Function() onSignOut;
   final String activeItemId;
 
@@ -63,20 +67,69 @@ class StaffDrawer extends StatelessWidget {
               child: ListView(
                 padding: const EdgeInsets.symmetric(vertical: 4),
                 children: [
-                  const _SectionLabel('Navigation', PhosphorIconsBold.compass),
+                  // ── Main — daily core and urgent queues first ──
+                  const _SectionLabel('Main', LucideIcons.layoutGrid),
                   _NavItem(
                     id: 'dashboard',
-                    icon: PhosphorIconsRegular.squaresFour,
-                    iconActive: PhosphorIconsFill.squaresFour,
+                    icon: LucideIcons.layoutGrid,
+                    iconActive: LucideIcons.layoutGrid,
                     label: 'Dashboard',
                     activeItemId: activeItemId,
                     onTap: onSelectDashboard,
                   ),
+                  if (session.hasTasks)
+                    _NavItem(
+                      id: 'tasks',
+                      icon: LucideIcons.listChecks,
+                      iconActive: LucideIcons.listChecks,
+                      label: 'Tasks',
+                      activeItemId: activeItemId,
+                      onTap: onSelectTasks,
+                    ),
+                  if (session.hasSupport)
+                    _NavItem(
+                      id: 'unassigned-tickets',
+                      icon: LucideIcons.userMinus,
+                      iconActive: LucideIcons.userMinus,
+                      label: 'Unassigned Tickets',
+                      activeItemId: activeItemId,
+                      onTap: onSelectUnassignedTickets,
+                    ),
+                  if (session.hasForwardedTasks)
+                    _NavItem(
+                      id: 'forwarded-tasks',
+                      icon: LucideIcons.arrowLeftRight,
+                      iconActive: LucideIcons.arrowLeftRight,
+                      label: 'Forwarded Tasks',
+                      activeItemId: activeItemId,
+                      onTap: onSelectForwardedTasks,
+                    ),
+                  if (session.hasSupport)
+                    _NavItem(
+                      id: 'tickets',
+                      icon: LucideIcons.lifeBuoy,
+                      iconActive: LucideIcons.lifeBuoy,
+                      label: 'Tickets',
+                      activeItemId: activeItemId,
+                      onTap: onSelectTickets,
+                    ),
+                  if (session.hasSupport)
+                    _NavItem(
+                      id: 'support-dashboard',
+                      icon: LucideIcons.trendingUp,
+                      iconActive: LucideIcons.trendingUp,
+                      label: 'Support Dashboard',
+                      activeItemId: activeItemId,
+                      onTap: onSelectSupportDashboard,
+                    ),
+                  // ── Productivity ──
+                  const _SectionLabel('Productivity',
+                      LucideIcons.notebookText),
                   if (session.hasAttendance)
                     _NavItem(
                       id: 'attendance',
-                      icon: PhosphorIconsRegular.calendarDots,
-                      iconActive: PhosphorIconsFill.calendarDots,
+                      icon: LucideIcons.calendarDays,
+                      iconActive: LucideIcons.calendarDays,
                       label: 'Attendance',
                       activeItemId: activeItemId,
                       onTap: onSelectAttendance,
@@ -84,84 +137,58 @@ class StaffDrawer extends StatelessWidget {
                   if (session.hasMyDtr)
                     _NavItem(
                       id: 'my-dtr',
-                      icon: PhosphorIconsRegular.clock,
-                      iconActive: PhosphorIconsFill.clock,
+                      icon: LucideIcons.clock,
+                      iconActive: LucideIcons.clock,
                       label: 'My DTR',
                       activeItemId: activeItemId,
                       onTap: onSelectMyDtr,
                     ),
-                  if (session.hasTasks)
-                    _NavItem(
-                      id: 'tasks',
-                      icon: PhosphorIconsRegular.listChecks,
-                      iconActive: PhosphorIconsFill.listChecks,
-                      label: 'Tasks',
-                      activeItemId: activeItemId,
-                      onTap: onSelectTasks,
-                    ),
-                  _NavItem(
-                    id: 'account',
-                    icon: PhosphorIconsRegular.userCircle,
-                    iconActive: PhosphorIconsFill.userCircle,
-                    label: 'Account',
-                    activeItemId: activeItemId,
-                    onTap: onSelectAccount,
-                  ),
-                  const _SectionLabel('Workspace', PhosphorIconsBold.buildings),
                   if (session.hasCalendar)
                     _NavItem(
                       id: 'calendar',
-                      icon: PhosphorIconsRegular.calendarBlank,
-                      iconActive: PhosphorIconsFill.calendarBlank,
+                      icon: LucideIcons.calendarDays,
+                      iconActive: LucideIcons.calendarDays,
                       label: 'Calendar',
                       activeItemId: activeItemId,
                       onTap: onSelectCalendar,
                     ),
-                  if (session.hasReminders)
-                    _NavItem(
-                      id: 'reminders',
-                      icon: PhosphorIconsRegular.bellRinging,
-                      iconActive: PhosphorIconsFill.bellRinging,
-                      label: 'Reminders',
-                      activeItemId: activeItemId,
-                      onTap: onSelectReminders,
-                    ),
                   if (session.hasNotes)
                     _NavItem(
                       id: 'notes',
-                      icon: PhosphorIconsRegular.notebook,
-                      iconActive: PhosphorIconsFill.notebook,
+                      icon: LucideIcons.notebookText,
+                      iconActive: LucideIcons.notebookText,
                       label: 'Notes',
                       activeItemId: activeItemId,
                       onTap: onSelectNotes,
                     ),
+                  if (session.hasReminders)
+                    _NavItem(
+                      id: 'reminders',
+                      icon: LucideIcons.bellRing,
+                      iconActive: LucideIcons.bellRing,
+                      label: 'Reminders',
+                      activeItemId: activeItemId,
+                      onTap: onSelectReminders,
+                    ),
                   if (session.hasRanking)
                     _NavItem(
                       id: 'annual-goals',
-                      icon: PhosphorIconsRegular.trophy,
-                      iconActive: PhosphorIconsFill.trophy,
+                      icon: LucideIcons.trophy,
+                      iconActive: LucideIcons.trophy,
                       label: 'Annual Goals',
                       activeItemId: activeItemId,
                       onTap: onSelectAnnualGoals,
                     ),
-                  if (session.hasSupport)
-                    _NavItem(
-                      id: 'support-dashboard',
-                      icon: PhosphorIconsRegular.chartLineUp,
-                      iconActive: PhosphorIconsFill.chartLineUp,
-                      label: 'Support Dashboard',
-                      activeItemId: activeItemId,
-                      onTap: onSelectSupportDashboard,
-                    ),
-                  if (session.hasSupport)
-                    _NavItem(
-                      id: 'unassigned-tickets',
-                      icon: PhosphorIconsRegular.userMinus,
-                      iconActive: PhosphorIconsFill.userMinus,
-                      label: 'Unassigned Tickets',
-                      activeItemId: activeItemId,
-                      onTap: onSelectUnassignedTickets,
-                    ),
+                  // ── Account ──
+                  const _SectionLabel('Account', LucideIcons.circleUser),
+                  _NavItem(
+                    id: 'account',
+                    icon: LucideIcons.circleUser,
+                    iconActive: LucideIcons.circleUser,
+                    label: 'Account',
+                    activeItemId: activeItemId,
+                    onTap: onSelectAccount,
+                  ),
                 ],
               ),
             ),
@@ -171,7 +198,7 @@ class StaffDrawer extends StatelessWidget {
               child: Column(
                 children: [
                   _DrawerAction(
-                    icon: PhosphorIconsRegular.signOut,
+                    icon: LucideIcons.logOut,
                     label: 'Sign out',
                     danger: true,
                     onTap: () async {
@@ -410,7 +437,7 @@ class _NavItem extends StatelessWidget {
                   duration: const Duration(milliseconds: 220),
                   opacity: isActive ? 1 : 0,
                   child: const Icon(
-                    PhosphorIconsBold.caretRight,
+                    LucideIcons.chevronRight,
                     size: 12,
                     color: AppTheme.primaryDark,
                   ),
@@ -474,7 +501,7 @@ class _DrawerFooter extends StatelessWidget {
       child: Row(
         children: [
           Icon(
-            PhosphorIconsBold.shieldCheck,
+            LucideIcons.shieldCheck,
             size: 11,
             color: AppTheme.textMuted.withValues(alpha: 0.9),
           ),

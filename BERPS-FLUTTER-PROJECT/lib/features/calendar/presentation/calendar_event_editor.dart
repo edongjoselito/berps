@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/network/api_exception.dart';
 import '../../../core/theme/app_theme.dart';
@@ -264,14 +264,14 @@ class _CalendarEventEditorState extends State<CalendarEventEditor> {
             children: [
               MobileHeader(
                 title: _isEdit ? 'Edit Event' : 'New Event',
-                leadingIcon: PhosphorIconsBold.caretLeft,
+                leadingIcon: LucideIcons.chevronLeft,
                 onLeadingTap: () {
                   Haptics.light();
                   Navigator.of(context).maybePop();
                 },
               ),
               const SizedBox(height: 16),
-              _SectionHeader(icon: PhosphorIconsBold.textT, title: 'Details'),
+              _SectionHeader(icon: LucideIcons.type, title: 'Details'),
               const SizedBox(height: 10),
               MobileSurfaceCard(
                 child: Column(
@@ -308,7 +308,7 @@ class _CalendarEventEditorState extends State<CalendarEventEditor> {
                 ),
               ),
               const SizedBox(height: 18),
-              _SectionHeader(icon: PhosphorIconsBold.clock, title: 'Schedule'),
+              _SectionHeader(icon: LucideIcons.clock, title: 'Schedule'),
               const SizedBox(height: 10),
               MobileSurfaceCard(
                 child: Column(
@@ -350,7 +350,7 @@ class _CalendarEventEditorState extends State<CalendarEventEditor> {
               ),
               const SizedBox(height: 18),
               _SectionHeader(
-                icon: PhosphorIconsBold.palette,
+                icon: LucideIcons.palette,
                 title: 'Appearance',
               ),
               const SizedBox(height: 10),
@@ -397,7 +397,7 @@ class _CalendarEventEditorState extends State<CalendarEventEditor> {
                             ),
                             child: selected
                                 ? const Icon(
-                                    PhosphorIconsBold.check,
+                                    LucideIcons.check,
                                     color: Colors.white,
                                     size: 16,
                                   )
@@ -475,7 +475,7 @@ class _CalendarEventEditorState extends State<CalendarEventEditor> {
                 ),
               ),
               const SizedBox(height: 18),
-              _SectionHeader(icon: PhosphorIconsBold.notebook, title: 'Day notes'),
+              _SectionHeader(icon: LucideIcons.notebookText, title: 'Day notes'),
               const SizedBox(height: 10),
               SizedBox(
                 width: double.infinity,
@@ -484,7 +484,7 @@ class _CalendarEventEditorState extends State<CalendarEventEditor> {
                     backgroundColor: AppTheme.primaryDark,
                   ),
                   onPressed: _canEdit ? _openAddNote : null,
-                  icon: const Icon(PhosphorIconsBold.plus, size: 16),
+                  icon: const Icon(LucideIcons.plus, size: 16),
                   label: const Text('Add note'),
                 ),
               ),
@@ -503,7 +503,7 @@ class _CalendarEventEditorState extends State<CalendarEventEditor> {
                     foregroundColor: AppTheme.danger,
                     side: const BorderSide(color: AppTheme.danger),
                   ),
-                  icon: const Icon(PhosphorIconsBold.trash, size: 16),
+                  icon: const Icon(LucideIcons.trash2, size: 16),
                   label: Text(_deleting ? 'Deleting…' : 'Delete event'),
                 ),
               ],
@@ -637,7 +637,7 @@ class _DateTimeRow extends StatelessWidget {
               ),
             ),
             const Icon(
-              PhosphorIconsBold.caretRight,
+              LucideIcons.chevronRight,
               size: 14,
               color: AppTheme.textMuted,
             ),

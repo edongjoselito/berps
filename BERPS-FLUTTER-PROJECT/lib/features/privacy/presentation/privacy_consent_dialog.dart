@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/haptics.dart';
@@ -35,7 +35,7 @@ class _PrivacyConsentDialogState extends State<PrivacyConsentDialog> {
                 borderRadius: BorderRadius.circular(18),
               ),
               child: const Icon(
-                PhosphorIconsBold.shieldCheck,
+                LucideIcons.shieldCheck,
                 color: AppTheme.primaryDark,
                 size: 26,
               ),
@@ -105,7 +105,7 @@ class _PrivacyConsentDialogState extends State<PrivacyConsentDialog> {
                       ),
                       child: _agreed
                           ? const Icon(
-                              PhosphorIconsBold.check,
+                              LucideIcons.check,
                               size: 12,
                               color: Colors.white,
                             )

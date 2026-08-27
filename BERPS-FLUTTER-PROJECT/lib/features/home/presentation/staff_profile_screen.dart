@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/network/api_exception.dart';
 import '../../../core/theme/app_theme.dart';
@@ -236,7 +236,7 @@ class _StaffProfileScreenState extends State<StaffProfileScreen> {
                 ),
                 const SizedBox(height: 12),
                 _PhotoSourceTile(
-                  icon: PhosphorIconsBold.camera,
+                  icon: LucideIcons.camera,
                   title: 'Take a photo',
                   subtitle: 'Use the device camera.',
                   onTap: () {
@@ -246,7 +246,7 @@ class _StaffProfileScreenState extends State<StaffProfileScreen> {
                 ),
                 const SizedBox(height: 10),
                 _PhotoSourceTile(
-                  icon: PhosphorIconsBold.image,
+                  icon: LucideIcons.image,
                   title: 'Choose from gallery',
                   subtitle: 'Pick an existing image.',
                   onTap: () {
@@ -289,7 +289,7 @@ class _StaffProfileScreenState extends State<StaffProfileScreen> {
                 children: [
                   MobileHeader(
                     title: 'My Profile',
-                    leadingIcon: PhosphorIconsBold.caretLeft,
+                    leadingIcon: LucideIcons.chevronLeft,
                     onLeadingTap: () {
                       Haptics.light();
                       if (_editing) {
@@ -302,7 +302,7 @@ class _StaffProfileScreenState extends State<StaffProfileScreen> {
                         ? IconButton(
                             onPressed: () => _startEditing(profile),
                             icon: const Icon(
-                              PhosphorIconsBold.pencilSimple,
+                              LucideIcons.pencil,
                               size: 20,
                               color: AppTheme.primaryDark,
                             ),
@@ -333,7 +333,7 @@ class _StaffProfileScreenState extends State<StaffProfileScreen> {
                     FadeSlide(
                       delay: const Duration(milliseconds: 120),
                       child: _SectionHeader(
-                        icon: PhosphorIconsBold.briefcase,
+                        icon: LucideIcons.briefcase,
                         title: 'Official Information',
                       ),
                     ),
@@ -345,47 +345,47 @@ class _StaffProfileScreenState extends State<StaffProfileScreen> {
                           _InfoRow(
                             'Employee No.',
                             profile.employeeNo,
-                            PhosphorIconsBold.identificationBadge,
+                            LucideIcons.badgeCheck,
                           ),
                           _InfoRow(
                             'Position',
                             profile.position,
-                            PhosphorIconsBold.crown,
+                            LucideIcons.crown,
                           ),
                           _InfoRow(
                             'Department',
                             profile.department,
-                            PhosphorIconsBold.buildings,
+                            LucideIcons.building2,
                           ),
                           _InfoRow(
                             'Date Hired',
                             profile.dateHired,
-                            PhosphorIconsBold.calendarCheck,
+                            LucideIcons.calendarCheck,
                           ),
                           _InfoRow(
                             'TIN',
                             profile.tinNo,
-                            PhosphorIconsBold.fileText,
+                            LucideIcons.fileText,
                           ),
                           _InfoRow(
                             'GSIS BP No.',
                             profile.gsisNo,
-                            PhosphorIconsBold.fileText,
+                            LucideIcons.fileText,
                           ),
                           _InfoRow(
                             'PAG-IBIG No.',
                             profile.pagibigNo,
-                            PhosphorIconsBold.fileText,
+                            LucideIcons.fileText,
                           ),
                           _InfoRow(
                             'SSS',
                             profile.sssNo,
-                            PhosphorIconsBold.fileText,
+                            LucideIcons.fileText,
                           ),
                           _InfoRow(
                             'PhilHealth No.',
                             profile.philHealthNo,
-                            PhosphorIconsBold.fileText,
+                            LucideIcons.fileText,
                           ),
                         ],
                       ),
@@ -394,7 +394,7 @@ class _StaffProfileScreenState extends State<StaffProfileScreen> {
                     FadeSlide(
                       delay: const Duration(milliseconds: 200),
                       child: _SectionHeader(
-                        icon: PhosphorIconsBold.user,
+                        icon: LucideIcons.user,
                         title: 'Personal Information',
                       ),
                     ),
@@ -410,7 +410,7 @@ class _StaffProfileScreenState extends State<StaffProfileScreen> {
                                     row: _InfoRow(
                                       'Gender',
                                       profile.gender,
-                                      PhosphorIconsBold.users,
+                                      LucideIcons.users,
                                     ),
                                   ),
                                 ),
@@ -450,37 +450,37 @@ class _StaffProfileScreenState extends State<StaffProfileScreen> {
                                 _InfoRow(
                                   'Gender',
                                   profile.gender,
-                                  PhosphorIconsBold.users,
+                                  LucideIcons.users,
                                 ),
                                 _InfoRow(
                                   'Birth Date',
                                   profile.birthDate,
-                                  PhosphorIconsBold.cake,
+                                  LucideIcons.cake,
                                 ),
                                 _InfoRow(
                                   'Birth Place',
                                   profile.birthPlace,
-                                  PhosphorIconsBold.mapPin,
+                                  LucideIcons.mapPin,
                                 ),
                                 _InfoRow(
                                   'Blood Type',
                                   profile.bloodType,
-                                  PhosphorIconsBold.heart,
+                                  LucideIcons.heart,
                                 ),
                                 _InfoRow(
                                   'Marital Status',
                                   profile.maritalStatus,
-                                  PhosphorIconsBold.heart,
+                                  LucideIcons.heart,
                                 ),
                                 _InfoRow(
                                   'Height',
                                   profile.height,
-                                  PhosphorIconsBold.ruler,
+                                  LucideIcons.ruler,
                                 ),
                                 _InfoRow(
                                   'Weight',
                                   profile.weight,
-                                  PhosphorIconsBold.scales,
+                                  LucideIcons.scale,
                                 ),
                               ],
                             ),
@@ -489,7 +489,7 @@ class _StaffProfileScreenState extends State<StaffProfileScreen> {
                     FadeSlide(
                       delay: const Duration(milliseconds: 280),
                       child: _SectionHeader(
-                        icon: PhosphorIconsBold.phone,
+                        icon: LucideIcons.phone,
                         title: 'Contact Information',
                       ),
                     ),
@@ -505,7 +505,7 @@ class _StaffProfileScreenState extends State<StaffProfileScreen> {
                                     row: _InfoRow(
                                       'Account Email',
                                       profile.email,
-                                      PhosphorIconsBold.envelope,
+                                      LucideIcons.mail,
                                     ),
                                   ),
                                 ),
@@ -535,22 +535,22 @@ class _StaffProfileScreenState extends State<StaffProfileScreen> {
                                 _InfoRow(
                                   'Contact No.',
                                   profile.contactNo,
-                                  PhosphorIconsBold.deviceMobile,
+                                  LucideIcons.smartphone,
                                 ),
                                 _InfoRow(
                                   'Account Email',
                                   profile.email,
-                                  PhosphorIconsBold.envelope,
+                                  LucideIcons.mail,
                                 ),
                                 _InfoRow(
                                   'Official Email',
                                   profile.officialEmail,
-                                  PhosphorIconsBold.envelopeSimple,
+                                  LucideIcons.mail,
                                 ),
                                 _InfoRow(
                                   'Address',
                                   profile.address,
-                                  PhosphorIconsBold.house,
+                                  LucideIcons.house,
                                 ),
                               ],
                             ),
@@ -697,7 +697,7 @@ class _ProfileHeaderCard extends StatelessWidget {
                         ],
                       ),
                       child: Icon(
-                        PhosphorIconsBold.camera,
+                        LucideIcons.camera,
                         color: AppTheme.primaryDark,
                         size: 14,
                       ),
@@ -731,7 +731,7 @@ class _ProfileHeaderCard extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
-                  PhosphorIconsBold.briefcase,
+                  LucideIcons.briefcase,
                   size: 12,
                   color: Colors.white.withValues(alpha: 0.85),
                 ),
@@ -948,7 +948,7 @@ class _PhotoSourceTile extends StatelessWidget {
               ),
             ),
             const Icon(
-              PhosphorIconsBold.caretRight,
+              LucideIcons.chevronRight,
               size: 14,
               color: AppTheme.textMuted,
             ),
@@ -1097,7 +1097,7 @@ class _ErrorCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Icon(
-                  PhosphorIconsBold.warningCircle,
+                  LucideIcons.circleAlert,
                   color: AppTheme.danger,
                   size: 20,
                 ),

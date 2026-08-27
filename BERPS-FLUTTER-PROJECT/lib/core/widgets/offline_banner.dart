@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../services/connectivity_service.dart';
 
@@ -66,7 +66,7 @@ class _OfflineBannerState extends State<OfflineBanner>
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(PhosphorIconsBold.wifiSlash, color: Colors.white, size: 16),
+              Icon(LucideIcons.wifiOff, color: Colors.white, size: 16),
               SizedBox(width: 8),
               Text(
                 'No internet connection',

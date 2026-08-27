@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/services/biometric_auth.dart';
 import '../../../core/theme/app_theme.dart';
@@ -125,7 +125,7 @@ class _StaffAccountTabState extends State<StaffAccountTab> {
           bottom: false,
           child: MobileHeader(
             title: 'Account',
-            leadingIcon: PhosphorIconsBold.list,
+            leadingIcon: LucideIcons.list,
             onLeadingTap: () {
               Haptics.light();
               widget.onMenu();
@@ -150,7 +150,7 @@ class _StaffAccountTabState extends State<StaffAccountTab> {
         FadeSlide(
           delay: const Duration(milliseconds: 100),
           child: _SectionLabel(
-            icon: PhosphorIconsBold.userCircle,
+            icon: LucideIcons.circleUser,
             text: 'Profile',
           ),
         ),
@@ -158,7 +158,7 @@ class _StaffAccountTabState extends State<StaffAccountTab> {
         FadeSlide(
           delay: const Duration(milliseconds: 140),
           child: _ActionCard(
-            icon: PhosphorIconsBold.identificationBadge,
+            icon: LucideIcons.badgeCheck,
             title: 'My Profile',
             subtitle: 'View your personal and employment details.',
             actionLabel: 'Open',
@@ -172,7 +172,7 @@ class _StaffAccountTabState extends State<StaffAccountTab> {
         FadeSlide(
           delay: const Duration(milliseconds: 200),
           child: _SectionLabel(
-            icon: PhosphorIconsBold.shieldCheck,
+            icon: LucideIcons.shieldCheck,
             text: 'Security',
           ),
         ),
@@ -185,7 +185,7 @@ class _StaffAccountTabState extends State<StaffAccountTab> {
                 value: _biometricEnabled,
                 onChanged: _toggleBiometric,
                 secondary: Icon(
-                  PhosphorIconsBold.fingerprint,
+                  LucideIcons.fingerprint,
                   color: AppTheme.primaryDark,
                 ),
                 title: Text(
@@ -219,7 +219,7 @@ class _StaffAccountTabState extends State<StaffAccountTab> {
         FadeSlide(
           delay: const Duration(milliseconds: 240),
           child: _SectionLabel(
-            icon: PhosphorIconsBold.fileText,
+            icon: LucideIcons.fileText,
             text: 'Privacy',
           ),
         ),
@@ -227,7 +227,7 @@ class _StaffAccountTabState extends State<StaffAccountTab> {
         FadeSlide(
           delay: const Duration(milliseconds: 260),
           child: _ActionCard(
-            icon: PhosphorIconsBold.shield,
+            icon: LucideIcons.shield,
             title: 'Privacy Policy',
             subtitle: 'How we collect, use, and protect your data.',
             actionLabel: 'View',
@@ -246,7 +246,7 @@ class _StaffAccountTabState extends State<StaffAccountTab> {
         FadeSlide(
           delay: const Duration(milliseconds: 280),
           child: _ActionCard(
-            icon: PhosphorIconsBold.trash,
+            icon: LucideIcons.trash2,
             title: 'Delete My Data',
             subtitle: 'Request deletion of your personal data.',
             actionLabel: 'Request',
@@ -262,13 +262,13 @@ class _StaffAccountTabState extends State<StaffAccountTab> {
         const SizedBox(height: 20),
         FadeSlide(
           delay: const Duration(milliseconds: 320),
-          child: _SectionLabel(icon: PhosphorIconsBold.power, text: 'Session'),
+          child: _SectionLabel(icon: LucideIcons.power, text: 'Session'),
         ),
         const SizedBox(height: 10),
         FadeSlide(
           delay: const Duration(milliseconds: 300),
           child: _ActionCard(
-            icon: PhosphorIconsBold.signOut,
+            icon: LucideIcons.logOut,
             title: 'Sign out',
             subtitle: 'End the current session on this device.',
             actionLabel: 'Sign out',
@@ -359,7 +359,7 @@ class _WorkspaceCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
             ),
             child: const Icon(
-              PhosphorIconsBold.globe,
+              LucideIcons.globe,
               color: Colors.white,
               size: 18,
             ),
@@ -401,7 +401,7 @@ class _WorkspaceCard extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
-                  PhosphorIconsBold.checkCircle,
+                  LucideIcons.circleCheck,
                   size: 10,
                   color: AppTheme.success,
                 ),
@@ -461,7 +461,7 @@ class _ProfileCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     MobileInlineBadge(
-                      icon: PhosphorIconsBold.briefcase,
+                      icon: LucideIcons.briefcase,
                       label: session.position.isEmpty
                           ? 'Staff'
                           : session.position,
@@ -473,12 +473,12 @@ class _ProfileCard extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           _ProfileInfoRow(
-            icon: PhosphorIconsBold.envelopeSimple,
+            icon: LucideIcons.mail,
             label: session.email.isEmpty ? 'No email on file' : session.email,
           ),
           const SizedBox(height: 10),
           _ProfileInfoRow(
-            icon: PhosphorIconsBold.identificationCard,
+            icon: LucideIcons.idCard,
             label: 'Username: ${session.username}',
           ),
         ],
@@ -598,7 +598,7 @@ class _ActionCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 6),
-                Icon(PhosphorIconsBold.caretRight, size: 14, color: accent),
+                Icon(LucideIcons.chevronRight, size: 14, color: accent),
               ],
             ),
           ],
@@ -621,7 +621,7 @@ class _AppFooter extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
-                PhosphorIconsBold.code,
+                LucideIcons.code,
                 size: 12,
                 color: AppTheme.textMuted.withValues(alpha: 0.7),
               ),

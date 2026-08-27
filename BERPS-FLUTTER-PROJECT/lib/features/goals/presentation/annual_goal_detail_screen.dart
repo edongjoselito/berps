@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/network/api_exception.dart';
 import '../../../core/theme/app_theme.dart';
@@ -84,7 +84,7 @@ class _AnnualGoalDetailScreenState extends State<AnnualGoalDetailScreen> {
                   MobileHeader(
                     title: '${widget.year}',
                     subtitle: 'Annual goal',
-                    leadingIcon: PhosphorIconsBold.caretLeft,
+                    leadingIcon: LucideIcons.chevronLeft,
                     onLeadingTap: () {
                       Haptics.light();
                       Navigator.of(context).maybePop();
@@ -111,7 +111,7 @@ class _AnnualGoalDetailScreenState extends State<AnnualGoalDetailScreen> {
                       const _NoGoalSet(),
                     if (data.monthly.isNotEmpty) ...[
                       _SectionHeader(
-                        icon: PhosphorIconsBold.calendarDots,
+                        icon: LucideIcons.calendarDays,
                         title: 'Monthly breakdown',
                       ),
                       const SizedBox(height: 10),
@@ -435,7 +435,7 @@ class _NoGoalSet extends StatelessWidget {
               shape: BoxShape.circle,
             ),
             child: const Icon(
-              PhosphorIconsBold.trophy,
+              LucideIcons.trophy,
               size: 26,
               color: AppTheme.primaryDark,
             ),

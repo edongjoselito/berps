@@ -2,7 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/network/api_exception.dart';
@@ -121,9 +121,9 @@ class _StaffDashboardTabState extends State<StaffDashboardTab> {
 
   IconData _greetingIcon() {
     final hour = DateTime.now().hour;
-    if (hour < 12) return PhosphorIconsFill.sunHorizon;
-    if (hour < 18) return PhosphorIconsFill.sun;
-    return PhosphorIconsFill.moonStars;
+    if (hour < 12) return LucideIcons.sunrise;
+    if (hour < 18) return LucideIcons.sun;
+    return LucideIcons.moonStar;
   }
 
   @override
@@ -154,7 +154,7 @@ class _StaffDashboardTabState extends State<StaffDashboardTab> {
                 bottom: false,
                 child: MobileHeader(
                   title: 'Dashboard',
-                  leadingIcon: PhosphorIconsBold.list,
+                  leadingIcon: LucideIcons.list,
                   onLeadingTap: () {
                     Haptics.light();
                     widget.onMenu();
@@ -382,66 +382,35 @@ class _DashboardContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Quick actions are gated by the workspace's enabled features so restricted
-    // staff don't see attendance/support shortcuts they can't use.
-    // My DTR, Reminders, and Unassigned are intentionally NOT here — they
-    // live in the sidebar drawer instead to keep the dashboard clean.
-    final quickActions = <_QuickAction>[
-      if (session.hasNotes)
-        _QuickAction(
-          label: 'Notes',
-          sublabel: 'Your notes',
-          icon: PhosphorIconsBold.notebook,
-          accent: AppTheme.primaryDark,
-          onTap: onOpenNotes,
-        ),
-      if (session.hasForwardedTasks)
-        _QuickAction(
-          label: 'Forwarded',
-          sublabel: data.forwardedTaskCount == 0
-              ? 'Inbox empty'
-              : '${data.forwardedTaskCount} waiting',
-          icon: PhosphorIconsBold.arrowsLeftRight,
-          accent: AppTheme.warning,
-          badge: data.forwardedTaskCount > 0
-              ? '${data.forwardedTaskCount}'
-              : null,
-          onTap: onOpenForwardedTasks,
-        ),
-      if (session.hasSupport)
-        _QuickAction(
-          label: 'Tickets',
-          sublabel: 'All support',
-          icon: PhosphorIconsBold.lifebuoy,
-          accent: AppTheme.primary,
-          onTap: onOpenSupportTickets,
-        ),
-    ];
+    // Quick actions have been moved to the sidebar drawer to keep the
+    // dashboard focused on metrics and snapshots. Notes, Forwarded Tasks,
+    // and Tickets are all accessible from the drawer, ordered by importance.
+    final quickActions = const <_QuickAction>[];
 
     final metricCards = <_MetricCardData>[
       _MetricCardData(
         label: 'Done Today',
         value: '${data.accomplishmentsToday}',
-        icon: PhosphorIconsBold.checkCircle,
+        icon: LucideIcons.circleCheck,
         accent: AppTheme.success,
       ),
       if (session.hasAttendance)
         _MetricCardData(
           label: 'Hours Today',
           value: data.todayHoursLabel,
-          icon: PhosphorIconsBold.clockCounterClockwise,
+          icon: LucideIcons.rotateCcw,
           accent: AppTheme.primary,
         ),
       _MetricCardData(
         label: 'Due Today',
         value: '${data.tasksDueToday}',
-        icon: PhosphorIconsBold.calendarDot,
+        icon: LucideIcons.calendarCheck,
         accent: AppTheme.accent,
       ),
       _MetricCardData(
         label: 'Overdue',
         value: '${data.tasksOverdue}',
-        icon: PhosphorIconsBold.warningCircle,
+        icon: LucideIcons.circleAlert,
         accent: AppTheme.danger,
       ),
     ];
@@ -592,14 +561,12 @@ class _QuickAction {
     required this.icon,
     required this.accent,
     required this.onTap,
-    this.badge,
   });
   final String label;
   final String sublabel;
   final IconData icon;
   final Color accent;
   final VoidCallback onTap;
-  final String? badge;
 }
 
 class _QuickActionTile extends StatelessWidget {
@@ -623,47 +590,14 @@ class _QuickActionTile extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Stack(
-              clipBehavior: Clip.none,
-              children: [
-                Container(
-                  width: 36,
-                  height: 36,
-                  decoration: BoxDecoration(
-                    color: action.accent.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(11),
-                  ),
-                  child: Icon(action.icon, size: 17, color: action.accent),
-                ),
-                if (action.badge != null)
-                  Positioned(
-                    right: -6,
-                    top: -4,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 5,
-                        vertical: 1,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppTheme.danger,
-                        borderRadius: BorderRadius.circular(999),
-                        border: Border.all(
-                          color: AppTheme.surfaceMuted,
-                          width: 2,
-                        ),
-                      ),
-                      child: Text(
-                        action.badge!,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w900,
-                          fontSize: 9,
-                          height: 1.1,
-                        ),
-                      ),
-                    ),
-                  ),
-              ],
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: action.accent.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(11),
+              ),
+              child: Icon(action.icon, size: 17, color: action.accent),
             ),
             const SizedBox(height: 8),
             Text(
@@ -726,15 +660,15 @@ class _DtrPreviewCard extends StatelessWidget {
   IconData get _statusIcon {
     final label = statusLabel.toLowerCase();
     if (label.contains('present')) {
-      return PhosphorIconsBold.checkCircle;
+      return LucideIcons.circleCheck;
     }
     if (label.contains('absent')) {
-      return PhosphorIconsBold.xCircle;
+      return LucideIcons.circleX;
     }
     if (label.contains('pending') || label.contains('open')) {
-      return PhosphorIconsBold.clock;
+      return LucideIcons.clock;
     }
-    return PhosphorIconsBold.clock;
+    return LucideIcons.clock;
   }
 
   @override
@@ -767,7 +701,7 @@ class _DtrPreviewCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Icon(
-                  PhosphorIconsBold.clock,
+                  LucideIcons.clock,
                   color: Colors.white,
                   size: 18,
                 ),
@@ -821,7 +755,7 @@ class _DtrPreviewCard extends StatelessWidget {
                         ),
                         SizedBox(width: 4),
                         Icon(
-                          PhosphorIconsBold.caretRight,
+                          LucideIcons.chevronRight,
                           size: 12,
                           color: Colors.white,
                         ),
@@ -1079,7 +1013,7 @@ class _RemindersBanner extends StatelessWidget {
               borderRadius: BorderRadius.circular(9),
             ),
             child: const Icon(
-              PhosphorIconsBold.bellRinging,
+              LucideIcons.bellRing,
               color: AppTheme.accent,
               size: 14,
             ),
@@ -1097,7 +1031,7 @@ class _RemindersBanner extends StatelessWidget {
           ),
           if (onTap != null)
             const Icon(
-              PhosphorIconsBold.caretRight,
+              LucideIcons.chevronRight,
               color: AppTheme.accent,
               size: 14,
             ),
@@ -1168,7 +1102,7 @@ class _LeaderboardCard extends StatelessWidget {
                     ],
                   ),
                   child: const Icon(
-                    PhosphorIconsBold.trophy,
+                    LucideIcons.trophy,
                     color: Colors.white,
                     size: 19,
                   ),
@@ -1220,7 +1154,7 @@ class _LeaderboardCard extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         const Icon(
-                          PhosphorIconsBold.user,
+                          LucideIcons.user,
                           size: 10,
                           color: Colors.white,
                         ),
@@ -1280,9 +1214,9 @@ class _LeaderboardRow extends StatelessWidget {
   }
 
   IconData? get _rankIcon {
-    if (entry.rank == 1) return PhosphorIconsFill.crown;
-    if (entry.rank == 2) return PhosphorIconsFill.medal;
-    if (entry.rank == 3) return PhosphorIconsFill.medal;
+    if (entry.rank == 1) return LucideIcons.crown;
+    if (entry.rank == 2) return LucideIcons.medal;
+    if (entry.rank == 3) return LucideIcons.medal;
     return null;
   }
 
@@ -1483,7 +1417,7 @@ class _RankingEmpty extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
           ),
           child: const Icon(
-            PhosphorIconsBold.trophy,
+            LucideIcons.trophy,
             color: AppTheme.textMuted,
             size: 18,
           ),
@@ -1524,7 +1458,7 @@ class _RankingFallback extends StatelessWidget {
               borderRadius: BorderRadius.circular(11),
             ),
             child: const Icon(
-              PhosphorIconsBold.trophy,
+              LucideIcons.trophy,
               color: AppTheme.warning,
               size: 18,
             ),
@@ -1623,7 +1557,7 @@ class _ViewAllLink extends StatelessWidget {
             ),
             SizedBox(width: 4),
             Icon(
-              PhosphorIconsBold.arrowRight,
+              LucideIcons.arrowRight,
               size: 10,
               color: AppTheme.primaryDark,
             ),
@@ -1661,7 +1595,7 @@ class _TaskPanel extends StatelessWidget {
                 borderRadius: BorderRadius.circular(11),
               ),
               child: const Icon(
-                PhosphorIconsBold.checkSquareOffset,
+                LucideIcons.squareCheck,
                 size: 16,
                 color: AppTheme.primary,
               ),
@@ -1860,7 +1794,7 @@ class _NotesRemindersSnapshot extends StatelessWidget {
               children: [
                 if (hasReminders) ...[
                   _SnapshotSubHeader(
-                    icon: PhosphorIconsBold.bellRinging,
+                    icon: LucideIcons.bellRing,
                     title: 'Reminders',
                   ),
                   const SizedBox(height: 8),
@@ -1870,7 +1804,7 @@ class _NotesRemindersSnapshot extends StatelessWidget {
                 if (hasReminders && hasNotes) const SizedBox(height: 16),
                 if (hasNotes) ...[
                   _SnapshotSubHeader(
-                    icon: PhosphorIconsBold.notebook,
+                    icon: LucideIcons.notebookText,
                     title: 'Notes for today',
                   ),
                   const SizedBox(height: 8),
@@ -2114,14 +2048,14 @@ class _EmptySnapshot extends StatelessWidget {
             FilledButton.icon(
               style: FilledButton.styleFrom(backgroundColor: AppTheme.primaryDark),
               onPressed: onOpenReminders,
-              icon: const Icon(PhosphorIconsBold.bellRinging, size: 16),
+              icon: const Icon(LucideIcons.bellRing, size: 16),
               label: const Text('Open reminders'),
             ),
           if (onOpenReminders != null && onOpenNotes != null) const SizedBox(height: 8),
           if (onOpenNotes != null)
             OutlinedButton.icon(
               onPressed: onOpenNotes,
-              icon: const Icon(PhosphorIconsBold.notebook, size: 16),
+              icon: const Icon(LucideIcons.notebookText, size: 16),
               label: const Text('Open notes'),
             ),
         ],
@@ -2243,7 +2177,7 @@ class _ErrorState extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Icon(
-                  PhosphorIconsBold.warningCircle,
+                  LucideIcons.circleAlert,
                   color: AppTheme.danger,
                   size: 18,
                 ),
@@ -2275,7 +2209,7 @@ class _ErrorState extends StatelessWidget {
               onRetry();
               AppToast.info(context, 'Reloading dashboard…');
             },
-            icon: const Icon(PhosphorIconsBold.arrowsClockwise, size: 16),
+            icon: const Icon(LucideIcons.refreshCw, size: 16),
             label: const Text('Try again'),
           ),
         ],

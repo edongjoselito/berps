@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/date_formatters.dart';
@@ -100,7 +100,7 @@ class _EmployeeTasksScreenState extends State<EmployeeTasksScreen> {
                   const Padding(
                     padding: EdgeInsets.only(top: 50),
                     child: AdminEmptyView(
-                      icon: PhosphorIconsFill.usersThree,
+                      icon: LucideIcons.users,
                       title: 'No employees found',
                     ),
                   )
@@ -235,7 +235,7 @@ class _EmployeeTasksScreenState extends State<EmployeeTasksScreen> {
           const SizedBox(height: 6),
           Row(
             children: [
-              Icon(PhosphorIconsBold.calendarBlank,
+              Icon(LucideIcons.calendarDays,
                   size: 12, color: AppTheme.textMuted),
               const SizedBox(width: 4),
               Text(

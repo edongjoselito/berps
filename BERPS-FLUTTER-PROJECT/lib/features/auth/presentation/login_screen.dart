@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/network/api_exception.dart';
 import '../../../core/services/biometric_auth.dart';
@@ -300,7 +300,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                       widget.controller.resetPairing();
                                     },
                               icon: const Icon(
-                                PhosphorIconsBold.arrowsLeftRight,
+                                LucideIcons.arrowLeftRight,
                                 size: 16,
                                 color: AppTheme.textMuted,
                               ),
@@ -373,7 +373,7 @@ class _LoginHero extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Icon(
-                PhosphorIconsBold.globe,
+                LucideIcons.globe,
                 size: 12,
                 color: AppTheme.textMuted,
               ),
@@ -453,7 +453,7 @@ class _LoginCard extends StatelessWidget {
               _StatusBanner(message: error!),
               const SizedBox(height: 12),
             ],
-            const _FieldLabel(icon: PhosphorIconsBold.user, text: 'Email'),
+            const _FieldLabel(icon: LucideIcons.user, text: 'Email'),
             TextFormField(
               controller: usernameController,
               autocorrect: false,
@@ -473,7 +473,7 @@ class _LoginCard extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             const _FieldLabel(
-              icon: PhosphorIconsBold.lockKey,
+              icon: LucideIcons.lockKeyhole,
               text: 'Password',
             ),
             TextFormField(
@@ -487,8 +487,8 @@ class _LoginCard extends StatelessWidget {
                 suffixIcon: IconButton(
                   icon: Icon(
                     obscure
-                        ? PhosphorIconsBold.eye
-                        : PhosphorIconsBold.eyeSlash,
+                        ? LucideIcons.eye
+                        : LucideIcons.eyeOff,
                     color: obscure ? AppTheme.textMuted : AppTheme.primary,
                     size: 18,
                   ),
@@ -522,7 +522,7 @@ class _LoginCard extends StatelessWidget {
               OutlinedButton.icon(
                 onPressed: onBiometric,
                 icon: Icon(
-                  PhosphorIconsBold.fingerprint,
+                  LucideIcons.fingerprint,
                   size: 18,
                   color: AppTheme.primary,
                 ),
@@ -638,7 +638,7 @@ class _RememberToggle extends StatelessWidget {
               ),
               child: value
                   ? const Icon(
-                      PhosphorIconsBold.check,
+                      LucideIcons.check,
                       size: 12,
                       color: Colors.white,
                     )
@@ -720,7 +720,7 @@ class _StatusBanner extends StatelessWidget {
               borderRadius: BorderRadius.circular(10),
             ),
             child: const Icon(
-              PhosphorIconsFill.warningCircle,
+              LucideIcons.circleAlert,
               color: AppTheme.danger,
               size: 18,
             ),

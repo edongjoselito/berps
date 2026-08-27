@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/responsive.dart';
@@ -106,7 +106,7 @@ class _EmployeeAccomplishmentScreenState
             const Padding(
               padding: EdgeInsets.only(top: 40),
               child: AdminEmptyView(
-                icon: PhosphorIconsFill.userFocus,
+                icon: LucideIcons.userSearch,
                 title: 'Pick an employee',
                 message: 'Choose an employee and period to view their report.',
               ),
@@ -140,7 +140,7 @@ class _EmployeeAccomplishmentScreenState
                   return const Padding(
                     padding: EdgeInsets.only(top: 40),
                     child: AdminEmptyView(
-                      icon: PhosphorIconsFill.trophy,
+                      icon: LucideIcons.trophy,
                       title: 'No accomplishments',
                       message: 'None recorded for this selection.',
                     ),
@@ -215,7 +215,7 @@ class _EmployeeAccomplishmentScreenState
       ),
       child: Row(
         children: [
-          const Icon(PhosphorIconsBold.userCircle,
+          const Icon(LucideIcons.circleUser,
               size: 18, color: AppTheme.primaryDark),
           const SizedBox(width: 10),
           Expanded(child: child),
