@@ -23,7 +23,7 @@ class AppTheme {
   static const Color warning = Color(0xFFB97A0E);
   static const Color danger = Color(0xFFB91C1C);
 
-  static const String fontFamily = 'Rubik';
+  static const String fontFamily = 'InstrumentSans';
 
   /// Reusable shadow tokens so cards share an exact elevation language.
   static const List<BoxShadow> shadowSoft = [

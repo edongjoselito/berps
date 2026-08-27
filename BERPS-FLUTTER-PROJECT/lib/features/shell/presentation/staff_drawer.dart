@@ -22,6 +22,7 @@ class StaffDrawer extends StatelessWidget {
     required this.onSelectReminders,
     required this.onSelectAnnualGoals,
     required this.onSelectSupportDashboard,
+    required this.onSelectUnassignedTickets,
     required this.onSignOut,
     this.activeItemId = 'dashboard',
   });
@@ -38,6 +39,7 @@ class StaffDrawer extends StatelessWidget {
   final VoidCallback onSelectReminders;
   final VoidCallback onSelectAnnualGoals;
   final VoidCallback onSelectSupportDashboard;
+  final VoidCallback onSelectUnassignedTickets;
   final Future<void> Function() onSignOut;
   final String activeItemId;
 
@@ -150,6 +152,15 @@ class StaffDrawer extends StatelessWidget {
                       label: 'Support Dashboard',
                       activeItemId: activeItemId,
                       onTap: onSelectSupportDashboard,
+                    ),
+                  if (session.hasSupport)
+                    _NavItem(
+                      id: 'unassigned-tickets',
+                      icon: PhosphorIconsRegular.userMinus,
+                      iconActive: PhosphorIconsFill.userMinus,
+                      label: 'Unassigned Tickets',
+                      activeItemId: activeItemId,
+                      onTap: onSelectUnassignedTickets,
                     ),
                 ],
               ),

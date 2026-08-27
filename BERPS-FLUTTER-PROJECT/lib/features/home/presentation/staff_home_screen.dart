@@ -283,6 +283,7 @@ class _StaffHomeScreenState extends State<StaffHomeScreen> {
         onSelectReminders: _openReminders,
         onSelectAnnualGoals: _openAnnualGoals,
         onSelectSupportDashboard: _openSupportDashboard,
+        onSelectUnassignedTickets: () => _openSupportIssues(scope: 'unassigned'),
         onSignOut: _confirmSignOut,
       ),
       body: AnimatedSwitcher(

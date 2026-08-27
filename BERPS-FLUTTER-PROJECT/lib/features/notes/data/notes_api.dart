@@ -40,6 +40,30 @@ class NotesApi {
         .toList(growable: false);
   }
 
+  /// Fetches notes within a date range (inclusive). Used by the calendar
+  /// to show markers on days that have notes.
+  Future<List<Note>> fetchNotesByDateRange({
+    required String baseUrl,
+    required String token,
+    required String from,
+    required String to,
+  }) async {
+    final query = <String, String>{'from': from, 'to': to};
+    final response = await _request(
+      () => _client.get(
+        _uri(baseUrl, '/api/mobile/staff/notes', query),
+        headers: _headers(token),
+      ),
+    );
+    final data = _decode(response);
+    final list = data['notes'];
+    if (list is! List) return const <Note>[];
+    return list
+        .whereType<Map>()
+        .map((e) => Note.fromJson(Map<String, dynamic>.from(e)))
+        .toList(growable: false);
+  }
+
   Future<void> createNote({
     required String baseUrl,
     required String token,

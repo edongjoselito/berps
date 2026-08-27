@@ -42,6 +42,54 @@ class RemindersApi {
     );
   }
 
+  /// Fetches reminders that fire on a specific date (used by the calendar
+  /// day view).  Recurring reminders (monthly/yearly) are matched by day
+  /// and month as appropriate.
+  Future<List<Reminder>> fetchRemindersByDate({
+    required String baseUrl,
+    required String token,
+    required String date,
+  }) async {
+    final response = await _request(
+      () => _client.get(
+        _uri(baseUrl, '/api/mobile/staff/reminders', {'date': date}),
+        headers: _headers(token),
+      ),
+    );
+    final data = _decode(response);
+    final list = data['reminders'];
+    if (list is! List) return const <Reminder>[];
+    return list
+        .whereType<Map>()
+        .map((e) => Reminder.fromJson(Map<String, dynamic>.from(e)))
+        .toList(growable: false);
+  }
+
+  /// Fetches reminders within a date range (inclusive). Recurring
+  /// reminders are expanded by the server to fire on every matching date
+  /// in the range. Used by the calendar to show markers on days that have
+  /// reminders.
+  Future<List<Reminder>> fetchRemindersByDateRange({
+    required String baseUrl,
+    required String token,
+    required String from,
+    required String to,
+  }) async {
+    final response = await _request(
+      () => _client.get(
+        _uri(baseUrl, '/api/mobile/staff/reminders', {'from': from, 'to': to}),
+        headers: _headers(token),
+      ),
+    );
+    final data = _decode(response);
+    final list = data['reminders'];
+    if (list is! List) return const <Reminder>[];
+    return list
+        .whereType<Map>()
+        .map((e) => Reminder.fromJson(Map<String, dynamic>.from(e)))
+        .toList(growable: false);
+  }
+
   Future<void> createReminder({
     required String baseUrl,
     required String token,
@@ -105,9 +153,11 @@ class RemindersApi {
 
   // ── Internals ──────────────────────────────────────────────────────────────
 
-  Uri _uri(String baseUrl, String path) {
+  Uri _uri(String baseUrl, String path, [Map<String, String>? query]) {
     final normalized = baseUrl.replaceFirst(RegExp(r'/+$'), '');
-    return Uri.parse('$normalized$path');
+    final uri = Uri.parse('$normalized$path');
+    if (query == null || query.isEmpty) return uri;
+    return uri.replace(queryParameters: query);
   }
 
   Map<String, String> _headers(String token) => {

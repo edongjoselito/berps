@@ -1126,7 +1126,7 @@ class MobileAdmin extends CI_Controller
                 'settingsID'   => $settingsID,
                 'status'       => 'active',
                 'task_id'      => $taskId,
-                'is_public'    => 1,
+                'is_public'    => 0,
                 'is_completed' => 1,
                 'created_at'   => date('Y-m-d H:i:s'),
                 'updated_at'   => date('Y-m-d H:i:s'),

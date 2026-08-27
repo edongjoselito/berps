@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_html/flutter_html.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/network/api_exception.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/haptics.dart';
+import '../../../core/utils/html_to_text.dart';
 import '../../../core/utils/responsive.dart';
 import '../../../core/widgets/animations.dart';
 import '../../../core/widgets/app_toast.dart';
@@ -329,15 +332,32 @@ class _NoteCard extends StatelessWidget {
             ),
             if (note.description.isNotEmpty) ...[
               const SizedBox(height: 6),
-              Text(
-                note.description,
-                maxLines: 3,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  color: AppTheme.textSecondary,
-                  fontSize: 12.5,
-                  height: 1.4,
-                ),
+              Html(
+                data: note.description,
+                shrinkWrap: true,
+                style: {
+                  'p': Style(
+                    margin: Margins.zero,
+                    color: AppTheme.textSecondary,
+                    fontSize: FontSize(12.5),
+                    lineHeight: const LineHeight(1.4),
+                    fontWeight: FontWeight.w600,
+                  ),
+                  'a': Style(
+                    color: AppTheme.primaryDark,
+                    fontSize: FontSize(12.5),
+                    fontWeight: FontWeight.w700,
+                    textDecoration: TextDecoration.underline,
+                  ),
+                  'br': Style(height: Height(4)),
+                },
+                onLinkTap: (url, attributes, element) async {
+                  if (url == null) return;
+                  final uri = Uri.tryParse(url);
+                  if (uri == null) return;
+                  Haptics.light();
+                  await launchUrl(uri, mode: LaunchMode.externalApplication);
+                },
               ),
             ],
             if (note.tags.isNotEmpty) ...[
@@ -425,7 +445,7 @@ class _NoteEditorSheetState extends State<_NoteEditorSheet> {
     final existing = widget.existing;
     _titleController = TextEditingController(text: existing?.title ?? '');
     _descriptionController =
-        TextEditingController(text: existing?.description ?? '');
+        TextEditingController(text: htmlToPlainText(existing?.description ?? ''));
     _tagsController =
         TextEditingController(text: existing?.tags.join(', ') ?? '');
   }

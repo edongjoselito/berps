@@ -1514,6 +1514,23 @@ class CashModel extends CI_Model
 		return $this->db->get()->result();
 	}
 
+	function noteListByDateRange($user, $settingsID, $from, $to)
+	{
+		$this->db->from('notes');
+		$this->db->where('notedBy', $user);
+		$this->db->where('settingsID', $settingsID);
+		$this->db->where('noteStat', 'Active');
+		if (!empty($from)) {
+			$this->db->where('noteDate >=', $from);
+		}
+		if (!empty($to)) {
+			$this->db->where('noteDate <=', $to);
+		}
+		$this->db->order_by('noteDate', 'DESC');
+		$this->db->order_by('noteID', 'DESC');
+		return $this->db->get()->result();
+	}
+
 	function priceList($settingsID)
 	{
 		if (!$this->db->table_exists('service_fees')) {

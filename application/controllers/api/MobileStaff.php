@@ -419,6 +419,22 @@ class MobileStaff extends CI_Controller
             $taskData = array_values(array_filter((array) $taskData, function ($task) use ($pendingForwardedIds) {
                 return in_array((int) ($task->taskID ?? 0), $pendingForwardedIds, true);
             }));
+        } elseif ($taskScope === 'due_today' || $taskScope === 'overdue') {
+            $taskData = array_values(array_filter((array) $taskData, function ($task) use ($today, $taskScope) {
+                $dueDate = trim((string) ($task->dueDate ?? ''));
+                if ($dueDate === '' || $dueDate === '0000-00-00') {
+                    return false;
+                }
+                $taskStat = (string) ($task->taskStat ?? '1');
+                if ($taskStat !== '1') {
+                    return false;
+                }
+                $dayDiff = (int) floor((strtotime($dueDate) - strtotime($today)) / 86400);
+                if ($taskScope === 'due_today') {
+                    return $dayDiff === 0;
+                }
+                return $dayDiff < 0;
+            }));
         }
 
         $filtered = array_values(array_filter((array) $taskData, function ($task) use ($statusFilter) {
@@ -2868,25 +2884,54 @@ class MobileStaff extends CI_Controller
 
         $userId     = (int) ($claims['user_id'] ?? 0);
         $settingsID = (int) ($claims['settingsID'] ?? 0);
+        $username   = trim((string) ($claims['username'] ?? ''));
         $from = trim((string) $this->input->get('from'));
         $to   = trim((string) $this->input->get('to'));
 
-        $this->db->from('calendar_events')
-            ->where('settingsID', $settingsID)
-            ->where('status', 'active')
-            ->group_start()
-            ->where('user_id', $userId)
-            ->or_where('is_public', 1)
-            ->group_end();
+        // Match the web Calendar::get_events scoping exactly:
+        //   1. Non-task events (manually created) — always shown if owned by user
+        //   2. Task-synced events — only shown if the task still exists AND the
+        //      user is in the task's assignedPerson list (matched by user_id
+        //      or username).
+        // This prevents the mobile calendar from showing tasks the user created
+        // but is no longer assigned to, matching the web calendar behavior.
+        $params = [$userId, $settingsID, (string) $userId, $username];
+        $filters = '';
 
         if ($from !== '') {
-            $this->db->where('end_date >=', $from . ' 00:00:00');
+            $filters .= ' AND ce.end_date >= ?';
+            $params[] = $from . ' 00:00:00';
         }
         if ($to !== '') {
-            $this->db->where('start_date <=', $to . ' 23:59:59');
+            $filters .= ' AND ce.start_date <= ?';
+            $params[] = $to . ' 23:59:59';
         }
 
-        $rows = $this->db->order_by('start_date', 'ASC')->get()->result();
+        $sql = "
+            SELECT ce.*, 1 AS own
+            FROM calendar_events ce
+            LEFT JOIN projects_task pt
+                ON pt.taskID = ce.task_id
+                AND pt.settingsID = ce.settingsID
+            WHERE ce.user_id = ?
+                AND ce.settingsID = ?
+                AND ce.status = 'active'
+                AND (
+                    (COALESCE(ce.task_id, 0) = 0 AND COALESCE(ce.event_type, '') != 'task')
+                    OR (
+                        (COALESCE(ce.task_id, 0) > 0 OR ce.event_type = 'task')
+                        AND pt.taskID IS NOT NULL
+                        AND (
+                            FIND_IN_SET(?, REPLACE(COALESCE(pt.assignedPerson, ''), ' ', '')) > 0
+                            OR FIND_IN_SET(?, REPLACE(COALESCE(pt.assignedPerson, ''), ' ', '')) > 0
+                        )
+                    )
+                )
+                $filters
+            ORDER BY ce.start_date ASC
+        ";
+
+        $rows = $this->db->query($sql, $params)->result();
 
         $events = [];
         foreach ($rows as $row) {
@@ -2964,17 +3009,36 @@ class MobileStaff extends CI_Controller
 
         $userId     = (int) ($claims['user_id'] ?? 0);
         $settingsID = (int) ($claims['settingsID'] ?? 0);
+        $username   = trim((string) ($claims['username'] ?? ''));
         $id         = (int) $id;
 
-        $row = $this->db->from('calendar_events')
-            ->where('id', $id)
-            ->where('settingsID', $settingsID)
-            ->where('status', 'active')
-            ->group_start()
-            ->where('user_id', $userId)
-            ->or_where('is_public', 1)
-            ->group_end()
-            ->get()->row();
+        // Match the web Calendar::get_events task-filtering logic: non-task
+        // events are always visible to the owner; task-synced events require
+        // the task to exist AND the user to be in the assignedPerson list.
+        $sql = "
+            SELECT ce.*, 1 AS own
+            FROM calendar_events ce
+            LEFT JOIN projects_task pt
+                ON pt.taskID = ce.task_id
+                AND pt.settingsID = ce.settingsID
+            WHERE ce.id = ?
+                AND ce.user_id = ?
+                AND ce.settingsID = ?
+                AND ce.status = 'active'
+                AND (
+                    (COALESCE(ce.task_id, 0) = 0 AND COALESCE(ce.event_type, '') != 'task')
+                    OR (
+                        (COALESCE(ce.task_id, 0) > 0 OR ce.event_type = 'task')
+                        AND pt.taskID IS NOT NULL
+                        AND (
+                            FIND_IN_SET(?, REPLACE(COALESCE(pt.assignedPerson, ''), ' ', '')) > 0
+                            OR FIND_IN_SET(?, REPLACE(COALESCE(pt.assignedPerson, ''), ' ', '')) > 0
+                        )
+                    )
+                )
+            LIMIT 1
+        ";
+        $row = $this->db->query($sql, [$id, $userId, $settingsID, (string) $userId, $username])->row();
 
         if (!$row) {
             return mobile_json(['ok' => false, 'message' => 'Event not found.'], 404);
@@ -3717,8 +3781,14 @@ class MobileStaff extends CI_Controller
         $settingsID = (int) ($claims['settingsID'] ?? 0);
         $username   = trim((string) ($claims['username'] ?? ''));
         $date       = trim((string) $this->input->get('date'));
+        $from       = trim((string) $this->input->get('from'));
+        $to         = trim((string) $this->input->get('to'));
 
-        $rows = $this->CashModel->noteList($username, $settingsID, $date);
+        if ($from !== '' || $to !== '') {
+            $rows = $this->CashModel->noteListByDateRange($username, $settingsID, $from, $to);
+        } else {
+            $rows = $this->CashModel->noteList($username, $settingsID, $date);
+        }
         $notes = [];
         foreach ((array) $rows as $row) {
             $notes[] = $this->_note_payload($row);
@@ -3929,19 +3999,108 @@ class MobileStaff extends CI_Controller
 
         $settingsID = (int) ($claims['settingsID'] ?? 0);
         $userId     = (int) ($claims['user_id'] ?? 0);
+        $date       = trim((string) $this->input->get('date'));
+        $from       = trim((string) $this->input->get('from'));
+        $to         = trim((string) $this->input->get('to'));
 
-        $rows = $this->RemindersModel->getAllReminders($settingsID, $userId);
+        if ($from !== '' || $to !== '') {
+            // Calendar range mode: return all reminders in the range.
+            // For recurring reminders, expand them to fire on every matching
+            // date within the range so the calendar can show markers.
+            $allReminders = $this->RemindersModel->getAllReminders($settingsID, $userId);
+            $rows = [];
+            $fromTs = $from !== '' ? strtotime($from) : 0;
+            $toTs   = $to !== '' ? strtotime($to) : PHP_INT_MAX;
+
+            foreach ((array) $allReminders as $rem) {
+                $remindTs = strtotime((string) ($rem->remind_at ?? ''));
+                if ($remindTs === false) continue;
+
+                $recurrence = trim((string) ($rem->recurrence ?? 'once'));
+                $remDay   = (int) date('j', $remindTs);
+                $remMonth = (int) date('n', $remindTs);
+
+                if ($recurrence === 'once') {
+                    // Show only if the remind_at date falls in range
+                    if ($remindTs >= $fromTs && $remindTs <= $toTs) {
+                        $rows[] = $rem;
+                    }
+                } else {
+                    // Expand recurring reminders: find all matching dates in range
+                    $period = new DatePeriod(
+                        new DateTime(date('Y-m-d', $fromTs)),
+                        new DateInterval('P1D'),
+                        (new DateTime(date('Y-m-d', $toTs)))->modify('+1 day')
+                    );
+                    foreach ($period as $dt) {
+                        $d = (int) $dt->format('j');
+                        $m = (int) $dt->format('n');
+                        if ($recurrence === 'monthly' && $d === $remDay) {
+                            $copy = clone $rem;
+                            $copy->remind_at = $dt->format('Y-m-d') . ' ' . date('H:i:s', $remindTs);
+                            $rows[] = $copy;
+                        } elseif ($recurrence === 'yearly' && $d === $remDay && $m === $remMonth) {
+                            $copy = clone $rem;
+                            $copy->remind_at = $dt->format('Y-m-d') . ' ' . date('H:i:s', $remindTs);
+                            $rows[] = $copy;
+                        }
+                    }
+                }
+            }
+        } elseif ($date !== '') {
+            // Calendar day view: return reminders that fire on this date.
+            //   once    → exact date match on remind_at
+            //   monthly → same day-of-month
+            //   yearly  → same month + day-of-month
+            $ts = strtotime($date);
+            if ($ts !== false) {
+                $day   = (int) date('j', $ts);
+                $month = (int) date('n', $ts);
+                $dateStr = date('Y-m-d', $ts);
+
+                $rows = $this->db
+                    ->where('settingsID', $settingsID)
+                    ->where('user_id', $userId)
+                    ->group_start()
+                        ->where('recurrence', 'once')
+                        ->where("DATE(remind_at)", $dateStr)
+                    ->group_end()
+                    ->or_group_start()
+                        ->where('recurrence', 'monthly')
+                        ->where("DAY(remind_at)", $day)
+                    ->group_end()
+                    ->or_group_start()
+                        ->where('recurrence', 'yearly')
+                        ->where("MONTH(remind_at)", $month)
+                        ->where("DAY(remind_at)", $day)
+                    ->group_end()
+                    ->order_by('remind_at', 'ASC')
+                    ->get('reminders')
+                    ->result();
+            } else {
+                $rows = [];
+            }
+        } else {
+            $rows = $this->RemindersModel->getAllReminders($settingsID, $userId);
+        }
+
         $reminders = [];
         foreach ((array) $rows as $row) {
             $reminders[] = $this->_reminder_payload($row);
         }
 
-        $dueToday = $this->RemindersModel->getDueToday($settingsID, $userId);
+        if ($date === '' && $from === '' && $to === '') {
+            $dueToday = $this->RemindersModel->getDueToday($settingsID, $userId);
+            return mobile_json([
+                'ok'              => true,
+                'reminders'       => $reminders,
+                'due_today_count' => is_array($dueToday) ? count($dueToday) : 0,
+            ]);
+        }
 
         return mobile_json([
-            'ok'              => true,
-            'reminders'       => $reminders,
-            'due_today_count' => is_array($dueToday) ? count($dueToday) : 0,
+            'ok'        => true,
+            'reminders' => $reminders,
         ]);
     }
 
@@ -4249,7 +4408,7 @@ class MobileStaff extends CI_Controller
     private function _normalize_task_scope($value)
     {
         $value = strtolower(trim((string) $value));
-        return in_array($value, ['forwarded'], true) ? $value : '';
+        return in_array($value, ['forwarded', 'due_today', 'overdue'], true) ? $value : '';
     }
 
     private function _normalize_date_input($value)

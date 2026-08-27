@@ -4,6 +4,7 @@ import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../../../core/network/api_exception.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/haptics.dart';
+import '../../../core/utils/html_to_text.dart';
 import '../../../core/widgets/app_toast.dart';
 import '../../../core/widgets/mobile_header.dart';
 import '../../auth/domain/staff_session.dart';
@@ -73,7 +74,7 @@ class _CalendarDayNoteEditorState extends State<CalendarDayNoteEditor> {
     final note = widget.existing;
     if (note == null) return '';
     final title = note.title.trim();
-    final description = note.description.trim();
+    final description = htmlToPlainText(note.description);
     if (title.isEmpty && description.isEmpty) return '';
     if (title.isEmpty) return description;
     if (description.isEmpty) return title;

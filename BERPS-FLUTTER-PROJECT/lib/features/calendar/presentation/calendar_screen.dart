@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_html/flutter_html.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/network/api_exception.dart';
 import '../../../core/theme/app_theme.dart';
@@ -7,12 +9,11 @@ import '../../../core/utils/haptics.dart';
 import '../../../core/widgets/app_toast.dart';
 import '../../../core/widgets/mobile_header.dart';
 import '../../auth/domain/staff_session.dart';
-import '../../home/data/staff_api.dart';
 import '../../notes/data/notes_api.dart';
 import '../../notes/domain/note.dart';
-import '../domain/calendar_event.dart';
+import '../../reminders/data/reminders_api.dart';
+import '../../reminders/domain/reminder.dart';
 import 'calendar_day_note_editor.dart';
-import 'calendar_event_editor.dart';
 
 /// Apple Calendar signature red — used for the year, the current month and
 /// the "today" marker, exactly like the iOS Calendar year view.
@@ -68,23 +69,79 @@ List<List<int>> _monthWeeks(int year, int month) {
   return [for (var i = 0; i < cells.length; i += 7) cells.sublist(i, i + 7)];
 }
 
-Color _eventColor(CalendarEvent e) {
-  try {
-    final hex = e.color.replaceAll('#', '');
-    if (hex.length == 6) return Color(int.parse('FF$hex', radix: 16));
-  } catch (_) {}
-  return AppTheme.primaryDark;
-}
-
 bool _sameDay(DateTime a, DateTime b) =>
     a.year == b.year && a.month == b.month && a.day == b.day;
 
-/// Whether [event] covers the calendar day [day].
-bool _eventCoversDay(CalendarEvent event, DateTime day) {
-  final dayStart = DateTime(day.year, day.month, day.day);
-  final start = DateTime(event.start.year, event.start.month, event.start.day);
-  final end = DateTime(event.end.year, event.end.month, event.end.day);
-  return !dayStart.isBefore(start) && !dayStart.isAfter(end);
+/// A unified calendar entry — either a note or a reminder — used by the
+/// calendar month/day views so the calendar can show notes and reminders
+/// on the timeline without involving tasks.
+class CalendarDayItem {
+  const CalendarDayItem({
+    required this.date,
+    required this.title,
+    required this.color,
+    required this.type,
+    this.note,
+    this.reminder,
+  });
+
+  final DateTime date;
+  final String title;
+  final Color color;
+  final CalendarDayItemType type;
+  final Note? note;
+  final Reminder? reminder;
+
+  bool get isNote => type == CalendarDayItemType.note;
+  bool get isReminder => type == CalendarDayItemType.reminder;
+}
+
+enum CalendarDayItemType { note, reminder }
+
+/// Parses a "yyyy-MM-dd" or "yyyy-MM-dd HH:mm:ss" string into a DateTime.
+DateTime _parseDate(String s) {
+  final cleaned = s.trim().replaceFirst(' ', 'T');
+  return DateTime.tryParse(cleaned) ?? DateTime(1970);
+}
+
+/// Builds calendar entries from notes and reminders for the month grid.
+List<CalendarDayItem> _buildDayItems({
+  required List<Note> notes,
+  required List<Reminder> reminders,
+}) {
+  final items = <CalendarDayItem>[];
+
+  for (final note in notes) {
+    final date = _parseDate(note.date);
+    if (date.year != 1970) {
+      items.add(CalendarDayItem(
+        date: date,
+        title: note.displayTitle,
+        color: const Color(0xFF007AFF), // blue for notes
+        type: CalendarDayItemType.note,
+        note: note,
+      ));
+    }
+  }
+
+  for (final reminder in reminders) {
+    final date = _parseDate(reminder.remindAt);
+    if (date.year != 1970) {
+      items.add(CalendarDayItem(
+        date: date,
+        title: reminder.title,
+        color: const Color(0xFFFF9500), // orange for reminders
+        type: CalendarDayItemType.reminder,
+        reminder: reminder,
+      ));
+    }
+  }
+
+  return items;
+}
+
+bool _itemCoversDay(CalendarDayItem item, DateTime day) {
+  return _sameDay(item.date, day);
 }
 
 /// Calendar — iOS-style year view.
@@ -109,7 +166,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
     Haptics.light();
     await Navigator.of(context).push<bool>(
       MaterialPageRoute(
-        builder: (_) => CalendarEventEditor(session: widget.session),
+        builder: (_) => CalendarDayNoteEditor(
+          session: widget.session,
+          date: DateTime.now(),
+        ),
       ),
     );
   }
@@ -141,7 +201,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
         onPressed: _openCreate,
         icon: const Icon(PhosphorIconsBold.plus, size: 18),
         label: const Text(
-          'New event',
+          'New note',
           style: TextStyle(fontWeight: FontWeight.w800),
         ),
       ),
@@ -200,10 +260,11 @@ class CalendarDashboardTab extends StatefulWidget {
 }
 
 class _CalendarDashboardTabState extends State<CalendarDashboardTab> {
-  final StaffApi _api = StaffApi();
+  final NotesApi _notesApi = NotesApi();
+  final RemindersApi _remindersApi = RemindersApi();
   late int _year = DateTime.now().year;
   late int _month = DateTime.now().month;
-  Future<List<CalendarEvent>>? _future;
+  Future<List<CalendarDayItem>>? _future;
 
   @override
   void initState() {
@@ -211,13 +272,43 @@ class _CalendarDashboardTabState extends State<CalendarDashboardTab> {
     _reload();
   }
 
+  String _monthStart() {
+    final d = DateTime(_year, _month, 1);
+    return '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+  }
+
+  String _monthEnd() {
+    final d = DateTime(_year, _month + 1, 0); // last day of month
+    return '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+  }
+
   void _reload() {
     setState(() {
-      _future = _api.fetchCalendarEvents(
+      _future = _fetchItems();
+    });
+  }
+
+  Future<List<CalendarDayItem>> _fetchItems() async {
+    final from = _monthStart();
+    final to = _monthEnd();
+    final results = await Future.wait([
+      _notesApi.fetchNotesByDateRange(
         baseUrl: widget.session.baseUrl,
         token: widget.session.token,
-      );
-    });
+        from: from,
+        to: to,
+      ),
+      _remindersApi.fetchRemindersByDateRange(
+        baseUrl: widget.session.baseUrl,
+        token: widget.session.token,
+        from: from,
+        to: to,
+      ),
+    ]);
+    return _buildDayItems(
+      notes: results[0] as List<Note>,
+      reminders: results[1] as List<Reminder>,
+    );
   }
 
   void _shiftMonth(int delta) {
@@ -240,40 +331,47 @@ class _CalendarDashboardTabState extends State<CalendarDashboardTab> {
 
   Future<void> _openCreate() async {
     Haptics.light();
-    final created = await Navigator.of(context).push<bool>(
+    final saved = await Navigator.of(context).push<bool>(
       MaterialPageRoute(
-        builder: (_) => CalendarEventEditor(session: widget.session),
+        builder: (_) => CalendarDayNoteEditor(
+          session: widget.session,
+          date: DateTime(_year, _month, DateTime.now().day),
+        ),
       ),
     );
-    if (created == true) _reload();
+    if (saved == true) _reload();
   }
 
-  Future<void> _openEdit(CalendarEvent event) async {
+  Future<void> _openEditNote(Note note) async {
     Haptics.light();
-    final updated = await Navigator.of(context).push<bool>(
+    final saved = await Navigator.of(context).push<bool>(
       MaterialPageRoute(
         builder: (_) =>
-            CalendarEventEditor(session: widget.session, existing: event),
+            CalendarDayNoteEditor(
+              session: widget.session,
+              date: _parseDate(note.date),
+              existing: note,
+            ),
       ),
     );
-    if (updated == true) _reload();
+    if (saved == true) _reload();
   }
 
-  Future<void> _confirmDelete(CalendarEvent event) async {
+  Future<void> _confirmDeleteNote(Note note) async {
     Haptics.warn();
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: const Text(
-          'Delete event?',
+          'Delete note?',
           style: TextStyle(
             fontWeight: FontWeight.w900,
             color: AppTheme.textPrimary,
           ),
         ),
         content: Text(
-          '"${event.title}" will be permanently removed.',
+          '"${note.displayTitle}" will be permanently removed.',
           style: const TextStyle(color: AppTheme.textSecondary),
         ),
         actions: [
@@ -291,13 +389,13 @@ class _CalendarDashboardTabState extends State<CalendarDashboardTab> {
     );
     if (confirmed != true) return;
     try {
-      await _api.deleteCalendarEvent(
+      await _notesApi.deleteNote(
         baseUrl: widget.session.baseUrl,
         token: widget.session.token,
-        id: event.id,
+        noteId: note.id,
       );
       if (!mounted) return;
-      AppToast.success(context, 'Event deleted.');
+      AppToast.success(context, 'Note deleted.');
       Navigator.of(context).maybePop(); // close the day sheet
       _reload();
     } on ApiException catch (e) {
@@ -306,10 +404,10 @@ class _CalendarDashboardTabState extends State<CalendarDashboardTab> {
     }
   }
 
-  void _openDay(DateTime day, List<CalendarEvent> events) {
+  void _openDay(DateTime day, List<CalendarDayItem> items) {
     Haptics.light();
-    final dayEvents = events.where((e) => _eventCoversDay(e, day)).toList()
-      ..sort((a, b) => a.start.compareTo(b.start));
+    final dayItems = items.where((e) => _itemCoversDay(e, day)).toList()
+      ..sort((a, b) => a.date.compareTo(b.date));
     showModalBottomSheet<void>(
       context: context,
       backgroundColor: AppTheme.surface,
@@ -319,16 +417,16 @@ class _CalendarDashboardTabState extends State<CalendarDashboardTab> {
       builder: (sheetContext) => _DaySheet(
         session: widget.session,
         day: day,
-        events: dayEvents,
-        onAdd: () {
+        items: dayItems,
+        onAddNote: () {
           Navigator.of(sheetContext).pop();
           _openCreate();
         },
-        onEdit: (e) {
+        onEditNote: (note) {
           Navigator.of(sheetContext).pop();
-          _openEdit(e);
+          _openEditNote(note);
         },
-        onDelete: (e) => _confirmDelete(e),
+        onDeleteNote: (note) => _confirmDeleteNote(note),
       ),
     );
   }
@@ -344,16 +442,16 @@ class _CalendarDashboardTabState extends State<CalendarDashboardTab> {
         onPressed: _openCreate,
         icon: const Icon(PhosphorIconsBold.plus, size: 18),
         label: const Text(
-          'New event',
+          'New note',
           style: TextStyle(fontWeight: FontWeight.w800),
         ),
       ),
       body: SafeArea(
         bottom: false,
-        child: FutureBuilder<List<CalendarEvent>>(
+        child: FutureBuilder<List<CalendarDayItem>>(
           future: _future,
           builder: (context, snapshot) {
-            final events = snapshot.data ?? const <CalendarEvent>[];
+            final items = snapshot.data ?? const <CalendarDayItem>[];
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -386,8 +484,8 @@ class _CalendarDashboardTabState extends State<CalendarDashboardTab> {
                     year: _year,
                     month: _month,
                     today: now,
-                    events: events,
-                    onDayTap: (day) => _openDay(day, events),
+                    items: items,
+                    onDayTap: (day) => _openDay(day, items),
                   ),
                 ),
               ],
@@ -668,10 +766,11 @@ class _MonthDetailScreen extends StatefulWidget {
 }
 
 class _MonthDetailScreenState extends State<_MonthDetailScreen> {
-  final StaffApi _api = StaffApi();
+  final NotesApi _notesApi = NotesApi();
+  final RemindersApi _remindersApi = RemindersApi();
   late int _year = widget.year;
   late int _month = widget.month;
-  Future<List<CalendarEvent>>? _future;
+  Future<List<CalendarDayItem>>? _future;
 
   @override
   void initState() {
@@ -679,13 +778,43 @@ class _MonthDetailScreenState extends State<_MonthDetailScreen> {
     _reload();
   }
 
+  String _monthStart() {
+    final d = DateTime(_year, _month, 1);
+    return '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+  }
+
+  String _monthEnd() {
+    final d = DateTime(_year, _month + 1, 0);
+    return '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+  }
+
   void _reload() {
     setState(() {
-      _future = _api.fetchCalendarEvents(
+      _future = _fetchItems();
+    });
+  }
+
+  Future<List<CalendarDayItem>> _fetchItems() async {
+    final from = _monthStart();
+    final to = _monthEnd();
+    final results = await Future.wait([
+      _notesApi.fetchNotesByDateRange(
         baseUrl: widget.session.baseUrl,
         token: widget.session.token,
-      );
-    });
+        from: from,
+        to: to,
+      ),
+      _remindersApi.fetchRemindersByDateRange(
+        baseUrl: widget.session.baseUrl,
+        token: widget.session.token,
+        from: from,
+        to: to,
+      ),
+    ]);
+    return _buildDayItems(
+      notes: results[0] as List<Note>,
+      reminders: results[1] as List<Reminder>,
+    );
   }
 
   void _shiftMonth(int delta) {
@@ -695,44 +824,52 @@ class _MonthDetailScreenState extends State<_MonthDetailScreen> {
       _year = next.year;
       _month = next.month;
     });
+    _reload();
   }
 
   Future<void> _openCreate() async {
     Haptics.light();
-    final created = await Navigator.of(context).push<bool>(
+    final saved = await Navigator.of(context).push<bool>(
       MaterialPageRoute(
-        builder: (_) => CalendarEventEditor(session: widget.session),
+        builder: (_) => CalendarDayNoteEditor(
+          session: widget.session,
+          date: DateTime(_year, _month, DateTime.now().day),
+        ),
       ),
     );
-    if (created == true) _reload();
+    if (saved == true) _reload();
   }
 
-  Future<void> _openEdit(CalendarEvent event) async {
+  Future<void> _openEditNote(Note note) async {
     Haptics.light();
-    final updated = await Navigator.of(context).push<bool>(
+    final saved = await Navigator.of(context).push<bool>(
       MaterialPageRoute(
         builder: (_) =>
-            CalendarEventEditor(session: widget.session, existing: event),
+            CalendarDayNoteEditor(
+              session: widget.session,
+              date: _parseDate(note.date),
+              existing: note,
+            ),
       ),
     );
-    if (updated == true) _reload();
+    if (saved == true) _reload();
   }
 
-  Future<void> _confirmDelete(CalendarEvent event) async {
+  Future<void> _confirmDeleteNote(Note note) async {
     Haptics.warn();
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: const Text(
-          'Delete event?',
+          'Delete note?',
           style: TextStyle(
             fontWeight: FontWeight.w900,
             color: AppTheme.textPrimary,
           ),
         ),
         content: Text(
-          '"${event.title}" will be permanently removed.',
+          '"${note.displayTitle}" will be permanently removed.',
           style: const TextStyle(color: AppTheme.textSecondary),
         ),
         actions: [
@@ -750,13 +887,13 @@ class _MonthDetailScreenState extends State<_MonthDetailScreen> {
     );
     if (confirmed != true) return;
     try {
-      await _api.deleteCalendarEvent(
+      await _notesApi.deleteNote(
         baseUrl: widget.session.baseUrl,
         token: widget.session.token,
-        id: event.id,
+        noteId: note.id,
       );
       if (!mounted) return;
-      AppToast.success(context, 'Event deleted.');
+      AppToast.success(context, 'Note deleted.');
       Navigator.of(context).maybePop(); // close the day sheet
       _reload();
     } on ApiException catch (e) {
@@ -765,10 +902,10 @@ class _MonthDetailScreenState extends State<_MonthDetailScreen> {
     }
   }
 
-  void _openDay(DateTime day, List<CalendarEvent> events) {
+  void _openDay(DateTime day, List<CalendarDayItem> items) {
     Haptics.light();
-    final dayEvents = events.where((e) => _eventCoversDay(e, day)).toList()
-      ..sort((a, b) => a.start.compareTo(b.start));
+    final dayItems = items.where((e) => _itemCoversDay(e, day)).toList()
+      ..sort((a, b) => a.date.compareTo(b.date));
     showModalBottomSheet<void>(
       context: context,
       backgroundColor: AppTheme.surface,
@@ -778,16 +915,16 @@ class _MonthDetailScreenState extends State<_MonthDetailScreen> {
       builder: (sheetContext) => _DaySheet(
         session: widget.session,
         day: day,
-        events: dayEvents,
-        onAdd: () {
+        items: dayItems,
+        onAddNote: () {
           Navigator.of(sheetContext).pop();
           _openCreate();
         },
-        onEdit: (e) {
+        onEditNote: (note) {
           Navigator.of(sheetContext).pop();
-          _openEdit(e);
+          _openEditNote(note);
         },
-        onDelete: (e) => _confirmDelete(e),
+        onDeleteNote: (note) => _confirmDeleteNote(note),
       ),
     );
   }
@@ -799,10 +936,10 @@ class _MonthDetailScreenState extends State<_MonthDetailScreen> {
       backgroundColor: AppTheme.background,
       body: SafeArea(
         bottom: false,
-        child: FutureBuilder<List<CalendarEvent>>(
+        child: FutureBuilder<List<CalendarDayItem>>(
           future: _future,
           builder: (context, snapshot) {
-            final events = snapshot.data ?? const <CalendarEvent>[];
+            final items = snapshot.data ?? const <CalendarDayItem>[];
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -821,8 +958,8 @@ class _MonthDetailScreenState extends State<_MonthDetailScreen> {
                     year: _year,
                     month: _month,
                     today: now,
-                    events: events,
-                    onDayTap: (day) => _openDay(day, events),
+                    items: items,
+                    onDayTap: (day) => _openDay(day, items),
                   ),
                 ),
               ],
@@ -931,14 +1068,14 @@ class _MonthGrid extends StatelessWidget {
     required this.year,
     required this.month,
     required this.today,
-    required this.events,
+    required this.items,
     required this.onDayTap,
   });
 
   final int year;
   final int month;
   final DateTime today;
-  final List<CalendarEvent> events;
+  final List<CalendarDayItem> items;
   final ValueChanged<DateTime> onDayTap;
 
   @override
@@ -963,7 +1100,7 @@ class _MonthGrid extends StatelessWidget {
                                   today.month == month &&
                                   today.day == day,
                               dotColors: _dotsFor(DateTime(year, month, day)),
-                              hasEvents: _hasEvents(DateTime(year, month, day)),
+                              hasEvents: _hasItems(DateTime(year, month, day)),
                               onTap: onDayTap,
                             ),
                     ),
@@ -976,11 +1113,11 @@ class _MonthGrid extends StatelessWidget {
   }
 
   List<Color> _dotsFor(DateTime day) {
-    final matches = events.where((e) => _eventCoversDay(e, day)).toList();
-    return [for (final e in matches.take(3)) _eventColor(e)];
+    final matches = items.where((e) => _itemCoversDay(e, day)).toList();
+    return [for (final e in matches.take(3)) e.color];
   }
 
-  bool _hasEvents(DateTime day) => events.any((e) => _eventCoversDay(e, day));
+  bool _hasItems(DateTime day) => items.any((e) => _itemCoversDay(e, day));
 }
 
 class _MonthDayCell extends StatelessWidget {
@@ -1059,31 +1196,218 @@ class _MonthDayCell extends StatelessWidget {
   }
 }
 
+/// Builds the notes sliver for the day sheet from a list of notes.
+Widget _dayNotes(List<Note> notes, _DaySheetState sheet) {
+  if (notes.isEmpty) {
+    return const SliverToBoxAdapter(
+      child: Padding(
+        padding: EdgeInsets.symmetric(vertical: 8),
+        child: Row(
+          children: [
+            Icon(
+              PhosphorIconsBold.notebook,
+              size: 16,
+              color: AppTheme.textMuted,
+            ),
+            SizedBox(width: 10),
+            Text(
+              'No notes on this day',
+              style: TextStyle(
+                color: AppTheme.textSecondary,
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+  return SliverList(
+    delegate: SliverChildBuilderDelegate(
+      (context, i) => Padding(
+        padding: const EdgeInsets.only(bottom: 8),
+        child: _DayNoteRow(
+          note: notes[i],
+          onTap: () => sheet.widget.onEditNote(notes[i]),
+          onDelete: () => sheet.widget.onDeleteNote(notes[i]),
+        ),
+      ),
+      childCount: notes.length,
+    ),
+  );
+}
+
+/// Reminders section for the day sheet — shows reminders from the items
+/// passed in (already filtered to this day).
+class _DayRemindersSection extends StatelessWidget {
+  const _DayRemindersSection({required this.reminders});
+
+  final List<Reminder> reminders;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const Icon(
+              PhosphorIconsBold.bellSimpleRinging,
+              size: 15,
+              color: AppTheme.primaryDark,
+            ),
+            const SizedBox(width: 8),
+            const Text(
+              'Reminders',
+              style: TextStyle(
+                fontSize: 13.5,
+                fontWeight: FontWeight.w900,
+                color: AppTheme.textPrimary,
+              ),
+            ),
+            const SizedBox(width: 8),
+            if (reminders.isNotEmpty)
+              Text(
+                '${reminders.length}',
+                style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w800,
+                  color: AppTheme.textMuted,
+                ),
+              ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        if (reminders.isEmpty)
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 8),
+            child: Row(
+              children: [
+                Icon(
+                  PhosphorIconsBold.bellSimpleSlash,
+                  size: 16,
+                  color: AppTheme.textMuted,
+                ),
+                SizedBox(width: 10),
+                Text(
+                  'No reminders on this day',
+                  style: TextStyle(
+                    color: AppTheme.textSecondary,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          )
+        else
+          ListView.separated(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: reminders.length,
+            separatorBuilder: (_, _) => const SizedBox(height: 8),
+            itemBuilder: (_, i) => _DayReminderRow(reminder: reminders[i]),
+          ),
+      ],
+    );
+  }
+}
+
+class _DayReminderRow extends StatelessWidget {
+  const _DayReminderRow({required this.reminder});
+
+  final Reminder reminder;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFF7ED),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFFED7AA)),
+      ),
+      child: Row(
+        children: [
+          const Icon(
+            PhosphorIconsFill.bellSimpleRinging,
+            size: 16,
+            color: Color(0xFFEA580C),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  reminder.title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 13,
+                    color: AppTheme.textPrimary,
+                  ),
+                ),
+                if (reminder.remindAtLabel.isNotEmpty) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    reminder.remindAtLabel,
+                    style: const TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: AppTheme.textMuted,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          if (reminder.recurrence != 'once')
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFED7AA),
+                borderRadius: BorderRadius.circular(99),
+              ),
+              child: Text(
+                reminder.recurrenceLabel,
+                style: const TextStyle(
+                  fontSize: 9.5,
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xFF9A3412),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
 class _DaySheet extends StatefulWidget {
   const _DaySheet({
     required this.session,
     required this.day,
-    required this.events,
-    required this.onAdd,
-    required this.onEdit,
-    required this.onDelete,
+    required this.items,
+    required this.onAddNote,
+    required this.onEditNote,
+    required this.onDeleteNote,
   });
 
   final StaffSession session;
   final DateTime day;
-  final List<CalendarEvent> events;
-  final VoidCallback onAdd;
-  final ValueChanged<CalendarEvent> onEdit;
-  final ValueChanged<CalendarEvent> onDelete;
+  final List<CalendarDayItem> items;
+  final VoidCallback onAddNote;
+  final ValueChanged<Note> onEditNote;
+  final ValueChanged<Note> onDeleteNote;
 
   @override
   State<_DaySheet> createState() => _DaySheetState();
 }
 
 class _DaySheetState extends State<_DaySheet> {
-  final NotesApi _notesApi = NotesApi();
-  Future<List<Note>>? _notesFuture;
-
   static const List<String> _weekdaysFull = [
     'Monday',
     'Tuesday',
@@ -1093,89 +1417,6 @@ class _DaySheetState extends State<_DaySheet> {
     'Saturday',
     'Sunday',
   ];
-
-  @override
-  void initState() {
-    super.initState();
-    _loadNotes();
-  }
-
-  void _loadNotes() {
-    setState(() {
-      _notesFuture = _notesApi.fetchNotesByDate(
-        baseUrl: widget.session.baseUrl,
-        token: widget.session.token,
-        date: _dateApiValue(widget.day),
-      );
-    });
-  }
-
-  String _dateApiValue(DateTime d) {
-    final y = d.year.toString().padLeft(4, '0');
-    final m = d.month.toString().padLeft(2, '0');
-    final day = d.day.toString().padLeft(2, '0');
-    return '$y-$m-$day';
-  }
-
-  Future<void> _openNoteEditor({Note? existing}) async {
-    Haptics.light();
-    final saved = await Navigator.of(context).push<bool>(
-      MaterialPageRoute(
-        builder: (_) => CalendarDayNoteEditor(
-          session: widget.session,
-          date: widget.day,
-          existing: existing,
-        ),
-      ),
-    );
-    if (saved == true) _loadNotes();
-  }
-
-  Future<void> _confirmDeleteNote(Note note) async {
-    Haptics.warn();
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text(
-          'Delete note?',
-          style: TextStyle(
-            fontWeight: FontWeight.w900,
-            color: AppTheme.textPrimary,
-          ),
-        ),
-        content: const Text(
-          'This note will be permanently removed.',
-          style: TextStyle(color: AppTheme.textSecondary),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: AppTheme.danger),
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
-    );
-    if (confirmed != true) return;
-
-    try {
-      await _notesApi.deleteNote(
-        baseUrl: widget.session.baseUrl,
-        token: widget.session.token,
-        noteId: note.id,
-      );
-      if (!mounted) return;
-      _loadNotes();
-    } on ApiException catch (e) {
-      if (!mounted) return;
-      AppToast.error(context, e.message);
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -1224,253 +1465,87 @@ class _DaySheetState extends State<_DaySheet> {
               ),
               const SizedBox(height: 14),
               Expanded(
-                child: FutureBuilder<List<Note>>(
-                  future: _notesFuture,
-                  builder: (context, snapshot) {
-                    final notes = snapshot.data ?? const <Note>[];
-                    final error = snapshot.error;
-                    final hasError = error != null && snapshot.data == null;
-                    return CustomScrollView(
-                      slivers: [
-                        // Events section
-                        SliverToBoxAdapter(
-                          child: _EventsSection(
-                            events: widget.events,
-                            onEdit: widget.onEdit,
-                            onDelete: widget.onDelete,
+                child: CustomScrollView(
+                  slivers: [
+                    // Reminders section (from items passed in)
+                    SliverToBoxAdapter(
+                      child: _DayRemindersSection(
+                        reminders: widget.items
+                            .where((e) => e.isReminder)
+                            .map((e) => e.reminder!)
+                            .toList(),
+                      ),
+                    ),
+                    const SliverToBoxAdapter(child: SizedBox(height: 20)),
+                    // Notes section header
+                    SliverToBoxAdapter(
+                      child: Row(
+                        children: [
+                          const Icon(
+                            PhosphorIconsBold.notebook,
+                            size: 15,
+                            color: AppTheme.primaryDark,
                           ),
-                        ),
-                        const SliverToBoxAdapter(child: SizedBox(height: 20)),
-                        // Notes section header
-                        SliverToBoxAdapter(
-                          child: Row(
-                            children: [
-                              const Icon(
-                                PhosphorIconsBold.notebook,
-                                size: 15,
-                                color: AppTheme.primaryDark,
+                          const SizedBox(width: 8),
+                          const Expanded(
+                            child: Text(
+                              'Notes',
+                              style: TextStyle(
+                                fontSize: 13.5,
+                                fontWeight: FontWeight.w900,
+                                color: AppTheme.textPrimary,
                               ),
-                              const SizedBox(width: 8),
-                              const Expanded(
-                                child: Text(
-                                  'Notes',
-                                  style: TextStyle(
-                                    fontSize: 13.5,
-                                    fontWeight: FontWeight.w900,
-                                    color: AppTheme.textPrimary,
-                                  ),
-                                ),
-                              ),
-                              TextButton.icon(
-                                onPressed: () => _openNoteEditor(),
-                                icon: const Icon(
-                                  PhosphorIconsBold.plus,
-                                  size: 14,
-                                ),
-                                label: const Text('Add note'),
-                                style: TextButton.styleFrom(
-                                  foregroundColor: AppTheme.primaryDark,
-                                  padding: EdgeInsets.zero,
-                                  textStyle: const TextStyle(
-                                    fontWeight: FontWeight.w800,
-                                    fontSize: 13,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SliverToBoxAdapter(child: SizedBox(height: 10)),
-                        // Notes list
-                        if (hasError)
-                          SliverToBoxAdapter(
-                            child: _NotesErrorState(
-                              message: error is ApiException
-                                  ? error.message
-                                  : 'Unable to load notes.',
-                              onRetry: _loadNotes,
-                            ),
-                          )
-                        else if (notes.isEmpty)
-                          SliverToBoxAdapter(
-                            child: _EmptyNotesState(onAdd: () => _openNoteEditor()),
-                          )
-                        else
-                          SliverList(
-                            delegate: SliverChildBuilderDelegate(
-                              (context, i) => Padding(
-                                padding: const EdgeInsets.only(bottom: 8),
-                                child: _DayNoteRow(
-                                  note: notes[i],
-                                  onTap: () => _openNoteEditor(existing: notes[i]),
-                                  onDelete: () => _confirmDeleteNote(notes[i]),
-                                ),
-                              ),
-                              childCount: notes.length,
                             ),
                           ),
-                        const SliverToBoxAdapter(child: SizedBox(height: 14)),
-                        // Add event button
-                        SliverToBoxAdapter(
-                          child: SizedBox(
-                            width: double.infinity,
-                            child: FilledButton.icon(
-                              style: FilledButton.styleFrom(
-                                backgroundColor: AppTheme.primaryDark,
+                          TextButton.icon(
+                            onPressed: widget.onAddNote,
+                            icon: const Icon(
+                              PhosphorIconsBold.plus,
+                              size: 14,
+                            ),
+                            label: const Text('Add note'),
+                            style: TextButton.styleFrom(
+                              foregroundColor: AppTheme.primaryDark,
+                              padding: EdgeInsets.zero,
+                              textStyle: const TextStyle(
+                                fontWeight: FontWeight.w800,
+                                fontSize: 13,
                               ),
-                              onPressed: widget.onAdd,
-                              icon: const Icon(PhosphorIconsBold.plus, size: 16),
-                              label: const Text('Add event'),
                             ),
                           ),
+                        ],
+                      ),
+                    ),
+                    const SliverToBoxAdapter(child: SizedBox(height: 10)),
+                    // Notes list (from items passed in)
+                    _dayNotes(
+                      widget.items
+                          .where((e) => e.isNote)
+                          .map((e) => e.note!)
+                          .toList(),
+                      this,
+                    ),
+                    const SliverToBoxAdapter(child: SizedBox(height: 14)),
+                    // Add note button
+                    SliverToBoxAdapter(
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: FilledButton.icon(
+                          style: FilledButton.styleFrom(
+                            backgroundColor: AppTheme.primaryDark,
+                          ),
+                          onPressed: widget.onAddNote,
+                          icon: const Icon(PhosphorIconsBold.plus, size: 16),
+                          label: const Text('Add note'),
                         ),
-                      ],
-                    );
-                  },
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _EventsSection extends StatelessWidget {
-  const _EventsSection({
-    required this.events,
-    required this.onEdit,
-    required this.onDelete,
-  });
-
-  final List<CalendarEvent> events;
-  final ValueChanged<CalendarEvent> onEdit;
-  final ValueChanged<CalendarEvent> onDelete;
-
-  @override
-  Widget build(BuildContext context) {
-    if (events.isEmpty) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 14),
-        child: Row(
-          children: [
-            const Icon(
-              PhosphorIconsBold.calendarBlank,
-              size: 18,
-              color: AppTheme.textMuted,
-            ),
-            const SizedBox(width: 10),
-            Text(
-              'No events on this day',
-              style: TextStyle(
-                color: AppTheme.textSecondary,
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-    return ListView.separated(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: events.length,
-      separatorBuilder: (_, _) => const SizedBox(height: 8),
-      itemBuilder: (_, i) => _DayEventRow(
-        event: events[i],
-        onTap: () => onEdit(events[i]),
-        onDelete: events[i].canDelete ? () => onDelete(events[i]) : null,
-      ),
-    );
-  }
-}
-
-class _EmptyNotesState extends StatelessWidget {
-  const _EmptyNotesState({required this.onAdd});
-
-  final VoidCallback onAdd;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 14),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            children: [
-              const Icon(
-                PhosphorIconsBold.notebook,
-                size: 18,
-                color: AppTheme.textMuted,
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  'No notes yet',
-                  style: TextStyle(
-                    color: AppTheme.textSecondary,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          FilledButton.icon(
-            style: FilledButton.styleFrom(
-              backgroundColor: AppTheme.primaryDark,
-            ),
-            onPressed: onAdd,
-            icon: const Icon(PhosphorIconsBold.plus, size: 16),
-            label: const Text('Add note'),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _NotesErrorState extends StatelessWidget {
-  const _NotesErrorState({required this.message, required this.onRetry});
-
-  final String message;
-  final VoidCallback onRetry;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 14),
-      child: Row(
-        children: [
-          const Icon(
-            PhosphorIconsBold.warningCircle,
-            size: 18,
-            color: AppTheme.danger,
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              message,
-              style: const TextStyle(
-                color: AppTheme.danger,
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                height: 1.4,
-              ),
-            ),
-          ),
-          TextButton(
-            onPressed: onRetry,
-            child: const Text(
-              'Retry',
-              style: TextStyle(fontWeight: FontWeight.w800),
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -1531,16 +1606,34 @@ class _DayNoteRow extends StatelessWidget {
                       ),
                     if (description.isNotEmpty) ...[
                       if (title.isNotEmpty) const SizedBox(height: 3),
-                      Text(
-                        description,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          color: AppTheme.textSecondary,
-                          fontSize: 12.5,
-                          fontWeight: FontWeight.w600,
-                          height: 1.35,
-                        ),
+                      Html(
+                        data: description,
+                        shrinkWrap: true,
+                        style: {
+                          'p': Style(
+                            margin: Margins.zero,
+                            color: AppTheme.textSecondary,
+                            fontSize: FontSize(12.5),
+                            fontWeight: FontWeight.w600,
+                            lineHeight: const LineHeight(1.35),
+                            maxLines: 2,
+                            textOverflow: TextOverflow.ellipsis,
+                          ),
+                          'a': Style(
+                            color: AppTheme.primaryDark,
+                            fontSize: FontSize(12.5),
+                            fontWeight: FontWeight.w700,
+                            textDecoration: TextDecoration.underline,
+                          ),
+                        },
+                        onLinkTap: (url, attributes, element) async {
+                          if (url == null) return;
+                          final uri = Uri.tryParse(url);
+                          if (uri == null) return;
+                          Haptics.light();
+                          await launchUrl(uri,
+                              mode: LaunchMode.externalApplication);
+                        },
                       ),
                     ],
                     if (!hasBody)
@@ -1574,142 +1667,3 @@ class _DayNoteRow extends StatelessWidget {
   }
 }
 
-class _DayEventRow extends StatelessWidget {
-  const _DayEventRow({
-    required this.event,
-    required this.onTap,
-    required this.onDelete,
-  });
-
-  final CalendarEvent event;
-  final VoidCallback onTap;
-  final VoidCallback? onDelete;
-
-  @override
-  Widget build(BuildContext context) {
-    final color = _eventColor(event);
-    return Material(
-      color: AppTheme.surfaceMuted,
-      borderRadius: BorderRadius.circular(14),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(14),
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: 10,
-                height: 10,
-                margin: const EdgeInsets.only(top: 4),
-                decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      event.title,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w800,
-                        fontSize: 14.5,
-                        color: AppTheme.textPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: 3),
-                    Text(
-                      _timeLabel(event),
-                      style: const TextStyle(
-                        color: AppTheme.textSecondary,
-                        fontSize: 12.5,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    if (event.location.isNotEmpty) ...[
-                      const SizedBox(height: 2),
-                      Row(
-                        children: [
-                          const Icon(
-                            PhosphorIconsBold.mapPin,
-                            size: 12,
-                            color: AppTheme.textMuted,
-                          ),
-                          const SizedBox(width: 4),
-                          Expanded(
-                            child: Text(
-                              event.location,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                color: AppTheme.textMuted,
-                                fontSize: 11.5,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-              if (event.isPublic)
-                Container(
-                  margin: const EdgeInsets.only(left: 8),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 7,
-                    vertical: 3,
-                  ),
-                  decoration: BoxDecoration(
-                    color: color.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                  child: Text(
-                    'PUBLIC',
-                    style: TextStyle(
-                      color: color,
-                      fontSize: 9,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 1.0,
-                    ),
-                  ),
-                ),
-              if (onDelete != null)
-                IconButton(
-                  visualDensity: VisualDensity.compact,
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                  icon: const Icon(
-                    PhosphorIconsBold.trash,
-                    size: 16,
-                    color: AppTheme.danger,
-                  ),
-                  onPressed: onDelete,
-                ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  String _timeLabel(CalendarEvent e) {
-    if (e.allDay) return 'All day';
-    final sameDay = _sameDay(e.start, e.end);
-    if (sameDay) {
-      return '${_formatTime(e.start)} – ${_formatTime(e.end)}';
-    }
-    return '${_monthNamesShort[e.start.month - 1]} ${e.start.day}, '
-        '${_formatTime(e.start)} → ${_monthNamesShort[e.end.month - 1]} '
-        '${e.end.day}, ${_formatTime(e.end)}';
-  }
-
-  String _formatTime(DateTime dt) {
-    final h = dt.hour == 0 ? 12 : (dt.hour > 12 ? dt.hour - 12 : dt.hour);
-    final m = dt.minute.toString().padLeft(2, '0');
-    final ampm = dt.hour >= 12 ? 'PM' : 'AM';
-    return '$h:$m $ampm';
-  }
-}

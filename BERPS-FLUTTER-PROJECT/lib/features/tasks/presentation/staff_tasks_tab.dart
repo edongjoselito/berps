@@ -37,6 +37,7 @@ class _StaffTasksTabState extends State<StaffTasksTab> {
   Future<StaffTasksData>? _future;
   String _status = 'open';
   String _scope = '';
+  String _statFilter = ''; // '', 'open', 'due_today', 'overdue', 'done'
 
   @override
   void initState() {
@@ -47,6 +48,59 @@ class _StaffTasksTabState extends State<StaffTasksTab> {
 
   void _reload() {
     setState(() {
+      _future = _api.fetchTasks(
+        baseUrl: widget.session.baseUrl,
+        token: widget.session.token,
+        status: _status,
+        scope: _scope,
+      );
+    });
+  }
+
+  String _sectionTitle() {
+    switch (_statFilter) {
+      case 'due_today':
+        return 'Due Today';
+      case 'overdue':
+        return 'Overdue Tasks';
+      case 'done':
+        return 'Completed Tasks';
+      case 'open':
+        return 'All Open Tasks';
+      default:
+        return _status == 'open' ? 'My Tasks' : 'Task History';
+    }
+  }
+
+  void _applyStatFilter(String filter) {
+    Haptics.light();
+    setState(() {
+      // Tapping the active stat filter again clears it
+      if (_statFilter == filter) {
+        _statFilter = '';
+        _status = 'open';
+        _scope = '';
+      } else {
+        _statFilter = filter;
+        switch (filter) {
+          case 'open':
+            _status = 'open';
+            _scope = '';
+            break;
+          case 'due_today':
+            _status = 'open';
+            _scope = 'due_today';
+            break;
+          case 'overdue':
+            _status = 'open';
+            _scope = 'overdue';
+            break;
+          case 'done':
+            _status = 'closed';
+            _scope = '';
+            break;
+        }
+      }
       _future = _api.fetchTasks(
         baseUrl: widget.session.baseUrl,
         token: widget.session.token,
@@ -421,7 +475,11 @@ class _StaffTasksTabState extends State<StaffTasksTab> {
               else ...[
                 FadeSlide(
                   delay: const Duration(milliseconds: 60),
-                  child: _TaskStatsRow(stats: snapshot.data!.stats),
+                  child: _TaskStatsRow(
+                    stats: snapshot.data!.stats,
+                    activeFilter: _statFilter,
+                    onStatTap: _applyStatFilter,
+                  ),
                 ),
                 const SizedBox(height: 18),
                 FadeSlide(
@@ -435,12 +493,18 @@ class _StaffTasksTabState extends State<StaffTasksTab> {
                         : null,
                     onStatusChanged: (value) {
                       Haptics.light();
-                      setState(() => _status = value);
+                      setState(() {
+                        _statFilter = '';
+                        _status = value;
+                      });
                       _reload();
                     },
                     onScopeChanged: (value) {
                       Haptics.light();
-                      setState(() => _scope = value);
+                      setState(() {
+                        _statFilter = '';
+                        _scope = value;
+                      });
                       _reload();
                     },
                   ),
@@ -456,7 +520,7 @@ class _StaffTasksTabState extends State<StaffTasksTab> {
                   delay: const Duration(milliseconds: 190),
                   child: _TaskSectionHeader(
                     icon: PhosphorIconsBold.listChecks,
-                    title: _status == 'open' ? 'My Tasks' : 'Task History',
+                    title: _sectionTitle(),
                     count: snapshot.data!.tasks.length,
                   ),
                 ),
@@ -485,9 +549,15 @@ class _StaffTasksTabState extends State<StaffTasksTab> {
 }
 
 class _TaskStatsRow extends StatelessWidget {
-  const _TaskStatsRow({required this.stats});
+  const _TaskStatsRow({
+    required this.stats,
+    required this.activeFilter,
+    required this.onStatTap,
+  });
 
   final TaskStats stats;
+  final String activeFilter;
+  final ValueChanged<String> onStatTap;
 
   @override
   Widget build(BuildContext context) {
@@ -498,6 +568,7 @@ class _TaskStatsRow extends StatelessWidget {
         AppTheme.primary,
         PhosphorIconsBold.folderOpen,
         const [Color(0xFF2563EB), Color(0xFF1D4ED8)],
+        'open',
       ),
       _StatItem(
         'Due Today',
@@ -505,6 +576,7 @@ class _TaskStatsRow extends StatelessWidget {
         AppTheme.accent,
         PhosphorIconsBold.calendarCheck,
         const [Color(0xFF0891B2), Color(0xFF0E7490)],
+        'due_today',
       ),
       _StatItem(
         'Overdue',
@@ -512,6 +584,7 @@ class _TaskStatsRow extends StatelessWidget {
         AppTheme.danger,
         PhosphorIconsBold.warningCircle,
         const [Color(0xFFDC2626), Color(0xFFB91C1C)],
+        'overdue',
       ),
       _StatItem(
         'Done',
@@ -519,6 +592,7 @@ class _TaskStatsRow extends StatelessWidget {
         AppTheme.success,
         PhosphorIconsBold.checkCircle,
         const [Color(0xFF16A34A), Color(0xFF15803D)],
+        'done',
       ),
     ];
 
@@ -529,67 +603,114 @@ class _TaskStatsRow extends StatelessWidget {
           spacing: 12,
           runSpacing: 12,
           children: items.map((item) {
+            final isActive = activeFilter == item.filterKey;
             return SizedBox(
               width: tileWidth,
-              child: Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: item.gradient,
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
+              child: PressScale(
+                onTap: () => onStatTap(item.filterKey),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 220),
+                  curve: Curves.easeOut,
+                  transform: isActive
+                      ? Matrix4.diagonal3Values(0.97, 0.97, 1.0)
+                      : Matrix4.identity(),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    border: isActive
+                        ? Border.all(color: Colors.white, width: 2.5)
+                        : null,
+                    boxShadow: isActive
+                        ? [
+                            BoxShadow(
+                              color: item.color.withValues(alpha: 0.45),
+                              blurRadius: 20,
+                              offset: const Offset(0, 8),
+                            ),
+                          ]
+                        : [
+                            BoxShadow(
+                              color: item.color.withValues(alpha: 0.25),
+                              blurRadius: 14,
+                              offset: const Offset(0, 6),
+                            ),
+                          ],
                   ),
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: item.color.withValues(alpha: 0.25),
-                      blurRadius: 14,
-                      offset: const Offset(0, 6),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      width: 30,
-                      height: 30,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(10),
+                  child: Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: item.gradient,
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
                       ),
-                      child: Icon(item.icon, size: 16, color: Colors.white),
+                      borderRadius: BorderRadius.circular(16),
                     ),
-                    const SizedBox(height: 12),
-                    TweenAnimationBuilder<int>(
-                      tween: IntTween(
-                        begin: 0,
-                        end: int.tryParse(item.value) ?? 0,
-                      ),
-                      duration: const Duration(milliseconds: 900),
-                      curve: Curves.easeOutCubic,
-                      builder: (context, val, child) {
-                        return Text(
-                          '$val',
-                          style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w900,
-                            color: Colors.white,
-                            letterSpacing: -0.3,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              width: 30,
+                              height: 30,
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.15),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Icon(
+                                item.icon,
+                                size: 16,
+                                color: Colors.white,
+                              ),
+                            ),
+                            const Spacer(),
+                            if (isActive)
+                              Container(
+                                padding: const EdgeInsets.all(3),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withValues(alpha: 0.25),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  PhosphorIconsBold.check,
+                                  size: 10,
+                                  color: Colors.white,
+                                ),
+                              ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        TweenAnimationBuilder<int>(
+                          tween: IntTween(
+                            begin: 0,
+                            end: int.tryParse(item.value) ?? 0,
                           ),
-                        );
-                      },
+                          duration: const Duration(milliseconds: 900),
+                          curve: Curves.easeOutCubic,
+                          builder: (context, val, child) {
+                            return Text(
+                              '$val',
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w900,
+                                color: Colors.white,
+                                letterSpacing: -0.3,
+                              ),
+                            );
+                          },
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          item.label,
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.85),
+                            fontWeight: FontWeight.w700,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 2),
-                    Text(
-                      item.label,
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.85),
-                        fontWeight: FontWeight.w700,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ),
             );
@@ -601,12 +722,20 @@ class _TaskStatsRow extends StatelessWidget {
 }
 
 class _StatItem {
-  const _StatItem(this.label, this.value, this.color, this.icon, this.gradient);
+  const _StatItem(
+    this.label,
+    this.value,
+    this.color,
+    this.icon,
+    this.gradient,
+    this.filterKey,
+  );
   final String label;
   final String value;
   final Color color;
   final IconData icon;
   final List<Color> gradient;
+  final String filterKey;
 }
 
 class _AddTaskButton extends StatelessWidget {
