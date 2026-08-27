@@ -38,6 +38,7 @@ class StaffDashboardTab extends StatefulWidget {
     required this.onOpenReminders,
     required this.onOpenCalendar,
     required this.onOpenNotes,
+    this.onOpenTasksWithFilter,
   });
 
   final StaffSession session;
@@ -51,6 +52,7 @@ class StaffDashboardTab extends StatefulWidget {
   final VoidCallback onOpenReminders;
   final VoidCallback onOpenCalendar;
   final VoidCallback onOpenNotes;
+  final void Function(String statFilter)? onOpenTasksWithFilter;
 
   @override
   State<StaffDashboardTab> createState() => _StaffDashboardTabState();
@@ -201,6 +203,7 @@ class _StaffDashboardTabState extends State<StaffDashboardTab> {
                   onOpenReminders: widget.onOpenReminders,
                   onOpenCalendar: widget.onOpenCalendar,
                   onOpenNotes: widget.onOpenNotes,
+                  onOpenTasksWithFilter: widget.onOpenTasksWithFilter,
                 ),
             ],
           );
@@ -364,6 +367,7 @@ class _DashboardContent extends StatelessWidget {
     required this.onOpenReminders,
     required this.onOpenCalendar,
     required this.onOpenNotes,
+    this.onOpenTasksWithFilter,
   });
 
   final StaffDashboard data;
@@ -379,6 +383,7 @@ class _DashboardContent extends StatelessWidget {
   final VoidCallback onOpenReminders;
   final VoidCallback onOpenCalendar;
   final VoidCallback onOpenNotes;
+  final void Function(String statFilter)? onOpenTasksWithFilter;
 
   @override
   Widget build(BuildContext context) {
@@ -393,6 +398,7 @@ class _DashboardContent extends StatelessWidget {
         value: '${data.accomplishmentsToday}',
         icon: LucideIcons.circleCheck,
         accent: AppTheme.success,
+        onTap: null,
       ),
       if (session.hasAttendance)
         _MetricCardData(
@@ -400,18 +406,25 @@ class _DashboardContent extends StatelessWidget {
           value: data.todayHoursLabel,
           icon: LucideIcons.rotateCcw,
           accent: AppTheme.primary,
+          onTap: onOpenMyDtr,
         ),
       _MetricCardData(
         label: 'Due Today',
         value: '${data.tasksDueToday}',
         icon: LucideIcons.calendarCheck,
         accent: AppTheme.accent,
+        onTap: onOpenTasksWithFilter != null
+            ? () => onOpenTasksWithFilter!('due_today')
+            : null,
       ),
       _MetricCardData(
         label: 'Overdue',
         value: '${data.tasksOverdue}',
         icon: LucideIcons.circleAlert,
         accent: AppTheme.danger,
+        onTap: onOpenTasksWithFilter != null
+            ? () => onOpenTasksWithFilter!('overdue')
+            : null,
       ),
     ];
 
@@ -891,11 +904,13 @@ class _MetricCardData {
     required this.value,
     required this.icon,
     required this.accent,
+    this.onTap,
   });
   final String label;
   final String value;
   final IconData icon;
   final Color accent;
+  final VoidCallback? onTap;
 }
 
 class _MetricGrid extends StatelessWidget {
@@ -929,7 +944,7 @@ class _MetricCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    final card = Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -952,14 +967,21 @@ class _MetricCard extends StatelessWidget {
                 child: Icon(data.icon, size: 17, color: data.accent),
               ),
               const Spacer(),
-              Container(
-                width: 6,
-                height: 6,
-                decoration: BoxDecoration(
-                  color: data.accent,
-                  shape: BoxShape.circle,
+              if (data.onTap != null)
+                Icon(
+                  LucideIcons.chevronRight,
+                  size: 14,
+                  color: AppTheme.textMuted,
+                )
+              else
+                Container(
+                  width: 6,
+                  height: 6,
+                  decoration: BoxDecoration(
+                    color: data.accent,
+                    shape: BoxShape.circle,
+                  ),
                 ),
-              ),
             ],
           ),
           const SizedBox(height: 14),
@@ -985,6 +1007,15 @@ class _MetricCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+
+    if (data.onTap == null) return card;
+    return PressScale(
+      onTap: () {
+        Haptics.light();
+        data.onTap!();
+      },
+      child: card,
     );
   }
 }

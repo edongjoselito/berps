@@ -14,10 +14,16 @@ import '../domain/calendar_event.dart';
 import 'calendar_day_note_editor.dart';
 
 class CalendarEventEditor extends StatefulWidget {
-  const CalendarEventEditor({super.key, required this.session, this.existing});
+  const CalendarEventEditor({
+    super.key,
+    required this.session,
+    this.existing,
+    this.initialDate,
+  });
 
   final StaffSession session;
   final CalendarEvent? existing;
+  final DateTime? initialDate;
 
   @override
   State<CalendarEventEditor> createState() => _CalendarEventEditorState();
@@ -61,7 +67,8 @@ class _CalendarEventEditorState extends State<CalendarEventEditor> {
     _notes = TextEditingController(text: e?.notes ?? '');
     _location = TextEditingController(text: e?.location ?? '');
     _reminderEmail = TextEditingController(text: e?.reminderEmail ?? '');
-    _start = e?.start ?? DateTime.now().add(const Duration(hours: 1));
+    _start = e?.start ??
+        (widget.initialDate ?? DateTime.now()).add(const Duration(hours: 1));
     _end = e?.end ?? _start.add(const Duration(hours: 1));
     _allDay = e?.allDay ?? false;
     _isPublic = e?.isPublic ?? false;

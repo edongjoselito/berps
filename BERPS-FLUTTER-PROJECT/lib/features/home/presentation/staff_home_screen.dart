@@ -48,6 +48,7 @@ class _StaffHomeScreenState extends State<StaffHomeScreen> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   _StaffTab _currentTab = _StaffTab.dashboard;
   String _pendingTasksScope = '';
+  String _pendingTasksStatFilter = '';
   bool _pendingDtrView = false;
   int _dashboardReopenKey = 0;
   int _tasksReopenKey = 0;
@@ -149,9 +150,20 @@ class _StaffHomeScreenState extends State<StaffHomeScreen> {
       // Tab nav resets any pending scopes/ranges so the user gets the default
       // view when they hop tabs manually.
       _pendingTasksScope = '';
+      _pendingTasksStatFilter = '';
       _pendingDtrView = false;
     });
     Navigator.of(context).maybePop();
+  }
+
+  void _openTasksWithStatFilter(String statFilter) {
+    Haptics.light();
+    setState(() {
+      _currentTab = _StaffTab.tasks;
+      _pendingTasksScope = '';
+      _pendingTasksStatFilter = statFilter;
+      _tasksReopenKey++;
+    });
   }
 
   void _onDestinationSelected(int index) {
@@ -165,6 +177,7 @@ class _StaffHomeScreenState extends State<StaffHomeScreen> {
     setState(() {
       _currentTab = _StaffTab.tasks;
       _pendingTasksScope = 'forwarded';
+      _pendingTasksStatFilter = '';
       _tasksReopenKey++;
     });
   }
@@ -386,6 +399,7 @@ class _StaffHomeScreenState extends State<StaffHomeScreen> {
           onOpenReminders: _openReminders,
           onOpenCalendar: _openCalendar,
           onOpenNotes: _openNotes,
+          onOpenTasksWithFilter: _openTasksWithStatFilter,
         );
       case _StaffTab.attendance:
         return StaffAttendanceTab(
@@ -400,6 +414,7 @@ class _StaffHomeScreenState extends State<StaffHomeScreen> {
           session: widget.session,
           onMenu: () => _scaffoldKey.currentState?.openDrawer(),
           initialScope: _pendingTasksScope,
+          initialStatFilter: _pendingTasksStatFilter,
         );
       case _StaffTab.account:
         return StaffAccountTab(

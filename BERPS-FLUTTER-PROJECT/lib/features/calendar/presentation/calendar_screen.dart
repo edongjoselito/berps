@@ -6,14 +6,18 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/network/api_exception.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/haptics.dart';
+import '../../../core/widgets/animations.dart';
 import '../../../core/widgets/app_toast.dart';
 import '../../../core/widgets/mobile_header.dart';
 import '../../auth/domain/staff_session.dart';
+import '../../home/data/staff_api.dart';
 import '../../notes/data/notes_api.dart';
 import '../../notes/domain/note.dart';
 import '../../reminders/data/reminders_api.dart';
 import '../../reminders/domain/reminder.dart';
+import '../domain/calendar_event.dart';
 import 'calendar_day_note_editor.dart';
+import 'calendar_event_editor.dart';
 
 /// Apple Calendar signature red — used for the year, the current month and
 /// the "today" marker, exactly like the iOS Calendar year view.
@@ -72,9 +76,9 @@ List<List<int>> _monthWeeks(int year, int month) {
 bool _sameDay(DateTime a, DateTime b) =>
     a.year == b.year && a.month == b.month && a.day == b.day;
 
-/// A unified calendar entry — either a note or a reminder — used by the
-/// calendar month/day views so the calendar can show notes and reminders
-/// on the timeline without involving tasks.
+/// A unified calendar entry — an event, a note, or a reminder — used by the
+/// calendar month/week/day views so the calendar can show all three entity
+/// types on the timeline without involving tasks.
 class CalendarDayItem {
   const CalendarDayItem({
     required this.date,
@@ -83,6 +87,8 @@ class CalendarDayItem {
     required this.type,
     this.note,
     this.reminder,
+    this.event,
+    this.endDate,
   });
 
   final DateTime date;
@@ -91,12 +97,15 @@ class CalendarDayItem {
   final CalendarDayItemType type;
   final Note? note;
   final Reminder? reminder;
+  final CalendarEvent? event;
+  final DateTime? endDate;
 
   bool get isNote => type == CalendarDayItemType.note;
   bool get isReminder => type == CalendarDayItemType.reminder;
+  bool get isEvent => type == CalendarDayItemType.event;
 }
 
-enum CalendarDayItemType { note, reminder }
+enum CalendarDayItemType { note, reminder, event }
 
 /// Parses a "yyyy-MM-dd" or "yyyy-MM-dd HH:mm:ss" string into a DateTime.
 DateTime _parseDate(String s) {
@@ -104,12 +113,26 @@ DateTime _parseDate(String s) {
   return DateTime.tryParse(cleaned) ?? DateTime(1970);
 }
 
-/// Builds calendar entries from notes and reminders for the month grid.
+/// Builds calendar entries from events, notes and reminders for the grid.
 List<CalendarDayItem> _buildDayItems({
+  required List<CalendarEvent> events,
   required List<Note> notes,
   required List<Reminder> reminders,
 }) {
   final items = <CalendarDayItem>[];
+
+  for (final event in events) {
+    final start = event.start;
+    final end = event.end;
+    items.add(CalendarDayItem(
+      date: start,
+      title: event.title,
+      color: _parseHexColor(event.color),
+      type: CalendarDayItemType.event,
+      event: event,
+      endDate: end,
+    ));
+  }
 
   for (final note in notes) {
     final date = _parseDate(note.date);
@@ -140,7 +163,21 @@ List<CalendarDayItem> _buildDayItems({
   return items;
 }
 
+Color _parseHexColor(String hex) {
+  var h = hex.trim();
+  if (h.startsWith('#')) h = h.substring(1);
+  if (h.length == 6) h = 'FF$h';
+  return Color(int.tryParse(h, radix: 16) ?? 0xFF3788D8);
+}
+
 bool _itemCoversDay(CalendarDayItem item, DateTime day) {
+  if (item.isEvent && item.endDate != null) {
+    // Multi-day events: check if day is between start and end (inclusive)
+    final start = DateTime(item.date.year, item.date.month, item.date.day);
+    final end = DateTime(item.endDate!.year, item.endDate!.month, item.endDate!.day);
+    final d = DateTime(day.year, day.month, day.day);
+    return !d.isBefore(start) && !d.isAfter(end);
+  }
   return _sameDay(item.date, day);
 }
 
@@ -262,8 +299,11 @@ class CalendarDashboardTab extends StatefulWidget {
 class _CalendarDashboardTabState extends State<CalendarDashboardTab> {
   final NotesApi _notesApi = NotesApi();
   final RemindersApi _remindersApi = RemindersApi();
+  final StaffApi _staffApi = StaffApi();
   late int _year = DateTime.now().year;
   late int _month = DateTime.now().month;
+  _CalendarView _view = _CalendarView.month;
+  DateTime _selectedDay = DateTime.now();
   Future<List<CalendarDayItem>>? _future;
 
   @override
@@ -292,6 +332,12 @@ class _CalendarDashboardTabState extends State<CalendarDashboardTab> {
     final from = _monthStart();
     final to = _monthEnd();
     final results = await Future.wait([
+      _staffApi.fetchCalendarEvents(
+        baseUrl: widget.session.baseUrl,
+        token: widget.session.token,
+        from: from,
+        to: to,
+      ),
       _notesApi.fetchNotesByDateRange(
         baseUrl: widget.session.baseUrl,
         token: widget.session.token,
@@ -306,18 +352,31 @@ class _CalendarDashboardTabState extends State<CalendarDashboardTab> {
       ),
     ]);
     return _buildDayItems(
-      notes: results[0] as List<Note>,
-      reminders: results[1] as List<Reminder>,
+      events: results[0] as List<CalendarEvent>,
+      notes: results[1] as List<Note>,
+      reminders: results[2] as List<Reminder>,
     );
   }
 
-  void _shiftMonth(int delta) {
+  void _shiftPeriod(int delta) {
     Haptics.light();
-    final next = DateTime(_year, _month + delta, 1);
-    setState(() {
-      _year = next.year;
-      _month = next.month;
-    });
+    if (_view == _CalendarView.month) {
+      final next = DateTime(_year, _month + delta, 1);
+      setState(() {
+        _year = next.year;
+        _month = next.month;
+      });
+    } else {
+      // Week or Day view — shift by weeks or days
+      final shiftDays = _view == _CalendarView.week ? 7 * delta : delta;
+      final next = DateTime(_year, _month, _selectedDay.day + shiftDays);
+      setState(() {
+        _year = next.year;
+        _month = next.month;
+        _selectedDay = next;
+      });
+    }
+    _reload();
   }
 
   void _goToday() {
@@ -326,16 +385,59 @@ class _CalendarDashboardTabState extends State<CalendarDashboardTab> {
     setState(() {
       _year = now.year;
       _month = now.month;
+      _selectedDay = now;
+    });
+    _reload();
+  }
+
+  void _selectDay(DateTime day) {
+    Haptics.light();
+    setState(() {
+      _selectedDay = day;
+      _year = day.year;
+      _month = day.month;
     });
   }
 
-  Future<void> _openCreate() async {
+  void _setView(_CalendarView view) {
+    Haptics.light();
+    setState(() => _view = view);
+  }
+
+  Future<void> _openCreateNote() async {
     Haptics.light();
     final saved = await Navigator.of(context).push<bool>(
       MaterialPageRoute(
         builder: (_) => CalendarDayNoteEditor(
           session: widget.session,
-          date: DateTime(_year, _month, DateTime.now().day),
+          date: _view == _CalendarView.day ? _selectedDay : DateTime(_year, _month, DateTime.now().day),
+        ),
+      ),
+    );
+    if (saved == true) _reload();
+  }
+
+  Future<void> _openCreateEvent() async {
+    Haptics.light();
+    final saved = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (_) => CalendarEventEditor(
+          session: widget.session,
+          initialDate: _view == _CalendarView.day ? _selectedDay : DateTime(_year, _month, DateTime.now().day),
+        ),
+      ),
+    );
+    if (saved == true) _reload();
+  }
+
+  Future<void> _openCreateReminder() async {
+    Haptics.light();
+    // Reuse the reminders screen editor via a bottom sheet
+    final saved = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (_) => _ReminderQuickEditor(
+          session: widget.session,
+          date: _view == _CalendarView.day ? _selectedDay : DateTime(_year, _month, DateTime.now().day),
         ),
       ),
     );
@@ -352,6 +454,33 @@ class _CalendarDashboardTabState extends State<CalendarDashboardTab> {
               date: _parseDate(note.date),
               existing: note,
             ),
+      ),
+    );
+    if (saved == true) _reload();
+  }
+
+  Future<void> _openEditEvent(CalendarEvent event) async {
+    Haptics.light();
+    final saved = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (_) => CalendarEventEditor(
+          session: widget.session,
+          existing: event,
+        ),
+      ),
+    );
+    if (saved == true) _reload();
+  }
+
+  Future<void> _openEditReminder(Reminder reminder) async {
+    Haptics.light();
+    final saved = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (_) => _ReminderQuickEditor(
+          session: widget.session,
+          date: _parseDate(reminder.remindAt),
+          existing: reminder,
+        ),
       ),
     );
     if (saved == true) _reload();
@@ -404,6 +533,100 @@ class _CalendarDashboardTabState extends State<CalendarDashboardTab> {
     }
   }
 
+  Future<void> _confirmDeleteEvent(CalendarEvent event) async {
+    Haptics.warn();
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text(
+          'Delete event?',
+          style: TextStyle(
+            fontWeight: FontWeight.w900,
+            color: AppTheme.textPrimary,
+          ),
+        ),
+        content: Text(
+          '"${event.title}" will be permanently removed.',
+          style: const TextStyle(color: AppTheme.textSecondary),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: AppTheme.danger),
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    try {
+      await _staffApi.deleteCalendarEvent(
+        baseUrl: widget.session.baseUrl,
+        token: widget.session.token,
+        id: event.id,
+      );
+      if (!mounted) return;
+      AppToast.success(context, 'Event deleted.');
+      Navigator.of(context).maybePop();
+      _reload();
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      AppToast.error(context, e.message);
+    }
+  }
+
+  Future<void> _confirmDeleteReminder(Reminder reminder) async {
+    Haptics.warn();
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text(
+          'Delete reminder?',
+          style: TextStyle(
+            fontWeight: FontWeight.w900,
+            color: AppTheme.textPrimary,
+          ),
+        ),
+        content: Text(
+          '"${reminder.title}" will be permanently removed.',
+          style: const TextStyle(color: AppTheme.textSecondary),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: AppTheme.danger),
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    try {
+      await _remindersApi.deleteReminder(
+        baseUrl: widget.session.baseUrl,
+        token: widget.session.token,
+        reminderId: reminder.id,
+      );
+      if (!mounted) return;
+      AppToast.success(context, 'Reminder deleted.');
+      Navigator.of(context).maybePop();
+      _reload();
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      AppToast.error(context, e.message);
+    }
+  }
+
   void _openDay(DateTime day, List<CalendarDayItem> items) {
     Haptics.light();
     final dayItems = items.where((e) => _itemCoversDay(e, day)).toList()
@@ -420,13 +643,31 @@ class _CalendarDashboardTabState extends State<CalendarDashboardTab> {
         items: dayItems,
         onAddNote: () {
           Navigator.of(sheetContext).pop();
-          _openCreate();
+          _openCreateNote();
+        },
+        onAddEvent: () {
+          Navigator.of(sheetContext).pop();
+          _openCreateEvent();
+        },
+        onAddReminder: () {
+          Navigator.of(sheetContext).pop();
+          _openCreateReminder();
         },
         onEditNote: (note) {
           Navigator.of(sheetContext).pop();
           _openEditNote(note);
         },
+        onEditEvent: (event) {
+          Navigator.of(sheetContext).pop();
+          _openEditEvent(event);
+        },
+        onEditReminder: (reminder) {
+          Navigator.of(sheetContext).pop();
+          _openEditReminder(reminder);
+        },
         onDeleteNote: (note) => _confirmDeleteNote(note),
+        onDeleteEvent: (event) => _confirmDeleteEvent(event),
+        onDeleteReminder: (reminder) => _confirmDeleteReminder(reminder),
       ),
     );
   }
@@ -439,7 +680,7 @@ class _CalendarDashboardTabState extends State<CalendarDashboardTab> {
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: AppTheme.primaryDark,
         foregroundColor: Colors.white,
-        onPressed: _openCreate,
+        onPressed: _openCreateNote,
         icon: const Icon(LucideIcons.plus, size: 18),
         label: const Text(
           'New note',
@@ -452,6 +693,11 @@ class _CalendarDashboardTabState extends State<CalendarDashboardTab> {
           future: _future,
           builder: (context, snapshot) {
             final items = snapshot.data ?? const <CalendarDayItem>[];
+            final title = _view == _CalendarView.month
+                ? '${_monthNamesFull[_month - 1]} $_year'
+                : _view == _CalendarView.week
+                    ? 'Week of ${_monthNamesShort[_weekStart(_selectedDay).month - 1]} ${_weekStart(_selectedDay).day}'
+                    : '${_weekdayFull(_selectedDay.weekday)}, ${_monthNamesShort[_selectedDay.month - 1]} ${_selectedDay.day}';
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -459,7 +705,7 @@ class _CalendarDashboardTabState extends State<CalendarDashboardTab> {
                   padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
                   child: MobileHeader(
                     title: 'Calendar',
-                    subtitle: '${_monthNamesFull[_month - 1]} $_year',
+                    subtitle: title,
                     leadingIcon: LucideIcons.list,
                     onLeadingTap: () {
                       Haptics.light();
@@ -472,22 +718,60 @@ class _CalendarDashboardTabState extends State<CalendarDashboardTab> {
                     },
                   ),
                 ),
-                _DashboardMonthBar(
-                  title: '${_monthNamesFull[_month - 1]} $_year',
-                  onPrev: () => _shiftMonth(-1),
-                  onNext: () => _shiftMonth(1),
+                _ViewSwitcher(
+                  current: _view,
+                  onChanged: _setView,
+                ),
+                _DashboardPeriodBar(
+                  title: title,
+                  onPrev: () => _shiftPeriod(-1),
+                  onNext: () => _shiftPeriod(1),
                   onToday: _goToday,
                 ),
-                const _WeekdayHeader(),
-                Expanded(
-                  child: _MonthGrid(
-                    year: _year,
-                    month: _month,
-                    today: now,
-                    items: items,
-                    onDayTap: (day) => _openDay(day, items),
+                if (_view == _CalendarView.month) ...[
+                  const _WeekdayHeader(),
+                  Expanded(
+                    child: _MonthGrid(
+                      year: _year,
+                      month: _month,
+                      today: now,
+                      items: items,
+                      onDayTap: (day) {
+                        _selectDay(day);
+                        _openDay(day, items);
+                      },
+                    ),
                   ),
-                ),
+                ],
+                if (_view == _CalendarView.week)
+                  Expanded(
+                    child: _WeekView(
+                      weekStart: _weekStart(_selectedDay),
+                      today: now,
+                      items: items,
+                      onDayTap: (day) {
+                        _selectDay(day);
+                        _openDay(day, items);
+                      },
+                    ),
+                  ),
+                if (_view == _CalendarView.day)
+                  Expanded(
+                    child: _DayView(
+                      day: _selectedDay,
+                      today: now,
+                      items: items.where((e) => _itemCoversDay(e, _selectedDay)).toList(),
+                      onAddEvent: _openCreateEvent,
+                      onAddNote: _openCreateNote,
+                      onAddReminder: _openCreateReminder,
+                      onEditEvent: _openEditEvent,
+                      onEditNote: _openEditNote,
+                      onEditReminder: _openEditReminder,
+                      onDeleteEvent: _confirmDeleteEvent,
+                      onDeleteNote: _confirmDeleteNote,
+                      onDeleteReminder: _confirmDeleteReminder,
+                    ),
+                  ),
               ],
             );
           },
@@ -497,10 +781,77 @@ class _CalendarDashboardTabState extends State<CalendarDashboardTab> {
   }
 }
 
-/// Month navigation row for [CalendarDashboardTab]: previous / next arrows, the
-/// current month title, and a quick "Today" jump.
-class _DashboardMonthBar extends StatelessWidget {
-  const _DashboardMonthBar({
+enum _CalendarView { month, week, day }
+
+DateTime _weekStart(DateTime day) {
+  final d = DateTime(day.year, day.month, day.day);
+  return d.subtract(Duration(days: d.weekday % 7)); // Sunday-first
+}
+
+String _weekdayFull(int weekday) {
+  const names = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  return names[weekday - 1];
+}
+
+String _formatTime(DateTime dt) {
+  final h = dt.hour;
+  final m = dt.minute;
+  final ampm = h >= 12 ? 'PM' : 'AM';
+  final h12 = h == 0 ? 12 : (h > 12 ? h - 12 : h);
+  return '$h12:${m.toString().padLeft(2, '0')} $ampm';
+}
+
+/// Segmented control for switching between Month / Week / Day views.
+class _ViewSwitcher extends StatelessWidget {
+  const _ViewSwitcher({required this.current, required this.onChanged});
+  final _CalendarView current;
+  final ValueChanged<_CalendarView> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 6),
+      child: Container(
+        padding: const EdgeInsets.all(3),
+        decoration: BoxDecoration(
+          color: AppTheme.surfaceMuted,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            for (final v in _CalendarView.values)
+              Expanded(
+                child: GestureDetector(
+                  onTap: () => onChanged(v),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    decoration: BoxDecoration(
+                      color: current == v ? AppTheme.primaryDark : Colors.transparent,
+                      borderRadius: BorderRadius.circular(9),
+                    ),
+                    child: Text(
+                      v == _CalendarView.month ? 'Month' : v == _CalendarView.week ? 'Week' : 'Day',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w800,
+                        color: current == v ? Colors.white : AppTheme.textSecondary,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Period navigation row (replaces _DashboardMonthBar — works for all views).
+class _DashboardPeriodBar extends StatelessWidget {
+  const _DashboardPeriodBar({
     required this.title,
     required this.onPrev,
     required this.onNext,
@@ -768,6 +1119,7 @@ class _MonthDetailScreen extends StatefulWidget {
 class _MonthDetailScreenState extends State<_MonthDetailScreen> {
   final NotesApi _notesApi = NotesApi();
   final RemindersApi _remindersApi = RemindersApi();
+  final StaffApi _staffApi = StaffApi();
   late int _year = widget.year;
   late int _month = widget.month;
   Future<List<CalendarDayItem>>? _future;
@@ -798,6 +1150,12 @@ class _MonthDetailScreenState extends State<_MonthDetailScreen> {
     final from = _monthStart();
     final to = _monthEnd();
     final results = await Future.wait([
+      _staffApi.fetchCalendarEvents(
+        baseUrl: widget.session.baseUrl,
+        token: widget.session.token,
+        from: from,
+        to: to,
+      ),
       _notesApi.fetchNotesByDateRange(
         baseUrl: widget.session.baseUrl,
         token: widget.session.token,
@@ -812,8 +1170,9 @@ class _MonthDetailScreenState extends State<_MonthDetailScreen> {
       ),
     ]);
     return _buildDayItems(
-      notes: results[0] as List<Note>,
-      reminders: results[1] as List<Reminder>,
+      events: results[0] as List<CalendarEvent>,
+      notes: results[1] as List<Note>,
+      reminders: results[2] as List<Reminder>,
     );
   }
 
@@ -827,11 +1186,37 @@ class _MonthDetailScreenState extends State<_MonthDetailScreen> {
     _reload();
   }
 
-  Future<void> _openCreate() async {
+  Future<void> _openCreateNote() async {
     Haptics.light();
     final saved = await Navigator.of(context).push<bool>(
       MaterialPageRoute(
         builder: (_) => CalendarDayNoteEditor(
+          session: widget.session,
+          date: DateTime(_year, _month, DateTime.now().day),
+        ),
+      ),
+    );
+    if (saved == true) _reload();
+  }
+
+  Future<void> _openCreateEvent() async {
+    Haptics.light();
+    final saved = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (_) => CalendarEventEditor(
+          session: widget.session,
+          initialDate: DateTime(_year, _month, DateTime.now().day),
+        ),
+      ),
+    );
+    if (saved == true) _reload();
+  }
+
+  Future<void> _openCreateReminder() async {
+    Haptics.light();
+    final saved = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (_) => _ReminderQuickEditor(
           session: widget.session,
           date: DateTime(_year, _month, DateTime.now().day),
         ),
@@ -850,6 +1235,33 @@ class _MonthDetailScreenState extends State<_MonthDetailScreen> {
               date: _parseDate(note.date),
               existing: note,
             ),
+      ),
+    );
+    if (saved == true) _reload();
+  }
+
+  Future<void> _openEditEvent(CalendarEvent event) async {
+    Haptics.light();
+    final saved = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (_) => CalendarEventEditor(
+          session: widget.session,
+          existing: event,
+        ),
+      ),
+    );
+    if (saved == true) _reload();
+  }
+
+  Future<void> _openEditReminder(Reminder reminder) async {
+    Haptics.light();
+    final saved = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (_) => _ReminderQuickEditor(
+          session: widget.session,
+          date: _parseDate(reminder.remindAt),
+          existing: reminder,
+        ),
       ),
     );
     if (saved == true) _reload();
@@ -894,7 +1306,81 @@ class _MonthDetailScreenState extends State<_MonthDetailScreen> {
       );
       if (!mounted) return;
       AppToast.success(context, 'Note deleted.');
-      Navigator.of(context).maybePop(); // close the day sheet
+      Navigator.of(context).maybePop();
+      _reload();
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      AppToast.error(context, e.message);
+    }
+  }
+
+  Future<void> _confirmDeleteEvent(CalendarEvent event) async {
+    Haptics.warn();
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text('Delete event?',
+            style: TextStyle(fontWeight: FontWeight.w900, color: AppTheme.textPrimary)),
+        content: Text('"${event.title}" will be permanently removed.',
+            style: const TextStyle(color: AppTheme.textSecondary)),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: const Text('Cancel')),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: AppTheme.danger),
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    try {
+      await _staffApi.deleteCalendarEvent(
+        baseUrl: widget.session.baseUrl,
+        token: widget.session.token,
+        id: event.id,
+      );
+      if (!mounted) return;
+      AppToast.success(context, 'Event deleted.');
+      Navigator.of(context).maybePop();
+      _reload();
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      AppToast.error(context, e.message);
+    }
+  }
+
+  Future<void> _confirmDeleteReminder(Reminder reminder) async {
+    Haptics.warn();
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text('Delete reminder?',
+            style: TextStyle(fontWeight: FontWeight.w900, color: AppTheme.textPrimary)),
+        content: Text('"${reminder.title}" will be permanently removed.',
+            style: const TextStyle(color: AppTheme.textSecondary)),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: const Text('Cancel')),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: AppTheme.danger),
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    try {
+      await _remindersApi.deleteReminder(
+        baseUrl: widget.session.baseUrl,
+        token: widget.session.token,
+        reminderId: reminder.id,
+      );
+      if (!mounted) return;
+      AppToast.success(context, 'Reminder deleted.');
+      Navigator.of(context).maybePop();
       _reload();
     } on ApiException catch (e) {
       if (!mounted) return;
@@ -916,15 +1402,15 @@ class _MonthDetailScreenState extends State<_MonthDetailScreen> {
         session: widget.session,
         day: day,
         items: dayItems,
-        onAddNote: () {
-          Navigator.of(sheetContext).pop();
-          _openCreate();
-        },
-        onEditNote: (note) {
-          Navigator.of(sheetContext).pop();
-          _openEditNote(note);
-        },
+        onAddNote: () { Navigator.of(sheetContext).pop(); _openCreateNote(); },
+        onAddEvent: () { Navigator.of(sheetContext).pop(); _openCreateEvent(); },
+        onAddReminder: () { Navigator.of(sheetContext).pop(); _openCreateReminder(); },
+        onEditNote: (note) { Navigator.of(sheetContext).pop(); _openEditNote(note); },
+        onEditEvent: (event) { Navigator.of(sheetContext).pop(); _openEditEvent(event); },
+        onEditReminder: (reminder) { Navigator.of(sheetContext).pop(); _openEditReminder(reminder); },
         onDeleteNote: (note) => _confirmDeleteNote(note),
+        onDeleteEvent: (event) => _confirmDeleteEvent(event),
+        onDeleteReminder: (reminder) => _confirmDeleteReminder(reminder),
       ),
     );
   }
@@ -1240,10 +1726,175 @@ Widget _dayNotes(List<Note> notes, _DaySheetState sheet) {
 
 /// Reminders section for the day sheet — shows reminders from the items
 /// passed in (already filtered to this day).
+/// Events section for the day sheet — shows calendar events with times.
+class _DayEventsSection extends StatelessWidget {
+  const _DayEventsSection({
+    required this.events,
+    required this.onAdd,
+    required this.onEdit,
+    required this.onDelete,
+  });
+
+  final List<CalendarEvent> events;
+  final VoidCallback onAdd;
+  final ValueChanged<CalendarEvent> onEdit;
+  final ValueChanged<CalendarEvent> onDelete;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const Icon(LucideIcons.calendar, size: 15, color: AppTheme.primaryDark),
+            const SizedBox(width: 8),
+            const Text('Events',
+                style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w900, color: AppTheme.textPrimary)),
+            const SizedBox(width: 8),
+            if (events.isNotEmpty)
+              Text('${events.length}',
+                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: AppTheme.textMuted)),
+            const Spacer(),
+            TextButton.icon(
+              onPressed: onAdd,
+              icon: const Icon(LucideIcons.plus, size: 14),
+              label: const Text('Add event'),
+              style: TextButton.styleFrom(
+                foregroundColor: AppTheme.primaryDark,
+                padding: EdgeInsets.zero,
+                textStyle: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        if (events.isEmpty)
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 8),
+            child: Row(
+              children: [
+                Icon(LucideIcons.calendarOff, size: 16, color: AppTheme.textMuted),
+                SizedBox(width: 10),
+                Text('No events on this day',
+                    style: TextStyle(color: AppTheme.textSecondary, fontSize: 13, fontWeight: FontWeight.w600)),
+              ],
+            ),
+          )
+        else
+          ListView.separated(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: events.length,
+            separatorBuilder: (_, _) => const SizedBox(height: 8),
+            itemBuilder: (_, i) => _DayEventRow(
+              event: events[i],
+              onTap: () => onEdit(events[i]),
+              onDelete: () => onDelete(events[i]),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _DayEventRow extends StatelessWidget {
+  const _DayEventRow({required this.event, required this.onTap, required this.onDelete});
+
+  final CalendarEvent event;
+  final VoidCallback onTap;
+  final VoidCallback onDelete;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = _parseHexColor(event.color);
+    final timeLabel = event.allDay
+        ? 'All day'
+        : '${_formatTime(event.start)} – ${_formatTime(event.end)}';
+    return Material(
+      color: color.withValues(alpha: 0.08),
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: color.withValues(alpha: 0.3)),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 4,
+                height: 36,
+                decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(2)),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      event.title.isEmpty ? '(Untitled event)' : event.title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 13,
+                        color: color,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Row(
+                      children: [
+                        Icon(LucideIcons.clock, size: 11, color: AppTheme.textMuted),
+                        const SizedBox(width: 4),
+                        Text(timeLabel,
+                            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppTheme.textMuted)),
+                        if (event.location.isNotEmpty) ...[
+                          const SizedBox(width: 8),
+                          Icon(LucideIcons.mapPin, size: 11, color: AppTheme.textMuted),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(event.location,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppTheme.textMuted)),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              IconButton(
+                visualDensity: VisualDensity.compact,
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+                icon: const Icon(LucideIcons.trash2, size: 16, color: AppTheme.danger),
+                onPressed: onDelete,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _DayRemindersSection extends StatelessWidget {
-  const _DayRemindersSection({required this.reminders});
+  const _DayRemindersSection({
+    required this.reminders,
+    this.onAdd,
+    this.onEdit,
+    this.onDelete,
+  });
 
   final List<Reminder> reminders;
+  final VoidCallback? onAdd;
+  final ValueChanged<Reminder>? onEdit;
+  final ValueChanged<Reminder>? onDelete;
 
   @override
   Widget build(BuildContext context) {
@@ -1274,6 +1925,18 @@ class _DayRemindersSection extends StatelessWidget {
                   fontSize: 11,
                   fontWeight: FontWeight.w800,
                   color: AppTheme.textMuted,
+                ),
+              ),
+            const Spacer(),
+            if (onAdd != null)
+              TextButton.icon(
+                onPressed: onAdd,
+                icon: const Icon(LucideIcons.plus, size: 14),
+                label: const Text('Add reminder'),
+                style: TextButton.styleFrom(
+                  foregroundColor: AppTheme.primaryDark,
+                  padding: EdgeInsets.zero,
+                  textStyle: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
                 ),
               ),
           ],
@@ -1307,7 +1970,11 @@ class _DayRemindersSection extends StatelessWidget {
             physics: const NeverScrollableScrollPhysics(),
             itemCount: reminders.length,
             separatorBuilder: (_, _) => const SizedBox(height: 8),
-            itemBuilder: (_, i) => _DayReminderRow(reminder: reminders[i]),
+            itemBuilder: (_, i) => _DayReminderRow(
+              reminder: reminders[i],
+              onTap: onEdit != null ? () => onEdit!(reminders[i]) : null,
+              onDelete: onDelete != null ? () => onDelete!(reminders[i]) : null,
+            ),
           ),
       ],
     );
@@ -1315,13 +1982,15 @@ class _DayRemindersSection extends StatelessWidget {
 }
 
 class _DayReminderRow extends StatelessWidget {
-  const _DayReminderRow({required this.reminder});
+  const _DayReminderRow({required this.reminder, this.onTap, this.onDelete});
 
   final Reminder reminder;
+  final VoidCallback? onTap;
+  final VoidCallback? onDelete;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    final card = Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: const Color(0xFFFFF7ED),
@@ -1380,8 +2049,24 @@ class _DayReminderRow extends StatelessWidget {
                 ),
               ),
             ),
+          if (onDelete != null) ...[
+            const SizedBox(width: 8),
+            IconButton(
+              visualDensity: VisualDensity.compact,
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(),
+              icon: const Icon(LucideIcons.trash2, size: 16, color: AppTheme.danger),
+              onPressed: onDelete,
+            ),
+          ],
         ],
       ),
+    );
+    if (onTap == null) return card;
+    return InkWell(
+      borderRadius: BorderRadius.circular(12),
+      onTap: onTap,
+      child: card,
     );
   }
 }
@@ -1392,16 +2077,28 @@ class _DaySheet extends StatefulWidget {
     required this.day,
     required this.items,
     required this.onAddNote,
+    required this.onAddEvent,
+    required this.onAddReminder,
     required this.onEditNote,
+    required this.onEditEvent,
+    required this.onEditReminder,
     required this.onDeleteNote,
+    required this.onDeleteEvent,
+    required this.onDeleteReminder,
   });
 
   final StaffSession session;
   final DateTime day;
   final List<CalendarDayItem> items;
   final VoidCallback onAddNote;
+  final VoidCallback onAddEvent;
+  final VoidCallback onAddReminder;
   final ValueChanged<Note> onEditNote;
+  final ValueChanged<CalendarEvent> onEditEvent;
+  final ValueChanged<Reminder> onEditReminder;
   final ValueChanged<Note> onDeleteNote;
+  final ValueChanged<CalendarEvent> onDeleteEvent;
+  final ValueChanged<Reminder> onDeleteReminder;
 
   @override
   State<_DaySheet> createState() => _DaySheetState();
@@ -1467,13 +2164,29 @@ class _DaySheetState extends State<_DaySheet> {
               Expanded(
                 child: CustomScrollView(
                   slivers: [
-                    // Reminders section (from items passed in)
+                    // Events section
+                    SliverToBoxAdapter(
+                      child: _DayEventsSection(
+                        events: widget.items
+                            .where((e) => e.isEvent)
+                            .map((e) => e.event!)
+                            .toList(),
+                        onAdd: widget.onAddEvent,
+                        onEdit: widget.onEditEvent,
+                        onDelete: widget.onDeleteEvent,
+                      ),
+                    ),
+                    const SliverToBoxAdapter(child: SizedBox(height: 20)),
+                    // Reminders section
                     SliverToBoxAdapter(
                       child: _DayRemindersSection(
                         reminders: widget.items
                             .where((e) => e.isReminder)
                             .map((e) => e.reminder!)
                             .toList(),
+                        onAdd: widget.onAddReminder,
+                        onEdit: widget.onEditReminder,
+                        onDelete: widget.onDeleteReminder,
                       ),
                     ),
                     const SliverToBoxAdapter(child: SizedBox(height: 20)),
@@ -1662,6 +2375,648 @@ class _DayNoteRow extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+// ─── Week View ──────────────────────────────────────────────────────────────
+
+class _WeekView extends StatelessWidget {
+  const _WeekView({
+    required this.weekStart,
+    required this.today,
+    required this.items,
+    required this.onDayTap,
+  });
+
+  final DateTime weekStart;
+  final DateTime today;
+  final List<CalendarDayItem> items;
+  final ValueChanged<DateTime> onDayTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final days = [for (var i = 0; i < 7; i++) weekStart.add(Duration(days: i))];
+    return ListView.builder(
+      padding: const EdgeInsets.fromLTRB(12, 4, 12, 100),
+      itemCount: days.length,
+      itemBuilder: (context, i) {
+        final day = days[i];
+        final dayItems = items.where((e) => _itemCoversDay(e, day)).toList()
+          ..sort((a, b) => a.date.compareTo(b.date));
+        final isToday = _sameDay(day, today);
+        return _WeekDayRow(
+          day: day,
+          isToday: isToday,
+          items: dayItems,
+          onTap: () => onDayTap(day),
+        );
+      },
+    );
+  }
+}
+
+class _WeekDayRow extends StatelessWidget {
+  const _WeekDayRow({
+    required this.day,
+    required this.isToday,
+    required this.items,
+    required this.onTap,
+  });
+
+  final DateTime day;
+  final bool isToday;
+  final List<CalendarDayItem> items;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(14),
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: isToday ? kAppleRed.withValues(alpha: 0.06) : AppTheme.surface,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: isToday ? kAppleRed.withValues(alpha: 0.3) : AppTheme.border,
+            ),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(
+                width: 44,
+                child: Column(
+                  children: [
+                    Text(
+                      _weekdayLetters[day.weekday % 7],
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w800,
+                        color: isToday ? kAppleRed : AppTheme.textMuted,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Container(
+                      width: 28,
+                      height: 28,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: isToday ? kAppleRed : Colors.transparent,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        '${day.day}',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w900,
+                          color: isToday ? Colors.white : AppTheme.textPrimary,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: items.isEmpty
+                    ? const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 6),
+                        child: Text(
+                          'No items',
+                          style: TextStyle(
+                            color: AppTheme.textMuted,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                      )
+                    : Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          for (final item in items.take(4))
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 4),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    width: 8,
+                                    height: 8,
+                                    decoration: BoxDecoration(
+                                      color: item.color,
+                                      shape: BoxShape.circle,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  if (item.isEvent && item.event != null && !item.event!.allDay)
+                                    Text(
+                                      '${_formatTime(item.event!.start)} ',
+                                      style: const TextStyle(
+                                        fontSize: 10.5,
+                                        fontWeight: FontWeight.w700,
+                                        color: AppTheme.textMuted,
+                                      ),
+                                    ),
+                                  Expanded(
+                                    child: Text(
+                                      item.title.isEmpty
+                                          ? (item.isNote ? 'Untitled note' : item.isEvent ? 'Untitled event' : 'Untitled reminder')
+                                          : item.title,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        fontSize: 12.5,
+                                        fontWeight: FontWeight.w700,
+                                        color: item.color,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          if (items.length > 4)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 2),
+                              child: Text(
+                                '+${items.length - 4} more',
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppTheme.textMuted,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Day View ───────────────────────────────────────────────────────────────
+
+class _DayView extends StatelessWidget {
+  const _DayView({
+    required this.day,
+    required this.today,
+    required this.items,
+    required this.onAddEvent,
+    required this.onAddNote,
+    required this.onAddReminder,
+    required this.onEditEvent,
+    required this.onEditNote,
+    required this.onEditReminder,
+    required this.onDeleteEvent,
+    required this.onDeleteNote,
+    required this.onDeleteReminder,
+  });
+
+  final DateTime day;
+  final DateTime today;
+  final List<CalendarDayItem> items;
+  final VoidCallback onAddEvent;
+  final VoidCallback onAddNote;
+  final VoidCallback onAddReminder;
+  final ValueChanged<CalendarEvent> onEditEvent;
+  final ValueChanged<Note> onEditNote;
+  final ValueChanged<Reminder> onEditReminder;
+  final ValueChanged<CalendarEvent> onDeleteEvent;
+  final ValueChanged<Note> onDeleteNote;
+  final ValueChanged<Reminder> onDeleteReminder;
+
+  @override
+  Widget build(BuildContext context) {
+    final events = items.where((e) => e.isEvent).map((e) => e.event!).toList()
+      ..sort((a, b) => a.start.compareTo(b.start));
+    final notes = items.where((e) => e.isNote).map((e) => e.note!).toList();
+    final reminders = items.where((e) => e.isReminder).map((e) => e.reminder!).toList();
+    final isToday = _sameDay(day, today);
+
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 100),
+      children: [
+        // Day header
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: isToday ? kAppleRed.withValues(alpha: 0.06) : AppTheme.surface,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: isToday ? kAppleRed.withValues(alpha: 0.2) : AppTheme.border),
+          ),
+          child: Row(
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    _weekdayFull(day.weekday).toUpperCase(),
+                    style: const TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 1.4,
+                      color: kAppleRed,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    '${_monthNamesFull[day.month - 1]} ${day.day}, ${day.year}',
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: -0.3,
+                      color: AppTheme.textPrimary,
+                    ),
+                  ),
+                ],
+              ),
+              const Spacer(),
+              // Quick add buttons
+              Row(
+                children: [
+                  _QuickAddButton(icon: LucideIcons.calendarPlus, label: 'Event', onTap: onAddEvent),
+                  const SizedBox(width: 8),
+                  _QuickAddButton(icon: LucideIcons.bellPlus, label: 'Reminder', onTap: onAddReminder),
+                  const SizedBox(width: 8),
+                  _QuickAddButton(icon: LucideIcons.stickyNote, label: 'Note', onTap: onAddNote),
+                ],
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 20),
+        // Events timeline
+        if (events.isNotEmpty) ...[
+          const _SectionLabel(icon: LucideIcons.calendar, label: 'Events'),
+          const SizedBox(height: 10),
+          for (final event in events)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: _DayEventRow(
+                event: event,
+                onTap: () => onEditEvent(event),
+                onDelete: () => onDeleteEvent(event),
+              ),
+            ),
+          const SizedBox(height: 20),
+        ],
+        // Reminders
+        const _SectionLabel(icon: LucideIcons.bellRing, label: 'Reminders'),
+        const SizedBox(height: 10),
+        if (reminders.isEmpty)
+          const _EmptyHint(icon: LucideIcons.bellOff, text: 'No reminders on this day')
+        else
+          for (final reminder in reminders)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: _DayReminderRow(
+                reminder: reminder,
+                onTap: () => onEditReminder(reminder),
+                onDelete: () => onDeleteReminder(reminder),
+              ),
+            ),
+        const SizedBox(height: 20),
+        // Notes
+        const _SectionLabel(icon: LucideIcons.notebookText, label: 'Notes'),
+        const SizedBox(height: 10),
+        if (notes.isEmpty)
+          const _EmptyHint(icon: LucideIcons.notebookPen, text: 'No notes on this day')
+        else
+          for (final note in notes)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: _DayNoteRow(
+                note: note,
+                onTap: () => onEditNote(note),
+                onDelete: () => onDeleteNote(note),
+              ),
+            ),
+      ],
+    );
+  }
+}
+
+class _QuickAddButton extends StatelessWidget {
+  const _QuickAddButton({required this.icon, required this.label, required this.onTap});
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return PressScale(
+      onTap: () { Haptics.light(); onTap(); },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        decoration: BoxDecoration(
+          color: AppTheme.primaryDark,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 13, color: Colors.white),
+            const SizedBox(width: 4),
+            Text(label, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: Colors.white)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SectionLabel extends StatelessWidget {
+  const _SectionLabel({required this.icon, required this.label});
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(icon, size: 15, color: AppTheme.primaryDark),
+        const SizedBox(width: 8),
+        Text(label,
+            style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w900, color: AppTheme.textPrimary)),
+      ],
+    );
+  }
+}
+
+class _EmptyHint extends StatelessWidget {
+  const _EmptyHint({required this.icon, required this.text});
+  final IconData icon;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        children: [
+          Icon(icon, size: 16, color: AppTheme.textMuted),
+          const SizedBox(width: 10),
+          Text(text,
+              style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13, fontWeight: FontWeight.w600)),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Reminder Quick Editor ───────────────────────────────────────────────────
+
+/// A lightweight screen for creating/editing a reminder from the calendar.
+/// Reuses the RemindersApi directly.
+class _ReminderQuickEditor extends StatefulWidget {
+  const _ReminderQuickEditor({required this.session, required this.date, this.existing});
+
+  final StaffSession session;
+  final DateTime date;
+  final Reminder? existing;
+
+  @override
+  State<_ReminderQuickEditor> createState() => _ReminderQuickEditorState();
+}
+
+class _ReminderQuickEditorState extends State<_ReminderQuickEditor> {
+  final RemindersApi _api = RemindersApi();
+  final _titleController = TextEditingController();
+  final _descController = TextEditingController();
+  late DateTime _selectedDateTime;
+  String _recurrence = 'once';
+  bool _saving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    final e = widget.existing;
+    _titleController.text = e?.title ?? '';
+    _descController.text = e?.description ?? '';
+    _selectedDateTime = e?.remindAtDate ?? widget.date;
+    _recurrence = e?.recurrence ?? 'once';
+  }
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _descController.dispose();
+    super.dispose();
+  }
+
+  String _formatDateTime(DateTime dt) {
+    return '${dt.year.toString().padLeft(4, '0')}-${dt.month.toString().padLeft(2, '0')}-${dt.day.toString().padLeft(2, '0')} '
+        '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}:00';
+  }
+
+  Future<void> _pickDate() async {
+    final d = await showDatePicker(
+      context: context,
+      initialDate: _selectedDateTime,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+    if (d == null) return;
+    setState(() {
+      _selectedDateTime = DateTime(d.year, d.month, d.day, _selectedDateTime.hour, _selectedDateTime.minute);
+    });
+  }
+
+  Future<void> _pickTime() async {
+    final t = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.fromDateTime(_selectedDateTime),
+    );
+    if (t == null) return;
+    setState(() {
+      _selectedDateTime = DateTime(_selectedDateTime.year, _selectedDateTime.month, _selectedDateTime.day, t.hour, t.minute);
+    });
+  }
+
+  Future<void> _save() async {
+    if (_titleController.text.trim().isEmpty) {
+      AppToast.error(context, 'Please enter a title.');
+      return;
+    }
+    setState(() => _saving = true);
+    try {
+      if (widget.existing != null) {
+        await _api.updateReminder(
+          baseUrl: widget.session.baseUrl,
+          token: widget.session.token,
+          reminderId: widget.existing!.id,
+          title: _titleController.text.trim(),
+          description: _descController.text.trim(),
+          remindAt: _formatDateTime(_selectedDateTime),
+          recurrence: _recurrence,
+        );
+      } else {
+        await _api.createReminder(
+          baseUrl: widget.session.baseUrl,
+          token: widget.session.token,
+          title: _titleController.text.trim(),
+          description: _descController.text.trim(),
+          remindAt: _formatDateTime(_selectedDateTime),
+          recurrence: _recurrence,
+        );
+      }
+      if (!mounted) return;
+      AppToast.success(context, widget.existing != null ? 'Reminder updated.' : 'Reminder created.');
+      Navigator.of(context).pop(true);
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      AppToast.error(context, e.message);
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isEdit = widget.existing != null;
+    return Scaffold(
+      backgroundColor: AppTheme.background,
+      appBar: AppBar(
+        backgroundColor: AppTheme.surface,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(LucideIcons.chevronLeft, color: AppTheme.textPrimary),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        title: Text(isEdit ? 'Edit Reminder' : 'New Reminder',
+            style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 18, color: AppTheme.textPrimary)),
+      ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              TextField(
+                controller: _titleController,
+                decoration: const InputDecoration(labelText: 'Title', hintText: 'Reminder title'),
+                textCapitalization: TextCapitalization.sentences,
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _descController,
+                maxLines: 3,
+                decoration: const InputDecoration(labelText: 'Description', hintText: 'Optional details'),
+                textCapitalization: TextCapitalization.sentences,
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: _PickerField(
+                      icon: LucideIcons.calendar,
+                      label: 'Date',
+                      value: '${_selectedDateTime.month}/${_selectedDateTime.day}/${_selectedDateTime.year}',
+                      onTap: _pickDate,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _PickerField(
+                      icon: LucideIcons.clock,
+                      label: 'Time',
+                      value: _formatTime(_selectedDateTime),
+                      onTap: _pickTime,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              const Text('Repeat',
+                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: AppTheme.textSecondary)),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                children: [
+                  for (final r in ['once', 'monthly', 'yearly'])
+                    _RecurrenceChip(
+                      label: r == 'once' ? 'One-time' : r == 'monthly' ? 'Monthly' : 'Yearly',
+                      selected: _recurrence == r,
+                      onTap: () => setState(() => _recurrence = r),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 28),
+              FilledButton(
+                onPressed: _saving ? null : _save,
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppTheme.primaryDark,
+                  minimumSize: const Size(0, 50),
+                ),
+                child: _saving
+                    ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                    : Text(isEdit ? 'Update Reminder' : 'Create Reminder',
+                        style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15)),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PickerField extends StatelessWidget {
+  const _PickerField({required this.icon, required this.label, required this.value, required this.onTap});
+  final IconData icon;
+  final String label;
+  final String value;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(12),
+      onTap: onTap,
+      child: InputDecorator(
+        decoration: InputDecoration(
+          labelText: label,
+          prefixIcon: Icon(icon, size: 18),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+        child: Text(value, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14)),
+      ),
+    );
+  }
+}
+
+class _RecurrenceChip extends StatelessWidget {
+  const _RecurrenceChip({required this.label, required this.selected, required this.onTap});
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: selected ? AppTheme.primaryDark : AppTheme.surfaceMuted,
+          borderRadius: BorderRadius.circular(99),
+          border: Border.all(color: selected ? AppTheme.primaryDark : AppTheme.border),
+        ),
+        child: Text(label,
+            style: TextStyle(
+              fontSize: 12.5,
+              fontWeight: FontWeight.w800,
+              color: selected ? Colors.white : AppTheme.textSecondary,
+            )),
       ),
     );
   }

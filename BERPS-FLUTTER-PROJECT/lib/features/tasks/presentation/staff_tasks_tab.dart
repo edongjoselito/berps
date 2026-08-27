@@ -22,11 +22,13 @@ class StaffTasksTab extends StatefulWidget {
     required this.session,
     required this.onMenu,
     this.initialScope = '',
+    this.initialStatFilter = '',
   });
 
   final StaffSession session;
   final VoidCallback onMenu;
   final String initialScope;
+  final String initialStatFilter;
 
   @override
   State<StaffTasksTab> createState() => _StaffTasksTabState();
@@ -43,7 +45,31 @@ class _StaffTasksTabState extends State<StaffTasksTab> {
   void initState() {
     super.initState();
     _scope = widget.initialScope;
+    _statFilter = widget.initialStatFilter;
+    _applyStatFilterState();
     _reload();
+  }
+
+  /// Sets _status and _scope from _statFilter without reloading.
+  void _applyStatFilterState() {
+    switch (_statFilter) {
+      case 'open':
+        _status = 'open';
+        _scope = '';
+        break;
+      case 'due_today':
+        _status = 'open';
+        _scope = 'due_today';
+        break;
+      case 'overdue':
+        _status = 'open';
+        _scope = 'overdue';
+        break;
+      case 'done':
+        _status = 'closed';
+        _scope = '';
+        break;
+    }
   }
 
   void _reload() {
