@@ -2,7 +2,7 @@ name: berps_mobile
 description: "Business Resource Planning System built for task management, invoicing, and job order processing so every team stays aligned from request to delivery."
 publish_to: 'none'
 
-version: 0.1.1+2
+version: 0.1.2+3
 
 environment:
   sdk: ^3.11.4
