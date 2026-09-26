@@ -903,7 +903,7 @@ if (empty($invoiceItems)) {
                                                 </small>
                                             </div>
                                             <div class="form-group col-md-6">
-                                                <label for="invoice-schedule-date">Schedule Date</label>
+                                                <label for="invoice-schedule-date">Recurring Due Date</label>
                                                 <input type="date" class="form-control" id="invoice-schedule-date" name="recurringScheduleDate" value="<?= htmlspecialchars($recurringScheduleDate, ENT_QUOTES, 'UTF-8'); ?>" <?= $isGeneratedRecurring ? 'readonly' : ''; ?>>
                                             </div>
                                         </div>
@@ -911,22 +911,22 @@ if (empty($invoiceItems)) {
                                         <div class="form-row" id="coverage-option-row">
                                             <div class="form-group col-md-12">
                                                 <label for="coverage-option" class="label-with-tip">
-                                                    <span>Coverage Period</span>
-                                                    <button type="button" class="field-tooltip" data-toggle="tooltip" data-placement="top" title="For recurring invoices, select whether this invoice covers the previous period or the upcoming period relative to the schedule date.">
+                                                    <span>Invoice Generation Timing</span>
+                                                    <button type="button" class="field-tooltip" data-toggle="tooltip" data-placement="top" title="Choose arrears (after service) or advance (before service) billing. The recurring schedule date is the billing due date.">
                                                         <i class="fa fa-info"></i>
                                                     </button>
                                                 </label>
                                                 <select class="custom-select" id="coverage-option" name="coverageOption" data-generated-lock="<?= $isGeneratedRecurring ? '1' : '0'; ?>" <?= $isGeneratedRecurring ? 'disabled' : ''; ?>>
-                                                    <option value="coming" <?= $coverageOption === 'coming' ? 'selected' : ''; ?>>Upcoming Period</option>
-                                                    <option value="previous" <?= $coverageOption === 'previous' ? 'selected' : ''; ?>>Previous Period</option>
+                                                    <option value="coming" <?= $coverageOption === 'coming' ? 'selected' : ''; ?>>Before Service Is Served</option>
+                                                    <option value="previous" <?= $coverageOption === 'previous' ? 'selected' : ''; ?>>After Service Is Served</option>
                                                 </select>
                                                 <small class="text-muted d-block mt-2" id="coverage-option-help">
                                                     <?php if ($isGeneratedRecurring): ?>
-                                                        This billing period is inherited from the recurring template.
+                                                        Invoice generation timing is inherited from the recurring template.
                                                     <?php elseif ($isRecurringInvoice): ?>
-                                                        Select whether this invoice covers the previous period or the upcoming period relative to the schedule date.
+                                                        After service: coverage ends the day before the due date. Before service: coverage starts on the due date. Frequency determines the period length.
                                                     <?php else: ?>
-                                                        You can choose the billing period now. It will apply once you set a recurring frequency.
+                                                        Choose invoice generation timing now; it applies when a recurring frequency is selected.
                                                     <?php endif; ?>
                                                 </small>
                                             </div>
@@ -1408,11 +1408,11 @@ if (empty($invoiceItems)) {
 
                 if (coverageOptionHelp) {
                     if (isGeneratedCoverageField) {
-                        coverageOptionHelp.textContent = 'This billing period is inherited from the recurring template.';
+                        coverageOptionHelp.textContent = 'Invoice generation timing is inherited from the recurring template.';
                     } else if (isRecurring) {
-                        coverageOptionHelp.textContent = 'Select whether this invoice covers the previous period or the upcoming period relative to the schedule date.';
+                        coverageOptionHelp.textContent = 'After service: coverage ends the day before the due date. Before service: coverage starts on the due date. Frequency determines the period length.';
                     } else {
-                        coverageOptionHelp.textContent = 'You can choose the billing period now. It will apply once you set a recurring frequency.';
+                        coverageOptionHelp.textContent = 'Choose invoice generation timing now; it applies when a recurring frequency is selected.';
                     }
                 }
 

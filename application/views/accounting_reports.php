@@ -24,6 +24,15 @@ $balanceLiabilitiesAndEquity = isset($balanceSheet['liabilitiesAndEquity']) && i
 $cashMonthly = isset($cashFlow['monthly']) && is_array($cashFlow['monthly']) ? $cashFlow['monthly'] : array();
 $receivableBuckets = isset($receivables['agingBuckets']) && is_array($receivables['agingBuckets']) ? $receivables['agingBuckets'] : array();
 $receivableRows = isset($receivables['rows']) && is_array($receivables['rows']) ? $receivables['rows'] : array();
+$overdueBalance = 0.0;
+$overdueCount = 0;
+foreach ($receivableRows as $receivableRow) {
+    if ((int) ($receivableRow['daysPastDue'] ?? 0) > 0) {
+        $overdueBalance += (float) ($receivableRow['balance'] ?? 0);
+        $overdueCount++;
+    }
+}
+$receivableTotal = (float) ($receivables['totalReceivable'] ?? 0);
 $expenseCategories = isset($expenseSummary['categories']) && is_array($expenseSummary['categories']) ? $expenseSummary['categories'] : array();
 $expenseRows = isset($expenseSummary['rows']) && is_array($expenseSummary['rows']) ? $expenseSummary['rows'] : array();
 $recentExpenseRows = array_slice($expenseRows, 0, 25);
@@ -1267,6 +1276,7 @@ $printUrl = base_url() . 'Page/accountingReports?' . http_build_query($printQuer
                             }
                         }
                     </style>
+                    <link rel="stylesheet" href="<?= base_url(); ?>assets/css/accounting-reports-modern.css">
 
                     <article class="accounting-print-document" aria-label="Printable accounting report package">
                         <header class="accounting-print-letterhead">
@@ -2007,12 +2017,36 @@ $printUrl = base_url() . 'Page/accountingReports?' . http_build_query($printQuer
                         </div>
 
                         <div class="tab-pane fade" id="receivables-tab" role="tabpanel">
-                            <div class="stat-strip" style="grid-template-columns: repeat(5, minmax(0, 1fr));">
+                            <div class="ar-section-heading">
+                                <div><h2>Accounts receivable</h2><p>Track outstanding balances and see what needs attention.</p></div>
+                                <span class="ar-snapshot"><i class="mdi mdi-calendar" aria-hidden="true"></i> As of <?= htmlspecialchars($formatDate($asOfDate)); ?></span>
+                            </div>
+                            <div class="ar-overview">
+                                <div class="ar-overview-card primary">
+                                    <div class="ar-overview-label"><i class="mdi mdi-wallet-outline" aria-hidden="true"></i> Total outstanding</div>
+                                    <div class="ar-overview-value"><small>PHP</small> <?= $money($receivableTotal); ?></div>
+                                    <div class="ar-overview-note">Across <?= number_format(count($receivableRows)); ?> open documents</div>
+                                </div>
+                                <div class="ar-overview-card">
+                                    <div class="ar-overview-label"><i class="mdi mdi-clock-outline" aria-hidden="true"></i> Overdue balance</div>
+                                    <div class="ar-overview-value ar-overdue-value"><small>PHP</small> <?= $money($overdueBalance); ?></div>
+                                    <div class="ar-overview-note"><?= number_format($overdueCount); ?> documents past their due date</div>
+                                </div>
+                                <div class="ar-overview-card">
+                                    <div class="ar-overview-label"><i class="mdi mdi-chart-donut" aria-hidden="true"></i> Overdue share</div>
+                                    <div class="ar-overview-value"><?= number_format($receivableTotal > 0 ? $overdueBalance / $receivableTotal * 100 : 0, 1); ?><small>%</small></div>
+                                    <div class="ar-overview-note">Of the total outstanding balance</div>
+                                </div>
+                            </div>
+                            <h3 class="ar-aging-title">Balance by age <span class="text-muted font-weight-normal">&middot; PHP</span></h3>
+                            <div class="ar-aging-grid">
                                 <?php foreach ($receivableBuckets as $bucket): ?>
-                                    <div class="stat-card">
-                                        <div class="stat-label"><?= htmlspecialchars((string) ($bucket['label'] ?? 'Bucket')); ?></div>
-                                        <div class="stat-value">PHP <?= $money($bucket['amount'] ?? 0); ?></div>
-                                        <div class="stat-meta"><?= (int) ($bucket['count'] ?? 0); ?> open item(s)</div>
+                                    <?php $bucketShare = $receivableTotal > 0 ? max(0, min(100, (float) ($bucket['amount'] ?? 0) / $receivableTotal * 100)) : 0; ?>
+                                    <div class="ar-aging-card">
+                                        <div class="ar-aging-label"><?= htmlspecialchars((string) ($bucket['label'] ?? 'Bucket')); ?></div>
+                                        <div class="ar-aging-amount"><?= $money($bucket['amount'] ?? 0); ?></div>
+                                        <div class="ar-aging-meta"><?= (int) ($bucket['count'] ?? 0); ?> documents &middot; <?= number_format($bucketShare, 1); ?>%</div>
+                                        <div class="ar-aging-track" aria-hidden="true"><span class="ar-aging-fill" style="width: <?= number_format($bucketShare, 2, '.', ''); ?>%"></span></div>
                                     </div>
                                 <?php endforeach; ?>
                             </div>
@@ -2035,9 +2069,9 @@ $printUrl = base_url() . 'Page/accountingReports?' . http_build_query($printQuer
                                                     <th>Customer</th>
                                                     <th>Document Date</th>
                                                     <th>Due Date</th>
-                                                    <th>Total</th>
-                                                    <th>Credit Applied</th>
-                                                    <th>Balance</th>
+                                                    <th class="ar-number">Total</th>
+                                                    <th class="ar-number">Credit Applied</th>
+                                                    <th class="ar-number">Balance</th>
                                                     <th>Aging</th>
                                                 </tr>
                                             </thead>
@@ -2051,7 +2085,7 @@ $printUrl = base_url() . 'Page/accountingReports?' . http_build_query($printQuer
                                                 <?php else: ?>
                                                     <?php foreach ($receivableRows as $row): ?>
                                                         <tr>
-                                                            <td><?= htmlspecialchars((string) ($row['sourceLabel'] ?? '-')); ?></td>
+                                                            <td><span class="ar-source"><?= htmlspecialchars((string) ($row['sourceLabel'] ?? '-')); ?></span></td>
                                                             <td>
                                                                 <?php if (!empty($row['viewUrl'])): ?>
                                                                     <a href="<?= htmlspecialchars((string) $row['viewUrl']); ?>" class="link-inline">
@@ -2067,12 +2101,12 @@ $printUrl = base_url() . 'Page/accountingReports?' . http_build_query($printQuer
                                                                     <div class="statement-subline"><?= htmlspecialchars((string) $row['description']); ?></div>
                                                                 <?php endif; ?>
                                                             </td>
-                                                            <td><?= htmlspecialchars($formatDate($row['documentDate'] ?? '')); ?></td>
-                                                            <td><?= htmlspecialchars($formatDate($row['dueDate'] ?? '')); ?></td>
-                                                            <td>PHP <?= $money($row['totalAmount'] ?? 0); ?></td>
-                                                            <td>PHP <?= $money($row['creditApplied'] ?? 0); ?></td>
-                                                            <td class="table-cell-label">PHP <?= $money($row['balance'] ?? 0); ?></td>
-                                                            <td><?= (int) ($row['daysPastDue'] ?? 0); ?> day(s)</td>
+                                                            <td class="ar-date" data-order="<?= htmlspecialchars((string) ($row['documentDate'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>"><?= htmlspecialchars($formatDate($row['documentDate'] ?? '')); ?></td>
+                                                            <td class="ar-date" data-order="<?= htmlspecialchars((string) ($row['dueDate'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>"><?= htmlspecialchars($formatDate($row['dueDate'] ?? '')); ?></td>
+                                                            <td class="ar-number " data-order="<?= (float) ($row['totalAmount'] ?? 0); ?>">PHP <?= $money($row['totalAmount'] ?? 0); ?></td>
+                                                            <td class="ar-number " data-order="<?= (float) ($row['creditApplied'] ?? 0); ?>">PHP <?= $money($row['creditApplied'] ?? 0); ?></td>
+                                                            <td class="ar-number table-cell-label" data-order="<?= (float) ($row['balance'] ?? 0); ?>">PHP <?= $money($row['balance'] ?? 0); ?></td>
+                                                            <td data-order="<?= (int) ($row['daysPastDue'] ?? 0); ?>"><span class="ar-status <?= (int) ($row['daysPastDue'] ?? 0) > 90 ? 'late' : ((int) ($row['daysPastDue'] ?? 0) > 0 ? 'overdue' : 'current'); ?>"><?= empty($row['dueDate']) ? 'No due date' : ((int) ($row['daysPastDue'] ?? 0) > 0 ? (int) $row['daysPastDue'] . ' days overdue' : 'Current'); ?></span></td>
                                                         </tr>
                                                     <?php endforeach; ?>
                                                 <?php endif; ?>
@@ -2206,10 +2240,19 @@ $printUrl = base_url() . 'Page/accountingReports?' . http_build_query($printQuer
                 function initIfPresent(selector, opts) {
                     var $table = $(selector);
                     if (!$table.length || $.fn.DataTable.isDataTable(selector)) return;
+                    if ($table.find('tbody td[colspan]').length) return;
                     $table.DataTable($.extend({}, common, opts || {}));
                 }
 
-                initIfPresent('#ar-receivables-table', { order: [[4, 'asc']] });
+                initIfPresent('#ar-receivables-table', { order: [[4, 'asc']], responsive: false, language: { search: '', searchPlaceholder: 'Search customer or reference…', emptyTable: 'No open receivables for this period.' } });
+                $('a[data-toggle="tab"]').on('shown.bs.tab', function () {
+                    var hash = this.getAttribute('href');
+                    if (hash) window.history.replaceState(null, '', hash);
+                    $.fn.dataTable.tables({ visible: true, api: true }).columns.adjust();
+                });
+                $('#arFilterModal form').on('submit', function () {
+                    this.action = this.action.split('#')[0] + window.location.hash;
+                });
                 initIfPresent('#ar-recent-expenses-table', { order: [[0, 'desc']] });
                 initIfPresent('#ar-monthly-table', { order: [[0, 'asc']], paging: false, searching: false, info: false });
                 initIfPresent('#ar-expense-categories-table', { order: [[3, 'desc']], paging: false, searching: false, info: false });
