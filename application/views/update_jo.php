@@ -157,11 +157,11 @@ $serviceCategories = array_values($serviceCategories);
 
         if (coverageOptionHelp) {
           if (isGeneratedCoverageField) {
-            coverageOptionHelp.textContent = 'This billing period is inherited from the recurring template.';
+            coverageOptionHelp.textContent = 'Invoice generation timing is inherited from the recurring template.';
           } else if (isRecurring) {
-            coverageOptionHelp.textContent = 'Select whether this invoice covers the previous period or the upcoming period relative to the schedule date.';
+            coverageOptionHelp.textContent = 'After service: coverage ends the day before the due date. Before service: coverage starts on the due date. Frequency determines the period length.';
           } else {
-            coverageOptionHelp.textContent = 'You can choose the billing period now. It will apply once you set a recurring frequency.';
+            coverageOptionHelp.textContent = 'Choose invoice generation timing now; it applies when a recurring frequency is selected.';
           }
         }
       }
@@ -469,7 +469,7 @@ $serviceCategories = array_values($serviceCategories);
                         <small class="form-text text-muted">Select <strong>No</strong> for a one-time invoice. Choose any frequency to make the invoice recurring.</small>
                       </div>
                       <div class="col-md-6 mb-2">
-                        <label>Schedule Date</label>
+                        <label>Recurring Due Date</label>
                         <input type="date" class="form-control" name="recurringScheduleDate" value="<?= htmlspecialchars((string) ($record->recurringScheduleDate ?? ''), ENT_QUOTES, 'UTF-8'); ?>" <?= $isGeneratedRecurring ? 'readonly' : ''; ?>>
                         <small class="form-text text-muted">
                           <?= $isGeneratedRecurring ? 'This invoice was generated from a recurring template.' : 'Recurring invoices generate 10 days before the schedule date for daily, weekly, monthly, quarterly, or yearly schedules.'; ?>
@@ -478,18 +478,18 @@ $serviceCategories = array_values($serviceCategories);
                     </div>
                     <div class="row" id="coverage-option-row">
                       <div class="col-md-12 mb-2">
-                        <label>Coverage Period</label>
+                        <label>Invoice Generation Timing</label>
                         <select class="form-control" id="coverage-option" name="coverageOption" data-generated-lock="<?= $isGeneratedRecurring ? '1' : '0'; ?>" <?= $isGeneratedRecurring ? 'disabled' : ''; ?>>
-                          <option value="coming" <?= (($record->coverageOption ?? 'coming') === 'coming') ? 'selected' : ''; ?>>Upcoming Period</option>
-                          <option value="previous" <?= (($record->coverageOption ?? 'coming') === 'previous') ? 'selected' : ''; ?>>Previous Period</option>
+                          <option value="coming" <?= (($record->coverageOption ?? 'coming') === 'coming') ? 'selected' : ''; ?>>Before Service Is Served</option>
+                          <option value="previous" <?= (($record->coverageOption ?? 'coming') === 'previous') ? 'selected' : ''; ?>>After Service Is Served</option>
                         </select>
                         <small class="form-text text-muted" id="coverage-option-help">
                           <?php if ($isGeneratedRecurring): ?>
-                            This billing period is inherited from the recurring template.
+                            Invoice generation timing is inherited from the recurring template.
                           <?php elseif (($record->recurringFrequency ?? 'none') !== 'none'): ?>
-                            Select whether this invoice covers the previous period or the upcoming period relative to the schedule date.
+                            After service: coverage ends the day before the due date. Before service: coverage starts on the due date. Frequency determines the period length.
                           <?php else: ?>
-                            You can choose the billing period now. It will apply once you set a recurring frequency.
+                            Choose invoice generation timing now; it applies when a recurring frequency is selected.
                           <?php endif; ?>
                         </small>
                       </div>

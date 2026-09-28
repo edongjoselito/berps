@@ -1486,7 +1486,7 @@ class Page extends CI_Controller
         )
     ");
 
-    // Generated recurring invoices should inherit the template coverage direction.
+    // Backfill missing timing only; existing occurrences retain their saved timing.
     $this->db->query("
       UPDATE `invoice` AS `generated`
       INNER JOIN `invoice` AS `template`
@@ -1498,10 +1498,6 @@ class Page extends CI_Controller
         AND (
           `generated`.`coverageOption` IS NULL
           OR TRIM(`generated`.`coverageOption`) = ''
-          OR (
-            COALESCE(NULLIF(TRIM(`template`.`coverageOption`), ''), 'coming') = 'previous'
-            AND `generated`.`coverageOption` = 'coming'
-          )
         )
     ");
   }
@@ -13116,72 +13112,8 @@ class Page extends CI_Controller
       ? date('F j, Y', strtotime($dueDateRaw))
       : 'Not specified';
 
-    $coveredMonths = '';
-    if ($recurringFrequency !== '' && $recurringFrequency !== 'none' && $recurringScheduleRaw !== '') {
-      $startDate = new DateTime($recurringScheduleRaw);
-      $endDate = clone $startDate;
-      $coverageOption = $invoice->coverageOption ?? 'coming';
-      switch ($recurringFrequency) {
-        case 'daily':
-          break;
-        case 'weekly':
-          if ($coverageOption === 'previous') {
-            $startDate->modify('-6 days');
-            $endDate = clone $startDate;
-            $endDate->modify('+6 days');
-          } else {
-            $endDate->modify('+6 days');
-          }
-          break;
-        case 'monthly':
-          if ($coverageOption === 'previous') {
-            $startDate->modify('-1 month');
-            $endDate = clone $startDate;
-            $endDate->modify('+1 month')->modify('-1 day');
-          } else {
-            $endDate->modify('+1 month')->modify('-1 day');
-          }
-          break;
-        case 'quarterly':
-          // Quarterly: use calendar quarters based on coverageOption
-          $year = (int)$startDate->format('Y');
-          $month = (int)$startDate->format('n');
-          $quarter = ceil($month / 3);
-
-          if ($coverageOption === 'previous') {
-            // Previous quarter
-            $quarter--;
-            if ($quarter < 1) {
-              $quarter = 4;
-              $year--;
-            }
-          }
-
-          // Calculate start and end of the quarter
-          $startMonth = ($quarter - 1) * 3 + 1;
-          $endMonth = $quarter * 3;
-
-          $startDate = new DateTime("$year-$startMonth-01");
-          $endDate = new DateTime("$year-$endMonth-01");
-          $endDate->modify('+1 month')->modify('-1 day');
-          break;
-        case 'yearly':
-          if ($coverageOption === 'previous') {
-            $startDate->modify('-1 year');
-            $endDate = clone $startDate;
-            $endDate->modify('+1 year')->modify('-1 day');
-          } else {
-            $endDate->modify('+1 year')->modify('-1 day');
-          }
-          break;
-        default:
-          $endDate = null;
-          break;
-      }
-      if ($endDate instanceof DateTime) {
-        $coveredMonths = 'From ' . date('M d, Y', $startDate->getTimestamp()) . ' To ' . date('M d, Y', $endDate->getTimestamp());
-      }
-    }
+    $this->load->helper('invoice_coverage');
+    $coveredMonths = invoice_service_coverage_label($dueDateRaw, $recurringFrequency, $invoice->coverageOption ?? 'coming');
 
     $totalDue = (float) ($invoice->TotalDue ?? 0);
     $amountPaid = (float) ($invoice->AmountPaid ?? 0);
@@ -13257,10 +13189,10 @@ class Page extends CI_Controller
       $lineRowsHtml .= '<td style="padding:14px 12px; border-top:1px solid #e5e7eb; color:#64748b; font-size:14px; vertical-align:top;">' . htmlspecialchars($itemQuantityDisplay, ENT_QUOTES, 'UTF-8') . '</td>';
       $lineRowsHtml .= '<td style="padding:14px 12px; border-top:1px solid #e5e7eb; vertical-align:top;">';
       $lineRowsHtml .= '<div style="font-size:15px; font-weight:700; color:#0f172a; margin-bottom:4px;">' . htmlspecialchars($itemDescription !== '' ? $itemDescription : 'Invoice item', ENT_QUOTES, 'UTF-8') . '</div>';
-      $lineRowsHtml .= '<div style="font-size:13px; color:#475569; line-height:1.6;">' . htmlspecialchars($itemBreakdownText, ENT_QUOTES, 'UTF-8') . '</div>';
       if ($coveredMonths !== '') {
-        $lineRowsHtml .= '<div style="font-size:12px; color:#1d4ed8; line-height:1.6; margin-top:4px;">' . htmlspecialchars($coveredMonths, ENT_QUOTES, 'UTF-8') . '</div>';
+        $lineRowsHtml .= '<div style="font-size:13px; color:#0f172a; line-height:1.6; margin-bottom:4px;">Service Coverage: ' . htmlspecialchars($coveredMonths, ENT_QUOTES, 'UTF-8') . '</div>';
       }
+      $lineRowsHtml .= '<div style="font-size:13px; color:#475569; line-height:1.6;">' . htmlspecialchars($itemBreakdownText, ENT_QUOTES, 'UTF-8') . '</div>';
       $lineRowsHtml .= '</td>';
       $lineRowsHtml .= '<td style="padding:14px 12px; border-top:1px solid #e5e7eb; color:#0f172a; font-size:14px; text-align:right; vertical-align:top;">' . number_format($itemUnitPrice, 2) . '</td>';
       $lineRowsHtml .= '<td style="padding:14px 12px; border-top:1px solid #e5e7eb; color:#0f172a; font-size:14px; font-weight:700; text-align:right; vertical-align:top;">' . number_format($lineTotal, 2) . '</td>';

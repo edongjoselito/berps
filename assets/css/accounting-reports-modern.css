@@ -1,0 +1,59 @@
+@media screen {
+    .accounting-reports-page { background: #f5f7fa; }
+    .accounting-reports-page .ar-hero { background: #172c46; box-shadow: none; border-radius: 20px; padding: 32px; }
+    .accounting-reports-page .calc-bounce { display: none; }
+    .accounting-reports-page .ar-hero__title { letter-spacing: -.035em; }
+    .accounting-reports-page .stat-card { box-shadow: none; border: 1px solid #e2e8f0; }
+    .accounting-reports-page .tab-nav { padding: 6px; background: #e9eef5; border-radius: 12px; gap: 4px; }
+    .accounting-reports-page .tab-nav .nav-link { border-radius: 8px; color: #52647a; padding: 12px 18px; }
+    .accounting-reports-page .tab-nav .nav-link.active { background: #fff; color: #1d4ed8; box-shadow: 0 2px 5px #172c4610; }
+    #receivables-tab { --ar-border: #e2e8f0; color: #172c46; }
+    #receivables-tab .ar-section-heading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; margin: 28px 0 20px; }
+    #receivables-tab .ar-section-heading h2 { font-size: 24px; font-weight: 700; letter-spacing: -.035em; margin: 0 0 6px; }
+    #receivables-tab .ar-section-heading p { margin: 0; color: #617489; font-size: 13px; }
+    #receivables-tab .ar-snapshot { border: 1px solid var(--ar-border); background: white; padding: 9px 13px; border-radius: 8px; color: #52647a; font-size: 12px; }
+    #receivables-tab .ar-overview { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+    #receivables-tab .ar-overview-card { border: 1px solid var(--ar-border); border-radius: 16px; background: white; padding: 24px; min-width: 0; }
+    #receivables-tab .ar-overview-card.primary { background: #172c46; color: white; border-color: #172c46; }
+    #receivables-tab .ar-overview-label { font-size: 12px; font-weight: 600; display: flex; gap: 8px; align-items: center; margin-bottom: 14px; }
+    #receivables-tab .ar-overview-value { font-size: clamp(22px, 2.1vw, 32px); line-height: 1.3; font-weight: 700; letter-spacing: -.04em; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+    #receivables-tab .ar-overview-value small { font-size: 12px; font-weight: 500; letter-spacing: 0; }
+    #receivables-tab .ar-overview-note { font-size: 12px; margin-top: 10px; color: #617489; }
+    #receivables-tab .primary .ar-overview-note { color: #c0d0e3; }
+    #receivables-tab .ar-overdue-value { color: #b4233a; }
+    #receivables-tab .ar-aging-title { font-size: 14px; font-weight: 700; margin: 0 0 12px; }
+    #receivables-tab .ar-aging-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; margin-bottom: 24px; }
+    #receivables-tab .ar-aging-card { background: white; border: 1px solid var(--ar-border); border-radius: 12px; padding: 18px; min-width: 0; }
+    #receivables-tab .ar-aging-label { font-size: 11px; color: #52647a; font-weight: 600; text-transform: uppercase; letter-spacing: .045em; }
+    #receivables-tab .ar-aging-amount { margin: 10px 0 5px; font-size: 17px; font-weight: 700; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+    #receivables-tab .ar-aging-meta { color: #617489; font-size: 11px; }
+    #receivables-tab .ar-aging-track { height: 4px; border-radius: 8px; background: #edf1f6; margin-top: 14px; overflow: hidden; }
+    #receivables-tab .ar-aging-fill { display: block; height: 100%; border-radius: inherit; background: #5378c5; }
+    #receivables-tab .ar-aging-card:first-child .ar-aging-fill { background: #159477; }
+    #receivables-tab .ar-aging-card:last-child .ar-aging-fill { background: #cf5266; }
+    #receivables-tab .panel-card { border: 1px solid var(--ar-border); border-radius: 16px; box-shadow: none; overflow: hidden; }
+    #receivables-tab .panel-title { font-size: 18px; letter-spacing: -.02em; }
+    #receivables-tab .panel-subtitle { max-width: 700px; font-size: 12px; line-height: 1.7; }
+    #receivables-tab .table thead th { background: #f5f7fa; color: #617489; font-size: 10px; letter-spacing: .06em; text-transform: uppercase; border-bottom: 1px solid var(--ar-border); padding: 15px 12px; white-space: nowrap; }
+    #receivables-tab .table tbody td { padding: 18px 12px; font-size: 12px; vertical-align: middle; border-top: 1px solid #edf1f6; }
+    #receivables-tab .table tbody tr:hover { background: #f8faff; }
+    #receivables-tab .ar-number { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    #receivables-tab .ar-date { white-space: nowrap; color: #52647a; }
+    #receivables-tab .statement-subline { max-width: 300px; font-size: 11px; line-height: 1.6; margin-top: 4px; }
+    #receivables-tab .ar-source, #receivables-tab .ar-status { display: inline-block; border-radius: 6px; padding: 5px 8px; font-size: 10px; font-weight: 600; white-space: nowrap; }
+    #receivables-tab .ar-source { color: #52647a; background: #edf1f6; }
+    #receivables-tab .ar-status.current { color: #08775a; background: #eaf8f1; }
+    #receivables-tab .ar-status.overdue { color: #a94718; background: #fff3e7; }
+    #receivables-tab .ar-status.late { color: #b4233a; background: #fff0f2; }
+    #receivables-tab .dataTables_filter input { min-width: 230px; border-radius: 8px; background: #f8fafc; }
+    #receivables-tab .empty-state { padding: 48px 20px; color: #617489; text-align: center; }
+    .accounting-reports-page a:focus-visible, .accounting-reports-page button:focus-visible { outline: 3px solid #60a5fa; outline-offset: 3px; }
+    @media (max-width: 1199px) { #receivables-tab .ar-aging-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+    @media (max-width: 767px) {
+        .accounting-reports-page .ar-hero { padding: 24px 20px; }
+        #receivables-tab .ar-overview { grid-template-columns: 1fr; }
+        #receivables-tab .ar-aging-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        #receivables-tab .panel-body { padding: 16px; }
+        #receivables-tab .dataTables_filter input { min-width: 0; }
+    }
+}

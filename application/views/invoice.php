@@ -82,98 +82,15 @@ $recurringSchedule = $recurringScheduleRaw !== '' && $recurringScheduleRaw !== '
     ? date('F j, Y', strtotime($recurringScheduleRaw))
     : '';
 
-// Helper function to calculate covered period for recurring invoices
-function getInvoiceCoveredMonths($invoiceData)
-{
-    $frequency = $invoiceData->recurringFrequency ?? 'none';
-    $scheduleDate = $invoiceData->recurringScheduleDate ?? '';
-    $coverageOption = $invoiceData->coverageOption ?? 'coming';
-
-    if ($frequency === 'none' || empty($scheduleDate)) {
-        return '';
-    }
-
-    $startDate = new DateTime($scheduleDate);
-    $endDate = clone $startDate;
-
-    // Calculate the covered period based on frequency
-    switch ($frequency) {
-        case 'daily':
-            // Daily: just the single day (schedule date)
-            $endDate = $startDate;
-            break;
-
-        case 'weekly':
-            // Weekly: 7 days from schedule date
-            if ($coverageOption === 'previous') {
-                $startDate->modify('-6 days');
-                $endDate = clone $startDate;
-                $endDate->modify('+6 days');
-            } else {
-                $endDate->modify('+6 days');
-            }
-            break;
-
-        case 'monthly':
-            // Monthly: from schedule date to schedule date + 1 month - 1 day
-            if ($coverageOption === 'previous') {
-                $startDate->modify('-1 month');
-                $endDate = clone $startDate;
-                $endDate->modify('+1 month')->modify('-1 day');
-            } else {
-                $endDate->modify('+1 month')->modify('-1 day');
-            }
-            break;
-
-        case 'quarterly':
-            // Quarterly: use calendar quarters based on coverageOption
-            $year = (int)$startDate->format('Y');
-            $month = (int)$startDate->format('n');
-            $quarter = ceil($month / 3);
-
-            if ($coverageOption === 'previous') {
-                // Previous quarter
-                $quarter--;
-                if ($quarter < 1) {
-                    $quarter = 4;
-                    $year--;
-                }
-            }
-
-            // Calculate start and end of the quarter
-            $startMonth = ($quarter - 1) * 3 + 1;
-            $endMonth = $quarter * 3;
-
-            $startDate = new DateTime("$year-$startMonth-01");
-            $endDate = new DateTime("$year-$endMonth-01");
-            $endDate->modify('+1 month')->modify('-1 day');
-            break;
-
-        case 'yearly':
-            // Yearly: from schedule date to schedule date + 1 year - 1 day
-            if ($coverageOption === 'previous') {
-                $startDate->modify('-1 year');
-                $endDate = clone $startDate;
-                $endDate->modify('+1 year')->modify('-1 day');
-            } else {
-                $endDate->modify('+1 year')->modify('-1 day');
-            }
-            break;
-
-        default:
-            return '';
-    }
-
-    return 'From ' . date('M d, Y', $startDate->getTimestamp()) . ' To ' . date('M d, Y', $endDate->getTimestamp());
-}
-
-$coveredMonths = getInvoiceCoveredMonths($invoiceData);
 $dueDateRaw = $recurringScheduleRaw !== '' && $recurringScheduleRaw !== '0000-00-00'
     ? $recurringScheduleRaw
     : ($receiveDateRaw !== '' && $receiveDateRaw !== '0000-00-00' ? $receiveDateRaw : $transactionDateRaw);
 $dueDate = $dueDateRaw !== '' && $dueDateRaw !== '0000-00-00'
     ? date('F j, Y', strtotime($dueDateRaw))
     : 'Not specified';
+
+$this->load->helper('invoice_coverage');
+$coveredMonths = invoice_service_coverage_label($dueDateRaw, $recurringFrequency, $invoiceData->coverageOption ?? 'coming');
 
 $totalDue = (float) ($invoiceData->TotalDue ?? 0);
 $amountPaid = (float) ($invoiceData->AmountPaid ?? 0);
@@ -789,14 +706,10 @@ $backLabel = isset($backLabel) && trim((string) $backLabel) !== ''
         }
 
         .description-cell .desc-coverage {
-            font-size: 0.78rem;
-            color: var(--accent-text);
-            font-weight: 600;
-            margin-top: 6px;
-            padding: 4px 10px;
-            background: var(--accent-soft);
-            border-radius: 6px;
-            display: inline-block;
+            font-size: 0.85rem;
+            color: var(--ink);
+            line-height: 1.5;
+            margin: 3px 0 6px;
         }
 
         .line-price {
@@ -1181,12 +1094,9 @@ $backLabel = isset($backLabel) && trim((string) $backLabel) !== ''
             }
 
             .description-cell .desc-coverage {
-                font-size: 7.8pt !important;
-                color: #1e3a8a !important;
-                background: #eff6ff !important;
-                padding: 2pt 6pt !important;
-                border-radius: 4pt !important;
-                margin-top: 4pt !important;
+                font-size: 8.5pt !important;
+                color: #0f172a !important;
+                margin: 2pt 0 4pt !important;
             }
 
             .line-price {
@@ -1719,7 +1629,11 @@ $backLabel = isset($backLabel) && trim((string) $backLabel) !== ''
                                     <div class="detail-value"><?= htmlspecialchars(ucfirst($recurringFrequency), ENT_QUOTES, 'UTF-8'); ?></div>
                                 </div>
                                 <div class="detail-item">
-                                    <div class="detail-label">Schedule Date</div>
+                                    <div class="detail-label">Invoice Generation Timing</div>
+                                    <div class="detail-value"><?= ($invoiceData->coverageOption ?? 'coming') === 'previous' ? 'After Service Is Served' : 'Before Service Is Served'; ?></div>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-label">Recurring Due Date</div>
                                     <div class="detail-value"><?= htmlspecialchars($recurringSchedule !== '' ? $recurringSchedule : 'Not specified', ENT_QUOTES, 'UTF-8'); ?></div>
                                 </div>
                             <?php endif; ?>
@@ -1743,10 +1657,10 @@ $backLabel = isset($backLabel) && trim((string) $backLabel) !== ''
                                     <td style="color: var(--muted); font-size: 0.92rem;"><?= htmlspecialchars($lineItem['itemQuantityDisplay'], ENT_QUOTES, 'UTF-8'); ?></td>
                                     <td class="description-cell">
                                         <div class="desc-title"><?= htmlspecialchars($lineItem['itemDescription'], ENT_QUOTES, 'UTF-8'); ?></div>
-                                        <div class="desc-sub"><?= htmlspecialchars($lineItem['itemBreakdownText'], ENT_QUOTES, 'UTF-8'); ?></div>
                                         <?php if (!empty($coveredMonths)): ?>
-                                            <div class="desc-coverage"><?= htmlspecialchars($coveredMonths, ENT_QUOTES, 'UTF-8'); ?></div>
+                                            <div class="desc-coverage">Service Coverage: <?= htmlspecialchars($coveredMonths, ENT_QUOTES, 'UTF-8'); ?></div>
                                         <?php endif; ?>
+                                        <div class="desc-sub"><?= htmlspecialchars($lineItem['itemBreakdownText'], ENT_QUOTES, 'UTF-8'); ?></div>
                                     </td>
                                     <td class="text-right text-mono line-price"><?= number_format((float) $lineItem['itemUnitPrice'], 2); ?></td>
                                     <td class="text-right text-mono line-price"><?= number_format((float) $lineItem['lineTotal'], 2); ?></td>
