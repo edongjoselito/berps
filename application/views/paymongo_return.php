@@ -9,6 +9,7 @@ $invoiceUrl = $row
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <?php include_once APPPATH . 'views/includes/page-experience.php'; ?>
 <meta charset="utf-8">
 <title><?= $isPaid ? 'Payment Received' : 'Payment Status'; ?> | BERPS</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">

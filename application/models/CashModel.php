@@ -22,6 +22,7 @@ class CashModel extends CI_Model
 			"COALESCE(c.ContactPerson, '') AS ContactPerson",
 			"COALESCE(c.ContactNos, '') AS ContactNos",
 			"COALESCE(c.CompanyEmail, '') AS CompanyEmail",
+			"COALESCE(c.client_email, '') AS client_email",
 			"{$alias}.TransDate",
 			"{$alias}.JobDescription",
 			"{$alias}.itemQuantity",
@@ -40,6 +41,8 @@ class CashModel extends CI_Model
 			"COALESCE({$alias}.coverageOption, ri.coverageOption, 'coming') AS coverageOption",
 			"{$alias}.recurringScheduleDate",
 			"{$alias}.recurringTerminationDate",
+			"{$alias}.recurringGenerateDaysBefore",
+			"{$alias}.recurringAutoEmail",
 			"{$alias}.invoiceExpirationDate",
 			"{$alias}.recurringTemplateID",
 			"{$alias}.lastRecurringGeneratedFor",
@@ -508,9 +511,13 @@ class CashModel extends CI_Model
 		$this->db->where('i.recurringTemplateID IS NULL', null, false);
 		$this->db->or_where('i.recurringTemplateID', 0);
 		$this->db->group_end();
-		// Only get invoices that are terminated (termination date is in the past)
-		$this->db->where('i.recurringTerminationDate IS NOT NULL', null, false);
-		$this->db->where('i.recurringTerminationDate <', date('Y-m-d'));
+		// Templates whose series has ended, by termination date OR expiration date.
+		$todayEscaped = $this->db->escape(date('Y-m-d'));
+		$this->db->where(
+			"((i.recurringTerminationDate IS NOT NULL AND i.recurringTerminationDate < {$todayEscaped}) OR (i.invoiceExpirationDate IS NOT NULL AND i.invoiceExpirationDate < {$todayEscaped}))",
+			null,
+			false
+		);
 
 		if ($frequency !== '') {
 			$this->db->where('i.recurringFrequency', $frequency);
@@ -520,7 +527,7 @@ class CashModel extends CI_Model
 			$this->db->where('COALESCE(i.CustID, c.CustID) = ' . $this->db->escape($custID), null, false);
 		}
 
-		$this->db->order_by('i.recurringTerminationDate', 'DESC');
+		$this->db->order_by('COALESCE(i.recurringTerminationDate, i.invoiceExpirationDate)', 'DESC', false);
 		$this->db->order_by('i.recurringFrequency', 'ASC');
 		$this->db->order_by('i.orderID', 'DESC');
 		return $this->db->get()->result();

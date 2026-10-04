@@ -5,6 +5,7 @@
     <meta content="BERPS business operations and resource planning platform" name="description" />
     <meta content="BERPS" name="author" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <?php include_once __DIR__ . '/page-experience.php'; ?>
     <!-- App favicon -->
     <link rel="shortcut icon" href="<?= base_url(); ?>assets/images/favicon.png">
 

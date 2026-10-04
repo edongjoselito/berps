@@ -20,7 +20,7 @@ class Page extends CI_Controller
 
     // Allow public access to knowledgeBaseView method
     $method = strtolower((string) $this->router->fetch_method());
-    if ($this->session->userdata('logged_in') !== TRUE && !in_array($method, array('knowledgebaseview', 'knowledgebaseattachment'), true)) {
+    if ($this->session->userdata('logged_in') !== TRUE && !in_array($method, array('knowledgebaseview', 'knowledgebaseattachment', 'recurringcron'), true)) {
       redirect('login');
     }
 
@@ -81,6 +81,8 @@ class Page extends CI_Controller
     }
 
     $this->_ensureInvoiceRecurringTerminationDateColumn();
+    $this->_ensureInvoiceRecurringGenerateDaysBeforeColumn();
+    $this->_ensureInvoiceRecurringAutoEmailColumn();
     $this->_ensureInvoiceExpirationDateColumn();
     $this->_ensureInvoiceDueDateColumn();
     $this->_ensureCoverageOptionColumn();
@@ -1450,6 +1452,25 @@ class Page extends CI_Controller
     }
 
     $this->db->query("UPDATE `invoice` SET `recurringTerminationDate` = NULL WHERE `recurringTerminationDate` IS NOT NULL AND (`recurringTerminationDate` + 0) = 0");
+  }
+
+  private function _ensureInvoiceRecurringGenerateDaysBeforeColumn()
+  {
+    if (!$this->db->field_exists('recurringGenerateDaysBefore', 'invoice')) {
+      $this->db->query("ALTER TABLE `invoice` ADD COLUMN `recurringGenerateDaysBefore` int(11) DEFAULT NULL AFTER `recurringTerminationDate`");
+    }
+
+    $this->db->query("UPDATE `invoice` SET `recurringGenerateDaysBefore` = NULL WHERE `recurringGenerateDaysBefore` IS NOT NULL AND `recurringGenerateDaysBefore` < 0");
+    $this->db->query("UPDATE `invoice` SET `recurringGenerateDaysBefore` = 90 WHERE `recurringGenerateDaysBefore` IS NOT NULL AND `recurringGenerateDaysBefore` > 90");
+  }
+
+  private function _ensureInvoiceRecurringAutoEmailColumn()
+  {
+    if (!$this->db->field_exists('recurringAutoEmail', 'invoice')) {
+      $this->db->query("ALTER TABLE `invoice` ADD COLUMN `recurringAutoEmail` tinyint(1) DEFAULT NULL AFTER `recurringGenerateDaysBefore`");
+    }
+
+    $this->db->query("UPDATE `invoice` SET `recurringAutoEmail` = 0 WHERE `recurringAutoEmail` IS NULL");
   }
 
   private function _ensureInvoiceExpirationDateColumn()
@@ -9120,6 +9141,98 @@ class Page extends CI_Controller
     redirect('Page/recurringInvoices');
   }
 
+  /**
+   * Recurring invoice generator — cron entry point.
+   *
+   *   URL cron : 0 6 * * * curl -s "https://<domain>/berps/Page/recurringCron?key=<token>" > /dev/null 2>&1
+   *   CLI cron : 0 6 * * * php /path/to/index.php Page recurringCron
+   *
+   * Admins can see the exact command for this install at
+   * Page/recurringCronSetup?show_cron=1 while logged in.
+   */
+  function recurringCron()
+  {
+    if (!$this->input->is_cli_request()) {
+      $key = (string) $this->input->get('key', true);
+      if ($key === '' || !hash_equals($this->_recurringCronToken(), $key)) {
+        show_error('Forbidden', 403);
+        return;
+      }
+    }
+
+    ignore_user_abort(true);
+    @set_time_limit(300);
+
+    // Generate for every company that owns at least one recurring template.
+    $settingsRows = $this->db
+      ->select('settingsID')
+      ->distinct()
+      ->from('invoice')
+      ->group_start()
+        ->where('recurringTemplateID IS NULL', null, false)
+        ->or_where('recurringTemplateID', 0)
+      ->group_end()
+      ->where("recurringFrequency IN ('daily','weekly','monthly','quarterly','yearly')", null, false)
+      ->get()
+      ->result_array();
+
+    $companies = array();
+    $totalGenerated = 0;
+    foreach ($settingsRows as $settingsRow) {
+      $sid = (int) ($settingsRow['settingsID'] ?? 0);
+      if ($sid <= 0) {
+        continue;
+      }
+      $summary = $this->_generateRecurringInvoices($sid);
+      $totalGenerated += (int) ($summary['generatedCount'] ?? 0);
+      $companies[] = array('settingsID' => $sid) + $summary;
+    }
+
+    $payload = array(
+      'status' => 'ok',
+      'ranAt' => date('Y-m-d H:i:s'),
+      'generatedCount' => $totalGenerated,
+      'companies' => $companies,
+    );
+
+    if ($this->input->is_cli_request()) {
+      echo json_encode($payload), PHP_EOL;
+      return;
+    }
+
+    $this->output
+      ->set_content_type('application/json')
+      ->set_output(json_encode($payload));
+  }
+
+  function recurringCronSetup()
+  {
+    if ($this->session->userdata('level') !== 'Admin') {
+      show_error('Forbidden', 403);
+      return;
+    }
+
+    $data = array(
+      'endpoint_url' => site_url('Page/recurringCron'),
+      'cli_command' => 'php ' . FCPATH . 'index.php Page recurringCron',
+      'cron_command' => '',
+    );
+
+    // Token stays hidden unless explicitly requested with ?show_cron=1.
+    if ((string) $this->input->get('show_cron') === '1') {
+      $data['cron_command'] = '0 6 * * * curl -s "' . $data['endpoint_url']
+        . '?key=' . $this->_recurringCronToken() . '" > /dev/null 2>&1';
+    }
+
+    $this->load->view('recurring_cron_setup', $data);
+  }
+
+  private function _recurringCronToken()
+  {
+    $dbName = isset($this->db) ? (string) $this->db->database : '';
+    return substr(hash('sha256', 'berps-recurring-cron|' . (string) config_item('encryption_key') . '|' . $dbName), 0, 40);
+  }
+
   function deleteRecurringInvoice()
   {
     if ($this->session->userdata('level') !== 'Admin') {
@@ -9181,6 +9294,10 @@ class Page extends CI_Controller
       'Balance' => 0,
       'AmountPaid' => 0
     ));
+
+    if (!$isTemplate) {
+      $this->_rewindRecurringGenerationForRemovedChild($invoice, $settingsID);
+    }
 
     // Delete related invoice items
     if ($this->db->table_exists('invoice_items')) {
@@ -9547,7 +9664,6 @@ class Page extends CI_Controller
   private function _buildRecurringInvoiceDashboard($templates, $generatedInvoices)
   {
     $today = date('Y-m-d');
-    $soonThresholdDate = date('Y-m-d', strtotime($today . ' +10 days'));
     $templatesById = array();
     $generatedByTemplate = array();
     $generatedByTemplateAndSchedule = array();
@@ -9600,11 +9716,12 @@ class Page extends CI_Controller
       }
 
       $seriesEndDate = $this->_resolveRecurringSeriesEndDate($template);
+      $daysBefore = $this->_normalizeRecurringGenerateDaysBefore($template->recurringGenerateDaysBefore ?? null);
       $upcomingDueDate = $this->_findNextRecurringOccurrence($baseScheduleDate, $frequency, $today, $seriesEndDate);
       $windowOpensOn = $upcomingDueDate !== null
-        ? date('Y-m-d', strtotime($upcomingDueDate . ' -10 days'))
+        ? date('Y-m-d', strtotime($upcomingDueDate . ' -' . $daysBefore . ' days'))
         : null;
-      $isDueSoon = $upcomingDueDate !== null && strtotime($upcomingDueDate) <= strtotime($soonThresholdDate);
+      $isDueSoon = $upcomingDueDate !== null && strtotime($windowOpensOn ?? '') <= strtotime($today);
       $preparedInvoice = null;
       $preparedInvoiceSource = '';
 
@@ -9638,7 +9755,7 @@ class Page extends CI_Controller
       if ($lastGeneratedFor === null || strtotime($lastGeneratedFor) < strtotime($baseScheduleDate)) {
         $lastGeneratedFor = $baseScheduleDate;
       }
-      $nextGenerationDate = $this->_advanceRecurringDate($lastGeneratedFor, $frequency);
+      $nextGenerationDate = $this->_advanceRecurringDate($lastGeneratedFor, $frequency, $baseScheduleDate);
       if ($seriesEndDate !== null && $nextGenerationDate !== null && strtotime($nextGenerationDate) > strtotime($seriesEndDate)) {
         $nextGenerationDate = null;
       }
@@ -9654,6 +9771,8 @@ class Page extends CI_Controller
         'scheduleDate' => $baseScheduleDate,
         'upcomingDueDate' => $upcomingDueDate,
         'windowOpensOn' => $windowOpensOn,
+        'generateDaysBefore' => $daysBefore,
+        'autoEmail' => (int) ($template->recurringAutoEmail ?? 0) === 1,
         'terminationDate' => $this->_normalizeDateInput($template->recurringTerminationDate ?? ''),
         'expirationDate' => $this->_normalizeDateInput($template->invoiceExpirationDate ?? ''),
         'daysUntilDue' => $daysUntilDue,
@@ -10022,7 +10141,7 @@ class Page extends CI_Controller
         $occurrences[] = $currentDate;
       }
 
-      $currentDate = $this->_advanceRecurringDate($currentDate, $frequency);
+      $currentDate = $this->_advanceRecurringDate($currentDate, $frequency, $baseDate);
       $guard++;
     }
 
@@ -10045,7 +10164,7 @@ class Page extends CI_Controller
       && ($endDate === null || strtotime($currentDate) <= strtotime($endDate))
       && $guard < 4000
     ) {
-      $currentDate = $this->_advanceRecurringDate($currentDate, $frequency);
+      $currentDate = $this->_advanceRecurringDate($currentDate, $frequency, $baseDate);
       $guard++;
     }
 
@@ -11554,6 +11673,8 @@ class Page extends CI_Controller
       $CoverageOption = $this->_normalizeCoverageOption($this->input->post('coverageOption'));
       $RecurringScheduleDate = $this->_normalizeDateInput($this->input->post('recurringScheduleDate'));
       $RecurringTerminationDate = $this->_normalizeDateInput($this->input->post('recurringTerminationDate'));
+      $RecurringGenerateDaysBefore = $this->_normalizeRecurringGenerateDaysBefore($this->input->post('recurringGenerateDaysBefore'));
+      $RecurringAutoEmail = $this->input->post('recurringAutoEmail') ? 1 : 0;
       $InvoiceExpirationDate = $this->_normalizeDateInput($this->input->post('invoiceExpirationDate'));
       if (trim((string) $this->input->post('isOpenDateInvoice')) === '1') {
         $InvoiceExpirationDate = null;
@@ -11633,6 +11754,8 @@ class Page extends CI_Controller
         'coverageOption' => $RecurringFrequency !== 'none' ? $CoverageOption : null,
         'recurringScheduleDate' => $RecurringFrequency !== 'none' ? $RecurringScheduleDate : null,
         'recurringTerminationDate' => $RecurringFrequency !== 'none' ? $RecurringTerminationDate : null,
+        'recurringGenerateDaysBefore' => $RecurringFrequency !== 'none' ? $RecurringGenerateDaysBefore : null,
+        'recurringAutoEmail' => $RecurringFrequency !== 'none' ? $RecurringAutoEmail : null,
         'invoiceExpirationDate' => $InvoiceExpirationDate,
         'recurringTemplateID' => null,
         'lastRecurringGeneratedFor' => $RecurringFrequency !== 'none' ? $RecurringScheduleDate : null,
@@ -11723,6 +11846,12 @@ class Page extends CI_Controller
         : null,
       'recurringScheduleDate' => $this->_normalizeDateInput($invoice->recurringScheduleDate ?? ''),
       'recurringTerminationDate' => $this->_normalizeDateInput($invoice->recurringTerminationDate ?? ''),
+      'recurringGenerateDaysBefore' => $this->_normalizeRecurringFrequency($invoice->recurringFrequency ?? 'none') !== 'none'
+        ? $this->_normalizeRecurringGenerateDaysBefore($invoice->recurringGenerateDaysBefore ?? null)
+        : null,
+      'recurringAutoEmail' => $this->_normalizeRecurringFrequency($invoice->recurringFrequency ?? 'none') !== 'none'
+        ? (int) ($invoice->recurringAutoEmail ?? 0)
+        : null,
       'invoiceExpirationDate' => $this->_normalizeDateInput($invoice->invoiceExpirationDate ?? ''),
       'recurringTemplateID' => null,
       'lastRecurringGeneratedFor' => $this->_normalizeDateInput($invoice->lastRecurringGeneratedFor ?? ''),
@@ -11804,6 +11933,8 @@ class Page extends CI_Controller
       $InvoiceDateInput = $this->_normalizeDateInput($this->input->post('TransDate'));
       $DueDateInput = $this->_normalizeDateInput($this->input->post('ReceiveDate'));
       $hasRecurringTerminationDateInput = array_key_exists('recurringTerminationDate', $_POST);
+      $hasRecurringGenerateDaysBeforeInput = array_key_exists('recurringGenerateDaysBefore', $_POST);
+      $hasRecurringAutoEmailInput = array_key_exists('recurringAutoEmail', $_POST);
       $hasInvoiceExpirationDateInput = array_key_exists('invoiceExpirationDate', $_POST);
       $RecurringFrequency = $invoice->invoiceSource === 'Others'
         ? $this->_normalizeRecurringFrequency($this->input->post('recurringFrequency'))
@@ -11818,6 +11949,16 @@ class Page extends CI_Controller
         ? ($hasRecurringTerminationDateInput
           ? $this->_normalizeDateInput($this->input->post('recurringTerminationDate'))
           : $this->_normalizeDateInput($invoice->recurringTerminationDate ?? ''))
+        : null;
+      $RecurringGenerateDaysBefore = $invoice->invoiceSource === 'Others'
+        ? ($hasRecurringGenerateDaysBeforeInput
+          ? $this->_normalizeRecurringGenerateDaysBefore($this->input->post('recurringGenerateDaysBefore'))
+          : $this->_normalizeRecurringGenerateDaysBefore($invoice->recurringGenerateDaysBefore ?? null))
+        : null;
+      $RecurringAutoEmail = $invoice->invoiceSource === 'Others'
+        ? ($hasRecurringAutoEmailInput
+          ? ((int) $this->input->post('recurringAutoEmail') === 1 ? 1 : 0)
+          : (int) ($invoice->recurringAutoEmail ?? 0))
         : null;
       $InvoiceExpirationDate = $invoice->invoiceSource === 'Others'
         ? ($hasInvoiceExpirationDateInput
@@ -11934,6 +12075,8 @@ class Page extends CI_Controller
         $invoiceUpdate['coverageOption'] = $RecurringFrequency !== 'none' ? $CoverageOption : null;
         $invoiceUpdate['recurringScheduleDate'] = $RecurringScheduleDate;
         $invoiceUpdate['recurringTerminationDate'] = $RecurringFrequency !== 'none' ? $RecurringTerminationDate : null;
+        $invoiceUpdate['recurringGenerateDaysBefore'] = $RecurringFrequency !== 'none' ? $RecurringGenerateDaysBefore : null;
+        $invoiceUpdate['recurringAutoEmail'] = $RecurringFrequency !== 'none' ? $RecurringAutoEmail : null;
         if ($RecurringFrequency === 'none') {
           $invoiceUpdate['lastRecurringGeneratedFor'] = null;
         } elseif (
@@ -12851,6 +12994,8 @@ class Page extends CI_Controller
         'invoiceStat' => 'Deleted',
       ));
 
+      $this->_rewindRecurringGenerationForRemovedChild($invoice, $settingsID);
+
       if ($this->db->table_exists('invoice_items')) {
         $this->db
           ->where('orderID', (int) $invoice->orderID)
@@ -12900,6 +13045,8 @@ class Page extends CI_Controller
       'AmountPaid' => 0
     ));
 
+    $this->_rewindRecurringGenerationForRemovedChild($invoice, $settingsID);
+
     // Delete related invoice items
     if ($this->db->table_exists('invoice_items')) {
       $this->db
@@ -12944,6 +13091,23 @@ class Page extends CI_Controller
       return;
     }
 
+    $invoiceNo = trim((string) ($invoice->InvoiceNo ?? 'N/A'));
+    if ($this->_sendInvoiceEmailCore($invoice, $settingsID, $recipientEmail, $emailMessage)) {
+      $this->session->set_flashdata('success', 'Invoice #' . $invoiceNo . ' has been sent to ' . $recipientEmail . ' successfully.');
+    } else {
+      $this->session->set_flashdata('danger', 'Failed to send email. Please check your email configuration.');
+    }
+
+    redirect('Page/invList');
+  }
+
+  /**
+   * Shared invoice email sender used by the manual "Send via Email" action and
+   * by the recurring generator's per-template auto-email option. Returns TRUE
+   * when the message was handed to the SMTP server.
+   */
+  private function _sendInvoiceEmailCore($invoice, $settingsID, $recipientEmail, $emailMessage = '')
+  {
     // Get business details
     $businessDetails = $this->CashModel->businessDetails($settingsID);
     $business = !empty($businessDetails) ? $businessDetails[0] : null;
@@ -12951,7 +13115,7 @@ class Page extends CI_Controller
     // Get invoice items
     $invoiceItems = [];
     if ($this->db->table_exists('invoice_items')) {
-      $this->db->where('orderID', $orderID);
+      $this->db->where('orderID', (int) $invoice->orderID);
       $this->db->where('settingsID', $settingsID);
       $query = $this->db->get('invoice_items');
       $invoiceItems = $query->result();
@@ -13004,9 +13168,7 @@ class Page extends CI_Controller
     }
 
     if ($fromEmail === '') {
-      $this->session->set_flashdata('danger', 'SMTP sender email is not configured. Please update your email settings.');
-      redirect('Page/invList');
-      return;
+      return false;
     }
 
     $fromName = trim((string) $this->config->item('from_name'));
@@ -13026,13 +13188,7 @@ class Page extends CI_Controller
 
     $this->email->message($emailBody);
 
-    if ($this->email->send()) {
-      $this->session->set_flashdata('success', 'Invoice #' . $invoiceNo . ' has been sent to ' . $recipientEmail . ' successfully.');
-    } else {
-      $this->session->set_flashdata('danger', 'Failed to send email. Please check your email configuration.');
-    }
-
-    redirect('Page/invList');
+    return (bool) $this->email->send();
   }
 
   private function _buildInvoiceEmailHTML($invoice, $items, $business, $invoiceFooter, $fromName, $fromEmail, $emailMessage = '')
@@ -20356,6 +20512,20 @@ class Page extends CI_Controller
     return in_array($value, array('daily', 'weekly', 'monthly', 'quarterly', 'yearly'), true) ? $value : 'none';
   }
 
+  private function _normalizeRecurringGenerateDaysBefore($value)
+  {
+    if ($value === null || trim((string) $value) === '' || !is_numeric($value)) {
+      return 10;
+    }
+
+    $days = (int) round((float) $value);
+    if ($days < 0) {
+      return 0;
+    }
+
+    return min($days, 90);
+  }
+
   private function _normalizeCoverageOption($value)
   {
     return strtolower(trim((string) $value)) === 'previous' ? 'previous' : 'coming';
@@ -20456,33 +20626,44 @@ class Page extends CI_Controller
     return (string) ($maxInvoiceNo + 1);
   }
 
-  private function _advanceRecurringDate($date, $frequency)
+  private function _advanceRecurringDate($date, $frequency, $anchorDate = null)
   {
     $normalizedDate = $this->_normalizeDateInput($date);
     if ($normalizedDate === null) {
       return null;
     }
 
-    if ($frequency === 'daily') {
-      $modifier = '+1 day';
-    } elseif ($frequency === 'weekly') {
-      $modifier = '+1 week';
-    } elseif ($frequency === 'quarterly') {
-      $modifier = '+3 months';
-    } elseif ($frequency === 'yearly') {
-      $modifier = '+1 year';
-    } else {
-      $modifier = '+1 month';
+    if ($frequency === 'daily' || $frequency === 'weekly') {
+      $modifier = $frequency === 'daily' ? '+1 day' : '+1 week';
+      return date('Y-m-d', strtotime($modifier, strtotime($normalizedDate)));
     }
-    return date('Y-m-d', strtotime($modifier, strtotime($normalizedDate)));
+
+    // Monthly/quarterly/yearly advance preserves the anchor day-of-month so
+    // schedules on the 29th-31st (or Feb 29) clamp to month-end instead of
+    // drifting forward the way strtotime('+1 month') does.
+    $monthsToAdd = ($frequency === 'quarterly') ? 3 : (($frequency === 'yearly') ? 12 : 1);
+    $anchor = $this->_normalizeDateInput($anchorDate ?? '') ?: $normalizedDate;
+    $anchorDay = (int) date('j', strtotime($anchor));
+
+    $timestamp = strtotime($normalizedDate);
+    $year = (int) date('Y', $timestamp);
+    $month = (int) date('n', $timestamp) + $monthsToAdd;
+    $year += intdiv($month - 1, 12);
+    $month = (($month - 1) % 12) + 1;
+    $day = min($anchorDay, (int) date('t', mktime(0, 0, 0, $month, 1, $year)));
+
+    return date('Y-m-d', mktime(0, 0, 0, $month, $day, $year));
   }
 
   private function _createRecurringInvoiceOccurrence($template, $settingsID, $frequency, $scheduleDate)
   {
+    // Only an active invoice blocks generation for a schedule date; a voided or
+    // deleted occurrence must not permanently suppress the billing period.
     $existingOccurrence = $this->db
       ->select('orderID, InvoiceNo')
       ->from('invoice')
       ->where('settingsID', $settingsID)
+      ->where('invoiceStat', 'active')
       ->group_start()
       ->where('orderID', (int) $template->orderID)
       ->or_where('recurringTemplateID', (int) $template->orderID)
@@ -20525,6 +20706,8 @@ class Page extends CI_Controller
       'coverageOption' => $this->_normalizeCoverageOption($template->coverageOption ?? 'coming'),
       'recurringScheduleDate' => $scheduleDate,
       'recurringTerminationDate' => $this->_normalizeDateInput($template->recurringTerminationDate ?? ''),
+      'recurringGenerateDaysBefore' => $this->_normalizeRecurringGenerateDaysBefore($template->recurringGenerateDaysBefore ?? null),
+      'recurringAutoEmail' => (int) ($template->recurringAutoEmail ?? 0),
       'invoiceExpirationDate' => $this->_normalizeDateInput($template->invoiceExpirationDate ?? ''),
       'recurringTemplateID' => (int) $template->orderID,
       'lastRecurringGeneratedFor' => null,
@@ -20610,7 +20793,7 @@ class Page extends CI_Controller
     }
 
     $seriesEndDate = $this->_resolveRecurringSeriesEndDate($template);
-    $nextScheduleDate = $this->_advanceRecurringDate($lastGeneratedFor, $frequency);
+    $nextScheduleDate = $this->_advanceRecurringDate($lastGeneratedFor, $frequency, $baseScheduleDate);
     $guard = 0;
 
     while ($nextScheduleDate !== null && $guard < 4000) {
@@ -20640,12 +20823,90 @@ class Page extends CI_Controller
         return $result;
       }
 
-      $nextScheduleDate = $this->_advanceRecurringDate($nextScheduleDate, $frequency);
+      $nextScheduleDate = $this->_advanceRecurringDate($nextScheduleDate, $frequency, $baseScheduleDate);
       $guard++;
     }
 
     $this->db->trans_rollback();
     return array('status' => 'error', 'message' => 'The next recurring invoice date could not be determined.');
+  }
+
+  private function _rewindRecurringGenerationForRemovedChild($invoice, $settingsID)
+  {
+    $templateID = (int) ($invoice->recurringTemplateID ?? 0);
+    $removedDate = $this->_normalizeDateInput($invoice->recurringScheduleDate ?? '');
+    if ($templateID <= 0 || $removedDate === null) {
+      return;
+    }
+
+    $template = $this->CashModel->getInvoiceByOrderID($templateID, $settingsID);
+    if (!$template) {
+      return;
+    }
+
+    // Only rewind when the template has already moved past the removed date;
+    // occurrences still ahead of the high-water mark are reached normally.
+    $lastGeneratedFor = $this->_normalizeDateInput($template->lastRecurringGeneratedFor ?? '');
+    if ($lastGeneratedFor === null || strtotime($lastGeneratedFor) < strtotime($removedDate)) {
+      return;
+    }
+
+    $baseScheduleDate = $this->_normalizeDateInput($template->recurringScheduleDate ?? '')
+      ?: $this->_normalizeDateInput($template->TransDate ?? '');
+
+    $previousActive = $this->db
+      ->select('MAX(recurringScheduleDate) AS prevDate', false)
+      ->from('invoice')
+      ->where('settingsID', $settingsID)
+      ->where('invoiceStat', 'active')
+      ->where('recurringTemplateID', $templateID)
+      ->where('recurringScheduleDate <', $removedDate)
+      ->get()
+      ->row();
+
+    $rewindTo = $this->_normalizeDateInput($previousActive->prevDate ?? '') ?: $baseScheduleDate;
+    if ($rewindTo === null || strtotime($rewindTo) >= strtotime($removedDate)) {
+      $rewindTo = $baseScheduleDate;
+    }
+    if ($rewindTo === null) {
+      return;
+    }
+
+    $this->db
+      ->where('orderID', $templateID)
+      ->where('settingsID', $settingsID)
+      ->update('invoice', array('lastRecurringGeneratedFor' => $rewindTo));
+  }
+
+  /**
+   * Emails a generated recurring child invoice to the customer when the
+   * template opted in. Runs only after the generation transaction commits so
+   * SMTP latency or failures can never roll back a created invoice.
+   */
+  private function _autoEmailRecurringInvoice($template, $generatedOrderID, $settingsID)
+  {
+    if ((int) ($template->recurringAutoEmail ?? 0) !== 1) {
+      return;
+    }
+
+    $invoice = $this->CashModel->getInvoiceByOrderID((int) $generatedOrderID, $settingsID);
+    if (!$invoice) {
+      return;
+    }
+
+    $recipientEmail = trim((string) ($invoice->client_email ?? ''));
+    if ($recipientEmail === '') {
+      $recipientEmail = trim((string) ($invoice->CompanyEmail ?? ''));
+    }
+
+    if ($recipientEmail === '' || !filter_var($recipientEmail, FILTER_VALIDATE_EMAIL)) {
+      log_message('error', 'Recurring auto-email skipped for invoice #' . ($invoice->InvoiceNo ?? $generatedOrderID) . ': no valid customer email on record.');
+      return;
+    }
+
+    if (!$this->_sendInvoiceEmailCore($invoice, $settingsID, $recipientEmail)) {
+      log_message('error', 'Recurring auto-email failed for invoice #' . ($invoice->InvoiceNo ?? $generatedOrderID) . ' to ' . $recipientEmail . '.');
+    }
   }
 
   private function _generateRecurringInvoices($settingsID)
@@ -20679,45 +20940,64 @@ class Page extends CI_Controller
     }
 
     foreach ($templates as $templateMeta) {
+      // Lock the template row so simultaneous page loads cannot double-generate.
+      $this->db->trans_begin();
+      $lockedTemplate = $this->db->query(
+        'SELECT orderID FROM invoice WHERE orderID = ? AND settingsID = ? FOR UPDATE',
+        array((int) $templateMeta->orderID, (int) $settingsID)
+      )->row();
+      if (!$lockedTemplate) {
+        $this->db->trans_rollback();
+        continue;
+      }
+
       $template = $this->CashModel->getInvoiceByOrderID((int) $templateMeta->orderID, $settingsID);
-      if (!$template) {
-        continue;
-      }
+      $frequency = $template ? $this->_normalizeRecurringFrequency($template->recurringFrequency) : 'none';
+      $baseScheduleDate = $template
+        ? ($this->_normalizeDateInput($template->recurringScheduleDate) ?: $this->_normalizeDateInput($template->TransDate))
+        : null;
 
-      $frequency = $this->_normalizeRecurringFrequency($template->recurringFrequency);
-      if ($frequency === 'none') {
-        continue;
-      }
-
-      $baseScheduleDate = $this->_normalizeDateInput($template->recurringScheduleDate) ?: $this->_normalizeDateInput($template->TransDate);
-      if ($baseScheduleDate === null) {
-        continue;
-      }
-
-      $seriesEndDate = $this->_resolveRecurringSeriesEndDate($template);
-      if ($seriesEndDate !== null && strtotime($today) > strtotime($seriesEndDate)) {
+      if (
+        !$template
+        || $frequency === 'none'
+        || $baseScheduleDate === null
+        || (string) ($template->invoiceStat ?? '') !== 'active'
+        || (string) ($template->invoiceSource ?? '') !== 'Others'
+      ) {
+        $this->db->trans_rollback();
         continue;
       }
 
       $summary['templateCount']++;
 
+      $seriesEndDate = $this->_resolveRecurringSeriesEndDate($template);
+      $daysBefore = $this->_normalizeRecurringGenerateDaysBefore($template->recurringGenerateDaysBefore ?? null);
+
       $lastGeneratedFor = $this->_normalizeDateInput($template->lastRecurringGeneratedFor);
       if ($lastGeneratedFor === null || strtotime($lastGeneratedFor) < strtotime($baseScheduleDate)) {
         $lastGeneratedFor = $baseScheduleDate;
       }
-      $nextScheduleDate = $this->_advanceRecurringDate($lastGeneratedFor, $frequency);
+      $nextScheduleDate = $this->_advanceRecurringDate($lastGeneratedFor, $frequency, $baseScheduleDate);
+      $guard = 0;
+      $failed = false;
+      $generatedForEmail = array();
 
+      // Occurrences up to the series end date stay eligible even after the end
+      // date has passed, so owed invoices are back-filled instead of lost.
       while (
         $nextScheduleDate !== null
         && ($seriesEndDate === null || strtotime($nextScheduleDate) <= strtotime($seriesEndDate))
-        && strtotime($today) >= strtotime($nextScheduleDate . ' -10 days')
+        && strtotime($today) >= strtotime($nextScheduleDate . ' -' . $daysBefore . ' days')
+        && $guard < 4000
       ) {
         $generationResult = $this->_createRecurringInvoiceOccurrence($template, $settingsID, $frequency, $nextScheduleDate);
         if (($generationResult['status'] ?? '') === 'generated') {
           $summary['generatedCount']++;
+          $generatedForEmail[] = (int) ($generationResult['orderID'] ?? 0);
         } elseif (($generationResult['status'] ?? '') === 'existing') {
           $summary['existingCount']++;
         } else {
+          $failed = true;
           break;
         }
 
@@ -20727,7 +21007,21 @@ class Page extends CI_Controller
           ->update('invoice', array('lastRecurringGeneratedFor' => $nextScheduleDate));
 
         $lastGeneratedFor = $nextScheduleDate;
-        $nextScheduleDate = $this->_advanceRecurringDate($lastGeneratedFor, $frequency);
+        $nextScheduleDate = $this->_advanceRecurringDate($lastGeneratedFor, $frequency, $baseScheduleDate);
+        $guard++;
+      }
+
+      if ($failed || $this->db->trans_status() === false) {
+        $this->db->trans_rollback();
+        continue;
+      }
+
+      $this->db->trans_commit();
+
+      // Emails go out only after the commit: a send failure can never undo an
+      // invoice that was already created.
+      foreach ($generatedForEmail as $generatedOrderID) {
+        $this->_autoEmailRecurringInvoice($template, $generatedOrderID, $settingsID);
       }
     }
 

@@ -182,6 +182,7 @@ $backLabel = isset($backLabel) && trim((string) $backLabel) !== ''
 <html lang="en">
 
 <head>
+    <?php if (!$isPdfRender) include_once APPPATH . 'views/includes/page-experience.php'; ?>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -1620,7 +1621,7 @@ $backLabel = isset($backLabel) && trim((string) $backLabel) !== ''
                                 <div class="detail-value"><?= htmlspecialchars($orderID !== '' ? $orderID : '—', ENT_QUOTES, 'UTF-8'); ?></div>
                             </div>
                             <div class="detail-item">
-                                <div class="detail-label">Generated</div>
+                                <div class="detail-label">Printed</div>
                                 <div class="detail-value"><?= htmlspecialchars(date('M j, Y g:i A'), ENT_QUOTES, 'UTF-8'); ?></div>
                             </div>
                             <?php if ($recurringFrequency !== '' && $recurringFrequency !== 'none'): ?>

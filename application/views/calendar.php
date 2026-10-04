@@ -801,6 +801,14 @@ if ($calendarSettingsID > 0 && in_array($calendarLevel, array('admin', 'staff', 
                 allDaySlot: true,
                 height: window.innerWidth < 768 ? 'auto' : 'auto',
                 aspectRatio: window.innerWidth < 768 ? 1.35 : 1.35,
+                loading: function(isLoading) {
+                    if (isLoading && window.BerpsLoading) {
+                        this.berpsFinishLoading = window.BerpsLoading.start('Loading calendar…');
+                    } else if (this.berpsFinishLoading) {
+                        this.berpsFinishLoading();
+                        this.berpsFinishLoading = null;
+                    }
+                },
                 events: function(info, successCallback, failureCallback) {
                     const filter = $('#eventTypeFilter').val();
                     const url = '<?= site_url("calendar/get_events") ?>';

@@ -502,7 +502,7 @@
                                    </div>
 
                                    <div class="form-row">
-                                        <div class="form-group col-md-6">
+                                        <div class="form-group col-md-4">
                                              <label for="invoice-recurring-frequency">Recurring</label>
                                              <select class="form-control" id="invoice-recurring-frequency" name="recurringFrequency">
                                                   <option value="none" selected>No</option>
@@ -513,9 +513,14 @@
                                                   <option value="yearly">Yearly</option>
                                              </select>
                                         </div>
-                                        <div class="form-group col-md-6">
+                                        <div class="form-group col-md-4">
                                              <label for="invoice-recurring-schedule-date">Schedule Date</label>
                                              <input type="date" class="form-control" id="invoice-recurring-schedule-date" name="recurringScheduleDate">
+                                        </div>
+                                        <div class="form-group col-md-4">
+                                             <label for="invoice-recurring-days-before">Generate Days Before</label>
+                                             <input type="number" class="form-control" id="invoice-recurring-days-before" name="recurringGenerateDaysBefore" min="0" max="90" step="1" value="10">
+                                             <small class="inv-helper">Days before each due date to generate the next invoice.</small>
                                         </div>
                                    </div>
                               </div>
@@ -636,7 +641,7 @@
                                    </div>
 
                                    <div class="form-row">
-                                        <div class="form-group col-md-6">
+                                        <div class="form-group col-md-4">
                                              <label for="invoice-edit-recurring-frequency">Recurring</label>
                                              <select class="form-control" id="invoice-edit-recurring-frequency" name="recurringFrequency">
                                                   <option value="none">No</option>
@@ -647,12 +652,17 @@
                                                   <option value="yearly">Yearly</option>
                                              </select>
                                         </div>
-                                        <div class="form-group col-md-6">
+                                        <div class="form-group col-md-4">
                                              <label for="invoice-edit-recurring-schedule-date">Schedule Date</label>
                                              <input type="date" class="form-control" id="invoice-edit-recurring-schedule-date" name="recurringScheduleDate" value="">
                                              <small class="inv-helper" id="invoice-edit-recurring-help">
-                                                  Recurring invoices generate 10 days before the schedule date.
+                                                  Recurring invoices generate a set number of days before each schedule due date.
                                              </small>
+                                        </div>
+                                        <div class="form-group col-md-4">
+                                             <label for="invoice-edit-recurring-days-before">Generate Days Before</label>
+                                             <input type="number" class="form-control" id="invoice-edit-recurring-days-before" name="recurringGenerateDaysBefore" min="0" max="90" step="1" value="10">
+                                             <small class="inv-helper">0–90 days. Default is 10.</small>
                                         </div>
                                    </div>
                               </div>
@@ -1303,13 +1313,17 @@
                     $form.find('input[name="Balance"]').val(normalizeAmount($trigger.data('balance')));
                     $form.find('select[name="recurringFrequency"]').val($trigger.data('recurringFrequency') || 'none');
                     $form.find('input[name="recurringScheduleDate"]').val($trigger.data('recurringScheduleDate') || '');
+                    $form.find('input[name="recurringGenerateDaysBefore"]').val(
+                         $trigger.data('recurringGenerateDaysBefore') !== undefined && $trigger.data('recurringGenerateDaysBefore') !== '' ?
+                         $trigger.data('recurringGenerateDaysBefore') : 10
+                    );
 
                     var isGeneratedOccurrence = parseInt($trigger.data('recurringTemplateId'), 10) > 0;
-                    $form.find('select[name="recurringFrequency"], input[name="recurringScheduleDate"]').prop('disabled', isGeneratedOccurrence);
+                    $form.find('select[name="recurringFrequency"], input[name="recurringScheduleDate"], input[name="recurringGenerateDaysBefore"]').prop('disabled', isGeneratedOccurrence);
                     $('#invoice-edit-recurring-help').text(
                          isGeneratedOccurrence ?
                          'This invoice was generated from a recurring template. Edit the original template to change the recurrence.' :
-                         'Recurring invoices generate 10 days before the schedule date for daily, weekly, monthly, quarterly, or yearly schedules.'
+                         'Recurring invoices generate a set number of days before each schedule due date.'
                     );
 
                     attachBalanceCalculator($form.get(0));

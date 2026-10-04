@@ -8,7 +8,7 @@ function invoice_coverage_shift_months(DateTimeImmutable $date, $months)
     return $target->setDate((int) $target->format('Y'), (int) $target->format('m'), min((int) $date->format('d'), (int) $target->format('t')));
 }
 
-/** Due date is the exclusive end in arrears, and inclusive start in advance. */
+/** In arrears the period ends on the due date; in advance it starts on the due date. */
 function invoice_service_coverage($dueDate, $frequency, $timing = 'coming')
 {
     $due = DateTimeImmutable::createFromFormat('!Y-m-d', (string) $dueDate);
@@ -26,8 +26,8 @@ function invoice_service_coverage($dueDate, $frequency, $timing = 'coming')
         return null;
     }
     return array(
-        'start' => ($previous ? $boundary : $due)->format('Y-m-d'),
-        'end' => ($previous ? $due : $boundary)->modify('-1 day')->format('Y-m-d'),
+        'start' => $previous ? $boundary->modify('+1 day')->format('Y-m-d') : $due->format('Y-m-d'),
+        'end' => $previous ? $due->format('Y-m-d') : $boundary->modify('-1 day')->format('Y-m-d'),
     );
 }
 

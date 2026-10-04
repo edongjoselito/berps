@@ -12,6 +12,10 @@ $recurringFrequency = $record ? trim((string) ($record->recurringFrequency ?? 'n
 $coverageOption = $record ? trim((string) ($record->coverageOption ?? 'coming')) : 'coming';
 $recurringScheduleDate = $record ? trim((string) ($record->recurringScheduleDate ?? '')) : '';
 $recurringTerminationDate = $record ? trim((string) ($record->recurringTerminationDate ?? '')) : '';
+$recurringGenerateDaysBefore = $record && is_numeric($record->recurringGenerateDaysBefore ?? null)
+    ? min(90, max(0, (int) $record->recurringGenerateDaysBefore))
+    : 10;
+$recurringAutoEmail = $record && (int) ($record->recurringAutoEmail ?? 0) === 1;
 $invoiceExpirationDate = $record ? trim((string) ($record->invoiceExpirationDate ?? '')) : '';
 $jobDescriptionValue = $record ? trim((string) ($record->JobDescription ?? '')) : '';
 $amountPaid = $record ? (float) ($record->AmountPaid ?? 0) : 0;
@@ -878,7 +882,7 @@ if (empty($invoiceItems)) {
                                         </div>
 
                                         <div class="form-row">
-                                            <div class="form-group col-md-6">
+                                            <div class="form-group col-md-4">
                                                 <label for="invoice-recurring" class="label-with-tip">
                                                     <span>Recurring Frequency</span>
                                                     <button
@@ -886,7 +890,7 @@ if (empty($invoiceItems)) {
                                                         class="field-tooltip"
                                                         data-toggle="tooltip"
                                                         data-placement="top"
-                                                        title="<?= htmlspecialchars($isGeneratedRecurring ? 'This invoice was generated from a recurring template. Edit the original template to change recurrence.' : 'Recurring invoices generate 10 days before the selected schedule date. Expired or terminated templates automatically drop out of active recurring billing.', ENT_QUOTES, 'UTF-8'); ?>">
+                                                        title="<?= htmlspecialchars($isGeneratedRecurring ? 'This invoice was generated from a recurring template. Edit the original template to change recurrence.' : 'Recurring invoices generate a set number of days before each schedule due date. Expired or terminated templates automatically drop out of active recurring billing.', ENT_QUOTES, 'UTF-8'); ?>">
                                                         <i class="fa fa-info"></i>
                                                     </button>
                                                 </label>
@@ -902,9 +906,19 @@ if (empty($invoiceItems)) {
                                                     Select <strong>No</strong> for a one-time invoice. Choose any frequency below to make the invoice recurring.
                                                 </small>
                                             </div>
-                                            <div class="form-group col-md-6">
+                                            <div class="form-group col-md-4">
                                                 <label for="invoice-schedule-date">Recurring Due Date</label>
                                                 <input type="date" class="form-control" id="invoice-schedule-date" name="recurringScheduleDate" value="<?= htmlspecialchars($recurringScheduleDate, ENT_QUOTES, 'UTF-8'); ?>" <?= $isGeneratedRecurring ? 'readonly' : ''; ?>>
+                                            </div>
+                                            <div class="form-group col-md-4">
+                                                <label for="invoice-generate-days-before" class="label-with-tip">
+                                                    <span>Generate Days Before</span>
+                                                    <button type="button" class="field-tooltip" data-toggle="tooltip" data-placement="top" title="How many days before each recurring due date the next invoice is generated. Use 0 to generate on the due date itself. Maximum 90 days.">
+                                                        <i class="fa fa-info"></i>
+                                                    </button>
+                                                </label>
+                                                <input type="number" class="form-control" id="invoice-generate-days-before" name="recurringGenerateDaysBefore" min="0" max="90" step="1" value="<?= (int) $recurringGenerateDaysBefore; ?>" <?= $isGeneratedRecurring ? 'readonly' : ''; ?>>
+                                                <small class="text-muted d-block mt-2">Default is 10 days.</small>
                                             </div>
                                         </div>
 
@@ -924,11 +938,27 @@ if (empty($invoiceItems)) {
                                                     <?php if ($isGeneratedRecurring): ?>
                                                         Invoice generation timing is inherited from the recurring template.
                                                     <?php elseif ($isRecurringInvoice): ?>
-                                                        After service: coverage ends the day before the due date. Before service: coverage starts on the due date. Frequency determines the period length.
+                                                        After service: coverage ends on the due date. Before service: coverage starts on the due date. Frequency determines the period length.
                                                     <?php else: ?>
                                                         Choose invoice generation timing now; it applies when a recurring frequency is selected.
                                                     <?php endif; ?>
                                                 </small>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-row" id="auto-email-row">
+                                            <div class="form-group col-md-12">
+                                                <div class="open-date-toggle">
+                                                    <input type="hidden" name="recurringAutoEmail" value="0" <?= $isGeneratedRecurring ? 'disabled' : ''; ?>>
+                                                    <input type="checkbox" id="invoice-auto-email" name="recurringAutoEmail" value="1" <?= $recurringAutoEmail ? 'checked' : ''; ?> <?= $isGeneratedRecurring ? 'disabled' : ''; ?> data-generated-lock="<?= $isGeneratedRecurring ? '1' : '0'; ?>">
+                                                    <label for="invoice-auto-email" class="label-with-tip">
+                                                        <span>Email generated invoices automatically</span>
+                                                        <button type="button" class="field-tooltip" data-toggle="tooltip" data-placement="top" title="When a recurring invoice is generated — by the page-load check, Run check, or the cron job — it is emailed to the client's portal email, or the customer's company email if no portal email exists.">
+                                                            <i class="fa fa-info"></i>
+                                                        </button>
+                                                    </label>
+                                                </div>
+                                                <small class="text-muted d-block mt-2">Requires a valid email on the customer record. Manual "Generate next" does not send email.</small>
                                             </div>
                                         </div>
 
@@ -1389,6 +1419,21 @@ if (empty($invoiceItems)) {
                 var isRecurring = recurringField && recurringField.value !== 'none';
                 var coverageOptionRow = document.getElementById('coverage-option-row');
                 var isGeneratedCoverageField = coverageOptionField && coverageOptionField.getAttribute('data-generated-lock') === '1';
+                var generateDaysBeforeField = document.getElementById('invoice-generate-days-before');
+
+                if (generateDaysBeforeField && !generateDaysBeforeField.readOnly) {
+                    generateDaysBeforeField.disabled = !isRecurring;
+                }
+
+                var autoEmailField = document.getElementById('invoice-auto-email');
+                var autoEmailLocked = autoEmailField && autoEmailField.getAttribute('data-generated-lock') === '1';
+                if (autoEmailField && !autoEmailLocked) {
+                    autoEmailField.disabled = !isRecurring;
+                    var autoEmailHidden = document.querySelector('input[type="hidden"][name="recurringAutoEmail"]');
+                    if (autoEmailHidden) {
+                        autoEmailHidden.disabled = !isRecurring;
+                    }
+                }
 
                 if (invoiceDateLabel) {
                     invoiceDateLabel.textContent = isRecurring ? 'Covered Period Start' : 'Invoice Date';
@@ -1410,7 +1455,7 @@ if (empty($invoiceItems)) {
                     if (isGeneratedCoverageField) {
                         coverageOptionHelp.textContent = 'Invoice generation timing is inherited from the recurring template.';
                     } else if (isRecurring) {
-                        coverageOptionHelp.textContent = 'After service: coverage ends the day before the due date. Before service: coverage starts on the due date. Frequency determines the period length.';
+                        coverageOptionHelp.textContent = 'After service: coverage ends on the due date. Before service: coverage starts on the due date. Frequency determines the period length.';
                     } else {
                         coverageOptionHelp.textContent = 'Choose invoice generation timing now; it applies when a recurring frequency is selected.';
                     }

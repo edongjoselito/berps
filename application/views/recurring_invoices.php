@@ -689,8 +689,8 @@ $generatedThisRun = (int) ($generationSummary['generatedCount'] ?? 0);
 
                     <div class="generator-note">
                         <div>
-                            <strong>Automatic 10-day billing window is active.</strong>
-                            <p>The system checks recurring invoice templates during normal billing activity and prepares the next invoice when the due date is within 10 days. The first due date is covered by the template invoice itself, and generated child invoices begin on the following recurring cycle.</p>
+                            <strong>Automatic advance billing window is active.</strong>
+                            <p>The system checks recurring invoice templates during normal billing activity and prepares the next invoice once the due date falls inside the template's advance window (10 days by default — adjustable per invoice under "Generate Days Before"). The first due date is covered by the template invoice itself, and generated child invoices begin on the following recurring cycle.</p>
                         </div>
                         <div class="generator-chip-wrap">
                             <div class="generator-chip">
@@ -711,7 +711,7 @@ $generatedThisRun = (int) ($generationSummary['generatedCount'] ?? 0);
                             <div class="stat-meta">Recurring invoice parents currently driving the billing schedule.</div>
                         </div>
                         <div class="stat-card sc-window">
-                            <div class="stat-label">Due Within 10 Days</div>
+                            <div class="stat-label">Inside Generate Window</div>
                             <div class="stat-value"><?= number_format($dueSoonCount); ?></div>
                             <div class="stat-meta"><?= number_format($needsGenerationCount); ?> still need attention inside the generator window.</div>
                         </div>
@@ -800,7 +800,13 @@ $generatedThisRun = (int) ($generationSummary['generatedCount'] ?? 0);
                                                             <span class="text-muted">-</span>
                                                         <?php endif; ?>
                                                     </td>
-                                                    <td><?= !empty($row['windowOpensOn']) ? htmlspecialchars(date('M j, Y', strtotime((string) $row['windowOpensOn'])), ENT_QUOTES, 'UTF-8') : '<span class="text-muted">-</span>'; ?></td>
+                                                    <td>
+                                                        <?= !empty($row['windowOpensOn']) ? htmlspecialchars(date('M j, Y', strtotime((string) $row['windowOpensOn'])), ENT_QUOTES, 'UTF-8') : '<span class="text-muted">-</span>'; ?>
+                                                        <div class="line-sub"><?= number_format((int) ($row['generateDaysBefore'] ?? 10)); ?> day(s) before</div>
+                                                        <?php if (!empty($row['autoEmail'])): ?>
+                                                            <div class="line-sub">Auto-emails on generation</div>
+                                                        <?php endif; ?>
+                                                    </td>
                                                     <td><span class="chip <?= $statusClass; ?>"><?= htmlspecialchars((string) ($row['statusLabel'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></span></td>
                                                     <td>
                                                         <?php if ($readyInvoiceUrl !== ''): ?>
@@ -939,7 +945,7 @@ $generatedThisRun = (int) ($generationSummary['generatedCount'] ?? 0);
                         <div class="panel-header">
                             <div>
                                 <h2 class="panel-title">Terminated Recurring Invoices</h2>
-                                <p class="panel-subtitle">These recurring invoice templates have been terminated and are no longer generating new invoices.</p>
+                                <p class="panel-subtitle">These recurring invoice templates have been terminated or have expired and are no longer generating new invoices.</p>
                             </div>
                         </div>
                         <div class="panel-body">

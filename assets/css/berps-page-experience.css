@@ -1,0 +1,122 @@
+/* Native document navigation: every page still gets a fresh script lifecycle. */
+@view-transition {
+  navigation: auto;
+}
+
+::view-transition-group(root) {
+  animation-duration: 160ms;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 160ms;
+  animation-timing-function: ease-out;
+}
+
+/* Keep the app chrome visually steady while the document changes beneath it. */
+.navbar-custom { view-transition-name: berps-topbar; }
+.left-side-menu { view-transition-name: berps-sidebar; }
+
+::view-transition-group(berps-topbar),
+::view-transition-group(berps-sidebar) {
+  animation-duration: 0s;
+}
+
+::view-transition-old(berps-topbar),
+::view-transition-old(berps-sidebar) {
+  display: none;
+}
+
+::view-transition-new(berps-topbar),
+::view-transition-new(berps-sidebar) {
+  animation: none;
+}
+
+/* Restore the desktop menu before body scripts run, avoiding a layout jump. */
+@media (min-width: 992px) {
+  html[data-berps-sidebar-collapsed] .left-side-menu { transform: translateX(-100%); }
+  html[data-berps-sidebar-collapsed] .content-page { margin-left: 0 !important; }
+  html[data-berps-sidebar-collapsed] .navbar-custom { left: 0; }
+}
+
+.berps-page-progress {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 2147483646;
+  height: 3px;
+  overflow: hidden;
+  pointer-events: none;
+  background: rgba(79, 70, 229, .10);
+}
+
+.berps-page-progress::after {
+  content: "";
+  display: block;
+  width: 35%;
+  height: 100%;
+  background: var(--berps-primary, #4f46e5);
+  border-radius: 0 2px 2px 0;
+  animation: berps-page-progress 1.25s ease-in-out infinite;
+}
+
+.berps-page-loading {
+  position: fixed;
+  right: max(20px, env(safe-area-inset-right));
+  bottom: max(20px, env(safe-area-inset-bottom));
+  z-index: 2147483646;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: calc(100vw - 40px);
+  padding: 12px 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #fff;
+  color: #334155;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, .10);
+  font: 500 13px/1.4 var(--font-primary, system-ui, sans-serif);
+  pointer-events: none;
+}
+
+.berps-page-loading__spinner {
+  flex: 0 0 17px;
+  width: 17px;
+  height: 17px;
+  border: 2px solid #e2e8f0;
+  border-top-color: var(--berps-primary, #4f46e5);
+  border-radius: 50%;
+  animation: berps-page-spin .8s linear infinite;
+}
+
+.berps-page-loading__dismiss {
+  appearance: none;
+  border: 0;
+  border-radius: 4px;
+  padding: 3px 6px;
+  background: transparent;
+  color: #64748b;
+  font: inherit;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.berps-page-loading__dismiss:focus-visible { outline: 2px solid #4f46e5; }
+.berps-page-progress[hidden], .berps-page-loading[hidden] { display: none !important; }
+
+@keyframes berps-page-spin { to { transform: rotate(360deg); } }
+@keyframes berps-page-progress {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(386%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  @view-transition { navigation: none; }
+  .berps-page-progress::after { animation: none; width: 100%; }
+  .berps-page-loading__spinner { animation: none; }
+}
+
+@media print {
+  .berps-page-progress, .berps-page-loading { display: none !important; }
+}
