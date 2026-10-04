@@ -184,38 +184,60 @@ $currentMonthLabel    = date('F Y');
                         <!-- Left sidebar: Task queue + quick stats -->
                         <aside class="dash-sidebar">
                             <?php if (!empty($taskQueueRows)): ?>
-                            <div class="side-card side-card--orange">
-                                <div class="side-card__head">
-                                    <div class="side-card__icon"><i class="mdi mdi-fire"></i></div>
-                                    <h5 class="side-card__title">Priority Queue</h5>
-                                </div>
-                                <div class="side-card__body">
-                                    <?php foreach ($taskQueueRows as $tq):
-                                        $tqTask = trim((string) ($tq->task ?? 'Untitled'));
-                                        $tqDue = trim((string) ($tq->dueDate ?? ''));
-                                        $tqHasDue = ($tqDue !== '' && $tqDue !== '0000-00-00');
-                                        $tqDueDisplay = $tqHasDue ? date('M j', strtotime($tqDue)) : 'No date';
-                                        $tqPriority = (string) ($tq->priority ?? '2');
-                                        $tqPrioLabel = $tqPriority === '1' ? 'High' : ($tqPriority === '2' ? 'Medium' : 'Low');
-                                        $tqPrioClass = $tqPriority === '1' ? 'is-high' : ($tqPriority === '2' ? 'is-medium' : 'is-low');
-                                        $tqDayDiff = 0;
-                                        $tqUrgencyClass = '';
-                                        if ($tqHasDue) {
-                                            $tqDayDiff = (int) floor((strtotime($tqDue) - $todayTimestamp) / 86400);
-                                            if ($tqDayDiff < 0) $tqUrgencyClass = 'is-overdue';
-                                            elseif ($tqDayDiff === 0) $tqUrgencyClass = 'is-today';
-                                            else $tqUrgencyClass = 'is-soon';
-                                        }
-                                        $tqLink = base_url('Page/taskStat?id=') . (int) ($tq->taskID ?? 0);
-                                    ?>
-                                        <a href="<?= htmlspecialchars($tqLink, ENT_QUOTES, 'UTF-8'); ?>" class="queue-item <?= htmlspecialchars($tqUrgencyClass, ENT_QUOTES, 'UTF-8'); ?>">
-                                            <div class="queue-item__task"><?= htmlspecialchars(mb_strimwidth($tqTask, 0, 50, '…'), ENT_QUOTES, 'UTF-8'); ?></div>
-                                            <div class="queue-item__meta">
-                                                <span class="queue-item__prio <?= htmlspecialchars($tqPrioClass, ENT_QUOTES, 'UTF-8'); ?>"><?= htmlspecialchars($tqPrioLabel, ENT_QUOTES, 'UTF-8'); ?></span>
-                                                <span class="queue-item__due"><i class="mdi mdi-calendar-blank-outline"></i> <?= htmlspecialchars($tqDueDisplay, ENT_QUOTES, 'UTF-8'); ?></span>
-                                            </div>
+                            <div class="side-card side-card--orange side-card--collapsible" id="priorityQueueCard">
+                                <button type="button" class="side-card__head side-card__toggle" id="priorityQueueToggle" aria-expanded="true" aria-controls="priorityQueueBody">
+                                    <span class="side-card__icon"><i class="mdi mdi-fire" aria-hidden="true"></i></span>
+                                    <span class="side-card__title">Priority Queue</span>
+                                    <span class="side-card__count"><?= number_format(count($taskQueueRows)); ?></span>
+                                    <i class="mdi mdi-chevron-down side-card__chevron" aria-hidden="true"></i>
+                                    <span class="side-card__timer" aria-hidden="true"><span class="side-card__timer-bar"></span></span>
+                                </button>
+                                <div class="side-card__collapse" id="priorityQueueBody" role="region" aria-labelledby="priorityQueueToggle">
+                                    <div class="side-card__collapse-inner">
+                                        <div class="side-card__body">
+                                            <?php foreach ($taskQueueRows as $tq):
+                                                $tqTask = trim((string) ($tq->task ?? 'Untitled'));
+                                                $tqDue = trim((string) ($tq->dueDate ?? ''));
+                                                $tqHasDue = ($tqDue !== '' && $tqDue !== '0000-00-00');
+                                                $tqDueDisplay = $tqHasDue ? date('M j', strtotime($tqDue)) : 'No date';
+                                                $tqPriority = (string) ($tq->priority ?? '2');
+                                                $tqPrioLabel = $tqPriority === '1' ? 'High' : ($tqPriority === '2' ? 'Medium' : 'Low');
+                                                $tqPrioClass = $tqPriority === '1' ? 'is-high' : ($tqPriority === '2' ? 'is-medium' : 'is-low');
+                                                $tqDayDiff = 0;
+                                                $tqUrgencyClass = '';
+                                                $tqUrgencyLabel = '';
+                                                if ($tqHasDue) {
+                                                    $tqDayDiff = (int) floor((strtotime($tqDue) - $todayTimestamp) / 86400);
+                                                    if ($tqDayDiff < 0) {
+                                                        $tqUrgencyClass = 'is-overdue';
+                                                        $tqUrgencyLabel = abs($tqDayDiff) . 'd overdue';
+                                                    } elseif ($tqDayDiff === 0) {
+                                                        $tqUrgencyClass = 'is-today';
+                                                        $tqUrgencyLabel = 'Due today';
+                                                    } else {
+                                                        $tqUrgencyClass = 'is-soon';
+                                                        $tqUrgencyLabel = 'In ' . $tqDayDiff . 'd';
+                                                    }
+                                                }
+                                                $tqLink = base_url('Page/taskStat?id=') . (int) ($tq->taskID ?? 0);
+                                            ?>
+                                                <a href="<?= htmlspecialchars($tqLink, ENT_QUOTES, 'UTF-8'); ?>" class="queue-item <?= htmlspecialchars($tqUrgencyClass, ENT_QUOTES, 'UTF-8'); ?>">
+                                                    <div class="queue-item__task"><?= htmlspecialchars(mb_strimwidth($tqTask, 0, 50, '…'), ENT_QUOTES, 'UTF-8'); ?></div>
+                                                    <div class="queue-item__meta">
+                                                        <span class="queue-item__prio <?= htmlspecialchars($tqPrioClass, ENT_QUOTES, 'UTF-8'); ?>"><?= htmlspecialchars($tqPrioLabel, ENT_QUOTES, 'UTF-8'); ?></span>
+                                                        <span class="queue-item__due"><i class="mdi mdi-calendar-blank-outline"></i> <?= htmlspecialchars($tqDueDisplay, ENT_QUOTES, 'UTF-8'); ?></span>
+                                                        <?php if ($tqUrgencyLabel !== ''): ?>
+                                                            <span class="queue-item__urgency <?= htmlspecialchars($tqUrgencyClass, ENT_QUOTES, 'UTF-8'); ?>"><?= htmlspecialchars($tqUrgencyLabel, ENT_QUOTES, 'UTF-8'); ?></span>
+                                                        <?php endif; ?>
+                                                    </div>
+                                                </a>
+                                            <?php endforeach; ?>
+                                        </div>
+                                        <a href="<?= base_url('Page/projectAddTask'); ?>" class="side-card__more">
+                                            <span>View all tasks</span>
+                                            <i class="mdi mdi-arrow-right" aria-hidden="true"></i>
                                         </a>
-                                    <?php endforeach; ?>
+                                    </div>
                                 </div>
                             </div>
                             <?php endif; ?>
@@ -470,6 +492,94 @@ $currentMonthLabel    = date('F Y');
                 localStorage.setItem('staffStickyNotes', textarea.value);
             }
         }, 30000);
+    </script>
+
+    <script>
+        // Priority Queue: auto-toggles open/closed every 5 seconds. Hovering
+        // or focusing the card pauses the cycle; clicking the header toggles
+        // immediately and restarts the 5-second phase.
+        document.addEventListener('DOMContentLoaded', function() {
+            var card = document.getElementById('priorityQueueCard');
+            var toggle = document.getElementById('priorityQueueToggle');
+            if (!card || !toggle) return;
+
+            var timerBar = card.querySelector('.side-card__timer-bar');
+            var PHASE_MS = 5000;
+            var remaining = PHASE_MS;
+            var startedAt = Date.now();
+            var timerId = null;
+            var barAnim = null;
+
+            function setCollapsed(collapsed) {
+                card.classList.toggle('is-collapsed', collapsed);
+                toggle.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+            }
+
+            function playBar() {
+                if (!timerBar || !timerBar.animate) return;
+                if (!barAnim) {
+                    barAnim = timerBar.animate(
+                        [{ transform: 'scaleX(1)' }, { transform: 'scaleX(0)' }],
+                        { duration: PHASE_MS, fill: 'forwards' }
+                    );
+                } else {
+                    barAnim.currentTime = 0;
+                }
+                barAnim.play();
+            }
+
+            function schedule() {
+                if (timerId !== null) return;
+                startedAt = Date.now();
+                timerId = setTimeout(tick, Math.max(remaining, 0));
+            }
+
+            function resetPhase() {
+                if (timerId !== null) {
+                    clearTimeout(timerId);
+                    timerId = null;
+                }
+                remaining = PHASE_MS;
+                playBar();
+                schedule();
+            }
+
+            function tick() {
+                timerId = null;
+                setCollapsed(!card.classList.contains('is-collapsed'));
+                resetPhase();
+            }
+
+            function pause() {
+                if (timerId === null) return;
+                clearTimeout(timerId);
+                timerId = null;
+                remaining -= Date.now() - startedAt;
+                if (barAnim) barAnim.pause();
+                if (remaining <= 0) tick();
+            }
+
+            function resume() {
+                if (card.matches(':hover')) return;
+                if (document.activeElement && card.contains(document.activeElement)) return;
+                if (timerId !== null) return;
+                if (barAnim) barAnim.play();
+                schedule();
+            }
+
+            toggle.addEventListener('click', function() {
+                setCollapsed(!card.classList.contains('is-collapsed'));
+                resetPhase();
+            });
+
+            card.addEventListener('mouseenter', pause);
+            card.addEventListener('mouseleave', resume);
+            card.addEventListener('focusin', pause);
+            card.addEventListener('focusout', resume);
+
+            playBar();
+            schedule();
+        });
     </script>
     <?php if ($staffDashboardIsPackage2): ?>
     <script>
