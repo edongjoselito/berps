@@ -224,6 +224,22 @@
             color: var(--primary-dark);
         }
 
+        .hero-download {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--muted);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .hero-download:hover {
+            color: var(--primary);
+        }
+
         /* Features Section */
         .features {
             padding: 88px 32px;
@@ -741,6 +757,9 @@
                 <a href="<?= site_url('Login/signup_page'); ?>" class="btn-hero btn-primary">Create an account</a>
                 <a href="#features" class="btn-hero btn-secondary">Explore the modules</a>
             </div>
+            <a href="<?= base_url('downloads/BERPS.dmg'); ?>" class="hero-download" download>
+                <i class="fas fa-apple" aria-hidden="true"></i> Download the desktop app for macOS
+            </a>
         </div>
     </section>
 
