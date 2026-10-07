@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
@@ -584,9 +586,33 @@ class _PunchHeroCard extends StatelessWidget {
     final hasOpenSlot = data.status.openSlotLabel.isNotEmpty;
 
     if (AppTheme.isDesktop) {
+      final status = data.status;
+      // The next sensible action drives the primary button — if a shift is
+      // open the only sensible action is Time Out, and vice versa.
+      final canIn = status.canTimeIn;
+      final canOut = status.canTimeOut;
+      final primaryIsOut = canOut;
+
       return DeskPanel(
         title: "Today's attendance",
-        action: data.status.canTimeIn
+        action: hasOpenSlot
+            ? Container(
+                margin: const EdgeInsets.only(right: 6),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: AppTheme.primary.withValues(alpha: 0.10),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  '${status.openSlotLabel} shift open',
+                  style: const TextStyle(
+                    color: AppTheme.primaryDark,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              )
+            : canIn
             ? Container(
                 margin: const EdgeInsets.only(right: 6),
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
@@ -604,49 +630,30 @@ class _PunchHeroCard extends StatelessWidget {
                 ),
               )
             : null,
-        padding: const EdgeInsets.fromLTRB(18, 16, 18, 18),
+        padding: const EdgeInsets.fromLTRB(18, 14, 18, 18),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            const _LiveClock(),
+            const SizedBox(height: 10),
             Text(
-              data.status.statusLabel,
+              status.statusLabel,
               style: const TextStyle(
                 color: AppTheme.textSecondary,
                 height: 1.5,
                 fontWeight: FontWeight.w600,
-                fontSize: 13,
+                fontSize: 12.5,
               ),
             ),
-            if (hasOpenSlot) ...[
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  const Icon(
-                    LucideIcons.clock,
-                    color: AppTheme.primaryDark,
-                    size: 13,
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    '${data.status.openSlotLabel} shift open',
-                    style: const TextStyle(
-                      color: AppTheme.primaryDark,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 12.5,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-            const SizedBox(height: 16),
+            const SizedBox(height: 14),
             Row(
               children: [
                 Expanded(
                   child: _DeskPunchMetric(
                     label: 'Time in',
-                    value: data.status.latestTimeInLabel.isEmpty
+                    value: status.latestTimeInLabel.isEmpty
                         ? '--'
-                        : data.status.latestTimeInLabel,
+                        : status.latestTimeInLabel,
                     icon: LucideIcons.logIn,
                     color: AppTheme.success,
                   ),
@@ -655,29 +662,33 @@ class _PunchHeroCard extends StatelessWidget {
                 Expanded(
                   child: _DeskPunchMetric(
                     label: 'Time out',
-                    value: data.status.latestTimeOutLabel.isEmpty
+                    value: status.latestTimeOutLabel.isEmpty
                         ? '--'
-                        : data.status.latestTimeOutLabel,
+                        : status.latestTimeOutLabel,
                     icon: LucideIcons.logOut,
                     color: AppTheme.primaryDark,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 18),
+            const SizedBox(height: 16),
             _PunchButton(
-              label: 'Time In',
-              icon: LucideIcons.logIn,
+              label: primaryIsOut ? 'Time Out' : 'Time In',
+              icon: primaryIsOut ? LucideIcons.logOut : LucideIcons.logIn,
               primary: true,
-              onTap: onTimeIn,
+              onTap: primaryIsOut ? onTimeOut : onTimeIn,
+              enabled: primaryIsOut ? canOut : canIn,
             ),
-            const SizedBox(height: 10),
-            _PunchButton(
-              label: 'Time Out',
-              icon: LucideIcons.logOut,
-              primary: false,
-              onTap: onTimeOut,
-            ),
+            if (canIn || canOut) ...[
+              const SizedBox(height: 8),
+              _PunchButton(
+                label: primaryIsOut ? 'Time In' : 'Time Out',
+                icon: primaryIsOut ? LucideIcons.logIn : LucideIcons.logOut,
+                primary: false,
+                onTap: primaryIsOut ? onTimeIn : onTimeOut,
+                enabled: primaryIsOut ? canIn : canOut,
+              ),
+            ],
           ],
         ),
       );
@@ -858,60 +869,215 @@ class _PunchButton extends StatelessWidget {
     required this.icon,
     required this.primary,
     required this.onTap,
+    this.enabled = true,
   });
 
   final String label;
   final IconData icon;
   final bool primary;
   final VoidCallback onTap;
+  final bool enabled;
 
   @override
   Widget build(BuildContext context) {
+    if (AppTheme.isDesktop) {
+      final fg = !enabled
+          ? AppTheme.textMuted
+          : primary
+          ? Colors.white
+          : AppTheme.primaryDark;
+      return Material(
+        color: !enabled
+            ? AppTheme.surfaceMuted
+            : primary
+            ? AppTheme.primaryDark
+            : Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        child: InkWell(
+          onTap: enabled ? onTap : null,
+          borderRadius: BorderRadius.circular(10),
+          child: Container(
+            height: 44,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              border: primary || !enabled
+                  ? null
+                  : Border.all(color: AppTheme.borderStrong),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(icon, size: 15, color: fg),
+                const SizedBox(width: 8),
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: fg,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13.5,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
     final fg = primary ? Colors.white : AppTheme.primaryDark;
 
     return PressScale(
-      onTap: onTap,
-      child: Container(
-        height: 50,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          gradient: primary
-              ? const LinearGradient(
-                  colors: [AppTheme.primary, AppTheme.primaryDark],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                )
-              : null,
-          color: primary ? null : Colors.white,
-          borderRadius: BorderRadius.circular(14),
-          border: primary ? null : Border.all(color: AppTheme.borderStrong),
-          boxShadow: primary
-              ? [
-                  BoxShadow(
-                    color: AppTheme.primaryDark.withValues(alpha: 0.28),
-                    blurRadius: 18,
-                    offset: const Offset(0, 10),
-                  ),
-                ]
-              : null,
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 16, color: fg),
-            const SizedBox(width: 8),
-            Text(
-              label,
-              style: TextStyle(
-                color: fg,
-                fontWeight: FontWeight.w800,
-                fontSize: 14,
-                letterSpacing: 0.2,
+      onTap: enabled ? onTap : () {},
+      child: Opacity(
+        opacity: enabled ? 1 : 0.5,
+        child: Container(
+          height: 50,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            gradient: primary
+                ? const LinearGradient(
+                    colors: [AppTheme.primary, AppTheme.primaryDark],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  )
+                : null,
+            color: primary ? null : Colors.white,
+            borderRadius: BorderRadius.circular(14),
+            border: primary ? null : Border.all(color: AppTheme.borderStrong),
+            boxShadow: primary
+                ? [
+                    BoxShadow(
+                      color: AppTheme.primaryDark.withValues(alpha: 0.28),
+                      blurRadius: 18,
+                      offset: const Offset(0, 10),
+                    ),
+                  ]
+                : null,
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, size: 16, color: fg),
+              const SizedBox(width: 8),
+              Text(
+                label,
+                style: TextStyle(
+                  color: fg,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 14,
+                  letterSpacing: 0.2,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
+    );
+  }
+}
+
+/// Ticking clock shown in the desktop punch panel — makes the rail read as a
+/// real time clock rather than a static card.
+class _LiveClock extends StatefulWidget {
+  const _LiveClock();
+
+  @override
+  State<_LiveClock> createState() => _LiveClockState();
+}
+
+class _LiveClockState extends State<_LiveClock> {
+  Timer? _timer;
+  DateTime _now = DateTime.now();
+
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (mounted) setState(() => _now = DateTime.now());
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final hour12 = _now.hour % 12 == 0 ? 12 : _now.hour % 12;
+    final mm = _now.minute.toString().padLeft(2, '0');
+    final ss = _now.second.toString().padLeft(2, '0');
+    final ampm = _now.hour < 12 ? 'AM' : 'PM';
+    const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+    final dateLabel =
+        '${weekdays[_now.weekday - 1]}, ${months[_now.month - 1]} ${_now.day}';
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        Text(
+          '$hour12:$mm',
+          style: const TextStyle(
+            fontSize: 34,
+            fontWeight: FontWeight.w800,
+            color: AppTheme.textPrimary,
+            letterSpacing: -1.2,
+            height: 1.0,
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(bottom: 3),
+          child: Text(
+            ':$ss',
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: AppTheme.textMuted,
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Padding(
+          padding: const EdgeInsets.only(bottom: 4),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                ampm,
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w800,
+                  color: AppTheme.primaryDark,
+                ),
+              ),
+              Text(
+                dateLabel,
+                style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  color: AppTheme.textMuted,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

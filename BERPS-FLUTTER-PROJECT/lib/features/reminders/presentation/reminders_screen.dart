@@ -104,16 +104,18 @@ class _RemindersScreenState extends State<RemindersScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.background,
-      floatingActionButton: AppTheme.isDesktop ? null : FloatingActionButton.extended(
-        backgroundColor: AppTheme.primaryDark,
-        foregroundColor: Colors.white,
-        onPressed: () => _openEditor(),
-        icon: const Icon(LucideIcons.plus, size: 18),
-        label: const Text(
-          'New reminder',
-          style: TextStyle(fontWeight: FontWeight.w800),
-        ),
-      ),
+      floatingActionButton: AppTheme.isDesktop
+          ? null
+          : FloatingActionButton.extended(
+              backgroundColor: AppTheme.primaryDark,
+              foregroundColor: Colors.white,
+              onPressed: () => _openEditor(),
+              icon: const Icon(LucideIcons.plus, size: 18),
+              label: const Text(
+                'New reminder',
+                style: TextStyle(fontWeight: FontWeight.w800),
+              ),
+            ),
       body: SafeArea(
         bottom: false,
         child: FutureBuilder<RemindersData>(
@@ -127,67 +129,76 @@ class _RemindersScreenState extends State<RemindersScreen> {
             return RefreshIndicator(
               color: AppTheme.primary,
               onRefresh: () async => _reload(),
-              child: ListView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                padding: EdgeInsets.fromLTRB(
-                  context.gutter,
-                  12,
-                  context.gutter,
-                  100,
-                ),
-                children: [
-                  MobileHeader(
-                    title: 'Reminders',
-                    subtitle: data != null && data.dueTodayCount > 0
-                        ? '${data.dueTodayCount} due today'
-                        : 'Stay on top of what matters',
-                    leadingIcon: LucideIcons.chevronLeft,
-                    onLeadingTap: () {
-                      Haptics.light();
-                      Navigator.of(context).maybePop();
-                    },
-                    trailing: AppTheme.isDesktop
-                        ? DeskButton(
-                            label: 'New reminder',
-                            icon: LucideIcons.plus,
-                            onTap: () => _openEditor(),
-                          )
-                        : null,
+              child: Align(
+                alignment: Alignment.topCenter,
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxWidth: AppTheme.isDesktop ? 860 : double.infinity,
                   ),
-                  const SizedBox(height: 14),
-                  if (loading && data == null)
-                    Column(
-                      children: List.generate(
-                        4,
-                        (_) => const Padding(
-                          padding: EdgeInsets.only(bottom: 12),
-                          child: SkeletonCard(child: SizedBox(height: 64)),
-                        ),
+                  child: ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: EdgeInsets.fromLTRB(
+                      context.gutter,
+                      12,
+                      context.gutter,
+                      100,
+                    ),
+                    children: [
+                      MobileHeader(
+                        title: 'Reminders',
+                        subtitle: data != null && data.dueTodayCount > 0
+                            ? '${data.dueTodayCount} due today'
+                            : 'Stay on top of what matters',
+                        leadingIcon: LucideIcons.chevronLeft,
+                        onLeadingTap: () {
+                          Haptics.light();
+                          Navigator.of(context).maybePop();
+                        },
+                        trailing: AppTheme.isDesktop
+                            ? DeskButton(
+                                label: 'New reminder',
+                                icon: LucideIcons.plus,
+                                onTap: () => _openEditor(),
+                              )
+                            : null,
                       ),
-                    )
-                  else if (error != null && data == null)
-                    _ErrorCard(
-                      message: error is ApiException
-                          ? error.message
-                          : 'Unable to load reminders.',
-                      onRetry: _reload,
-                    )
-                  else if (reminders.isEmpty)
-                    const _EmptyState()
-                  else
-                    for (var i = 0; i < reminders.length; i++)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 10),
-                        child: FadeSlide(
-                          delay: Duration(milliseconds: 40 * i),
-                          child: _ReminderCard(
-                            reminder: reminders[i],
-                            onTap: () => _openEditor(existing: reminders[i]),
-                            onDelete: () => _confirmDelete(reminders[i]),
+                      const SizedBox(height: 14),
+                      if (loading && data == null)
+                        Column(
+                          children: List.generate(
+                            4,
+                            (_) => const Padding(
+                              padding: EdgeInsets.only(bottom: 12),
+                              child: SkeletonCard(child: SizedBox(height: 64)),
+                            ),
                           ),
-                        ),
-                      ),
-                ],
+                        )
+                      else if (error != null && data == null)
+                        _ErrorCard(
+                          message: error is ApiException
+                              ? error.message
+                              : 'Unable to load reminders.',
+                          onRetry: _reload,
+                        )
+                      else if (reminders.isEmpty)
+                        const _EmptyState()
+                      else
+                        for (var i = 0; i < reminders.length; i++)
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 10),
+                            child: FadeSlide(
+                              delay: Duration(milliseconds: 40 * i),
+                              child: _ReminderCard(
+                                reminder: reminders[i],
+                                onTap: () =>
+                                    _openEditor(existing: reminders[i]),
+                                onDelete: () => _confirmDelete(reminders[i]),
+                              ),
+                            ),
+                          ),
+                    ],
+                  ),
+                ),
               ),
             );
           },
@@ -236,11 +247,7 @@ class _ReminderCard extends StatelessWidget {
                 color: accent.withValues(alpha: 0.10),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(
-                LucideIcons.bellRing,
-                size: 18,
-                color: accent,
-              ),
+              child: Icon(LucideIcons.bellRing, size: 18, color: accent),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -273,11 +280,7 @@ class _ReminderCard extends StatelessWidget {
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      Icon(
-                        LucideIcons.clock,
-                        size: 12,
-                        color: accent,
-                      ),
+                      Icon(LucideIcons.clock, size: 12, color: accent),
                       const SizedBox(width: 5),
                       Flexible(
                         child: Text(
@@ -363,8 +366,9 @@ class _ReminderEditorSheetState extends State<_ReminderEditorSheet> {
     super.initState();
     final existing = widget.existing;
     _titleController = TextEditingController(text: existing?.title ?? '');
-    _descriptionController =
-        TextEditingController(text: existing?.description ?? '');
+    _descriptionController = TextEditingController(
+      text: existing?.description ?? '',
+    );
     final existingDate = existing?.remindAtDate;
     final base = existingDate ?? DateTime.now().add(const Duration(hours: 1));
     _date = DateTime(base.year, base.month, base.day);
@@ -383,8 +387,18 @@ class _ReminderEditorSheetState extends State<_ReminderEditorSheet> {
 
   String get _dateLabel {
     const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
     return '${months[_date.month - 1]} ${_date.day}, ${_date.year}';
   }
@@ -519,8 +533,10 @@ class _ReminderEditorSheetState extends State<_ReminderEditorSheet> {
                 controller: _titleController,
                 textCapitalization: TextCapitalization.sentences,
                 decoration: const InputDecoration(
-                  contentPadding:
-                      EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 14,
+                  ),
                 ),
               ),
               const SizedBox(height: 14),
@@ -531,8 +547,10 @@ class _ReminderEditorSheetState extends State<_ReminderEditorSheet> {
                 minLines: 2,
                 maxLines: 5,
                 decoration: const InputDecoration(
-                  contentPadding:
-                      EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 14,
+                  ),
                 ),
               ),
               const SizedBox(height: 14),
@@ -574,8 +592,7 @@ class _ReminderEditorSheetState extends State<_ReminderEditorSheet> {
                         child: _RecurrenceChip(
                           label: option[1],
                           selected: _recurrence == option[0],
-                          onTap: () =>
-                              setState(() => _recurrence = option[0]),
+                          onTap: () => setState(() => _recurrence = option[0]),
                         ),
                       ),
                     ),

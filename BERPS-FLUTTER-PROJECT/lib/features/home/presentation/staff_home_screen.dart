@@ -304,8 +304,12 @@ class _StaffHomeScreenState extends State<StaffHomeScreen> {
 
   Future<void> _openCalendar() async {
     Haptics.light();
+    // Desktop gets the real month/week/day calendar; the year-at-a-glance
+    // grid stays for mobile where it suits the narrow canvas.
     await _pushContent(
-      CalendarScreen(session: widget.session),
+      AppTheme.isDesktop
+          ? CalendarDashboardTab(session: widget.session)
+          : CalendarScreen(session: widget.session),
       navId: 'calendar',
     );
   }
@@ -343,7 +347,7 @@ class _StaffHomeScreenState extends State<StaffHomeScreen> {
     Haptics.light();
     await _pushContent(
       SupportIssuesScreen(session: widget.session, initialScope: scope),
-      navId: scope == 'unassigned' ? 'unassigned-tickets' : 'tickets',
+      navId: 'tickets',
     );
     if (!mounted) return;
     setState(() {
@@ -383,7 +387,6 @@ class _StaffHomeScreenState extends State<StaffHomeScreen> {
       onSelectReminders: _openReminders,
       onSelectAnnualGoals: _openAnnualGoals,
       onSelectSupportDashboard: _openSupportDashboard,
-      onSelectUnassignedTickets: () => _openSupportIssues(scope: 'unassigned'),
       onSelectForwardedTasks: _openForwardedTasks,
       onSelectTickets: () => _openSupportIssues(scope: 'open'),
       onSignOut: _confirmSignOut,

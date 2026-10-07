@@ -9,9 +9,10 @@ import '../utils/haptics.dart';
 /// Toast variants — each has a colour + icon vocabulary.
 enum AppToastVariant { success, error, warning, info }
 
-/// A universal in-app toast that slides in from the top of the screen,
-/// floats over everything (including the app bar / nav bar), and dismisses
-/// itself on tap or after a short timeout.
+/// A universal in-app toast that floats over everything (including the app
+/// bar / nav bar) and dismisses itself on tap or after a short timeout.
+/// Mobile: slides in from the top edge. Desktop: a compact card in the
+/// bottom-right corner, the standard desktop notification position.
 ///
 /// Usage:
 ///   AppToast.success(context, 'Time-in recorded.');
@@ -167,6 +168,98 @@ class _ToastWidgetState extends State<_ToastWidget>
 
   @override
   Widget build(BuildContext context) {
+    if (AppTheme.isDesktop) return _buildDesktop(context);
+    return _buildMobile(context);
+  }
+
+  /// Desktop toast — small floating card pinned to the bottom-right of the
+  /// window, away from the sidebar, toolbar and title bar.
+  Widget _buildDesktop(BuildContext context) {
+    final style = _style;
+    return Positioned(
+      right: 24,
+      bottom: 24,
+      child: AnimatedBuilder(
+        animation: _ctrl,
+        builder: (context, child) {
+          final value = Curves.easeOutCubic.transform(_ctrl.value);
+          return Opacity(
+            opacity: value,
+            child: Transform.translate(
+              offset: Offset(0, 18 * (1 - value)),
+              child: child,
+            ),
+          );
+        },
+        child: Material(
+          color: Colors.transparent,
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: _dismiss,
+            child: Container(
+              constraints: const BoxConstraints(maxWidth: 380),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppTheme.border),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Color(0x1F0F1E3A),
+                    blurRadius: 24,
+                    offset: Offset(0, 10),
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 28,
+                    height: 28,
+                    decoration: BoxDecoration(
+                      color: style.accent.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(style.icon, color: style.accent, size: 15),
+                  ),
+                  const SizedBox(width: 10),
+                  Flexible(
+                    child: Text(
+                      widget.message,
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: AppTheme.textPrimary,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 12.5,
+                        height: 1.35,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  InkWell(
+                    onTap: _dismiss,
+                    borderRadius: BorderRadius.circular(6),
+                    child: const Padding(
+                      padding: EdgeInsets.all(4),
+                      child: Icon(
+                        LucideIcons.x,
+                        size: 13,
+                        color: AppTheme.textMuted,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMobile(BuildContext context) {
     final media = MediaQuery.of(context);
     final style = _style;
 

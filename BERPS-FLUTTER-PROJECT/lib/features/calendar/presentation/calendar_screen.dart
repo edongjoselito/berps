@@ -125,39 +125,45 @@ List<CalendarDayItem> _buildDayItems({
   for (final event in events) {
     final start = event.start;
     final end = event.end;
-    items.add(CalendarDayItem(
-      date: start,
-      title: event.title,
-      color: _parseHexColor(event.color),
-      type: CalendarDayItemType.event,
-      event: event,
-      endDate: end,
-    ));
+    items.add(
+      CalendarDayItem(
+        date: start,
+        title: event.title,
+        color: _parseHexColor(event.color),
+        type: CalendarDayItemType.event,
+        event: event,
+        endDate: end,
+      ),
+    );
   }
 
   for (final note in notes) {
     final date = _parseDate(note.date);
     if (date.year != 1970) {
-      items.add(CalendarDayItem(
-        date: date,
-        title: note.displayTitle,
-        color: const Color(0xFF007AFF), // blue for notes
-        type: CalendarDayItemType.note,
-        note: note,
-      ));
+      items.add(
+        CalendarDayItem(
+          date: date,
+          title: note.displayTitle,
+          color: const Color(0xFF007AFF), // blue for notes
+          type: CalendarDayItemType.note,
+          note: note,
+        ),
+      );
     }
   }
 
   for (final reminder in reminders) {
     final date = _parseDate(reminder.remindAt);
     if (date.year != 1970) {
-      items.add(CalendarDayItem(
-        date: date,
-        title: reminder.title,
-        color: const Color(0xFFFF9500), // orange for reminders
-        type: CalendarDayItemType.reminder,
-        reminder: reminder,
-      ));
+      items.add(
+        CalendarDayItem(
+          date: date,
+          title: reminder.title,
+          color: const Color(0xFFFF9500), // orange for reminders
+          type: CalendarDayItemType.reminder,
+          reminder: reminder,
+        ),
+      );
     }
   }
 
@@ -175,7 +181,11 @@ bool _itemCoversDay(CalendarDayItem item, DateTime day) {
   if (item.isEvent && item.endDate != null) {
     // Multi-day events: check if day is between start and end (inclusive)
     final start = DateTime(item.date.year, item.date.month, item.date.day);
-    final end = DateTime(item.endDate!.year, item.endDate!.month, item.endDate!.day);
+    final end = DateTime(
+      item.endDate!.year,
+      item.endDate!.month,
+      item.endDate!.day,
+    );
     final d = DateTime(day.year, day.month, day.day);
     return !d.isBefore(start) && !d.isAfter(end);
   }
@@ -233,16 +243,18 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
     return Scaffold(
       backgroundColor: AppTheme.background,
-      floatingActionButton: AppTheme.isDesktop ? null : FloatingActionButton.extended(
-        backgroundColor: AppTheme.primaryDark,
-        foregroundColor: Colors.white,
-        onPressed: _openCreate,
-        icon: const Icon(LucideIcons.plus, size: 18),
-        label: const Text(
-          'New note',
-          style: TextStyle(fontWeight: FontWeight.w800),
-        ),
-      ),
+      floatingActionButton: AppTheme.isDesktop
+          ? null
+          : FloatingActionButton.extended(
+              backgroundColor: AppTheme.primaryDark,
+              foregroundColor: Colors.white,
+              onPressed: _openCreate,
+              icon: const Icon(LucideIcons.plus, size: 18),
+              label: const Text(
+                'New note',
+                style: TextStyle(fontWeight: FontWeight.w800),
+              ),
+            ),
       body: SafeArea(
         bottom: false,
         child: Column(
@@ -285,11 +297,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
 /// this shows a hamburger header so it can live inside the bottom-nav shell,
 /// and it highlights every day that has an event so they stand out at a glance.
 class CalendarDashboardTab extends StatefulWidget {
-  const CalendarDashboardTab({
-    super.key,
-    required this.session,
-    this.onMenu,
-  });
+  const CalendarDashboardTab({super.key, required this.session, this.onMenu});
 
   final StaffSession session;
   final VoidCallback? onMenu;
@@ -412,7 +420,9 @@ class _CalendarDashboardTabState extends State<CalendarDashboardTab> {
       MaterialPageRoute(
         builder: (_) => CalendarDayNoteEditor(
           session: widget.session,
-          date: _view == _CalendarView.day ? _selectedDay : DateTime(_year, _month, DateTime.now().day),
+          date: _view == _CalendarView.day
+              ? _selectedDay
+              : DateTime(_year, _month, DateTime.now().day),
         ),
       ),
     );
@@ -425,7 +435,9 @@ class _CalendarDashboardTabState extends State<CalendarDashboardTab> {
       MaterialPageRoute(
         builder: (_) => CalendarEventEditor(
           session: widget.session,
-          initialDate: _view == _CalendarView.day ? _selectedDay : DateTime(_year, _month, DateTime.now().day),
+          initialDate: _view == _CalendarView.day
+              ? _selectedDay
+              : DateTime(_year, _month, DateTime.now().day),
         ),
       ),
     );
@@ -439,7 +451,9 @@ class _CalendarDashboardTabState extends State<CalendarDashboardTab> {
       MaterialPageRoute(
         builder: (_) => _ReminderQuickEditor(
           session: widget.session,
-          date: _view == _CalendarView.day ? _selectedDay : DateTime(_year, _month, DateTime.now().day),
+          date: _view == _CalendarView.day
+              ? _selectedDay
+              : DateTime(_year, _month, DateTime.now().day),
         ),
       ),
     );
@@ -450,12 +464,11 @@ class _CalendarDashboardTabState extends State<CalendarDashboardTab> {
     Haptics.light();
     final saved = await Navigator.of(context).push<bool>(
       MaterialPageRoute(
-        builder: (_) =>
-            CalendarDayNoteEditor(
-              session: widget.session,
-              date: _parseDate(note.date),
-              existing: note,
-            ),
+        builder: (_) => CalendarDayNoteEditor(
+          session: widget.session,
+          date: _parseDate(note.date),
+          existing: note,
+        ),
       ),
     );
     if (saved == true) _reload();
@@ -465,10 +478,8 @@ class _CalendarDashboardTabState extends State<CalendarDashboardTab> {
     Haptics.light();
     final saved = await Navigator.of(context).push<bool>(
       MaterialPageRoute(
-        builder: (_) => CalendarEventEditor(
-          session: widget.session,
-          existing: event,
-        ),
+        builder: (_) =>
+            CalendarEventEditor(session: widget.session, existing: event),
       ),
     );
     if (saved == true) _reload();
@@ -679,16 +690,18 @@ class _CalendarDashboardTabState extends State<CalendarDashboardTab> {
     final now = DateTime.now();
     return Scaffold(
       backgroundColor: AppTheme.background,
-      floatingActionButton: AppTheme.isDesktop ? null : FloatingActionButton.extended(
-        backgroundColor: AppTheme.primaryDark,
-        foregroundColor: Colors.white,
-        onPressed: _openCreateNote,
-        icon: const Icon(LucideIcons.plus, size: 18),
-        label: const Text(
-          'New note',
-          style: TextStyle(fontWeight: FontWeight.w800),
-        ),
-      ),
+      floatingActionButton: AppTheme.isDesktop
+          ? null
+          : FloatingActionButton.extended(
+              backgroundColor: AppTheme.primaryDark,
+              foregroundColor: Colors.white,
+              onPressed: _openCreateNote,
+              icon: const Icon(LucideIcons.plus, size: 18),
+              label: const Text(
+                'New note',
+                style: TextStyle(fontWeight: FontWeight.w800),
+              ),
+            ),
       body: SafeArea(
         bottom: false,
         child: FutureBuilder<List<CalendarDayItem>>(
@@ -698,40 +711,85 @@ class _CalendarDashboardTabState extends State<CalendarDashboardTab> {
             final title = _view == _CalendarView.month
                 ? '${_monthNamesFull[_month - 1]} $_year'
                 : _view == _CalendarView.week
-                    ? 'Week of ${_monthNamesShort[_weekStart(_selectedDay).month - 1]} ${_weekStart(_selectedDay).day}'
-                    : '${_weekdayFull(_selectedDay.weekday)}, ${_monthNamesShort[_selectedDay.month - 1]} ${_selectedDay.day}';
+                ? 'Week of ${_monthNamesShort[_weekStart(_selectedDay).month - 1]} ${_weekStart(_selectedDay).day}'
+                : '${_weekdayFull(_selectedDay.weekday)}, ${_monthNamesShort[_selectedDay.month - 1]} ${_selectedDay.day}';
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-                  child: MobileHeader(
-                    title: 'Calendar',
-                    subtitle: title,
-                    leadingIcon: LucideIcons.list,
-                    onLeadingTap: widget.onMenu == null
-                      ? null
-                      : () {
-                          Haptics.light();
-                          widget.onMenu!();
-                        },
-                    trailingIcon: LucideIcons.rotateCw,
-                    onTrailingTap: () {
-                      Haptics.light();
-                      _reload();
-                    },
+                if (AppTheme.isDesktop)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(24, 6, 24, 8),
+                    child: MobileHeader(
+                      title: 'Calendar',
+                      subtitle: title,
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          MobileHeaderButton(
+                            icon: LucideIcons.chevronLeft,
+                            onTap: () => _shiftPeriod(-1),
+                          ),
+                          const SizedBox(width: 6),
+                          MobileHeaderButton(
+                            icon: LucideIcons.chevronRight,
+                            onTap: () => _shiftPeriod(1),
+                          ),
+                          const SizedBox(width: 8),
+                          DeskButton(
+                            label: 'Today',
+                            icon: LucideIcons.calendarCheck,
+                            primary: false,
+                            onTap: _goToday,
+                          ),
+                          const SizedBox(width: 10),
+                          DeskSegmented(
+                            options: const {
+                              'month': 'Month',
+                              'week': 'Week',
+                              'day': 'Day',
+                            },
+                            value: _view.name,
+                            onChanged: (v) =>
+                                _setView(_CalendarView.values.byName(v)),
+                          ),
+                          const SizedBox(width: 10),
+                          _NewEntryMenu(
+                            onNote: _openCreateNote,
+                            onEvent: _openCreateEvent,
+                            onReminder: _openCreateReminder,
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                else ...[
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+                    child: MobileHeader(
+                      title: 'Calendar',
+                      subtitle: title,
+                      leadingIcon: LucideIcons.list,
+                      onLeadingTap: widget.onMenu == null
+                          ? null
+                          : () {
+                              Haptics.light();
+                              widget.onMenu!();
+                            },
+                      trailingIcon: LucideIcons.rotateCw,
+                      onTrailingTap: () {
+                        Haptics.light();
+                        _reload();
+                      },
+                    ),
                   ),
-                ),
-                _ViewSwitcher(
-                  current: _view,
-                  onChanged: _setView,
-                ),
-                _DashboardPeriodBar(
-                  title: title,
-                  onPrev: () => _shiftPeriod(-1),
-                  onNext: () => _shiftPeriod(1),
-                  onToday: _goToday,
-                ),
+                  _ViewSwitcher(current: _view, onChanged: _setView),
+                  _DashboardPeriodBar(
+                    title: title,
+                    onPrev: () => _shiftPeriod(-1),
+                    onNext: () => _shiftPeriod(1),
+                    onToday: _goToday,
+                  ),
+                ],
                 if (_view == _CalendarView.month) ...[
                   const _WeekdayHeader(),
                   Expanded(
@@ -749,31 +807,43 @@ class _CalendarDashboardTabState extends State<CalendarDashboardTab> {
                 ],
                 if (_view == _CalendarView.week)
                   Expanded(
-                    child: _WeekView(
-                      weekStart: _weekStart(_selectedDay),
-                      today: now,
-                      items: items,
-                      onDayTap: (day) {
-                        _selectDay(day);
-                        _openDay(day, items);
-                      },
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: AppTheme.isDesktop ? 24 : 0,
+                      ),
+                      child: _WeekView(
+                        weekStart: _weekStart(_selectedDay),
+                        today: now,
+                        items: items,
+                        onDayTap: (day) {
+                          _selectDay(day);
+                          _openDay(day, items);
+                        },
+                      ),
                     ),
                   ),
                 if (_view == _CalendarView.day)
                   Expanded(
-                    child: _DayView(
-                      day: _selectedDay,
-                      today: now,
-                      items: items.where((e) => _itemCoversDay(e, _selectedDay)).toList(),
-                      onAddEvent: _openCreateEvent,
-                      onAddNote: _openCreateNote,
-                      onAddReminder: _openCreateReminder,
-                      onEditEvent: _openEditEvent,
-                      onEditNote: _openEditNote,
-                      onEditReminder: _openEditReminder,
-                      onDeleteEvent: _confirmDeleteEvent,
-                      onDeleteNote: _confirmDeleteNote,
-                      onDeleteReminder: _confirmDeleteReminder,
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: AppTheme.isDesktop ? 24 : 0,
+                      ),
+                      child: _DayView(
+                        day: _selectedDay,
+                        today: now,
+                        items: items
+                            .where((e) => _itemCoversDay(e, _selectedDay))
+                            .toList(),
+                        onAddEvent: _openCreateEvent,
+                        onAddNote: _openCreateNote,
+                        onAddReminder: _openCreateReminder,
+                        onEditEvent: _openEditEvent,
+                        onEditNote: _openEditNote,
+                        onEditReminder: _openEditReminder,
+                        onDeleteEvent: _confirmDeleteEvent,
+                        onDeleteNote: _confirmDeleteNote,
+                        onDeleteReminder: _confirmDeleteReminder,
+                      ),
                     ),
                   ),
               ],
@@ -793,7 +863,15 @@ DateTime _weekStart(DateTime day) {
 }
 
 String _weekdayFull(int weekday) {
-  const names = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  const names = [
+    'Monday',
+    'Tuesday',
+    'Wednesday',
+    'Thursday',
+    'Friday',
+    'Saturday',
+    'Sunday',
+  ];
   return names[weekday - 1];
 }
 
@@ -831,16 +909,24 @@ class _ViewSwitcher extends StatelessWidget {
                     duration: const Duration(milliseconds: 200),
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     decoration: BoxDecoration(
-                      color: current == v ? AppTheme.primaryDark : Colors.transparent,
+                      color: current == v
+                          ? AppTheme.primaryDark
+                          : Colors.transparent,
                       borderRadius: BorderRadius.circular(9),
                     ),
                     child: Text(
-                      v == _CalendarView.month ? 'Month' : v == _CalendarView.week ? 'Week' : 'Day',
+                      v == _CalendarView.month
+                          ? 'Month'
+                          : v == _CalendarView.week
+                          ? 'Week'
+                          : 'Day',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w800,
-                        color: current == v ? Colors.white : AppTheme.textSecondary,
+                        color: current == v
+                            ? Colors.white
+                            : AppTheme.textSecondary,
                       ),
                     ),
                   ),
@@ -1250,12 +1336,11 @@ class _MonthDetailScreenState extends State<_MonthDetailScreen> {
     Haptics.light();
     final saved = await Navigator.of(context).push<bool>(
       MaterialPageRoute(
-        builder: (_) =>
-            CalendarDayNoteEditor(
-              session: widget.session,
-              date: _parseDate(note.date),
-              existing: note,
-            ),
+        builder: (_) => CalendarDayNoteEditor(
+          session: widget.session,
+          date: _parseDate(note.date),
+          existing: note,
+        ),
       ),
     );
     if (saved == true) _reload();
@@ -1265,10 +1350,8 @@ class _MonthDetailScreenState extends State<_MonthDetailScreen> {
     Haptics.light();
     final saved = await Navigator.of(context).push<bool>(
       MaterialPageRoute(
-        builder: (_) => CalendarEventEditor(
-          session: widget.session,
-          existing: event,
-        ),
+        builder: (_) =>
+            CalendarEventEditor(session: widget.session, existing: event),
       ),
     );
     if (saved == true) _reload();
@@ -1341,12 +1424,22 @@ class _MonthDetailScreenState extends State<_MonthDetailScreen> {
       context: context,
       builder: (dialogContext) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text('Delete event?',
-            style: TextStyle(fontWeight: FontWeight.w900, color: AppTheme.textPrimary)),
-        content: Text('"${event.title}" will be permanently removed.',
-            style: const TextStyle(color: AppTheme.textSecondary)),
+        title: const Text(
+          'Delete event?',
+          style: TextStyle(
+            fontWeight: FontWeight.w900,
+            color: AppTheme.textPrimary,
+          ),
+        ),
+        content: Text(
+          '"${event.title}" will be permanently removed.',
+          style: const TextStyle(color: AppTheme.textSecondary),
+        ),
         actions: [
-          TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Cancel'),
+          ),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: AppTheme.danger),
             onPressed: () => Navigator.of(dialogContext).pop(true),
@@ -1378,12 +1471,22 @@ class _MonthDetailScreenState extends State<_MonthDetailScreen> {
       context: context,
       builder: (dialogContext) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text('Delete reminder?',
-            style: TextStyle(fontWeight: FontWeight.w900, color: AppTheme.textPrimary)),
-        content: Text('"${reminder.title}" will be permanently removed.',
-            style: const TextStyle(color: AppTheme.textSecondary)),
+        title: const Text(
+          'Delete reminder?',
+          style: TextStyle(
+            fontWeight: FontWeight.w900,
+            color: AppTheme.textPrimary,
+          ),
+        ),
+        content: Text(
+          '"${reminder.title}" will be permanently removed.',
+          style: const TextStyle(color: AppTheme.textSecondary),
+        ),
         actions: [
-          TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Cancel'),
+          ),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: AppTheme.danger),
             onPressed: () => Navigator.of(dialogContext).pop(true),
@@ -1423,12 +1526,30 @@ class _MonthDetailScreenState extends State<_MonthDetailScreen> {
         session: widget.session,
         day: day,
         items: dayItems,
-        onAddNote: () { Navigator.of(sheetContext).pop(); _openCreateNote(); },
-        onAddEvent: () { Navigator.of(sheetContext).pop(); _openCreateEvent(); },
-        onAddReminder: () { Navigator.of(sheetContext).pop(); _openCreateReminder(); },
-        onEditNote: (note) { Navigator.of(sheetContext).pop(); _openEditNote(note); },
-        onEditEvent: (event) { Navigator.of(sheetContext).pop(); _openEditEvent(event); },
-        onEditReminder: (reminder) { Navigator.of(sheetContext).pop(); _openEditReminder(reminder); },
+        onAddNote: () {
+          Navigator.of(sheetContext).pop();
+          _openCreateNote();
+        },
+        onAddEvent: () {
+          Navigator.of(sheetContext).pop();
+          _openCreateEvent();
+        },
+        onAddReminder: () {
+          Navigator.of(sheetContext).pop();
+          _openCreateReminder();
+        },
+        onEditNote: (note) {
+          Navigator.of(sheetContext).pop();
+          _openEditNote(note);
+        },
+        onEditEvent: (event) {
+          Navigator.of(sheetContext).pop();
+          _openEditEvent(event);
+        },
+        onEditReminder: (reminder) {
+          Navigator.of(sheetContext).pop();
+          _openEditReminder(reminder);
+        },
         onDeleteNote: (note) => _confirmDeleteNote(note),
         onDeleteEvent: (event) => _confirmDeleteEvent(event),
         onDeleteReminder: (reminder) => _confirmDeleteReminder(reminder),
@@ -1541,10 +1662,13 @@ class _MonthHeader extends StatelessWidget {
 class _WeekdayHeader extends StatelessWidget {
   const _WeekdayHeader();
 
+  static const _fullNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
   @override
   Widget build(BuildContext context) {
+    final desktop = AppTheme.isDesktop;
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
+      padding: EdgeInsets.symmetric(horizontal: desktop ? 24 : 12),
       child: Row(
         children: [
           for (var i = 0; i < 7; i++)
@@ -1552,7 +1676,7 @@ class _WeekdayHeader extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.only(bottom: 6),
                 child: Text(
-                  _weekdayLetters[i],
+                  desktop ? _fullNames[i] : _weekdayLetters[i],
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 12,
@@ -1588,62 +1712,173 @@ class _MonthGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final weeks = _monthWeeks(year, month);
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      child: Column(
-        children: [
-          for (final week in weeks)
-            Expanded(
-              child: Row(
-                children: [
-                  for (final day in week)
-                    Expanded(
-                      child: day == 0
-                          ? const SizedBox.shrink()
-                          : _MonthDayCell(
-                              date: DateTime(year, month, day),
-                              isToday:
-                                  today.year == year &&
-                                  today.month == month &&
-                                  today.day == day,
-                              dotColors: _dotsFor(DateTime(year, month, day)),
-                              hasEvents: _hasItems(DateTime(year, month, day)),
-                              onTap: onDayTap,
-                            ),
-                    ),
-                ],
-              ),
+    final grid = Column(
+      children: [
+        for (final week in weeks)
+          Expanded(
+            child: Row(
+              children: [
+                for (final day in week)
+                  Expanded(
+                    child: day == 0
+                        ? AppTheme.isDesktop
+                              ? Container(
+                                  decoration: const BoxDecoration(
+                                    color: AppTheme.surfaceMuted,
+                                    border: Border(
+                                      right: BorderSide(color: AppTheme.border),
+                                      bottom: BorderSide(
+                                        color: AppTheme.border,
+                                      ),
+                                    ),
+                                  ),
+                                )
+                              : const SizedBox.shrink()
+                        : _MonthDayCell(
+                            date: DateTime(year, month, day),
+                            isToday:
+                                today.year == year &&
+                                today.month == month &&
+                                today.day == day,
+                            dayItems: _itemsFor(DateTime(year, month, day)),
+                            onTap: onDayTap,
+                          ),
+                  ),
+              ],
             ),
-        ],
+          ),
+      ],
+    );
+    if (!AppTheme.isDesktop) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        child: grid,
+      );
+    }
+    // Desktop: the grid reads as a real calendar — bordered white surface
+    // with hairline gridlines, filling the space under the toolbar.
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 0, 24, 22),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppTheme.border),
+          ),
+          child: grid,
+        ),
       ),
     );
   }
 
-  List<Color> _dotsFor(DateTime day) {
-    final matches = items.where((e) => _itemCoversDay(e, day)).toList();
-    return [for (final e in matches.take(3)) e.color];
-  }
-
-  bool _hasItems(DateTime day) => items.any((e) => _itemCoversDay(e, day));
+  List<CalendarDayItem> _itemsFor(DateTime day) =>
+      items.where((e) => _itemCoversDay(e, day)).toList();
 }
 
 class _MonthDayCell extends StatelessWidget {
   const _MonthDayCell({
     required this.date,
     required this.isToday,
-    required this.dotColors,
-    required this.hasEvents,
+    required this.dayItems,
     required this.onTap,
   });
 
   final DateTime date;
   final bool isToday;
-  final List<Color> dotColors;
-  final bool hasEvents;
+  final List<CalendarDayItem> dayItems;
   final ValueChanged<DateTime> onTap;
 
   @override
   Widget build(BuildContext context) {
+    if (AppTheme.isDesktop) return _buildDesktop();
+    return _buildMobile();
+  }
+
+  /// Real calendar cell — day number top-left, event chips underneath, all
+  /// inside a hairline grid cell. Today gets a tinted surface + red marker.
+  Widget _buildDesktop() {
+    const maxChips = 3;
+    final visible = dayItems.take(maxChips).toList();
+    final extra = dayItems.length - visible.length;
+
+    return Material(
+      color: isToday ? AppTheme.primarySoft.withValues(alpha: 0.4) : null,
+      child: InkWell(
+        onTap: () => onTap(date),
+        child: Container(
+          padding: const EdgeInsets.all(6),
+          decoration: const BoxDecoration(
+            border: Border(
+              right: BorderSide(color: AppTheme.border),
+              bottom: BorderSide(color: AppTheme.border),
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 22,
+                height: 22,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: isToday ? kAppleRed : Colors.transparent,
+                  shape: BoxShape.circle,
+                ),
+                child: Text(
+                  '${date.day}',
+                  style: TextStyle(
+                    fontSize: 11.5,
+                    fontWeight: isToday ? FontWeight.w800 : FontWeight.w600,
+                    color: isToday ? Colors.white : AppTheme.textPrimary,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 4),
+              for (final item in visible)
+                Container(
+                  width: double.infinity,
+                  margin: const EdgeInsets.only(bottom: 3),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 5,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: item.color.withValues(alpha: 0.13),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    item.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w700,
+                      color: Color.lerp(item.color, Colors.black, 0.25),
+                      height: 1.25,
+                    ),
+                  ),
+                ),
+              if (extra > 0)
+                Text(
+                  '+$extra more',
+                  style: const TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600,
+                    color: AppTheme.textMuted,
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMobile() {
+    final dotColors = [for (final e in dayItems.take(3)) e.color];
+    final hasEvents = dayItems.isNotEmpty;
     // Days with events get a soft red highlight so they're easy to spot at a
     // glance; "today" keeps its solid red marker and takes precedence.
     final Color background = isToday
@@ -1703,6 +1938,99 @@ class _MonthDayCell extends StatelessWidget {
   }
 }
 
+/// Primary "+ New" menu in the desktop calendar toolbar — note, event or
+/// reminder, matching the creation paths in the day sheet.
+class _NewEntryMenu extends StatelessWidget {
+  const _NewEntryMenu({
+    required this.onNote,
+    required this.onEvent,
+    required this.onReminder,
+  });
+
+  final VoidCallback onNote;
+  final VoidCallback onEvent;
+  final VoidCallback onReminder;
+
+  @override
+  Widget build(BuildContext context) {
+    return PopupMenuButton<String>(
+      tooltip: 'Add to calendar',
+      position: PopupMenuPosition.under,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      onSelected: (value) {
+        Haptics.light();
+        switch (value) {
+          case 'note':
+            onNote();
+          case 'event':
+            onEvent();
+          case 'reminder':
+            onReminder();
+        }
+      },
+      itemBuilder: (_) => const [
+        PopupMenuItem(
+          value: 'note',
+          child: _MenuEntry(icon: LucideIcons.notebookText, label: 'Note'),
+        ),
+        PopupMenuItem(
+          value: 'event',
+          child: _MenuEntry(icon: LucideIcons.calendarPlus, label: 'Event'),
+        ),
+        PopupMenuItem(
+          value: 'reminder',
+          child: _MenuEntry(icon: LucideIcons.bellRing, label: 'Reminder'),
+        ),
+      ],
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+        decoration: BoxDecoration(
+          color: AppTheme.primaryDark,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: const Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(LucideIcons.plus, size: 15, color: Colors.white),
+            SizedBox(width: 6),
+            Text(
+              'New',
+              style: TextStyle(
+                fontSize: 12.5,
+                fontWeight: FontWeight.w700,
+                color: Colors.white,
+              ),
+            ),
+            SizedBox(width: 4),
+            Icon(LucideIcons.chevronDown, size: 13, color: Colors.white),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _MenuEntry extends StatelessWidget {
+  const _MenuEntry({required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(icon, size: 15, color: AppTheme.textSecondary),
+        const SizedBox(width: 10),
+        Text(
+          label,
+          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+        ),
+      ],
+    );
+  }
+}
+
 /// Builds the notes sliver for the day sheet from a list of notes.
 Widget _dayNotes(List<Note> notes, _DaySheetState sheet) {
   if (notes.isEmpty) {
@@ -1711,11 +2039,7 @@ Widget _dayNotes(List<Note> notes, _DaySheetState sheet) {
         padding: EdgeInsets.symmetric(vertical: 8),
         child: Row(
           children: [
-            Icon(
-              LucideIcons.notebookText,
-              size: 16,
-              color: AppTheme.textMuted,
-            ),
+            Icon(LucideIcons.notebookText, size: 16, color: AppTheme.textMuted),
             SizedBox(width: 10),
             Text(
               'No notes on this day',
@@ -1768,14 +2092,30 @@ class _DayEventsSection extends StatelessWidget {
       children: [
         Row(
           children: [
-            const Icon(LucideIcons.calendar, size: 15, color: AppTheme.primaryDark),
+            const Icon(
+              LucideIcons.calendar,
+              size: 15,
+              color: AppTheme.primaryDark,
+            ),
             const SizedBox(width: 8),
-            const Text('Events',
-                style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w900, color: AppTheme.textPrimary)),
+            const Text(
+              'Events',
+              style: TextStyle(
+                fontSize: 13.5,
+                fontWeight: FontWeight.w900,
+                color: AppTheme.textPrimary,
+              ),
+            ),
             const SizedBox(width: 8),
             if (events.isNotEmpty)
-              Text('${events.length}',
-                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: AppTheme.textMuted)),
+              Text(
+                '${events.length}',
+                style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w800,
+                  color: AppTheme.textMuted,
+                ),
+              ),
             const Spacer(),
             TextButton.icon(
               onPressed: onAdd,
@@ -1784,7 +2124,10 @@ class _DayEventsSection extends StatelessWidget {
               style: TextButton.styleFrom(
                 foregroundColor: AppTheme.primaryDark,
                 padding: EdgeInsets.zero,
-                textStyle: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
+                textStyle: const TextStyle(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 13,
+                ),
               ),
             ),
           ],
@@ -1795,10 +2138,20 @@ class _DayEventsSection extends StatelessWidget {
             padding: EdgeInsets.symmetric(vertical: 8),
             child: Row(
               children: [
-                Icon(LucideIcons.calendarOff, size: 16, color: AppTheme.textMuted),
+                Icon(
+                  LucideIcons.calendarOff,
+                  size: 16,
+                  color: AppTheme.textMuted,
+                ),
                 SizedBox(width: 10),
-                Text('No events on this day',
-                    style: TextStyle(color: AppTheme.textSecondary, fontSize: 13, fontWeight: FontWeight.w600)),
+                Text(
+                  'No events on this day',
+                  style: TextStyle(
+                    color: AppTheme.textSecondary,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ],
             ),
           )
@@ -1820,7 +2173,11 @@ class _DayEventsSection extends StatelessWidget {
 }
 
 class _DayEventRow extends StatelessWidget {
-  const _DayEventRow({required this.event, required this.onTap, required this.onDelete});
+  const _DayEventRow({
+    required this.event,
+    required this.onTap,
+    required this.onDelete,
+  });
 
   final CalendarEvent event;
   final VoidCallback onTap;
@@ -1849,7 +2206,10 @@ class _DayEventRow extends StatelessWidget {
               Container(
                 width: 4,
                 height: 36,
-                decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(2)),
+                decoration: BoxDecoration(
+                  color: color,
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
               const SizedBox(width: 10),
               Expanded(
@@ -1869,19 +2229,39 @@ class _DayEventRow extends StatelessWidget {
                     const SizedBox(height: 2),
                     Row(
                       children: [
-                        Icon(LucideIcons.clock, size: 11, color: AppTheme.textMuted),
+                        Icon(
+                          LucideIcons.clock,
+                          size: 11,
+                          color: AppTheme.textMuted,
+                        ),
                         const SizedBox(width: 4),
-                        Text(timeLabel,
-                            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppTheme.textMuted)),
+                        Text(
+                          timeLabel,
+                          style: const TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: AppTheme.textMuted,
+                          ),
+                        ),
                         if (event.location.isNotEmpty) ...[
                           const SizedBox(width: 8),
-                          Icon(LucideIcons.mapPin, size: 11, color: AppTheme.textMuted),
+                          Icon(
+                            LucideIcons.mapPin,
+                            size: 11,
+                            color: AppTheme.textMuted,
+                          ),
                           const SizedBox(width: 4),
                           Expanded(
-                            child: Text(event.location,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppTheme.textMuted)),
+                            child: Text(
+                              event.location,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: AppTheme.textMuted,
+                              ),
+                            ),
                           ),
                         ],
                       ],
@@ -1893,7 +2273,11 @@ class _DayEventRow extends StatelessWidget {
                 visualDensity: VisualDensity.compact,
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
-                icon: const Icon(LucideIcons.trash2, size: 16, color: AppTheme.danger),
+                icon: const Icon(
+                  LucideIcons.trash2,
+                  size: 16,
+                  color: AppTheme.danger,
+                ),
                 onPressed: onDelete,
               ),
             ],
@@ -1957,7 +2341,10 @@ class _DayRemindersSection extends StatelessWidget {
                 style: TextButton.styleFrom(
                   foregroundColor: AppTheme.primaryDark,
                   padding: EdgeInsets.zero,
-                  textStyle: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
+                  textStyle: const TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 13,
+                  ),
                 ),
               ),
           ],
@@ -1968,11 +2355,7 @@ class _DayRemindersSection extends StatelessWidget {
             padding: EdgeInsets.symmetric(vertical: 8),
             child: Row(
               children: [
-                Icon(
-                  LucideIcons.bellOff,
-                  size: 16,
-                  color: AppTheme.textMuted,
-                ),
+                Icon(LucideIcons.bellOff, size: 16, color: AppTheme.textMuted),
                 SizedBox(width: 10),
                 Text(
                   'No reminders on this day',
@@ -2020,11 +2403,7 @@ class _DayReminderRow extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Icon(
-            LucideIcons.bellRing,
-            size: 16,
-            color: Color(0xFFEA580C),
-          ),
+          const Icon(LucideIcons.bellRing, size: 16, color: Color(0xFFEA580C)),
           const SizedBox(width: 10),
           Expanded(
             child: Column(
@@ -2076,7 +2455,11 @@ class _DayReminderRow extends StatelessWidget {
               visualDensity: VisualDensity.compact,
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(),
-              icon: const Icon(LucideIcons.trash2, size: 16, color: AppTheme.danger),
+              icon: const Icon(
+                LucideIcons.trash2,
+                size: 16,
+                color: AppTheme.danger,
+              ),
               onPressed: onDelete,
             ),
           ],
@@ -2233,10 +2616,7 @@ class _DaySheetState extends State<_DaySheet> {
                           ),
                           TextButton.icon(
                             onPressed: widget.onAddNote,
-                            icon: const Icon(
-                              LucideIcons.plus,
-                              size: 14,
-                            ),
+                            icon: const Icon(LucideIcons.plus, size: 14),
                             label: const Text('Add note'),
                             style: TextButton.styleFrom(
                               foregroundColor: AppTheme.primaryDark,
@@ -2365,8 +2745,10 @@ class _DayNoteRow extends StatelessWidget {
                           final uri = Uri.tryParse(url);
                           if (uri == null) return;
                           Haptics.light();
-                          await launchUrl(uri,
-                              mode: LaunchMode.externalApplication);
+                          await launchUrl(
+                            uri,
+                            mode: LaunchMode.externalApplication,
+                          );
                         },
                       ),
                     ],
@@ -2461,10 +2843,14 @@ class _WeekDayRow extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: isToday ? kAppleRed.withValues(alpha: 0.06) : AppTheme.surface,
+            color: isToday
+                ? kAppleRed.withValues(alpha: 0.06)
+                : AppTheme.surface,
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
-              color: isToday ? kAppleRed.withValues(alpha: 0.3) : AppTheme.border,
+              color: isToday
+                  ? kAppleRed.withValues(alpha: 0.3)
+                  : AppTheme.border,
             ),
           ),
           child: Row(
@@ -2535,7 +2921,9 @@ class _WeekDayRow extends StatelessWidget {
                                     ),
                                   ),
                                   const SizedBox(width: 8),
-                                  if (item.isEvent && item.event != null && !item.event!.allDay)
+                                  if (item.isEvent &&
+                                      item.event != null &&
+                                      !item.event!.allDay)
                                     Text(
                                       '${_formatTime(item.event!.start)} ',
                                       style: const TextStyle(
@@ -2547,7 +2935,11 @@ class _WeekDayRow extends StatelessWidget {
                                   Expanded(
                                     child: Text(
                                       item.title.isEmpty
-                                          ? (item.isNote ? 'Untitled note' : item.isEvent ? 'Untitled event' : 'Untitled reminder')
+                                          ? (item.isNote
+                                                ? 'Untitled note'
+                                                : item.isEvent
+                                                ? 'Untitled event'
+                                                : 'Untitled reminder')
                                           : item.title,
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
@@ -2620,7 +3012,10 @@ class _DayView extends StatelessWidget {
     final events = items.where((e) => e.isEvent).map((e) => e.event!).toList()
       ..sort((a, b) => a.start.compareTo(b.start));
     final notes = items.where((e) => e.isNote).map((e) => e.note!).toList();
-    final reminders = items.where((e) => e.isReminder).map((e) => e.reminder!).toList();
+    final reminders = items
+        .where((e) => e.isReminder)
+        .map((e) => e.reminder!)
+        .toList();
     final isToday = _sameDay(day, today);
 
     return ListView(
@@ -2630,9 +3025,15 @@ class _DayView extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: isToday ? kAppleRed.withValues(alpha: 0.06) : AppTheme.surface,
+            color: isToday
+                ? kAppleRed.withValues(alpha: 0.06)
+                : AppTheme.surface,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: isToday ? kAppleRed.withValues(alpha: 0.2) : AppTheme.border),
+            border: Border.all(
+              color: isToday
+                  ? kAppleRed.withValues(alpha: 0.2)
+                  : AppTheme.border,
+            ),
           ),
           child: Row(
             children: [
@@ -2664,11 +3065,23 @@ class _DayView extends StatelessWidget {
               // Quick add buttons
               Row(
                 children: [
-                  _QuickAddButton(icon: LucideIcons.calendarPlus, label: 'Event', onTap: onAddEvent),
+                  _QuickAddButton(
+                    icon: LucideIcons.calendarPlus,
+                    label: 'Event',
+                    onTap: onAddEvent,
+                  ),
                   const SizedBox(width: 8),
-                  _QuickAddButton(icon: LucideIcons.bellPlus, label: 'Reminder', onTap: onAddReminder),
+                  _QuickAddButton(
+                    icon: LucideIcons.bellPlus,
+                    label: 'Reminder',
+                    onTap: onAddReminder,
+                  ),
                   const SizedBox(width: 8),
-                  _QuickAddButton(icon: LucideIcons.stickyNote, label: 'Note', onTap: onAddNote),
+                  _QuickAddButton(
+                    icon: LucideIcons.stickyNote,
+                    label: 'Note',
+                    onTap: onAddNote,
+                  ),
                 ],
               ),
             ],
@@ -2694,7 +3107,10 @@ class _DayView extends StatelessWidget {
         const _SectionLabel(icon: LucideIcons.bellRing, label: 'Reminders'),
         const SizedBox(height: 10),
         if (reminders.isEmpty)
-          const _EmptyHint(icon: LucideIcons.bellOff, text: 'No reminders on this day')
+          const _EmptyHint(
+            icon: LucideIcons.bellOff,
+            text: 'No reminders on this day',
+          )
         else
           for (final reminder in reminders)
             Padding(
@@ -2710,7 +3126,10 @@ class _DayView extends StatelessWidget {
         const _SectionLabel(icon: LucideIcons.notebookText, label: 'Notes'),
         const SizedBox(height: 10),
         if (notes.isEmpty)
-          const _EmptyHint(icon: LucideIcons.notebookPen, text: 'No notes on this day')
+          const _EmptyHint(
+            icon: LucideIcons.notebookPen,
+            text: 'No notes on this day',
+          )
         else
           for (final note in notes)
             Padding(
@@ -2727,7 +3146,11 @@ class _DayView extends StatelessWidget {
 }
 
 class _QuickAddButton extends StatelessWidget {
-  const _QuickAddButton({required this.icon, required this.label, required this.onTap});
+  const _QuickAddButton({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
   final IconData icon;
   final String label;
   final VoidCallback onTap;
@@ -2735,7 +3158,10 @@ class _QuickAddButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PressScale(
-      onTap: () { Haptics.light(); onTap(); },
+      onTap: () {
+        Haptics.light();
+        onTap();
+      },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
         decoration: BoxDecoration(
@@ -2747,7 +3173,14 @@ class _QuickAddButton extends StatelessWidget {
           children: [
             Icon(icon, size: 13, color: Colors.white),
             const SizedBox(width: 4),
-            Text(label, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: Colors.white)),
+            Text(
+              label,
+              style: const TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w800,
+                color: Colors.white,
+              ),
+            ),
           ],
         ),
       ),
@@ -2766,8 +3199,14 @@ class _SectionLabel extends StatelessWidget {
       children: [
         Icon(icon, size: 15, color: AppTheme.primaryDark),
         const SizedBox(width: 8),
-        Text(label,
-            style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w900, color: AppTheme.textPrimary)),
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 13.5,
+            fontWeight: FontWeight.w900,
+            color: AppTheme.textPrimary,
+          ),
+        ),
       ],
     );
   }
@@ -2786,8 +3225,14 @@ class _EmptyHint extends StatelessWidget {
         children: [
           Icon(icon, size: 16, color: AppTheme.textMuted),
           const SizedBox(width: 10),
-          Text(text,
-              style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13, fontWeight: FontWeight.w600)),
+          Text(
+            text,
+            style: const TextStyle(
+              color: AppTheme.textSecondary,
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
         ],
       ),
     );
@@ -2799,7 +3244,11 @@ class _EmptyHint extends StatelessWidget {
 /// A lightweight screen for creating/editing a reminder from the calendar.
 /// Reuses the RemindersApi directly.
 class _ReminderQuickEditor extends StatefulWidget {
-  const _ReminderQuickEditor({required this.session, required this.date, this.existing});
+  const _ReminderQuickEditor({
+    required this.session,
+    required this.date,
+    this.existing,
+  });
 
   final StaffSession session;
   final DateTime date;
@@ -2848,7 +3297,13 @@ class _ReminderQuickEditorState extends State<_ReminderQuickEditor> {
     );
     if (d == null) return;
     setState(() {
-      _selectedDateTime = DateTime(d.year, d.month, d.day, _selectedDateTime.hour, _selectedDateTime.minute);
+      _selectedDateTime = DateTime(
+        d.year,
+        d.month,
+        d.day,
+        _selectedDateTime.hour,
+        _selectedDateTime.minute,
+      );
     });
   }
 
@@ -2859,7 +3314,13 @@ class _ReminderQuickEditorState extends State<_ReminderQuickEditor> {
     );
     if (t == null) return;
     setState(() {
-      _selectedDateTime = DateTime(_selectedDateTime.year, _selectedDateTime.month, _selectedDateTime.day, t.hour, t.minute);
+      _selectedDateTime = DateTime(
+        _selectedDateTime.year,
+        _selectedDateTime.month,
+        _selectedDateTime.day,
+        t.hour,
+        t.minute,
+      );
     });
   }
 
@@ -2891,7 +3352,10 @@ class _ReminderQuickEditorState extends State<_ReminderQuickEditor> {
         );
       }
       if (!mounted) return;
-      AppToast.success(context, widget.existing != null ? 'Reminder updated.' : 'Reminder created.');
+      AppToast.success(
+        context,
+        widget.existing != null ? 'Reminder updated.' : 'Reminder created.',
+      );
       Navigator.of(context).pop(true);
     } on ApiException catch (e) {
       if (!mounted) return;
@@ -2910,11 +3374,20 @@ class _ReminderQuickEditorState extends State<_ReminderQuickEditor> {
         backgroundColor: AppTheme.surface,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(LucideIcons.chevronLeft, color: AppTheme.textPrimary),
+          icon: const Icon(
+            LucideIcons.chevronLeft,
+            color: AppTheme.textPrimary,
+          ),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: Text(isEdit ? 'Edit Reminder' : 'New Reminder',
-            style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 18, color: AppTheme.textPrimary)),
+        title: Text(
+          isEdit ? 'Edit Reminder' : 'New Reminder',
+          style: const TextStyle(
+            fontWeight: FontWeight.w900,
+            fontSize: 18,
+            color: AppTheme.textPrimary,
+          ),
+        ),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -2924,14 +3397,20 @@ class _ReminderQuickEditorState extends State<_ReminderQuickEditor> {
             children: [
               TextField(
                 controller: _titleController,
-                decoration: const InputDecoration(labelText: 'Title', hintText: 'Reminder title'),
+                decoration: const InputDecoration(
+                  labelText: 'Title',
+                  hintText: 'Reminder title',
+                ),
                 textCapitalization: TextCapitalization.sentences,
               ),
               const SizedBox(height: 16),
               TextField(
                 controller: _descController,
                 maxLines: 3,
-                decoration: const InputDecoration(labelText: 'Description', hintText: 'Optional details'),
+                decoration: const InputDecoration(
+                  labelText: 'Description',
+                  hintText: 'Optional details',
+                ),
                 textCapitalization: TextCapitalization.sentences,
               ),
               const SizedBox(height: 16),
@@ -2941,7 +3420,8 @@ class _ReminderQuickEditorState extends State<_ReminderQuickEditor> {
                     child: _PickerField(
                       icon: LucideIcons.calendar,
                       label: 'Date',
-                      value: '${_selectedDateTime.month}/${_selectedDateTime.day}/${_selectedDateTime.year}',
+                      value:
+                          '${_selectedDateTime.month}/${_selectedDateTime.day}/${_selectedDateTime.year}',
                       onTap: _pickDate,
                     ),
                   ),
@@ -2957,15 +3437,25 @@ class _ReminderQuickEditorState extends State<_ReminderQuickEditor> {
                 ],
               ),
               const SizedBox(height: 16),
-              const Text('Repeat',
-                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: AppTheme.textSecondary)),
+              const Text(
+                'Repeat',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w800,
+                  color: AppTheme.textSecondary,
+                ),
+              ),
               const SizedBox(height: 8),
               Wrap(
                 spacing: 8,
                 children: [
                   for (final r in ['once', 'monthly', 'yearly'])
                     _RecurrenceChip(
-                      label: r == 'once' ? 'One-time' : r == 'monthly' ? 'Monthly' : 'Yearly',
+                      label: r == 'once'
+                          ? 'One-time'
+                          : r == 'monthly'
+                          ? 'Monthly'
+                          : 'Yearly',
                       selected: _recurrence == r,
                       onTap: () => setState(() => _recurrence = r),
                     ),
@@ -2979,9 +3469,21 @@ class _ReminderQuickEditorState extends State<_ReminderQuickEditor> {
                   minimumSize: const Size(0, 50),
                 ),
                 child: _saving
-                    ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                    : Text(isEdit ? 'Update Reminder' : 'Create Reminder',
-                        style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15)),
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : Text(
+                        isEdit ? 'Update Reminder' : 'Create Reminder',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 15,
+                        ),
+                      ),
               ),
             ],
           ),
@@ -2992,7 +3494,12 @@ class _ReminderQuickEditorState extends State<_ReminderQuickEditor> {
 }
 
 class _PickerField extends StatelessWidget {
-  const _PickerField({required this.icon, required this.label, required this.value, required this.onTap});
+  const _PickerField({
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.onTap,
+  });
   final IconData icon;
   final String label;
   final String value;
@@ -3009,14 +3516,21 @@ class _PickerField extends StatelessWidget {
           prefixIcon: Icon(icon, size: 18),
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         ),
-        child: Text(value, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14)),
+        child: Text(
+          value,
+          style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
+        ),
       ),
     );
   }
 }
 
 class _RecurrenceChip extends StatelessWidget {
-  const _RecurrenceChip({required this.label, required this.selected, required this.onTap});
+  const _RecurrenceChip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
   final String label;
   final bool selected;
   final VoidCallback onTap;
@@ -3030,16 +3544,19 @@ class _RecurrenceChip extends StatelessWidget {
         decoration: BoxDecoration(
           color: selected ? AppTheme.primaryDark : AppTheme.surfaceMuted,
           borderRadius: BorderRadius.circular(99),
-          border: Border.all(color: selected ? AppTheme.primaryDark : AppTheme.border),
+          border: Border.all(
+            color: selected ? AppTheme.primaryDark : AppTheme.border,
+          ),
         ),
-        child: Text(label,
-            style: TextStyle(
-              fontSize: 12.5,
-              fontWeight: FontWeight.w800,
-              color: selected ? Colors.white : AppTheme.textSecondary,
-            )),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 12.5,
+            fontWeight: FontWeight.w800,
+            color: selected ? Colors.white : AppTheme.textSecondary,
+          ),
+        ),
       ),
     );
   }
 }
-

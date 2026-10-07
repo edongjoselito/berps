@@ -50,7 +50,8 @@ class _NotesScreenState extends State<NotesScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => _NoteEditorSheet(session: widget.session, existing: existing),
+      builder: (_) =>
+          _NoteEditorSheet(session: widget.session, existing: existing),
     );
     if (saved == true) _reload();
   }
@@ -122,16 +123,18 @@ class _NotesScreenState extends State<NotesScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.background,
-      floatingActionButton: AppTheme.isDesktop ? null : FloatingActionButton.extended(
-        backgroundColor: AppTheme.primaryDark,
-        foregroundColor: Colors.white,
-        onPressed: () => _openEditor(),
-        icon: const Icon(LucideIcons.plus, size: 18),
-        label: const Text(
-          'New note',
-          style: TextStyle(fontWeight: FontWeight.w800),
-        ),
-      ),
+      floatingActionButton: AppTheme.isDesktop
+          ? null
+          : FloatingActionButton.extended(
+              backgroundColor: AppTheme.primaryDark,
+              foregroundColor: Colors.white,
+              onPressed: () => _openEditor(),
+              icon: const Icon(LucideIcons.plus, size: 18),
+              label: const Text(
+                'New note',
+                style: TextStyle(fontWeight: FontWeight.w800),
+              ),
+            ),
       body: SafeArea(
         bottom: false,
         child: FutureBuilder<List<Note>>(
@@ -198,16 +201,7 @@ class _NotesScreenState extends State<NotesScreen> {
                         title: 'Favorites',
                       ),
                       const SizedBox(height: 10),
-                      for (var i = 0; i < favorites.length; i++)
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 10),
-                          child: _NoteCard(
-                            note: favorites[i],
-                            onTap: () => _openEditor(existing: favorites[i]),
-                            onFavorite: () => _toggleFavorite(favorites[i]),
-                            onDelete: () => _confirmDelete(favorites[i]),
-                          ),
-                        ),
+                      _noteCollection(favorites),
                       const SizedBox(height: 14),
                     ],
                     if (others.isNotEmpty) ...[
@@ -217,19 +211,7 @@ class _NotesScreenState extends State<NotesScreen> {
                           title: 'All notes',
                         ),
                       if (favorites.isNotEmpty) const SizedBox(height: 10),
-                      for (var i = 0; i < others.length; i++)
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 10),
-                          child: FadeSlide(
-                            delay: Duration(milliseconds: 40 * i),
-                            child: _NoteCard(
-                              note: others[i],
-                              onTap: () => _openEditor(existing: others[i]),
-                              onFavorite: () => _toggleFavorite(others[i]),
-                              onDelete: () => _confirmDelete(others[i]),
-                            ),
-                          ),
-                        ),
+                      _noteCollection(others),
                     ],
                   ],
                 ],
@@ -238,6 +220,47 @@ class _NotesScreenState extends State<NotesScreen> {
           },
         ),
       ),
+    );
+  }
+
+  /// Mobile: stacked cards. Desktop: a fixed-width card grid — notes are
+  /// content blocks, not table rows.
+  Widget _noteCollection(List<Note> notes) {
+    Widget cardFor(Note note, int i) => _NoteCard(
+      note: note,
+      onTap: () => _openEditor(existing: note),
+      onFavorite: () => _toggleFavorite(note),
+      onDelete: () => _confirmDelete(note),
+    );
+
+    if (!AppTheme.isDesktop) {
+      return Column(
+        children: [
+          for (var i = 0; i < notes.length; i++)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: FadeSlide(
+                delay: Duration(milliseconds: 40 * i),
+                child: cardFor(notes[i], i),
+              ),
+            ),
+        ],
+      );
+    }
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final cols = (constraints.maxWidth ~/ 330).clamp(1, 4);
+        final cardWidth = (constraints.maxWidth - (cols - 1) * 12) / cols;
+        return Wrap(
+          spacing: 12,
+          runSpacing: 12,
+          children: [
+            for (var i = 0; i < notes.length; i++)
+              SizedBox(width: cardWidth, child: cardFor(notes[i], i)),
+          ],
+        );
+      },
     );
   }
 }
@@ -314,9 +337,7 @@ class _NoteCard extends StatelessWidget {
                   child: Padding(
                     padding: const EdgeInsets.only(left: 6),
                     child: Icon(
-                      note.isFavorite
-                          ? LucideIcons.star
-                          : LucideIcons.star,
+                      note.isFavorite ? LucideIcons.star : LucideIcons.star,
                       size: 18,
                       color: note.isFavorite
                           ? const Color(0xFFF59E0B)
@@ -373,9 +394,7 @@ class _NoteCard extends StatelessWidget {
               Wrap(
                 spacing: 6,
                 runSpacing: 6,
-                children: [
-                  for (final tag in note.tags) _TagChip(tag: tag),
-                ],
+                children: [for (final tag in note.tags) _TagChip(tag: tag)],
               ),
             ],
             const SizedBox(height: 10),
@@ -452,10 +471,12 @@ class _NoteEditorSheetState extends State<_NoteEditorSheet> {
     super.initState();
     final existing = widget.existing;
     _titleController = TextEditingController(text: existing?.title ?? '');
-    _descriptionController =
-        TextEditingController(text: htmlToPlainText(existing?.description ?? ''));
-    _tagsController =
-        TextEditingController(text: existing?.tags.join(', ') ?? '');
+    _descriptionController = TextEditingController(
+      text: htmlToPlainText(existing?.description ?? ''),
+    );
+    _tagsController = TextEditingController(
+      text: existing?.tags.join(', ') ?? '',
+    );
   }
 
   @override
@@ -579,8 +600,10 @@ class _NoteEditorSheetState extends State<_NoteEditorSheet> {
                 controller: _titleController,
                 textCapitalization: TextCapitalization.sentences,
                 decoration: const InputDecoration(
-                  contentPadding:
-                      EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 14,
+                  ),
                 ),
               ),
               const SizedBox(height: 14),
@@ -591,8 +614,10 @@ class _NoteEditorSheetState extends State<_NoteEditorSheet> {
                 minLines: 3,
                 maxLines: 8,
                 decoration: const InputDecoration(
-                  contentPadding:
-                      EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 14,
+                  ),
                 ),
               ),
               const SizedBox(height: 14),
@@ -600,8 +625,10 @@ class _NoteEditorSheetState extends State<_NoteEditorSheet> {
               TextField(
                 controller: _tagsController,
                 decoration: const InputDecoration(
-                  contentPadding:
-                      EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 14,
+                  ),
                 ),
               ),
               const SizedBox(height: 20),

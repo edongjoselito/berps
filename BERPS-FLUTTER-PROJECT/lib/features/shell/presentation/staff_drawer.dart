@@ -25,7 +25,6 @@ class StaffDrawer extends StatelessWidget {
     required this.onSelectReminders,
     required this.onSelectAnnualGoals,
     required this.onSelectSupportDashboard,
-    required this.onSelectUnassignedTickets,
     required this.onSelectForwardedTasks,
     required this.onSelectTickets,
     required this.onSignOut,
@@ -46,7 +45,6 @@ class StaffDrawer extends StatelessWidget {
   final VoidCallback onSelectReminders;
   final VoidCallback onSelectAnnualGoals;
   final VoidCallback onSelectSupportDashboard;
-  final VoidCallback onSelectUnassignedTickets;
   final VoidCallback onSelectForwardedTasks;
   final VoidCallback onSelectTickets;
   final Future<void> Function() onSignOut;
@@ -93,13 +91,6 @@ class StaffDrawer extends StatelessWidget {
         ),
         if (session.hasTasks)
           _NavSpec('tasks', LucideIcons.listChecks, 'Tasks', onSelectTasks),
-        if (session.hasSupport)
-          _NavSpec(
-            'unassigned-tickets',
-            LucideIcons.userMinus,
-            'Unassigned Tickets',
-            onSelectUnassignedTickets,
-          ),
         if (session.hasForwardedTasks)
           _NavSpec(
             'forwarded-tasks',

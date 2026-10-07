@@ -141,7 +141,6 @@ void main() {
     // ── Walk every sidebar module ──
     final modules = <String>[
       'Tasks',
-      'Unassigned Tickets',
       'Forwarded Tasks',
       'Tickets',
       'Support Dashboard',
