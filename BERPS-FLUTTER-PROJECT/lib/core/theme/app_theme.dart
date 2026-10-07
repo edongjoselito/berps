@@ -43,7 +43,7 @@ class AppTheme {
 
   /// Product/release branding — single source of truth so footers, the auth
   /// side panel and the status bar never drift apart.
-  static const String appVersion = '1.0.2';
+  static const String appVersion = '1.0.3';
   static String get productName => isDesktop ? 'BERPS Desktop' : 'BERPS Mobile';
   static String get productLabel => '$productName · v$appVersion';
 
