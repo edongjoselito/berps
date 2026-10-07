@@ -1,0 +1,24 @@
+{
+  "name": "BERPS Staff Portal",
+  "short_name": "BERPS Staff",
+  "description": "BERPS staff portal - tasks, attendance, and business operations.",
+  "start_url": "./page/staff",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1f5bc6",
+  "icons": [
+    {
+      "src": "assets/images/icons/berps-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/images/icons/berps-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

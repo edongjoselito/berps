@@ -8,6 +8,9 @@
     <?php include_once __DIR__ . '/page-experience.php'; ?>
     <!-- App favicon -->
     <link rel="shortcut icon" href="<?= base_url(); ?>assets/images/favicon.png">
+    <meta name="theme-color" content="#1f5bc6">
+    <link rel="manifest" href="<?= base_url('manifest.webmanifest?v=1'); ?>">
+    <link rel="apple-touch-icon" href="<?= base_url('assets/images/icons/berps-192.png'); ?>">
 
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 

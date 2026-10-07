@@ -11,7 +11,8 @@
     <title>BERPS - Business Resource Planning System</title>
 
     <link rel="icon" type="image/png" href="<?= base_url('assets/images/logo-sm1.png'); ?>">
-    <link rel="apple-touch-icon" sizes="180x180" href="<?= base_url('assets/images/logo-sm1.png'); ?>">
+    <link rel="apple-touch-icon" sizes="180x180" href="<?= base_url('assets/images/icons/berps-192.png'); ?>">
+    <link rel="manifest" href="<?= base_url('manifest.webmanifest?v=1'); ?>">
     <link rel="stylesheet" href="<?= base_url('assets/css/fonts.css'); ?>">
     <link rel="stylesheet" href="<?= base_url('assets/css/berps-design-system.css'); ?>?v=20260722-5">
     <link rel="stylesheet" href="<?= base_url('assets/plugins/fontawesome-free/css/all.min.css'); ?>">
