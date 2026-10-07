@@ -3,6 +3,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/network/api_exception.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/desktop_kit.dart';
 import '../../../core/utils/haptics.dart';
 import '../../../core/utils/responsive.dart';
 import '../../../core/widgets/animations.dart';
@@ -297,6 +298,24 @@ class _TotalsGrid extends StatelessWidget {
         const [Color(0xFF0891B2), Color(0xFF0E7490)],
       ),
     ];
+
+    if (AppTheme.isDesktop) {
+      return Row(
+        children: [
+          for (var i = 0; i < cells.length; i++) ...[
+            if (i > 0) const SizedBox(width: 12),
+            Expanded(
+              child: DeskStatCard(
+                icon: cells[i].icon,
+                label: cells[i].label,
+                value: '${cells[i].value}',
+                accent: cells[i].gradient[0],
+              ),
+            ),
+          ],
+        ],
+      );
+    }
 
     return LayoutBuilder(
       builder: (context, constraints) {

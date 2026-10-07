@@ -236,9 +236,10 @@ class _GreetingCard extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(18, 18, 18, 18),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius:
+            BorderRadius.circular(AppTheme.isDesktop ? 14 : 20),
         border: Border.all(color: AppTheme.border),
-        boxShadow: AppTheme.shadowSoft,
+        boxShadow: AppTheme.isDesktop ? null : AppTheme.shadowSoft,
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -695,14 +696,18 @@ class _DtrPreviewCard extends StatelessWidget {
         gradient: const LinearGradient(
           colors: [Color(0xFF1E3A5F), Color(0xFF2D5A8A)],
         ),
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF1E3A5F).withValues(alpha: 0.20),
-            blurRadius: 16,
-            offset: const Offset(0, 6),
-          ),
-        ],
+        borderRadius:
+            BorderRadius.circular(AppTheme.isDesktop ? 14 : 18),
+        boxShadow: AppTheme.isDesktop
+            ? null
+            : [
+                BoxShadow(
+                  color:
+                      const Color(0xFF1E3A5F).withValues(alpha: 0.20),
+                  blurRadius: 16,
+                  offset: const Offset(0, 6),
+                ),
+              ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -923,6 +928,17 @@ class _MetricGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
+        if (AppTheme.isDesktop && constraints.maxWidth >= 720) {
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              for (var i = 0; i < cards.length; i++) ...[
+                if (i > 0) const SizedBox(width: 12),
+                Expanded(child: _MetricCard(data: cards[i])),
+              ],
+            ],
+          );
+        }
         final tileWidth = (constraints.maxWidth - 12) / 2;
         return Wrap(
           spacing: 12,
@@ -950,9 +966,10 @@ class _MetricCard extends StatelessWidget {
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius:
+            BorderRadius.circular(AppTheme.isDesktop ? 14 : 18),
         border: Border.all(color: AppTheme.border),
-        boxShadow: AppTheme.shadowSoft,
+        boxShadow: AppTheme.isDesktop ? null : AppTheme.shadowSoft,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

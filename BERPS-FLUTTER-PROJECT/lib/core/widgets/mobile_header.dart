@@ -52,11 +52,11 @@ class MobileHeader extends StatelessWidget {
                 title,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontSize: 22,
+                style: TextStyle(
+                  fontSize: AppTheme.isDesktop ? 24 : 22,
                   fontWeight: FontWeight.w900,
                   color: AppTheme.textPrimary,
-                  letterSpacing: -0.5,
+                  letterSpacing: -0.6,
                 ),
               ),
               if (subtitle?.trim().isNotEmpty == true) ...[
@@ -95,22 +95,23 @@ class MobileHeaderButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final desktop = AppTheme.isDesktop;
     return PressScale(
       onTap: onTap,
       child: Container(
-        width: 44,
-        height: 44,
+        width: desktop ? 40 : 44,
+        height: desktop ? 40 : 44,
         decoration: BoxDecoration(
           color: filled ? AppTheme.primaryDark : Colors.white,
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(desktop ? 11 : 14),
           border: Border.all(
             color: filled ? AppTheme.primaryDark : AppTheme.border,
           ),
-          boxShadow: AppTheme.shadowSoft,
+          boxShadow: desktop ? null : AppTheme.shadowSoft,
         ),
         child: Icon(
           icon,
-          size: 20,
+          size: desktop ? 19 : 20,
           color: filled ? Colors.white : AppTheme.textPrimary,
         ),
       ),
@@ -170,6 +171,18 @@ class MobileSurfaceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (AppTheme.isDesktop) {
+      // Flat desktop surface — hairline border, tight radius, no drop shadow.
+      return Container(
+        padding: padding,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: AppTheme.border),
+        ),
+        child: child,
+      );
+    }
     return Container(
       padding: padding,
       decoration: BoxDecoration(

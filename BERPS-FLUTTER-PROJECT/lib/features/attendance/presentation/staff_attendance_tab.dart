@@ -3,6 +3,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/network/api_exception.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/desktop_kit.dart';
 import '../../../core/utils/date_formatters.dart';
 import '../../../core/utils/haptics.dart';
 import '../../../core/utils/responsive.dart';
@@ -455,6 +456,166 @@ class _PunchHeroCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hasOpenSlot = data.status.openSlotLabel.isNotEmpty;
+
+    if (AppTheme.isDesktop) {
+      return Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: AppTheme.border),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        width: 38,
+                        height: 38,
+                        decoration: BoxDecoration(
+                          color: AppTheme.primarySoft,
+                          borderRadius: BorderRadius.circular(11),
+                        ),
+                        child: const Icon(
+                          LucideIcons.calendarCheck,
+                          size: 18,
+                          color: AppTheme.primaryDark,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      const Text(
+                        "Today's Attendance",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w900,
+                          color: AppTheme.textPrimary,
+                          letterSpacing: -0.3,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      if (data.status.canTimeIn)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 3,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppTheme.accent.withValues(alpha: 0.14),
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                          child: const Text(
+                            'READY',
+                            style: TextStyle(
+                              color: AppTheme.warning,
+                              fontSize: 9.5,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 1.2,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    data.status.statusLabel,
+                    style: const TextStyle(
+                      color: AppTheme.textSecondary,
+                      height: 1.45,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                    ),
+                  ),
+                  if (hasOpenSlot) ...[
+                    const SizedBox(height: 10),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 5,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppTheme.primarySoft,
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            LucideIcons.clock,
+                            color: AppTheme.primaryDark,
+                            size: 12,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            '${data.status.openSlotLabel} shift open',
+                            style: const TextStyle(
+                              color: AppTheme.primaryDark,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 11.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            const SizedBox(width: 24),
+            Column(
+              children: [
+                _DeskPunchMetric(
+                  label: 'Time In',
+                  value: data.status.latestTimeInLabel.isEmpty
+                      ? '--'
+                      : data.status.latestTimeInLabel,
+                  icon: LucideIcons.logIn,
+                  color: AppTheme.success,
+                ),
+                const SizedBox(height: 10),
+                _DeskPunchMetric(
+                  label: 'Time Out',
+                  value: data.status.latestTimeOutLabel.isEmpty
+                      ? '--'
+                      : data.status.latestTimeOutLabel,
+                  icon: LucideIcons.logOut,
+                  color: AppTheme.primaryDark,
+                ),
+              ],
+            ),
+            const SizedBox(width: 24),
+            Column(
+              children: [
+                SizedBox(
+                  width: 168,
+                  child: _PunchButton(
+                    label: 'Time In',
+                    icon: LucideIcons.logIn,
+                    primary: true,
+                    onTap: onTimeIn,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                SizedBox(
+                  width: 168,
+                  child: _PunchButton(
+                    label: 'Time Out',
+                    icon: LucideIcons.logOut,
+                    primary: false,
+                    onTap: onTimeOut,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+    }
+
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
@@ -688,6 +849,64 @@ class _PunchButton extends StatelessWidget {
   }
 }
 
+/// Compact horizontal metric used by the desktop punch hero.
+class _DeskPunchMetric extends StatelessWidget {
+  const _DeskPunchMetric({
+    required this.label,
+    required this.value,
+    required this.icon,
+    required this.color,
+  });
+
+  final String label;
+  final String value;
+  final IconData icon;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 190,
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: AppTheme.surfaceMuted,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppTheme.border),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, size: 15, color: color),
+          const SizedBox(width: 10),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 10.5,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.3,
+                  color: AppTheme.textMuted,
+                ),
+              ),
+              const SizedBox(height: 1),
+              Text(
+                value,
+                style: const TextStyle(
+                  fontSize: 14.5,
+                  fontWeight: FontWeight.w900,
+                  color: AppTheme.textPrimary,
+                  letterSpacing: -0.2,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _PunchMetricCard extends StatelessWidget {
   const _PunchMetricCard({
     required this.label,
@@ -783,6 +1002,24 @@ class _SummaryRow extends StatelessWidget {
         const [Color(0xFF2563EB), Color(0xFF1D4ED8)],
       ),
     ];
+
+    if (AppTheme.isDesktop) {
+      return Row(
+        children: [
+          for (var i = 0; i < items.length; i++) ...[
+            if (i > 0) const SizedBox(width: 12),
+            Expanded(
+              child: DeskStatCard(
+                icon: items[i].icon,
+                label: items[i].label,
+                value: items[i].value,
+                accent: items[i].color,
+              ),
+            ),
+          ],
+        ],
+      );
+    }
 
     return LayoutBuilder(
       builder: (context, constraints) {

@@ -3,6 +3,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/network/api_exception.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/desktop_kit.dart';
 import '../../../core/utils/haptics.dart';
 import '../../../core/utils/responsive.dart';
 import '../../../core/widgets/animations.dart';
@@ -481,39 +482,71 @@ class _SummaryCard extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: _StatCard(
-                icon: LucideIcons.circleCheck,
-                label: 'Present',
-                value: data.presentDays.toString(),
-                color: AppTheme.success,
-                gradient: const [Color(0xFF16A34A), Color(0xFF15803D)],
+        if (AppTheme.isDesktop)
+          Row(
+            children: [
+              Expanded(
+                child: DeskStatCard(
+                  icon: LucideIcons.circleCheck,
+                  label: 'Present',
+                  value: data.presentDays.toString(),
+                  accent: AppTheme.success,
+                ),
               ),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: _StatCard(
-                icon: LucideIcons.circleX,
-                label: 'Absent',
-                value: data.absentDays.toString(),
-                color: AppTheme.danger,
-                gradient: const [Color(0xFFDC2626), Color(0xFFB91C1C)],
+              const SizedBox(width: 12),
+              Expanded(
+                child: DeskStatCard(
+                  icon: LucideIcons.circleX,
+                  label: 'Absent',
+                  value: data.absentDays.toString(),
+                  accent: AppTheme.danger,
+                ),
               ),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: _StatCard(
-                icon: LucideIcons.clock,
-                label: 'Pending',
-                value: data.pendingDays.toString(),
-                color: AppTheme.warning,
-                gradient: const [Color(0xFFF59E0B), Color(0xFFD97706)],
+              const SizedBox(width: 12),
+              Expanded(
+                child: DeskStatCard(
+                  icon: LucideIcons.clock,
+                  label: 'Pending',
+                  value: data.pendingDays.toString(),
+                  accent: AppTheme.warning,
+                ),
               ),
-            ),
-          ],
-        ),
+            ],
+          )
+        else
+          Row(
+            children: [
+              Expanded(
+                child: _StatCard(
+                  icon: LucideIcons.circleCheck,
+                  label: 'Present',
+                  value: data.presentDays.toString(),
+                  color: AppTheme.success,
+                  gradient: const [Color(0xFF16A34A), Color(0xFF15803D)],
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _StatCard(
+                  icon: LucideIcons.circleX,
+                  label: 'Absent',
+                  value: data.absentDays.toString(),
+                  color: AppTheme.danger,
+                  gradient: const [Color(0xFFDC2626), Color(0xFFB91C1C)],
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _StatCard(
+                  icon: LucideIcons.clock,
+                  label: 'Pending',
+                  value: data.pendingDays.toString(),
+                  color: AppTheme.warning,
+                  gradient: const [Color(0xFFF59E0B), Color(0xFFD97706)],
+                ),
+              ),
+            ],
+          ),
         const SizedBox(height: 14),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),

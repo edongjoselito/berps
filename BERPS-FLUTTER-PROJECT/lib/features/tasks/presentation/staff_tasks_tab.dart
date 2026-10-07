@@ -3,6 +3,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/network/api_exception.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/desktop_kit.dart';
 import '../../../core/utils/date_formatters.dart';
 import '../../../core/utils/haptics.dart';
 import '../../../core/utils/responsive.dart';
@@ -553,20 +554,43 @@ class _StaffTasksTabState extends State<StaffTasksTab> {
                   ),
                 ),
                 const SizedBox(height: 10),
-                ...snapshot.data!.tasks.asMap().entries.map(
-                  (entry) => Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: FadeSlide(
-                      delay: Duration(milliseconds: 200 + 40 * entry.key),
-                      child: _TaskCard(
-                        task: entry.value,
-                        onTap: () =>
-                            _openTaskActions(snapshot.data!, entry.value),
+                if (snapshot.data!.tasks.isEmpty)
+                  const _TaskEmptyState()
+                else if (AppTheme.isDesktop)
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      final colWidth = (constraints.maxWidth - 14) / 2;
+                      return Wrap(
+                        spacing: 14,
+                        runSpacing: 14,
+                        children: [
+                          for (final task in snapshot.data!.tasks)
+                            SizedBox(
+                              width: colWidth,
+                              child: _TaskCard(
+                                task: task,
+                                onTap: () =>
+                                    _openTaskActions(snapshot.data!, task),
+                              ),
+                            ),
+                        ],
+                      );
+                    },
+                  )
+                else
+                  ...snapshot.data!.tasks.asMap().entries.map(
+                    (entry) => Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: FadeSlide(
+                        delay: Duration(milliseconds: 200 + 40 * entry.key),
+                        child: _TaskCard(
+                          task: entry.value,
+                          onTap: () =>
+                              _openTaskActions(snapshot.data!, entry.value),
+                        ),
                       ),
                     ),
                   ),
-                ),
-                if (snapshot.data!.tasks.isEmpty) const _TaskEmptyState(),
               ],
             ],
           );
@@ -623,6 +647,26 @@ class _TaskStatsRow extends StatelessWidget {
         'done',
       ),
     ];
+
+    if (AppTheme.isDesktop) {
+      return Row(
+        children: [
+          for (var i = 0; i < items.length; i++) ...[
+            if (i > 0) const SizedBox(width: 12),
+            Expanded(
+              child: DeskStatCard(
+                icon: items[i].icon,
+                label: items[i].label,
+                value: items[i].value,
+                accent: items[i].color,
+                selected: activeFilter == items[i].filterKey,
+                onTap: () => onStatTap(items[i].filterKey),
+              ),
+            ),
+          ],
+        ],
+      );
+    }
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -1146,16 +1190,17 @@ class _TaskCard extends StatelessWidget {
       _ => AppTheme.success,
     };
 
+    final radius = AppTheme.isDesktop ? 14.0 : 20.0;
     return PressScale(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(20),
+      borderRadius: BorderRadius.circular(radius),
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(radius),
           border: Border.all(color: AppTheme.border),
-          boxShadow: AppTheme.shadowSoft,
+          boxShadow: AppTheme.isDesktop ? null : AppTheme.shadowSoft,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
