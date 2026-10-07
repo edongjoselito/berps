@@ -152,6 +152,8 @@ jobs:
     needs: [prepare, macos, windows, linux]
     if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     env:
       APP_VERSION: ${{ needs.prepare.outputs.version }}
     steps:
