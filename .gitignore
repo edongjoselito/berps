@@ -1,14 +1,38 @@
 # macOS
 .DS_Store
 **/.DS_Store
+._*
 __MACOSX/
 .AppleDouble
 .LSOverride
 .Spotlight-V100
 .Trashes
+.fseventsd
+.DocumentRevisions-V100
+.TemporaryItems
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# Linux
+*~
+.fuse_hidden*
+.Trash-*
+
+# Editors / IDEs
+*.swp
+*.swo
+*.swn
+*.bak
+*.tmp
+*.orig
+.idea/
+.vscode/
 
 # CodeIgniter session files (keep the dir, its .htaccess and index.html)
 application/sessions/ci_session*
-.DS_Store
-.DS_Store
-.DS_Store
