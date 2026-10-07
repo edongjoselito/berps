@@ -74,9 +74,9 @@ jobs:
       - name: Build Windows app
         working-directory: ${{ env.APP_DIR }}
         run: |
+          flutter doctor -v
           flutter pub get
-          flutter build windows --release `
-            --dart-define=BERPS_DEFAULT_BASE_URL=${{ env.API_URL }}
+          flutter build windows --release --dart-define=BERPS_DEFAULT_BASE_URL=${{ env.API_URL }}
       - name: Build installer
         working-directory: ${{ env.APP_DIR }}
         run: |
