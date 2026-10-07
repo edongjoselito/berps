@@ -865,18 +865,16 @@
                 <span class="download-platform">macOS</span>
                 <span class="download-meta">BERPS.dmg · Apple Silicon · macOS 12+</span>
             </a>
-            <div class="download-card disabled">
+            <a class="download-card" href="<?= base_url('downloads/BERPS-Setup.exe'); ?>" download>
                 <span class="os-icon windows"><i class="fab fa-windows"></i></span>
                 <span class="download-platform">Windows</span>
-                <span class="download-meta">.exe installer · Windows 10+</span>
-                <span class="download-soon">Coming soon</span>
-            </div>
-            <div class="download-card disabled">
+                <span class="download-meta">BERPS-Setup.exe · Windows 10+</span>
+            </a>
+            <a class="download-card" href="<?= base_url('downloads/BERPS-amd64.deb'); ?>" download>
                 <span class="os-icon linux"><i class="fab fa-linux"></i></span>
                 <span class="download-platform">Linux</span>
-                <span class="download-meta">AppImage · .deb</span>
-                <span class="download-soon">Coming soon</span>
-            </div>
+                <span class="download-meta">BERPS-amd64.deb · Ubuntu/Debian</span>
+            </a>
         </div>
         <p class="download-note">
             macOS install: open <code>BERPS.dmg</code>, drag BERPS into <code>Applications</code>. On first launch,
