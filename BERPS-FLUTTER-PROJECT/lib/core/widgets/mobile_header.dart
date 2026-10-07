@@ -6,8 +6,8 @@ class MobileHeader extends StatelessWidget {
   const MobileHeader({
     super.key,
     required this.title,
-    required this.leadingIcon,
-    required this.onLeadingTap,
+    this.leadingIcon,
+    this.onLeadingTap,
     this.subtitle,
     this.trailingIcon,
     this.onTrailingTap,
@@ -16,8 +16,8 @@ class MobileHeader extends StatelessWidget {
 
   final String title;
   final String? subtitle;
-  final IconData leadingIcon;
-  final VoidCallback onLeadingTap;
+  final IconData? leadingIcon;
+  final VoidCallback? onLeadingTap;
   final IconData? trailingIcon;
   final VoidCallback? onTrailingTap;
   final Widget? trailing;
@@ -40,8 +40,10 @@ class MobileHeader extends StatelessWidget {
 
     return Row(
       children: [
-        MobileHeaderButton(icon: leadingIcon, onTap: onLeadingTap),
-        const SizedBox(width: 12),
+        if (leadingIcon != null && onLeadingTap != null) ...[
+          MobileHeaderButton(icon: leadingIcon!, onTap: onLeadingTap!),
+          const SizedBox(width: 12),
+        ],
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

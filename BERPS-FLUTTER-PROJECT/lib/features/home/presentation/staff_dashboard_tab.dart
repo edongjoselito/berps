@@ -28,7 +28,7 @@ class StaffDashboardTab extends StatefulWidget {
   const StaffDashboardTab({
     super.key,
     required this.session,
-    required this.onMenu,
+    this.onMenu,
     required this.onOpenAttendance,
     required this.onOpenTasks,
     required this.onOpenMyDtr,
@@ -42,7 +42,7 @@ class StaffDashboardTab extends StatefulWidget {
   });
 
   final StaffSession session;
-  final VoidCallback onMenu;
+  final VoidCallback? onMenu;
   final VoidCallback onOpenAttendance;
   final VoidCallback onOpenTasks;
   final VoidCallback onOpenMyDtr;
@@ -157,10 +157,12 @@ class _StaffDashboardTabState extends State<StaffDashboardTab> {
                 child: MobileHeader(
                   title: 'Dashboard',
                   leadingIcon: LucideIcons.list,
-                  onLeadingTap: () {
-                    Haptics.light();
-                    widget.onMenu();
-                  },
+                  onLeadingTap: widget.onMenu == null
+                      ? null
+                      : () {
+                          Haptics.light();
+                          widget.onMenu!();
+                        },
                   trailing: NotificationBell(session: widget.session),
                 ),
               ),

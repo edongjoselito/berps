@@ -1,3 +1,6 @@
+import 'dart:io' show Platform;
+
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 
 /// BERPS mobile palette — light sky-blue primary.
@@ -25,6 +28,14 @@ class AppTheme {
 
   static const String fontFamily = 'InstrumentSans';
 
+  /// True on macOS/Windows/Linux builds — used for desktop-only styling
+  /// (Sora typeface, sidebar layout, wider density).
+  static bool get isDesktop =>
+      !kIsWeb && (Platform.isMacOS || Platform.isWindows || Platform.isLinux);
+
+  /// Font family actually applied by [build] — Sora on desktop.
+  static String get effectiveFontFamily => isDesktop ? 'Sora' : fontFamily;
+
   /// Reusable shadow tokens so cards share an exact elevation language.
   static const List<BoxShadow> shadowSoft = [
     BoxShadow(color: Color(0x0A0F1E3A), blurRadius: 18, offset: Offset(0, 8)),
@@ -43,19 +54,19 @@ class AppTheme {
         brightness: Brightness.light,
       ),
       scaffoldBackgroundColor: background,
-      fontFamily: fontFamily,
+      fontFamily: effectiveFontFamily,
       splashFactory: InkSparkle.splashFactory,
     );
 
     return base.copyWith(
-      appBarTheme: const AppBarTheme(
+      appBarTheme: AppBarTheme(
         backgroundColor: Colors.white,
         foregroundColor: textPrimary,
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: false,
         titleTextStyle: TextStyle(
-          fontFamily: fontFamily,
+          fontFamily: effectiveFontFamily,
           color: textPrimary,
           fontWeight: FontWeight.w800,
           fontSize: 18,
@@ -69,13 +80,13 @@ class AppTheme {
           horizontal: 16,
           vertical: 16,
         ),
-        hintStyle: const TextStyle(
-          fontFamily: fontFamily,
+        hintStyle: TextStyle(
+          fontFamily: effectiveFontFamily,
           color: textMuted,
           fontWeight: FontWeight.w500,
         ),
-        labelStyle: const TextStyle(
-          fontFamily: fontFamily,
+        labelStyle: TextStyle(
+          fontFamily: effectiveFontFamily,
           color: textSecondary,
         ),
         border: OutlineInputBorder(
@@ -98,8 +109,8 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
-          textStyle: const TextStyle(
-            fontFamily: fontFamily,
+          textStyle: TextStyle(
+            fontFamily: effectiveFontFamily,
             fontSize: 15,
             fontWeight: FontWeight.w700,
             letterSpacing: 0.1,
@@ -108,8 +119,8 @@ class AppTheme {
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          textStyle: const TextStyle(
-            fontFamily: fontFamily,
+          textStyle: TextStyle(
+            fontFamily: effectiveFontFamily,
             fontSize: 15,
             fontWeight: FontWeight.w700,
             letterSpacing: 0.1,
@@ -118,8 +129,8 @@ class AppTheme {
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          textStyle: const TextStyle(
-            fontFamily: fontFamily,
+          textStyle: TextStyle(
+            fontFamily: effectiveFontFamily,
             fontSize: 14,
             fontWeight: FontWeight.w700,
           ),
@@ -143,7 +154,7 @@ class AppTheme {
         ),
         labelTextStyle: WidgetStateProperty.resolveWith(
           (states) => TextStyle(
-            fontFamily: fontFamily,
+            fontFamily: effectiveFontFamily,
             fontSize: 12,
             fontWeight: states.contains(WidgetState.selected)
                 ? FontWeight.w800
@@ -155,7 +166,7 @@ class AppTheme {
         ),
       ),
       textTheme: base.textTheme.apply(
-        fontFamily: fontFamily,
+        fontFamily: effectiveFontFamily,
         bodyColor: textPrimary,
         displayColor: textPrimary,
       ),
@@ -175,8 +186,8 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
-          textStyle: const TextStyle(
-            fontFamily: fontFamily,
+          textStyle: TextStyle(
+            fontFamily: effectiveFontFamily,
             fontSize: 15.5,
             fontWeight: FontWeight.w800,
             letterSpacing: 0.2,
@@ -187,10 +198,10 @@ class AppTheme {
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
         backgroundColor: textPrimary,
-        contentTextStyle: const TextStyle(
+        contentTextStyle: TextStyle(
           color: Colors.white,
           fontWeight: FontWeight.w600,
-          fontFamily: fontFamily,
+          fontFamily: effectiveFontFamily,
         ),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       ),

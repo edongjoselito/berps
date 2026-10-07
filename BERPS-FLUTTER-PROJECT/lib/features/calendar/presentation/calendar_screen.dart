@@ -286,11 +286,11 @@ class CalendarDashboardTab extends StatefulWidget {
   const CalendarDashboardTab({
     super.key,
     required this.session,
-    required this.onMenu,
+    this.onMenu,
   });
 
   final StaffSession session;
-  final VoidCallback onMenu;
+  final VoidCallback? onMenu;
 
   @override
   State<CalendarDashboardTab> createState() => _CalendarDashboardTabState();
@@ -707,10 +707,12 @@ class _CalendarDashboardTabState extends State<CalendarDashboardTab> {
                     title: 'Calendar',
                     subtitle: title,
                     leadingIcon: LucideIcons.list,
-                    onLeadingTap: () {
-                      Haptics.light();
-                      widget.onMenu();
-                    },
+                    onLeadingTap: widget.onMenu == null
+                      ? null
+                      : () {
+                          Haptics.light();
+                          widget.onMenu!();
+                        },
                     trailingIcon: LucideIcons.rotateCw,
                     onTrailingTap: () {
                       Haptics.light();

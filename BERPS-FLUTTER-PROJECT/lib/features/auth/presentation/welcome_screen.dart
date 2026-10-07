@@ -95,7 +95,13 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   constraints: BoxConstraints(
                     minHeight: constraints.maxHeight - 40,
                   ),
-                  child: Form(
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxWidth:
+                            AppTheme.isDesktop ? 480 : double.infinity,
+                      ),
+                      child: Form(
                     key: _formKey,
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -116,6 +122,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                           ),
                         ),
                       ],
+                        ),
+                      ),
                     ),
                   ),
                 ),

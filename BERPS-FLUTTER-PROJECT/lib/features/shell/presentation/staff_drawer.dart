@@ -27,6 +27,7 @@ class StaffDrawer extends StatelessWidget {
     required this.onSelectTickets,
     required this.onSignOut,
     this.activeItemId = 'dashboard',
+    this.sidebar = false,
   });
 
   final StaffSession session;
@@ -47,8 +48,23 @@ class StaffDrawer extends StatelessWidget {
   final Future<void> Function() onSignOut;
   final String activeItemId;
 
+  /// When true, renders as a docked sidebar (desktop layout) instead of a
+  /// modal [Drawer].
+  final bool sidebar;
+
   @override
   Widget build(BuildContext context) {
+    final content = _buildContent();
+    if (sidebar) {
+      return Container(
+        width: 280,
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          border: Border(right: BorderSide(color: AppTheme.border)),
+        ),
+        child: content,
+      );
+    }
     return Drawer(
       backgroundColor: Colors.white,
       width: MediaQuery.of(context).size.width * 0.84,
@@ -58,23 +74,30 @@ class StaffDrawer extends StatelessWidget {
           bottomRight: Radius.circular(28),
         ),
       ),
-      child: SafeArea(
+      child: content,
+    );
+  }
+
+  Widget _buildContent() {
+    return Builder(
+      builder: (context) => SafeArea(
         child: Column(
           children: [
-            _Header(session: session, config: config),
+            _Header(session: session, config: config, sidebar: sidebar),
             const SizedBox(height: 4),
             Expanded(
               child: ListView(
                 padding: const EdgeInsets.symmetric(vertical: 4),
                 children: [
                   // ── Main — daily core and urgent queues first ──
-                  const _SectionLabel('Main', LucideIcons.layoutGrid),
+                  _SectionLabel('Main', LucideIcons.layoutGrid, sidebar),
                   _NavItem(
                     id: 'dashboard',
                     icon: LucideIcons.layoutGrid,
                     iconActive: LucideIcons.layoutGrid,
                     label: 'Dashboard',
                     activeItemId: activeItemId,
+                    sidebar: sidebar,
                     onTap: onSelectDashboard,
                   ),
                   if (session.hasTasks)
@@ -84,6 +107,7 @@ class StaffDrawer extends StatelessWidget {
                       iconActive: LucideIcons.listChecks,
                       label: 'Tasks',
                       activeItemId: activeItemId,
+                    sidebar: sidebar,
                       onTap: onSelectTasks,
                     ),
                   if (session.hasSupport)
@@ -93,6 +117,7 @@ class StaffDrawer extends StatelessWidget {
                       iconActive: LucideIcons.userMinus,
                       label: 'Unassigned Tickets',
                       activeItemId: activeItemId,
+                    sidebar: sidebar,
                       onTap: onSelectUnassignedTickets,
                     ),
                   if (session.hasForwardedTasks)
@@ -102,6 +127,7 @@ class StaffDrawer extends StatelessWidget {
                       iconActive: LucideIcons.arrowLeftRight,
                       label: 'Forwarded Tasks',
                       activeItemId: activeItemId,
+                    sidebar: sidebar,
                       onTap: onSelectForwardedTasks,
                     ),
                   if (session.hasSupport)
@@ -111,6 +137,7 @@ class StaffDrawer extends StatelessWidget {
                       iconActive: LucideIcons.lifeBuoy,
                       label: 'Tickets',
                       activeItemId: activeItemId,
+                    sidebar: sidebar,
                       onTap: onSelectTickets,
                     ),
                   if (session.hasSupport)
@@ -120,11 +147,12 @@ class StaffDrawer extends StatelessWidget {
                       iconActive: LucideIcons.trendingUp,
                       label: 'Support Dashboard',
                       activeItemId: activeItemId,
+                    sidebar: sidebar,
                       onTap: onSelectSupportDashboard,
                     ),
                   // ── Productivity ──
-                  const _SectionLabel('Productivity',
-                      LucideIcons.notebookText),
+                  _SectionLabel('Productivity',
+                      LucideIcons.notebookText, sidebar),
                   if (session.hasAttendance)
                     _NavItem(
                       id: 'attendance',
@@ -132,6 +160,7 @@ class StaffDrawer extends StatelessWidget {
                       iconActive: LucideIcons.calendarDays,
                       label: 'Attendance',
                       activeItemId: activeItemId,
+                    sidebar: sidebar,
                       onTap: onSelectAttendance,
                     ),
                   if (session.hasMyDtr)
@@ -141,6 +170,7 @@ class StaffDrawer extends StatelessWidget {
                       iconActive: LucideIcons.clock,
                       label: 'My DTR',
                       activeItemId: activeItemId,
+                    sidebar: sidebar,
                       onTap: onSelectMyDtr,
                     ),
                   if (session.hasCalendar)
@@ -150,6 +180,7 @@ class StaffDrawer extends StatelessWidget {
                       iconActive: LucideIcons.calendarDays,
                       label: 'Calendar',
                       activeItemId: activeItemId,
+                    sidebar: sidebar,
                       onTap: onSelectCalendar,
                     ),
                   if (session.hasNotes)
@@ -159,6 +190,7 @@ class StaffDrawer extends StatelessWidget {
                       iconActive: LucideIcons.notebookText,
                       label: 'Notes',
                       activeItemId: activeItemId,
+                    sidebar: sidebar,
                       onTap: onSelectNotes,
                     ),
                   if (session.hasReminders)
@@ -168,6 +200,7 @@ class StaffDrawer extends StatelessWidget {
                       iconActive: LucideIcons.bellRing,
                       label: 'Reminders',
                       activeItemId: activeItemId,
+                    sidebar: sidebar,
                       onTap: onSelectReminders,
                     ),
                   if (session.hasRanking)
@@ -177,16 +210,18 @@ class StaffDrawer extends StatelessWidget {
                       iconActive: LucideIcons.trophy,
                       label: 'Annual Goals',
                       activeItemId: activeItemId,
+                    sidebar: sidebar,
                       onTap: onSelectAnnualGoals,
                     ),
                   // ── Account ──
-                  const _SectionLabel('Account', LucideIcons.circleUser),
+                  _SectionLabel('Account', LucideIcons.circleUser, sidebar),
                   _NavItem(
                     id: 'account',
                     icon: LucideIcons.circleUser,
                     iconActive: LucideIcons.circleUser,
                     label: 'Account',
                     activeItemId: activeItemId,
+                    sidebar: sidebar,
                     onTap: onSelectAccount,
                   ),
                 ],
@@ -202,14 +237,14 @@ class StaffDrawer extends StatelessWidget {
                     label: 'Sign out',
                     danger: true,
                     onTap: () async {
-                      Navigator.of(context).pop();
+                      if (!sidebar) Navigator.of(context).pop();
                       await onSignOut();
                     },
                   ),
                 ],
               ),
             ),
-            const _DrawerFooter(),
+            _DrawerFooter(sidebar: sidebar),
           ],
         ),
       ),
@@ -218,10 +253,15 @@ class StaffDrawer extends StatelessWidget {
 }
 
 class _Header extends StatelessWidget {
-  const _Header({required this.session, required this.config});
+  const _Header({
+    required this.session,
+    required this.config,
+    this.sidebar = false,
+  });
 
   final StaffSession session;
   final MobileConfig? config;
+  final bool sidebar;
 
   @override
   Widget build(BuildContext context) {
@@ -249,8 +289,8 @@ class _Header extends StatelessWidget {
                   borderRadius: BorderRadius.circular(999),
                   border: Border.all(color: AppTheme.border),
                 ),
-                child: const Text(
-                  'MOBILE',
+                child: Text(
+                  sidebar ? 'DESKTOP' : 'MOBILE',
                   style: TextStyle(
                     fontSize: 9,
                     fontWeight: FontWeight.w900,
@@ -332,14 +372,15 @@ class _Header extends StatelessWidget {
 }
 
 class _SectionLabel extends StatelessWidget {
-  const _SectionLabel(this.text, [this.icon]);
+  const _SectionLabel(this.text, [this.icon, this.sidebar = false]);
   final String text;
   final IconData? icon;
+  final bool sidebar;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 18, 22, 8),
+      padding: EdgeInsets.fromLTRB(16, sidebar ? 12 : 18, 22, 6),
       child: Row(
         children: [
           if (icon != null) ...[
@@ -369,6 +410,7 @@ class _NavItem extends StatelessWidget {
     required this.label,
     required this.activeItemId,
     required this.onTap,
+    this.sidebar = false,
   });
 
   final String id;
@@ -377,6 +419,7 @@ class _NavItem extends StatelessWidget {
   final String label;
   final String activeItemId;
   final VoidCallback onTap;
+  final bool sidebar;
 
   @override
   Widget build(BuildContext context) {
@@ -391,21 +434,22 @@ class _NavItem extends StatelessWidget {
         borderRadius: BorderRadius.circular(14),
         child: InkWell(
           onTap: () {
-            Navigator.of(context).pop();
+            if (!sidebar) Navigator.of(context).maybePop();
             if (!isActive) {
               Haptics.light();
               onTap();
             }
           },
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(sidebar ? 10 : 14),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+            padding: EdgeInsets.symmetric(
+                horizontal: 10, vertical: sidebar ? 7.5 : 11),
             child: Row(
               children: [
                 AnimatedContainer(
                   duration: const Duration(milliseconds: 220),
-                  width: 34,
-                  height: 34,
+                  width: sidebar ? 30 : 34,
+                  height: sidebar ? 30 : 34,
                   decoration: BoxDecoration(
                     color: isActive
                         ? AppTheme.primary.withValues(alpha: 0.14)
@@ -428,7 +472,7 @@ class _NavItem extends StatelessWidget {
                       color: isActive
                           ? AppTheme.textPrimary
                           : AppTheme.textSecondary,
-                      fontSize: 13.5,
+                      fontSize: sidebar ? 13 : 13.5,
                       fontWeight: isActive ? FontWeight.w800 : FontWeight.w600,
                     ),
                   ),
@@ -492,7 +536,9 @@ class _DrawerAction extends StatelessWidget {
 }
 
 class _DrawerFooter extends StatelessWidget {
-  const _DrawerFooter();
+  const _DrawerFooter({this.sidebar = false});
+
+  final bool sidebar;
 
   @override
   Widget build(BuildContext context) {
@@ -507,7 +553,7 @@ class _DrawerFooter extends StatelessWidget {
           ),
           const SizedBox(width: 6),
           Text(
-            'BERPS Mobile · v1.0',
+            sidebar ? 'BERPS Desktop · v1.0' : 'BERPS Mobile · v1.0',
             style: TextStyle(
               fontSize: 10.5,
               fontWeight: FontWeight.w800,

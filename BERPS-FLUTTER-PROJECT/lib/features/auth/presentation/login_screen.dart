@@ -248,7 +248,13 @@ class _LoginScreenState extends State<LoginScreen> {
                   constraints: BoxConstraints(
                     minHeight: constraints.maxHeight - 32,
                   ),
-                  child: Column(
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxWidth:
+                            AppTheme.isDesktop ? 480 : double.infinity,
+                      ),
+                      child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
@@ -319,6 +325,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ],
                     ],
+                      ),
+                    ),
                   ),
                 ),
               );

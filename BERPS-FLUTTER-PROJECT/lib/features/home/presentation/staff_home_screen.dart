@@ -46,6 +46,25 @@ class StaffHomeScreen extends StatefulWidget {
 
 class _StaffHomeScreenState extends State<StaffHomeScreen> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
+  final GlobalKey<NavigatorState> _contentNavKey = GlobalKey<NavigatorState>();
+
+  /// Drives rebuilds of the nested content navigator's root page on wide
+  /// layouts — the route is cached, so setState alone never refreshes it.
+  final ValueNotifier<_StaffTab> _tabNotifier =
+      ValueNotifier(_StaffTab.dashboard);
+
+  /// Cached per-build so navigation helpers know which navigator to target.
+  bool _isWide = false;
+
+  /// Pushes a page. On wide layouts this goes onto the content-area navigator
+  /// so the sidebar stays visible; on narrow layouts it's a normal push.
+  Future<T?> _pushContent<T>(Widget page) {
+    final route = MaterialPageRoute<T>(builder: (_) => page);
+    if (_isWide) {
+      return _contentNavKey.currentState!.push<T>(route);
+    }
+    return Navigator.of(context).push<T>(route);
+  }
   _StaffTab _currentTab = _StaffTab.dashboard;
   String _pendingTasksScope = '';
   String _pendingTasksStatFilter = '';
@@ -153,7 +172,20 @@ class _StaffHomeScreenState extends State<StaffHomeScreen> {
       _pendingTasksStatFilter = '';
       _pendingDtrView = false;
     });
-    Navigator.of(context).maybePop();
+    if (_isWide) {
+      _contentNavKey.currentState?.popUntil((route) => route.isFirst);
+      _tabNotifier.value = tab;
+    } else {
+      Navigator.of(context).maybePop();
+    }
+  }
+
+  /// After a tab switch triggered outside [_selectTab] (e.g. dashboard
+  /// shortcuts), sync the nested navigator: pop pushed pages and rebuild.
+  void _syncContentNav() {
+    if (!_isWide) return;
+    _contentNavKey.currentState?.popUntil((route) => route.isFirst);
+    _tabNotifier.value = _currentTab;
   }
 
   void _openTasksWithStatFilter(String statFilter) {
@@ -164,6 +196,7 @@ class _StaffHomeScreenState extends State<StaffHomeScreen> {
       _pendingTasksStatFilter = statFilter;
       _tasksReopenKey++;
     });
+    _syncContentNav();
   }
 
   void _onDestinationSelected(int index) {
@@ -180,6 +213,7 @@ class _StaffHomeScreenState extends State<StaffHomeScreen> {
       _pendingTasksStatFilter = '';
       _tasksReopenKey++;
     });
+    _syncContentNav();
   }
 
   void _openMyDtr() {
@@ -189,78 +223,54 @@ class _StaffHomeScreenState extends State<StaffHomeScreen> {
       _pendingDtrView = true;
       _attendanceReopenKey++;
     });
+    _syncContentNav();
   }
 
   Future<void> _openProfile({bool openPhotoPicker = false}) async {
     Haptics.light();
-    await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => StaffProfileScreen(
-          session: widget.session,
-          onAvatarUpdated: widget.onAvatarUpdated,
-          openPhotoPicker: openPhotoPicker,
-        ),
+    await _pushContent(
+      StaffProfileScreen(
+        session: widget.session,
+        onAvatarUpdated: widget.onAvatarUpdated,
+        openPhotoPicker: openPhotoPicker,
       ),
     );
   }
 
   Future<void> _openMyDTR() async {
     Haptics.light();
-    await Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => MyDtrScreen(session: widget.session)),
-    );
+    await _pushContent(MyDtrScreen(session: widget.session));
   }
 
   Future<void> _openCalendar() async {
     Haptics.light();
-    await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => CalendarScreen(session: widget.session),
-      ),
-    );
+    await _pushContent(CalendarScreen(session: widget.session));
   }
 
   Future<void> _openNotes() async {
     Haptics.light();
-    await Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => NotesScreen(session: widget.session)),
-    );
+    await _pushContent(NotesScreen(session: widget.session));
   }
 
   Future<void> _openReminders() async {
     Haptics.light();
-    await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => RemindersScreen(session: widget.session),
-      ),
-    );
+    await _pushContent(RemindersScreen(session: widget.session));
   }
 
   Future<void> _openAnnualGoals() async {
     Haptics.light();
-    await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => AnnualGoalsScreen(session: widget.session),
-      ),
-    );
+    await _pushContent(AnnualGoalsScreen(session: widget.session));
   }
 
   Future<void> _openSupportDashboard() async {
     Haptics.light();
-    await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => SupportDashboardScreen(session: widget.session),
-      ),
-    );
+    await _pushContent(SupportDashboardScreen(session: widget.session));
   }
 
   Future<void> _openSupportIssues({String scope = 'unassigned'}) async {
     Haptics.light();
-    await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) =>
-            SupportIssuesScreen(session: widget.session, initialScope: scope),
-      ),
+    await _pushContent(
+      SupportIssuesScreen(session: widget.session, initialScope: scope),
     );
     if (!mounted) return;
     setState(() {
@@ -274,54 +284,73 @@ class _StaffHomeScreenState extends State<StaffHomeScreen> {
     final tabs = _tabs;
     final selectedIndex = tabs.indexOf(_currentTab).clamp(0, tabs.length - 1);
 
+    final isWide = MediaQuery.sizeOf(context).width >= 1024;
+    _isWide = isWide;
+
+    final nav = StaffDrawer(
+      session: widget.session,
+      config: widget.config,
+      sidebar: isWide,
+      activeItemId: switch (_currentTab) {
+        _StaffTab.dashboard => 'dashboard',
+        _StaffTab.attendance => 'attendance',
+        _StaffTab.tasks => 'tasks',
+        _StaffTab.account => 'account',
+      },
+      onSelectDashboard: () => _selectTab(_StaffTab.dashboard),
+      onSelectAttendance: () => _selectTab(_StaffTab.attendance),
+      onSelectTasks: () => _selectTab(_StaffTab.tasks),
+      onSelectAccount: () => _selectTab(_StaffTab.account),
+      onSelectMyDtr: _openMyDTR,
+      onSelectCalendar: _openCalendar,
+      onSelectNotes: _openNotes,
+      onSelectReminders: _openReminders,
+      onSelectAnnualGoals: _openAnnualGoals,
+      onSelectSupportDashboard: _openSupportDashboard,
+      onSelectUnassignedTickets: () => _openSupportIssues(scope: 'unassigned'),
+      onSelectForwardedTasks: _openForwardedTasks,
+      onSelectTickets: () => _openSupportIssues(scope: 'open'),
+      onSignOut: _confirmSignOut,
+    );
+
+    final body = _animatedBody(_buildCurrentPage());
+
+    if (isWide) {
+      return Scaffold(
+        key: _scaffoldKey,
+        backgroundColor: AppTheme.background,
+        body: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            nav,
+            Expanded(
+              child: Align(
+                alignment: Alignment.topCenter,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 1360),
+                  child: Navigator(
+                    key: _contentNavKey,
+                    onGenerateRoute: (_) => MaterialPageRoute(
+                      builder: (_) => AnimatedBuilder(
+                        animation: _tabNotifier,
+                        builder: (_, _) =>
+                            _animatedBody(_buildCurrentPage()),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: AppTheme.background,
-      drawer: StaffDrawer(
-        session: widget.session,
-        config: widget.config,
-        activeItemId: switch (_currentTab) {
-          _StaffTab.dashboard => 'dashboard',
-          _StaffTab.attendance => 'attendance',
-          _StaffTab.tasks => 'tasks',
-          _StaffTab.account => 'account',
-        },
-        onSelectDashboard: () => _selectTab(_StaffTab.dashboard),
-        onSelectAttendance: () => _selectTab(_StaffTab.attendance),
-        onSelectTasks: () => _selectTab(_StaffTab.tasks),
-        onSelectAccount: () => _selectTab(_StaffTab.account),
-        onSelectMyDtr: _openMyDTR,
-        onSelectCalendar: _openCalendar,
-        onSelectNotes: _openNotes,
-        onSelectReminders: _openReminders,
-        onSelectAnnualGoals: _openAnnualGoals,
-        onSelectSupportDashboard: _openSupportDashboard,
-        onSelectUnassignedTickets: () => _openSupportIssues(scope: 'unassigned'),
-        onSelectForwardedTasks: _openForwardedTasks,
-        onSelectTickets: () => _openSupportIssues(scope: 'open'),
-        onSignOut: _confirmSignOut,
-      ),
-      body: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 280),
-        switchInCurve: Curves.easeOut,
-        switchOutCurve: Curves.easeIn,
-        transitionBuilder: (child, animation) {
-          return FadeTransition(
-            opacity: animation,
-            child: SlideTransition(
-              position: Tween<Offset>(
-                begin: const Offset(0, 0.02),
-                end: Offset.zero,
-              ).animate(animation),
-              child: child,
-            ),
-          );
-        },
-        child: KeyedSubtree(
-          key: ValueKey(_currentTab),
-          child: _buildCurrentPage(),
-        ),
-      ),
+      drawer: nav,
+      body: body,
       bottomNavigationBar: Container(
         decoration: const BoxDecoration(
           border: Border(top: BorderSide(color: AppTheme.border)),
@@ -340,6 +369,36 @@ class _StaffHomeScreenState extends State<StaffHomeScreen> {
           labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
           destinations: [for (final tab in tabs) _destinationFor(tab)],
         ),
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _tabNotifier.dispose();
+    super.dispose();
+  }
+
+  Widget _animatedBody(Widget page) {
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 280),
+      switchInCurve: Curves.easeOut,
+      switchOutCurve: Curves.easeIn,
+      transitionBuilder: (child, animation) {
+        return FadeTransition(
+          opacity: animation,
+          child: SlideTransition(
+            position: Tween<Offset>(
+              begin: const Offset(0, 0.02),
+              end: Offset.zero,
+            ).animate(animation),
+            child: child,
+          ),
+        );
+      },
+      child: KeyedSubtree(
+        key: ValueKey(_currentTab),
+        child: page,
       ),
     );
   }
@@ -382,13 +441,13 @@ class _StaffHomeScreenState extends State<StaffHomeScreen> {
           return CalendarDashboardTab(
             key: ValueKey('calendar-dashboard-$_dashboardReopenKey'),
             session: widget.session,
-            onMenu: () => _scaffoldKey.currentState?.openDrawer(),
+            onMenu: _isWide ? null : () => _scaffoldKey.currentState?.openDrawer(),
           );
         }
         return StaffDashboardTab(
           key: ValueKey('dashboard-$_dashboardReopenKey'),
           session: widget.session,
-          onMenu: () => _scaffoldKey.currentState?.openDrawer(),
+          onMenu: _isWide ? null : () => _scaffoldKey.currentState?.openDrawer(),
           onOpenAttendance: () => _selectTab(_StaffTab.attendance),
           onOpenTasks: () => _selectTab(_StaffTab.tasks),
           onOpenMyDtr: _openMyDtr,
@@ -405,14 +464,14 @@ class _StaffHomeScreenState extends State<StaffHomeScreen> {
         return StaffAttendanceTab(
           key: ValueKey('attendance-$_attendanceReopenKey'),
           session: widget.session,
-          onMenu: () => _scaffoldKey.currentState?.openDrawer(),
+          onMenu: _isWide ? null : () => _scaffoldKey.currentState?.openDrawer(),
           dtrMonthView: _pendingDtrView,
         );
       case _StaffTab.tasks:
         return StaffTasksTab(
           key: ValueKey('tasks-$_tasksReopenKey'),
           session: widget.session,
-          onMenu: () => _scaffoldKey.currentState?.openDrawer(),
+          onMenu: _isWide ? null : () => _scaffoldKey.currentState?.openDrawer(),
           initialScope: _pendingTasksScope,
           initialStatFilter: _pendingTasksStatFilter,
         );
@@ -420,7 +479,7 @@ class _StaffHomeScreenState extends State<StaffHomeScreen> {
         return StaffAccountTab(
           session: widget.session,
           config: widget.config,
-          onMenu: () => _scaffoldKey.currentState?.openDrawer(),
+          onMenu: _isWide ? null : () => _scaffoldKey.currentState?.openDrawer(),
           onSignOut: _confirmSignOut,
           onOpenMyProfile: () => _openProfile(),
           store: widget.store,

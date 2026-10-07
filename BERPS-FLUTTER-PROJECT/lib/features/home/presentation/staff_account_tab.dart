@@ -20,7 +20,7 @@ class StaffAccountTab extends StatefulWidget {
     super.key,
     required this.session,
     required this.config,
-    required this.onMenu,
+    this.onMenu,
     required this.onSignOut,
     required this.onOpenMyProfile,
     required this.store,
@@ -28,7 +28,7 @@ class StaffAccountTab extends StatefulWidget {
 
   final StaffSession session;
   final MobileConfig? config;
-  final VoidCallback onMenu;
+  final VoidCallback? onMenu;
   final Future<void> Function() onSignOut;
   final VoidCallback onOpenMyProfile;
   final SessionStore store;
@@ -126,10 +126,12 @@ class _StaffAccountTabState extends State<StaffAccountTab> {
           child: MobileHeader(
             title: 'Account',
             leadingIcon: LucideIcons.list,
-            onLeadingTap: () {
-              Haptics.light();
-              widget.onMenu();
-            },
+            onLeadingTap: widget.onMenu == null
+                      ? null
+                      : () {
+                          Haptics.light();
+                          widget.onMenu!();
+                        },
             trailing: NotificationBell(session: widget.session),
           ),
         ),
