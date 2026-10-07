@@ -115,6 +115,129 @@ class _StaffAttendanceTabState extends State<StaffAttendanceTab> {
     _reload();
   }
 
+  /// Which quick range is active, for the desktop segmented control.
+  String get _activePreset {
+    final today = _today();
+    final yesterday = _isoDate(
+      DateTime.now().subtract(const Duration(days: 1)),
+    );
+    final weekStart = _isoDate(
+      DateTime.now().subtract(const Duration(days: 6)),
+    );
+    if (_from == today && _to == today) return 'today';
+    if (_from == yesterday && _to == yesterday) return 'yesterday';
+    if (_from == weekStart && _to == today) return 'week';
+    return 'custom';
+  }
+
+  void _applyPreset(String preset) {
+    final now = DateTime.now();
+    switch (preset) {
+      case 'today':
+        _setPreset(from: _today(), to: _today());
+      case 'yesterday':
+        final iso = _isoDate(now.subtract(const Duration(days: 1)));
+        _setPreset(from: iso, to: iso);
+      case 'week':
+        _setPreset(
+          from: _isoDate(now.subtract(const Duration(days: 6))),
+          to: _isoDate(now),
+        );
+    }
+  }
+
+  /// Desktop composition: range toolbar, summary and records on the left;
+  /// the punch clock as a fixed right rail.
+  Widget _buildDesktop(StaffAttendanceData data) {
+    final main = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          children: [
+            const Icon(
+              LucideIcons.calendarDays,
+              size: 16,
+              color: AppTheme.textSecondary,
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                formatRangeLabel(_from, _to),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: AppTheme.textPrimary,
+                ),
+              ),
+            ),
+            DeskSegmented(
+              options: const {
+                'today': 'Today',
+                'yesterday': 'Yesterday',
+                'week': 'Last 7 days',
+              },
+              value: _activePreset,
+              onChanged: _applyPreset,
+            ),
+            const SizedBox(width: 8),
+            DeskButton(
+              label: 'Custom range',
+              icon: LucideIcons.calendarSearch,
+              primary: false,
+              onTap: _pickDateRange,
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        _SummaryRow(summary: data.summary),
+        const SizedBox(height: 20),
+        const _SectionTitle('Entries'),
+        const SizedBox(height: 10),
+        if (data.records.isEmpty)
+          const _EmptyState(
+            message: 'No attendance entries were found for this range.',
+          )
+        else
+          for (final record in data.records)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: _AttendanceRecordCard(record: record),
+            ),
+      ],
+    );
+
+    return FadeSlide(
+      delay: const Duration(milliseconds: 60),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(child: main),
+          const SizedBox(width: 20),
+          SizedBox(
+            width: 340,
+            child: _PunchHeroCard(
+              data: data,
+              onTimeIn: () => _runPunchAction(
+                () => _api.timeIn(
+                  baseUrl: widget.session.baseUrl,
+                  token: widget.session.token,
+                ),
+              ),
+              onTimeOut: () => _runPunchAction(
+                () => _api.timeOut(
+                  baseUrl: widget.session.baseUrl,
+                  token: widget.session.token,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return RefreshIndicator(
@@ -151,29 +274,30 @@ class _StaffAttendanceTabState extends State<StaffAttendanceTab> {
                 ),
               ),
               const SizedBox(height: 16),
-              FadeSlide(
-                delay: const Duration(milliseconds: 60),
-                child: _RangeCard(
-                  label: formatRangeLabel(_from, _to),
-                  onFilter: _pickDateRange,
-                  onToday: () => _setPreset(from: _today(), to: _today()),
-                  onYesterday: () {
-                    final date = DateTime.now().subtract(
-                      const Duration(days: 1),
-                    );
-                    final iso = _isoDate(date);
-                    _setPreset(from: iso, to: iso);
-                  },
-                  onWeek: () {
-                    final now = DateTime.now();
-                    _setPreset(
-                      from: _isoDate(now.subtract(const Duration(days: 6))),
-                      to: _isoDate(now),
-                    );
-                  },
+              if (!AppTheme.isDesktop)
+                FadeSlide(
+                  delay: const Duration(milliseconds: 60),
+                  child: _RangeCard(
+                    label: formatRangeLabel(_from, _to),
+                    onFilter: _pickDateRange,
+                    onToday: () => _setPreset(from: _today(), to: _today()),
+                    onYesterday: () {
+                      final date = DateTime.now().subtract(
+                        const Duration(days: 1),
+                      );
+                      final iso = _isoDate(date);
+                      _setPreset(from: iso, to: iso);
+                    },
+                    onWeek: () {
+                      final now = DateTime.now();
+                      _setPreset(
+                        from: _isoDate(now.subtract(const Duration(days: 6))),
+                        to: _isoDate(now),
+                      );
+                    },
+                  ),
                 ),
-              ),
-              const SizedBox(height: 18),
+              if (!AppTheme.isDesktop) const SizedBox(height: 18),
               if (snapshot.connectionState == ConnectionState.waiting)
                 const _AttendanceSkeleton()
               else if (snapshot.hasError)
@@ -194,6 +318,8 @@ class _StaffAttendanceTabState extends State<StaffAttendanceTab> {
                     _reload();
                   },
                 )
+              else if (AppTheme.isDesktop)
+                _buildDesktop(snapshot.data!)
               else ...[
                 FadeSlide(
                   delay: const Duration(milliseconds: 120),
@@ -458,158 +584,99 @@ class _PunchHeroCard extends StatelessWidget {
     final hasOpenSlot = data.status.openSlotLabel.isNotEmpty;
 
     if (AppTheme.isDesktop) {
-      return Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: AppTheme.border),
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
+      return DeskPanel(
+        title: "Today's attendance",
+        action: data.status.canTimeIn
+            ? Container(
+                margin: const EdgeInsets.only(right: 6),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: AppTheme.success.withValues(alpha: 0.10),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: const Text(
+                  'Ready to time in',
+                  style: TextStyle(
+                    color: AppTheme.success,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              )
+            : null,
+        padding: const EdgeInsets.fromLTRB(18, 16, 18, 18),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        width: 38,
-                        height: 38,
-                        decoration: BoxDecoration(
-                          color: AppTheme.primarySoft,
-                          borderRadius: BorderRadius.circular(11),
-                        ),
-                        child: const Icon(
-                          LucideIcons.calendarCheck,
-                          size: 18,
-                          color: AppTheme.primaryDark,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      const Text(
-                        "Today's Attendance",
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w900,
-                          color: AppTheme.textPrimary,
-                          letterSpacing: -0.3,
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      if (data.status.canTimeIn)
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 3,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppTheme.accent.withValues(alpha: 0.14),
-                            borderRadius: BorderRadius.circular(999),
-                          ),
-                          child: const Text(
-                            'READY',
-                            style: TextStyle(
-                              color: AppTheme.warning,
-                              fontSize: 9.5,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: 1.2,
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    data.status.statusLabel,
-                    style: const TextStyle(
-                      color: AppTheme.textSecondary,
-                      height: 1.45,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 13,
-                    ),
-                  ),
-                  if (hasOpenSlot) ...[
-                    const SizedBox(height: 10),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 5,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppTheme.primarySoft,
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(
-                            LucideIcons.clock,
-                            color: AppTheme.primaryDark,
-                            size: 12,
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            '${data.status.openSlotLabel} shift open',
-                            style: const TextStyle(
-                              color: AppTheme.primaryDark,
-                              fontWeight: FontWeight.w800,
-                              fontSize: 11.5,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ],
+            Text(
+              data.status.statusLabel,
+              style: const TextStyle(
+                color: AppTheme.textSecondary,
+                height: 1.5,
+                fontWeight: FontWeight.w600,
+                fontSize: 13,
               ),
             ),
-            const SizedBox(width: 24),
-            Column(
+            if (hasOpenSlot) ...[
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  const Icon(
+                    LucideIcons.clock,
+                    color: AppTheme.primaryDark,
+                    size: 13,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    '${data.status.openSlotLabel} shift open',
+                    style: const TextStyle(
+                      color: AppTheme.primaryDark,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 12.5,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+            const SizedBox(height: 16),
+            Row(
               children: [
-                _DeskPunchMetric(
-                  label: 'Time In',
-                  value: data.status.latestTimeInLabel.isEmpty
-                      ? '--'
-                      : data.status.latestTimeInLabel,
-                  icon: LucideIcons.logIn,
-                  color: AppTheme.success,
+                Expanded(
+                  child: _DeskPunchMetric(
+                    label: 'Time in',
+                    value: data.status.latestTimeInLabel.isEmpty
+                        ? '--'
+                        : data.status.latestTimeInLabel,
+                    icon: LucideIcons.logIn,
+                    color: AppTheme.success,
+                  ),
                 ),
-                const SizedBox(height: 10),
-                _DeskPunchMetric(
-                  label: 'Time Out',
-                  value: data.status.latestTimeOutLabel.isEmpty
-                      ? '--'
-                      : data.status.latestTimeOutLabel,
-                  icon: LucideIcons.logOut,
-                  color: AppTheme.primaryDark,
+                const SizedBox(width: 10),
+                Expanded(
+                  child: _DeskPunchMetric(
+                    label: 'Time out',
+                    value: data.status.latestTimeOutLabel.isEmpty
+                        ? '--'
+                        : data.status.latestTimeOutLabel,
+                    icon: LucideIcons.logOut,
+                    color: AppTheme.primaryDark,
+                  ),
                 ),
               ],
             ),
-            const SizedBox(width: 24),
-            Column(
-              children: [
-                SizedBox(
-                  width: 168,
-                  child: _PunchButton(
-                    label: 'Time In',
-                    icon: LucideIcons.logIn,
-                    primary: true,
-                    onTap: onTimeIn,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                SizedBox(
-                  width: 168,
-                  child: _PunchButton(
-                    label: 'Time Out',
-                    icon: LucideIcons.logOut,
-                    primary: false,
-                    onTap: onTimeOut,
-                  ),
-                ),
-              ],
+            const SizedBox(height: 18),
+            _PunchButton(
+              label: 'Time In',
+              icon: LucideIcons.logIn,
+              primary: true,
+              onTap: onTimeIn,
+            ),
+            const SizedBox(height: 10),
+            _PunchButton(
+              label: 'Time Out',
+              icon: LucideIcons.logOut,
+              primary: false,
+              onTap: onTimeOut,
             ),
           ],
         ),
@@ -866,8 +933,7 @@ class _DeskPunchMetric extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 190,
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
         color: AppTheme.surfaceMuted,
         borderRadius: BorderRadius.circular(12),
@@ -995,7 +1061,7 @@ class _SummaryRow extends StatelessWidget {
         const [Color(0xFF1E3A5F), Color(0xFF2D5A8A)],
       ),
       _SummaryItem(
-        'Accomplishments',
+        AppTheme.isDesktop ? 'Accomplished' : 'Accomplishments',
         '${summary.accomplishmentCount}',
         AppTheme.primary,
         LucideIcons.squareCheck,
@@ -1004,20 +1070,27 @@ class _SummaryRow extends StatelessWidget {
     ];
 
     if (AppTheme.isDesktop) {
-      return Row(
-        children: [
-          for (var i = 0; i < items.length; i++) ...[
-            if (i > 0) const SizedBox(width: 12),
-            Expanded(
-              child: DeskStatCard(
-                icon: items[i].icon,
-                label: items[i].label,
-                value: items[i].value,
-                accent: items[i].color,
-              ),
-            ),
-          ],
-        ],
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          final perRow = constraints.maxWidth >= 720 ? items.length : 2;
+          final width = (constraints.maxWidth - 12 * (perRow - 1)) / perRow;
+          return Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            children: [
+              for (final item in items)
+                SizedBox(
+                  width: width,
+                  child: DeskStatCard(
+                    icon: item.icon,
+                    label: item.label,
+                    value: item.value,
+                    accent: item.color,
+                  ),
+                ),
+            ],
+          );
+        },
       );
     }
 
@@ -1233,11 +1306,7 @@ class _IntervalRow extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Icon(
-                LucideIcons.logIn,
-                size: 14,
-                color: AppTheme.success,
-              ),
+              const Icon(LucideIcons.logIn, size: 14, color: AppTheme.success),
               const SizedBox(width: 8),
               const Text(
                 'Time In',
@@ -1262,9 +1331,7 @@ class _IntervalRow extends StatelessWidget {
           Row(
             children: [
               Icon(
-                interval.isOpen
-                    ? LucideIcons.clock4
-                    : LucideIcons.logOut,
+                interval.isOpen ? LucideIcons.clock4 : LucideIcons.logOut,
                 size: 14,
                 color: interval.isOpen
                     ? AppTheme.warning

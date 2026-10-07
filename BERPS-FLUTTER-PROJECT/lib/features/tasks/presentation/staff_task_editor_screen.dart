@@ -3,6 +3,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/network/api_exception.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/desktop_kit.dart';
 import '../../../core/utils/date_formatters.dart';
 import '../../../core/widgets/animations.dart';
 import '../../../core/widgets/app_toast.dart';
@@ -210,7 +211,7 @@ class _StaffTaskEditorScreenState extends State<StaffTaskEditorScreen> {
     int? selectedUserId;
     final noteController = TextEditingController();
 
-    final confirmed = await showModalBottomSheet<bool>(
+    final confirmed = await showAppSheet<bool>(
       context: context,
       isScrollControlled: true,
       builder: (context) {

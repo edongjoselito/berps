@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/desktop_kit.dart';
 import '../../../core/utils/responsive.dart';
 import '../../../core/widgets/skeleton.dart';
 import '../../auth/domain/staff_session.dart';
@@ -46,7 +47,7 @@ class _EmpDtrScreenState extends State<EmpDtrScreen> {
   ) async {
     if (employees.isEmpty) return;
 
-    final selected = await showModalBottomSheet<DtrStaff>(
+    final selected = await showAppSheet<DtrStaff>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
@@ -704,7 +705,7 @@ class _EmployeePickerSheetState extends State<_EmployeePickerSheet> {
           children: [
             Container(
               width: 42,
-              height: 4,
+              height: AppTheme.isDesktop ? 0 : 4,
               decoration: BoxDecoration(
                 color: AppTheme.borderStrong,
                 borderRadius: BorderRadius.circular(999),

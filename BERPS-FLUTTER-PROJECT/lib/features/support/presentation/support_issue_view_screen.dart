@@ -9,6 +9,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/network/api_exception.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/desktop_kit.dart';
 import '../../../core/utils/haptics.dart';
 import '../../../core/utils/responsive.dart';
 import '../../../core/widgets/animations.dart';
@@ -215,7 +216,7 @@ class _SupportIssueViewScreenState extends State<SupportIssueViewScreen> {
   Future<void> _closeTicket(SupportIssue issue) async {
     if (_closing || issue.isClosed) return;
     final controller = TextEditingController();
-    final confirmed = await showModalBottomSheet<bool>(
+    final confirmed = await showAppSheet<bool>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
@@ -280,7 +281,7 @@ class _SupportIssueViewScreenState extends State<SupportIssueViewScreen> {
 
     int? selectedUserId;
     final noteController = TextEditingController();
-    final confirmed = await showModalBottomSheet<bool>(
+    final confirmed = await showAppSheet<bool>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
@@ -322,7 +323,7 @@ class _SupportIssueViewScreenState extends State<SupportIssueViewScreen> {
 
     final selectedIds = <int>{};
     final noteController = TextEditingController();
-    final confirmed = await showModalBottomSheet<bool>(
+    final confirmed = await showAppSheet<bool>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
@@ -385,7 +386,7 @@ class _SupportIssueViewScreenState extends State<SupportIssueViewScreen> {
 
   Future<void> _openAttachmentMenu() async {
     Haptics.light();
-    final action = await showModalBottomSheet<_AttachmentAction>(
+    final action = await showAppSheet<_AttachmentAction>(
       context: context,
       backgroundColor: Colors.transparent,
       builder: (_) => const _AttachmentActionSheet(),

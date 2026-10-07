@@ -137,6 +137,76 @@ class _StaffTasksTabState extends State<StaffTasksTab> {
     });
   }
 
+  /// Desktop body: stat filters, one toolbar row, then a table-style list.
+  List<Widget> _buildDesktopBody(StaffTasksData data) {
+    return [
+      _TaskStatsRow(
+        stats: data.stats,
+        activeFilter: _statFilter,
+        onStatTap: _applyStatFilter,
+      ),
+      const SizedBox(height: 20),
+      if (!data.hasTimeInToday) ...[
+        const _TimeInWarning(),
+        const SizedBox(height: 16),
+      ],
+      DeskPanel(
+        title: _sectionTitle(),
+        count: data.tasks.length,
+        padding: EdgeInsets.zero,
+        action: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _FilterChip(
+              label: 'Forwarded',
+              icon: LucideIcons.arrowLeftRight,
+              selected: _scope == 'forwarded',
+              onSelected: (selected) {
+                Haptics.light();
+                setState(() {
+                  _statFilter = '';
+                  _scope = selected ? 'forwarded' : '';
+                });
+                _reload();
+              },
+            ),
+            const SizedBox(width: 10),
+            DeskSegmented(
+              options: const {'open': 'Open', 'closed': 'Closed', 'all': 'All'},
+              value: _status,
+              onChanged: (value) {
+                Haptics.light();
+                setState(() {
+                  _statFilter = '';
+                  _status = value;
+                });
+                _reload();
+              },
+            ),
+            const SizedBox(width: 6),
+          ],
+        ),
+        child: data.tasks.isEmpty
+            ? const Padding(
+                padding: EdgeInsets.all(16),
+                child: _TaskEmptyState(),
+              )
+            : Column(
+                children: [
+                  const _DeskTaskHeaderRow(),
+                  for (final task in data.tasks) ...[
+                    const Divider(height: 1, color: AppTheme.border),
+                    _DeskTaskRow(
+                      task: task,
+                      onTap: () => _openTaskActions(data, task),
+                    ),
+                  ],
+                ],
+              ),
+      ),
+    ];
+  }
+
   Future<void> _openEditor(StaffTasksData data, {int? taskId}) async {
     Haptics.light();
     final changed = await Navigator.of(context).push<bool>(
@@ -157,7 +227,7 @@ class _StaffTasksTabState extends State<StaffTasksTab> {
 
   Future<void> _openTaskActions(StaffTasksData data, StaffTask task) async {
     Haptics.light();
-    final action = await showModalBottomSheet<_TaskAction>(
+    final action = await showAppSheet<_TaskAction>(
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
@@ -186,7 +256,7 @@ class _StaffTasksTabState extends State<StaffTasksTab> {
     final noteController = TextEditingController();
     String selectedStatus = task.isClosed ? '0' : '1';
 
-    final confirmed = await showModalBottomSheet<bool>(
+    final confirmed = await showAppSheet<bool>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
@@ -302,7 +372,7 @@ class _StaffTasksTabState extends State<StaffTasksTab> {
     int? selectedUserId;
     final noteController = TextEditingController();
 
-    final confirmed = await showModalBottomSheet<bool>(
+    final confirmed = await showAppSheet<bool>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
@@ -478,6 +548,9 @@ class _StaffTasksTabState extends State<StaffTasksTab> {
                 bottom: false,
                 child: MobileHeader(
                   title: 'Tasks',
+                  subtitle: AppTheme.isDesktop && snapshot.hasData
+                      ? '${snapshot.data!.stats.open} open · ${snapshot.data!.stats.overdue} overdue · ${snapshot.data!.stats.dueToday} due today'
+                      : null,
                   leadingIcon: LucideIcons.list,
                   onLeadingTap: widget.onMenu == null
                       ? null
@@ -485,7 +558,22 @@ class _StaffTasksTabState extends State<StaffTasksTab> {
                           Haptics.light();
                           widget.onMenu!();
                         },
-                  trailing: NotificationBell(session: widget.session),
+                  trailing: AppTheme.isDesktop
+                      ? Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            DeskButton(
+                              label: 'New task',
+                              icon: LucideIcons.plus,
+                              onTap: snapshot.hasData
+                                  ? () => _openEditor(snapshot.data!)
+                                  : null,
+                            ),
+                            const SizedBox(width: 8),
+                            NotificationBell(session: widget.session),
+                          ],
+                        )
+                      : NotificationBell(session: widget.session),
                 ),
               ),
               const SizedBox(height: 16),
@@ -501,6 +589,8 @@ class _StaffTasksTabState extends State<StaffTasksTab> {
                     _reload();
                   },
                 )
+              else if (AppTheme.isDesktop)
+                ..._buildDesktopBody(snapshot.data!)
               else ...[
                 FadeSlide(
                   delay: const Duration(milliseconds: 60),
@@ -556,27 +646,6 @@ class _StaffTasksTabState extends State<StaffTasksTab> {
                 const SizedBox(height: 10),
                 if (snapshot.data!.tasks.isEmpty)
                   const _TaskEmptyState()
-                else if (AppTheme.isDesktop)
-                  LayoutBuilder(
-                    builder: (context, constraints) {
-                      final colWidth = (constraints.maxWidth - 14) / 2;
-                      return Wrap(
-                        spacing: 14,
-                        runSpacing: 14,
-                        children: [
-                          for (final task in snapshot.data!.tasks)
-                            SizedBox(
-                              width: colWidth,
-                              child: _TaskCard(
-                                task: task,
-                                onTap: () =>
-                                    _openTaskActions(snapshot.data!, task),
-                              ),
-                            ),
-                        ],
-                      );
-                    },
-                  )
                 else
                   ...snapshot.data!.tasks.asMap().entries.map(
                     (entry) => Padding(
@@ -1072,6 +1141,32 @@ class _TimeInWarning extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (AppTheme.isDesktop) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+        decoration: BoxDecoration(
+          color: AppTheme.warning.withValues(alpha: 0.07),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: AppTheme.warning.withValues(alpha: 0.18)),
+        ),
+        child: const Row(
+          children: [
+            Icon(LucideIcons.circleAlert, color: AppTheme.warning, size: 15),
+            SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                'Time in first — task creation and updates require a time-in for today.',
+                style: TextStyle(
+                  color: AppTheme.textPrimary,
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -1163,6 +1258,189 @@ class _TaskSectionHeader extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+const _deskTaskColumns = (priority: 96.0, due: 170.0, reported: 120.0);
+
+class _DeskTaskHeaderRow extends StatelessWidget {
+  const _DeskTaskHeaderRow();
+
+  @override
+  Widget build(BuildContext context) {
+    const style = TextStyle(
+      fontSize: 11,
+      fontWeight: FontWeight.w700,
+      letterSpacing: 0.6,
+      color: AppTheme.textMuted,
+    );
+    return Container(
+      color: AppTheme.surfaceMuted.withValues(alpha: 0.6),
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 9),
+      child: Row(
+        children: [
+          const SizedBox(width: 20),
+          const Expanded(child: Text('TASK', style: style)),
+          SizedBox(
+            width: _deskTaskColumns.priority,
+            child: const Text('PRIORITY', style: style),
+          ),
+          SizedBox(
+            width: _deskTaskColumns.due,
+            child: const Text('DUE', style: style),
+          ),
+          SizedBox(
+            width: _deskTaskColumns.reported,
+            child: const Text('REPORTED', style: style),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DeskTaskRow extends StatelessWidget {
+  const _DeskTaskRow({required this.task, required this.onTap});
+
+  final StaffTask task;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final dueColor = switch (task.dueMetaType) {
+      'overdue' => AppTheme.danger,
+      'due_today' => AppTheme.warning,
+      'undated' => AppTheme.textSecondary,
+      _ => AppTheme.success,
+    };
+    final p = task.priorityLabel.toLowerCase();
+    final priorityColor = p.contains('high')
+        ? AppTheme.danger
+        : p.contains('medium')
+            ? AppTheme.warning
+            : p.contains('low')
+                ? AppTheme.success
+                : AppTheme.textSecondary;
+
+    return InkWell(
+      onTap: onTap,
+      hoverColor: AppTheme.primarySoft.withValues(alpha: 0.5),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 13),
+        child: Row(
+          children: [
+            Container(
+              width: 8,
+              height: 8,
+              decoration: BoxDecoration(
+                color: dueColor,
+                shape: BoxShape.circle,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    task.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w700,
+                      color: AppTheme.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  Text.rich(
+                    TextSpan(
+                      children: [
+                        if (task.projectName.isNotEmpty)
+                          TextSpan(
+                            text: task.projectName,
+                            style: const TextStyle(
+                              color: AppTheme.primaryDark,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        if (task.isForwardedPending)
+                          TextSpan(
+                            text: task.projectName.isNotEmpty
+                                ? '  ·  Needs your first action'
+                                : 'Needs your first action',
+                            style: const TextStyle(
+                              color: AppTheme.warning,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        if (task.adminComment.isNotEmpty)
+                          TextSpan(
+                            text: '  ·  ${task.adminComment}',
+                            style: const TextStyle(
+                              color: AppTheme.textSecondary,
+                            ),
+                          ),
+                      ],
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 12),
+            SizedBox(
+              width: _deskTaskColumns.priority,
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: priorityColor.withValues(alpha: 0.10),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    task.priorityLabel,
+                    style: TextStyle(
+                      color: priorityColor,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(
+              width: _deskTaskColumns.due,
+              child: Text(
+                task.dueMetaLabel,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: dueColor,
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+            SizedBox(
+              width: _deskTaskColumns.reported,
+              child: Text(
+                formatCompactDate(task.reportedDate),
+                style: const TextStyle(
+                  color: AppTheme.textSecondary,
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -1582,7 +1860,7 @@ class _SheetContainer extends StatelessWidget {
             const SizedBox(height: 10),
             Container(
               width: 36,
-              height: 4,
+              height: AppTheme.isDesktop ? 0 : 4,
               decoration: BoxDecoration(
                 color: AppTheme.border,
                 borderRadius: BorderRadius.circular(2),

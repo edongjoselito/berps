@@ -3,6 +3,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/network/api_exception.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/desktop_kit.dart';
 import '../../../core/utils/haptics.dart';
 import '../../../core/utils/responsive.dart';
 import '../../../core/widgets/app_toast.dart';
@@ -44,7 +45,7 @@ class _AdminClientsTabState extends State<AdminClientsTab> {
   void _reload() => setState(() => _future = _load());
 
   Future<void> _openForm({AdminClient? client, String? nextId}) async {
-    final saved = await showModalBottomSheet<bool>(
+    final saved = await showAppSheet<bool>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
@@ -396,7 +397,7 @@ class _ClientFormSheetState extends State<_ClientFormSheet> {
               Center(
                 child: Container(
                   width: 42,
-                  height: 4,
+                  height: AppTheme.isDesktop ? 0 : 4,
                   decoration: BoxDecoration(
                     color: AppTheme.border,
                     borderRadius: BorderRadius.circular(99),

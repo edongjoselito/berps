@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 import 'package:berps_mobile/app/app.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 
@@ -102,6 +103,16 @@ void main() {
     expect(find.text('Dashboard'), findsWidgets,
         reason: 'dashboard should render after sign in');
 
+    // ── Notifications slide-over ──
+    final bell = find.byTooltip('Notifications');
+    if (bell.evaluate().isNotEmpty) {
+      await tester.tap(bell.first, warnIfMissed: false);
+      await _settle(tester, 8);
+      await _shot('03b_notifications_panel');
+      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+      await _settle(tester, 3);
+    }
+
     // ── Walk every sidebar module ──
     final modules = <String>[
       'Tasks',
@@ -142,6 +153,16 @@ void main() {
           '${i.toString().padLeft(2, '0')}_${label.toLowerCase().replaceAll(' ', '_')}');
       expect(tester.takeException(), isNull,
           reason: 'exception while viewing "$label"');
+      if (label == 'Tasks') {
+        final row = find.textContaining('Overdue by');
+        if (row.evaluate().isNotEmpty) {
+          await tester.tap(row.first, warnIfMissed: false);
+          await _settle(tester, 4);
+          await _shot('04b_task_action_dialog');
+          await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+          await _settle(tester, 3);
+        }
+      }
       i++;
     }
 

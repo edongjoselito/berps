@@ -4,6 +4,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/network/api_exception.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/desktop_kit.dart';
 import '../../../core/utils/haptics.dart';
 import '../../../core/utils/responsive.dart';
 import '../../../core/widgets/animations.dart';
@@ -200,7 +201,7 @@ class _StaffProfileScreenState extends State<StaffProfileScreen> {
 
   void _showPhotoSourceSheet() {
     Haptics.light();
-    showModalBottomSheet<void>(
+    showAppSheet<void>(
       context: context,
       backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
@@ -216,7 +217,7 @@ class _StaffProfileScreenState extends State<StaffProfileScreen> {
               children: [
                 Container(
                   width: 44,
-                  height: 4,
+                  height: AppTheme.isDesktop ? 0 : 4,
                   margin: const EdgeInsets.only(bottom: 14),
                   decoration: BoxDecoration(
                     color: AppTheme.border,

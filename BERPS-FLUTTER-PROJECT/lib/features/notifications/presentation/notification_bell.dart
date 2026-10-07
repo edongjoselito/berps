@@ -6,6 +6,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/haptics.dart';
 import '../../../core/widgets/animations.dart';
+import '../../../core/widgets/desktop_kit.dart';
 import '../../auth/domain/staff_session.dart';
 import '../../home/data/staff_api.dart';
 import 'notifications_screen.dart';
@@ -63,16 +64,77 @@ class _NotificationBellState extends State<NotificationBell>
 
   Future<void> _open() async {
     Haptics.light();
-    await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => NotificationsScreen(session: widget.session),
-      ),
-    );
+    if (AppTheme.isDesktop) {
+      await showSidePanel<void>(
+        context: context,
+        child: NotificationsScreen(session: widget.session),
+      );
+    } else {
+      await Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => NotificationsScreen(session: widget.session),
+        ),
+      );
+    }
     if (mounted) _refresh();
   }
 
   @override
   Widget build(BuildContext context) {
+    if (AppTheme.isDesktop) {
+      // Quiet ghost button with a small count pill — desktop toolbars keep
+      // secondary actions visually light.
+      return Tooltip(
+        message: 'Notifications',
+        child: Material(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+          child: InkWell(
+            onTap: _open,
+            borderRadius: BorderRadius.circular(10),
+            child: Container(
+              height: 38,
+              padding: const EdgeInsets.symmetric(horizontal: 11),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: AppTheme.border),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    LucideIcons.bell,
+                    size: 16,
+                    color: AppTheme.textPrimary,
+                  ),
+                  if (_count > 0) ...[
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 1,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppTheme.danger,
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Text(
+                        _count > 99 ? '99+' : '$_count',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 10.5,
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
     return PressScale(
       onTap: _open,
       child: SizedBox(

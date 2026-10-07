@@ -7,6 +7,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/network/api_exception.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/desktop_kit.dart';
 import '../../../core/utils/haptics.dart';
 import '../../../core/utils/responsive.dart';
 import '../../../core/widgets/animations.dart';
@@ -156,6 +157,9 @@ class _StaffDashboardTabState extends State<StaffDashboardTab> {
                 bottom: false,
                 child: MobileHeader(
                   title: 'Dashboard',
+                  subtitle: AppTheme.isDesktop
+                      ? '${_greeting()}, ${widget.session.firstName.isNotEmpty ? widget.session.firstName : widget.session.formalName} · ${_GreetingCard.formatDate(DateTime.now())}'
+                      : null,
                   leadingIcon: LucideIcons.list,
                   onLeadingTap: widget.onMenu == null
                       ? null
@@ -167,15 +171,17 @@ class _StaffDashboardTabState extends State<StaffDashboardTab> {
                 ),
               ),
               const SizedBox(height: 14),
-              FadeSlide(
-                delay: const Duration(milliseconds: 60),
-                child: _GreetingCard(
-                  greeting: _greeting(),
-                  greetingIcon: _greetingIcon(),
-                  session: widget.session,
+              if (!AppTheme.isDesktop) ...[
+                FadeSlide(
+                  delay: const Duration(milliseconds: 60),
+                  child: _GreetingCard(
+                    greeting: _greeting(),
+                    greetingIcon: _greetingIcon(),
+                    session: widget.session,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 18),
+                const SizedBox(height: 18),
+              ],
               if (snapshot.connectionState == ConnectionState.waiting)
                 const _DashboardSkeleton()
               else if (snapshot.hasError)
@@ -348,7 +354,9 @@ class _GreetingCard extends StatelessWidget {
   ];
   static const _days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
-  String _formatDate(DateTime now) {
+  String _formatDate(DateTime now) => formatDate(now);
+
+  static String formatDate(DateTime now) {
     return '${_days[now.weekday - 1]} · ${_months[now.month - 1]} ${now.day}';
   }
 }
@@ -430,6 +438,8 @@ class _DashboardContent extends StatelessWidget {
             : null,
       ),
     ];
+
+    if (AppTheme.isDesktop) return _buildDesktop(metricCards);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -536,6 +546,253 @@ class _DashboardContent extends StatelessWidget {
           ),
         ],
       ],
+    );
+  }
+
+  /// Desktop composition: work (metrics + in-progress) in the main column,
+  /// glanceable context (today, notes, leaderboard) in a fixed right rail.
+  Widget _buildDesktop(List<_MetricCardData> metricCards) {
+    final main = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _MetricGrid(cards: metricCards),
+        if (data.remindersDueTodayCount > 0) ...[
+          const SizedBox(height: 14),
+          _RemindersBanner(
+            count: data.remindersDueTodayCount,
+            onTap: session.hasReminders ? onOpenReminders : null,
+          ),
+        ],
+        if (session.hasTasks) ...[
+          const SizedBox(height: 20),
+          DeskPanel(
+            title: 'In progress',
+            count: data.ongoingTasks.length,
+            action: DeskLink(label: 'View all tasks', onTap: onOpenTasks),
+            padding: EdgeInsets.zero,
+            child: _DeskTaskList(tasks: data.ongoingTasks),
+          ),
+        ],
+      ],
+    );
+
+    final rail = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (session.hasAttendance) ...[
+          _DtrPreviewCard(
+            statusLabel: data.attendanceStatusLabel,
+            hoursLabel: data.todayHoursLabel,
+            notice: data.attendanceNotice,
+            onViewDtr: onOpenMyDtr,
+          ),
+          const SizedBox(height: 20),
+        ],
+        if (session.hasNotes || session.hasReminders) ...[
+          DeskPanel(
+            title: 'Notes & reminders',
+            action: session.hasNotes
+                ? DeskLink(label: 'Open', onTap: onOpenNotes)
+                : null,
+            padding: const EdgeInsets.fromLTRB(18, 14, 18, 16),
+            child: _NotesRemindersSnapshot(
+              notesFuture: notesFuture,
+              remindersFuture: remindersFuture,
+              onOpenNotes: onOpenNotes,
+              onOpenReminders: onOpenReminders,
+              session: session,
+            ),
+          ),
+          const SizedBox(height: 20),
+        ],
+        if (session.hasRanking)
+          FutureBuilder<StaffRanking>(
+            future: rankingFuture,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const _RankingSkeleton();
+              }
+              if (snapshot.hasError || !snapshot.hasData) {
+                return _RankingFallback(
+                  message: snapshot.error is ApiException
+                      ? (snapshot.error as ApiException).message
+                      : 'Ranking unavailable right now.',
+                );
+              }
+              return _LeaderboardCard(ranking: snapshot.data!);
+            },
+          ),
+      ],
+    );
+
+    return FadeSlide(
+      delay: const Duration(milliseconds: 80),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(child: main),
+          const SizedBox(width: 20),
+          SizedBox(width: 360, child: rail),
+        ],
+      ),
+    );
+  }
+}
+
+/// Desktop table-style list of in-progress tasks: one row per task with
+/// progress, due date and priority aligned in columns.
+class _DeskTaskList extends StatelessWidget {
+  const _DeskTaskList({required this.tasks});
+
+  final List<OngoingTask> tasks;
+
+  @override
+  Widget build(BuildContext context) {
+    if (tasks.isEmpty) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(horizontal: 18, vertical: 22),
+        child: Text(
+          'No active tasks in your deadline window.',
+          style: TextStyle(
+            color: AppTheme.textSecondary,
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      );
+    }
+    return Column(
+      children: [
+        for (var i = 0; i < tasks.length; i++) ...[
+          if (i > 0) const Divider(height: 1, color: AppTheme.border),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 13),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        tasks[i].title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 13.5,
+                          fontWeight: FontWeight.w700,
+                          color: AppTheme.textPrimary,
+                        ),
+                      ),
+                      if (tasks[i].subtitle.isNotEmpty) ...[
+                        const SizedBox(height: 3),
+                        Text(
+                          tasks[i].subtitle,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: AppTheme.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 20),
+                SizedBox(
+                  width: 150,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(999),
+                          child: LinearProgressIndicator(
+                            minHeight: 5,
+                            value: tasks[i].progress / 100,
+                            backgroundColor: AppTheme.surfaceMuted,
+                            valueColor: const AlwaysStoppedAnimation(
+                              AppTheme.primary,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      SizedBox(
+                        width: 36,
+                        child: Text(
+                          '${tasks[i].progress}%',
+                          textAlign: TextAlign.right,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: AppTheme.textSecondary,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 24),
+                SizedBox(
+                  width: 110,
+                  child: Text(
+                    tasks[i].dueDate.isEmpty ? 'No due date' : tasks[i].dueDate,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: AppTheme.textSecondary,
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  width: 72,
+                  child: tasks[i].priority.isEmpty
+                      ? null
+                      : Align(
+                          alignment: Alignment.centerRight,
+                          child: _PriorityTag(label: tasks[i].priority),
+                        ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _PriorityTag extends StatelessWidget {
+  const _PriorityTag({required this.label});
+
+  final String label;
+
+  Color get _color {
+    final p = label.toLowerCase();
+    if (p.contains('high') || p.contains('urgent')) return AppTheme.danger;
+    if (p.contains('medium')) return AppTheme.warning;
+    if (p.contains('low')) return AppTheme.success;
+    return AppTheme.textSecondary;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: _color.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Text(
+        int.tryParse(label) != null ? 'P$label' : label,
+        style: TextStyle(
+          color: _color,
+          fontSize: 11,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
     );
   }
 }
@@ -687,8 +944,93 @@ class _DtrPreviewCard extends StatelessWidget {
     return LucideIcons.clock;
   }
 
+  Widget _buildDesktop() {
+    final showNotice = notice.isNotEmpty && notice.trim() != statusLabel.trim();
+    return DeskPanel(
+      title: 'Today',
+      action: DeskLink(label: 'View DTR', onTap: onViewDtr),
+      padding: const EdgeInsets.fromLTRB(18, 16, 18, 18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            _formatDate(DateTime.now()),
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: AppTheme.textMuted,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Text(
+                hoursLabel,
+                style: const TextStyle(
+                  fontSize: 30,
+                  fontWeight: FontWeight.w800,
+                  color: AppTheme.textPrimary,
+                  letterSpacing: -1,
+                ),
+              ),
+              const SizedBox(width: 8),
+              const Text(
+                'hours logged',
+                style: TextStyle(
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w600,
+                  color: AppTheme.textSecondary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: _statusColor.withValues(alpha: 0.07),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(_statusIcon, size: 16, color: _statusColor),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    statusLabel.isNotEmpty ? statusLabel : 'No status yet',
+                    style: const TextStyle(
+                      fontSize: 12.5,
+                      height: 1.45,
+                      fontWeight: FontWeight.w600,
+                      color: AppTheme.textPrimary,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (showNotice) ...[
+            const SizedBox(height: 10),
+            Text(
+              notice,
+              style: const TextStyle(
+                fontSize: 12,
+                height: 1.45,
+                color: AppTheme.textSecondary,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (AppTheme.isDesktop) return _buildDesktop();
     final today = _formatDate(DateTime.now());
     return Container(
       padding: const EdgeInsets.all(16),
@@ -928,14 +1270,25 @@ class _MetricGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        if (AppTheme.isDesktop && constraints.maxWidth >= 720) {
-          return Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+        if (AppTheme.isDesktop) {
+          final perRow = constraints.maxWidth >= 720 ? cards.length : 2;
+          final width =
+              (constraints.maxWidth - 12 * (perRow - 1)) / perRow;
+          return Wrap(
+            spacing: 12,
+            runSpacing: 12,
             children: [
-              for (var i = 0; i < cards.length; i++) ...[
-                if (i > 0) const SizedBox(width: 12),
-                Expanded(child: _MetricCard(data: cards[i])),
-              ],
+              for (final card in cards)
+                SizedBox(
+                  width: width,
+                  child: DeskStatCard(
+                    icon: card.icon,
+                    label: card.label,
+                    value: card.value,
+                    accent: card.accent,
+                    onTap: card.onTap,
+                  ),
+                ),
             ],
           );
         }
@@ -1105,12 +1458,13 @@ class _LeaderboardCard extends StatelessWidget {
     final entries = ranking.entries;
     final hasData = entries.isNotEmpty;
 
+    final desktop = AppTheme.isDesktop;
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(desktop ? 14 : 20),
         border: Border.all(color: AppTheme.border),
-        boxShadow: AppTheme.shadowSoft,
+        boxShadow: desktop ? null : AppTheme.shadowSoft,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1119,42 +1473,52 @@ class _LeaderboardCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  const Color(0xFFFFFBEC),
-                  Colors.white.withValues(alpha: 0.6),
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(20),
+              gradient: desktop
+                  ? null
+                  : LinearGradient(
+                      colors: [
+                        const Color(0xFFFFFBEC),
+                        Colors.white.withValues(alpha: 0.6),
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+              borderRadius: BorderRadius.vertical(
+                top: Radius.circular(desktop ? 14 : 20),
               ),
             ),
             child: Row(
               children: [
                 Container(
-                  width: 38,
-                  height: 38,
+                  width: desktop ? 34 : 38,
+                  height: desktop ? 34 : 38,
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFFF59E0B), Color(0xFFFBBF24)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFFF59E0B).withValues(alpha: 0.35),
-                        blurRadius: 14,
-                        offset: const Offset(0, 6),
-                      ),
-                    ],
+                    color: desktop
+                        ? const Color(0xFFF59E0B).withValues(alpha: 0.12)
+                        : null,
+                    gradient: desktop
+                        ? null
+                        : const LinearGradient(
+                            colors: [Color(0xFFF59E0B), Color(0xFFFBBF24)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                    borderRadius: BorderRadius.circular(desktop ? 10 : 12),
+                    boxShadow: desktop
+                        ? null
+                        : [
+                            BoxShadow(
+                              color: const Color(0xFFF59E0B)
+                                  .withValues(alpha: 0.35),
+                              blurRadius: 14,
+                              offset: const Offset(0, 6),
+                            ),
+                          ],
                   ),
-                  child: const Icon(
+                  child: Icon(
                     LucideIcons.trophy,
-                    color: Colors.white,
-                    size: 19,
+                    color: desktop ? const Color(0xFFD97706) : Colors.white,
+                    size: desktop ? 16 : 19,
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -2074,6 +2438,42 @@ class _EmptySnapshot extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (AppTheme.isDesktop) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Nothing scheduled for today.',
+            style: TextStyle(
+              color: AppTheme.textSecondary,
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              if (onOpenReminders != null)
+                DeskButton(
+                  label: 'Add reminder',
+                  icon: LucideIcons.bellPlus,
+                  primary: false,
+                  onTap: onOpenReminders,
+                ),
+              if (onOpenNotes != null)
+                DeskButton(
+                  label: 'Write a note',
+                  icon: LucideIcons.notebookPen,
+                  primary: false,
+                  onTap: onOpenNotes,
+                ),
+            ],
+          ),
+        ],
+      );
+    }
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(

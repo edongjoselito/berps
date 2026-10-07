@@ -3,6 +3,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/haptics.dart';
+import '../../../core/widgets/brand_logo.dart';
 import '../../../core/widgets/staff_avatar.dart';
 import '../../auth/domain/mobile_config.dart';
 import '../../auth/domain/staff_session.dart';
@@ -48,23 +49,59 @@ class StaffDrawer extends StatelessWidget {
   final Future<void> Function() onSignOut;
   final String activeItemId;
 
-  /// When true, renders as a docked sidebar (desktop layout) instead of a
-  /// modal [Drawer].
+  /// When true, renders as the docked desktop sidebar instead of a modal
+  /// mobile [Drawer].
   final bool sidebar;
+
+  /// Navigation model shared by the mobile drawer and the desktop sidebar,
+  /// grouped into labelled sections and filtered by workspace features.
+  List<_NavSection> _sections() {
+    return [
+      _NavSection('Main', LucideIcons.layoutGrid, [
+        _NavSpec('dashboard', LucideIcons.layoutGrid, 'Dashboard',
+            onSelectDashboard),
+        if (session.hasTasks)
+          _NavSpec('tasks', LucideIcons.listChecks, 'Tasks', onSelectTasks),
+        if (session.hasSupport)
+          _NavSpec('unassigned-tickets', LucideIcons.userMinus,
+              'Unassigned Tickets', onSelectUnassignedTickets),
+        if (session.hasForwardedTasks)
+          _NavSpec('forwarded-tasks', LucideIcons.arrowLeftRight,
+              'Forwarded Tasks', onSelectForwardedTasks),
+        if (session.hasSupport)
+          _NavSpec('tickets', LucideIcons.lifeBuoy, 'Tickets', onSelectTickets),
+        if (session.hasSupport)
+          _NavSpec('support-dashboard', LucideIcons.trendingUp,
+              'Support Dashboard', onSelectSupportDashboard),
+      ]),
+      _NavSection('Productivity', LucideIcons.notebookText, [
+        if (session.hasAttendance)
+          _NavSpec('attendance', LucideIcons.calendarDays, 'Attendance',
+              onSelectAttendance),
+        if (session.hasMyDtr)
+          _NavSpec('my-dtr', LucideIcons.clock, 'My DTR', onSelectMyDtr),
+        if (session.hasCalendar)
+          _NavSpec('calendar', LucideIcons.calendarRange, 'Calendar',
+              onSelectCalendar),
+        if (session.hasNotes)
+          _NavSpec('notes', LucideIcons.notebookText, 'Notes', onSelectNotes),
+        if (session.hasReminders)
+          _NavSpec('reminders', LucideIcons.bellRing, 'Reminders',
+              onSelectReminders),
+        if (session.hasRanking)
+          _NavSpec('annual-goals', LucideIcons.trophy, 'Annual Goals',
+              onSelectAnnualGoals),
+      ]),
+      _NavSection('Account', LucideIcons.circleUser, [
+        _NavSpec('account', LucideIcons.circleUser, 'Account', onSelectAccount),
+      ]),
+    ].where((s) => s.items.isNotEmpty).toList();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final content = _buildContent();
-    if (sidebar) {
-      return Container(
-        width: 280,
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          border: Border(right: BorderSide(color: AppTheme.border)),
-        ),
-        child: content,
-      );
-    }
+    if (sidebar) return _DesktopSidebar(drawer: this);
+
     return Drawer(
       backgroundColor: Colors.white,
       width: MediaQuery.of(context).size.width * 0.84,
@@ -74,177 +111,39 @@ class StaffDrawer extends StatelessWidget {
           bottomRight: Radius.circular(28),
         ),
       ),
-      child: content,
-    );
-  }
-
-  Widget _buildContent() {
-    return Builder(
-      builder: (context) => SafeArea(
+      child: SafeArea(
         child: Column(
           children: [
-            _Header(session: session, config: config, sidebar: sidebar),
+            _Header(session: session),
             const SizedBox(height: 4),
             Expanded(
               child: ListView(
                 padding: const EdgeInsets.symmetric(vertical: 4),
                 children: [
-                  // ── Main — daily core and urgent queues first ──
-                  _SectionLabel('Main', LucideIcons.layoutGrid, sidebar),
-                  _NavItem(
-                    id: 'dashboard',
-                    icon: LucideIcons.layoutGrid,
-                    iconActive: LucideIcons.layoutGrid,
-                    label: 'Dashboard',
-                    activeItemId: activeItemId,
-                    sidebar: sidebar,
-                    onTap: onSelectDashboard,
-                  ),
-                  if (session.hasTasks)
-                    _NavItem(
-                      id: 'tasks',
-                      icon: LucideIcons.listChecks,
-                      iconActive: LucideIcons.listChecks,
-                      label: 'Tasks',
-                      activeItemId: activeItemId,
-                    sidebar: sidebar,
-                      onTap: onSelectTasks,
-                    ),
-                  if (session.hasSupport)
-                    _NavItem(
-                      id: 'unassigned-tickets',
-                      icon: LucideIcons.userMinus,
-                      iconActive: LucideIcons.userMinus,
-                      label: 'Unassigned Tickets',
-                      activeItemId: activeItemId,
-                    sidebar: sidebar,
-                      onTap: onSelectUnassignedTickets,
-                    ),
-                  if (session.hasForwardedTasks)
-                    _NavItem(
-                      id: 'forwarded-tasks',
-                      icon: LucideIcons.arrowLeftRight,
-                      iconActive: LucideIcons.arrowLeftRight,
-                      label: 'Forwarded Tasks',
-                      activeItemId: activeItemId,
-                    sidebar: sidebar,
-                      onTap: onSelectForwardedTasks,
-                    ),
-                  if (session.hasSupport)
-                    _NavItem(
-                      id: 'tickets',
-                      icon: LucideIcons.lifeBuoy,
-                      iconActive: LucideIcons.lifeBuoy,
-                      label: 'Tickets',
-                      activeItemId: activeItemId,
-                    sidebar: sidebar,
-                      onTap: onSelectTickets,
-                    ),
-                  if (session.hasSupport)
-                    _NavItem(
-                      id: 'support-dashboard',
-                      icon: LucideIcons.trendingUp,
-                      iconActive: LucideIcons.trendingUp,
-                      label: 'Support Dashboard',
-                      activeItemId: activeItemId,
-                    sidebar: sidebar,
-                      onTap: onSelectSupportDashboard,
-                    ),
-                  // ── Productivity ──
-                  _SectionLabel('Productivity',
-                      LucideIcons.notebookText, sidebar),
-                  if (session.hasAttendance)
-                    _NavItem(
-                      id: 'attendance',
-                      icon: LucideIcons.calendarDays,
-                      iconActive: LucideIcons.calendarDays,
-                      label: 'Attendance',
-                      activeItemId: activeItemId,
-                    sidebar: sidebar,
-                      onTap: onSelectAttendance,
-                    ),
-                  if (session.hasMyDtr)
-                    _NavItem(
-                      id: 'my-dtr',
-                      icon: LucideIcons.clock,
-                      iconActive: LucideIcons.clock,
-                      label: 'My DTR',
-                      activeItemId: activeItemId,
-                    sidebar: sidebar,
-                      onTap: onSelectMyDtr,
-                    ),
-                  if (session.hasCalendar)
-                    _NavItem(
-                      id: 'calendar',
-                      icon: LucideIcons.calendarDays,
-                      iconActive: LucideIcons.calendarDays,
-                      label: 'Calendar',
-                      activeItemId: activeItemId,
-                    sidebar: sidebar,
-                      onTap: onSelectCalendar,
-                    ),
-                  if (session.hasNotes)
-                    _NavItem(
-                      id: 'notes',
-                      icon: LucideIcons.notebookText,
-                      iconActive: LucideIcons.notebookText,
-                      label: 'Notes',
-                      activeItemId: activeItemId,
-                    sidebar: sidebar,
-                      onTap: onSelectNotes,
-                    ),
-                  if (session.hasReminders)
-                    _NavItem(
-                      id: 'reminders',
-                      icon: LucideIcons.bellRing,
-                      iconActive: LucideIcons.bellRing,
-                      label: 'Reminders',
-                      activeItemId: activeItemId,
-                    sidebar: sidebar,
-                      onTap: onSelectReminders,
-                    ),
-                  if (session.hasRanking)
-                    _NavItem(
-                      id: 'annual-goals',
-                      icon: LucideIcons.trophy,
-                      iconActive: LucideIcons.trophy,
-                      label: 'Annual Goals',
-                      activeItemId: activeItemId,
-                    sidebar: sidebar,
-                      onTap: onSelectAnnualGoals,
-                    ),
-                  // ── Account ──
-                  _SectionLabel('Account', LucideIcons.circleUser, sidebar),
-                  _NavItem(
-                    id: 'account',
-                    icon: LucideIcons.circleUser,
-                    iconActive: LucideIcons.circleUser,
-                    label: 'Account',
-                    activeItemId: activeItemId,
-                    sidebar: sidebar,
-                    onTap: onSelectAccount,
-                  ),
+                  for (final section in _sections()) ...[
+                    _SectionLabel(section.label, section.icon),
+                    for (final item in section.items)
+                      _NavItem(spec: item, activeItemId: activeItemId),
+                  ],
                 ],
               ),
             ),
             const Divider(height: 1, color: AppTheme.border),
             Padding(
               padding: const EdgeInsets.fromLTRB(12, 8, 12, 6),
-              child: Column(
-                children: [
-                  _DrawerAction(
-                    icon: LucideIcons.logOut,
-                    label: 'Sign out',
-                    danger: true,
-                    onTap: () async {
-                      if (!sidebar) Navigator.of(context).pop();
-                      await onSignOut();
-                    },
-                  ),
-                ],
+              child: Builder(
+                builder: (context) => _DrawerAction(
+                  icon: LucideIcons.logOut,
+                  label: 'Sign out',
+                  danger: true,
+                  onTap: () async {
+                    Navigator.of(context).pop();
+                    await onSignOut();
+                  },
+                ),
               ),
             ),
-            _DrawerFooter(sidebar: sidebar),
+            const _DrawerFooter(),
           ],
         ),
       ),
@@ -252,16 +151,250 @@ class StaffDrawer extends StatelessWidget {
   }
 }
 
+class _NavSection {
+  const _NavSection(this.label, this.icon, this.items);
+  final String label;
+  final IconData icon;
+  final List<_NavSpec> items;
+}
+
+class _NavSpec {
+  const _NavSpec(this.id, this.icon, this.label, this.onTap);
+  final String id;
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+}
+
+// ── Desktop sidebar ─────────────────────────────────────────────────────────
+
+class _Sidebar {
+  static const background = Color(0xFF0E1A2D);
+  static const divider = Color(0x14FFFFFF);
+  static const textDim = Color(0x8CFFFFFF);
+  static const textFaint = Color(0x59FFFFFF);
+  static const activeFill = Color(0x1AFFFFFF);
+  static const hoverFill = Color(0x0DFFFFFF);
+}
+
+class _DesktopSidebar extends StatelessWidget {
+  const _DesktopSidebar({required this.drawer});
+
+  final StaffDrawer drawer;
+
+  @override
+  Widget build(BuildContext context) {
+    final session = drawer.session;
+    return Container(
+      width: 248,
+      color: _Sidebar.background,
+      child: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 22, 20, 18),
+              child: Row(
+                children: [
+                  Container(
+                    width: 30,
+                    height: 30,
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: BrandLogo(
+                      url: drawer.config?.logoUrl ?? '',
+                      size: 22,
+                      framed: false,
+                    ),
+                  ),
+                  const SizedBox(width: 11),
+                  const Text(
+                    'BERPS',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 1.4,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+                children: [
+                  for (final section in drawer._sections()) ...[
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(10, 16, 10, 6),
+                      child: Text(
+                        section.label.toUpperCase(),
+                        style: const TextStyle(
+                          color: _Sidebar.textFaint,
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 1.4,
+                        ),
+                      ),
+                    ),
+                    for (final item in section.items)
+                      _SidebarItem(
+                        spec: item,
+                        active: drawer.activeItemId == item.id,
+                      ),
+                  ],
+                ],
+              ),
+            ),
+            const Divider(height: 1, color: _Sidebar.divider),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 10, 8, 12),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: InkWell(
+                      onTap: drawer.onSelectAccount,
+                      borderRadius: BorderRadius.circular(10),
+                      hoverColor: _Sidebar.hoverFill,
+                      child: Padding(
+                        padding: const EdgeInsets.all(6),
+                        child: Row(
+                          children: [
+                            StaffAvatar(
+                              url: session.avatarUrl,
+                              size: 34,
+                              radius: 10,
+                              background: Colors.white,
+                              placeholderColor: AppTheme.primary,
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    session.formalName,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    session.position.isEmpty
+                                        ? 'Staff'
+                                        : session.position,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      color: _Sidebar.textDim,
+                                      fontSize: 11.5,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    tooltip: 'Sign out',
+                    onPressed: drawer.onSignOut,
+                    hoverColor: _Sidebar.hoverFill,
+                    icon: const Icon(
+                      LucideIcons.logOut,
+                      size: 17,
+                      color: _Sidebar.textDim,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SidebarItem extends StatelessWidget {
+  const _SidebarItem({required this.spec, required this.active});
+
+  final _NavSpec spec;
+  final bool active;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 1),
+      child: Material(
+        color: active ? _Sidebar.activeFill : Colors.transparent,
+        borderRadius: BorderRadius.circular(9),
+        child: InkWell(
+          onTap: active
+              ? null
+              : () {
+                  Haptics.light();
+                  spec.onTap();
+                },
+          borderRadius: BorderRadius.circular(9),
+          hoverColor: _Sidebar.hoverFill,
+          child: SizedBox(
+            height: 38,
+            child: Row(
+              children: [
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 180),
+                  width: 3,
+                  height: active ? 18 : 0,
+                  decoration: BoxDecoration(
+                    color: AppTheme.primary,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(width: 9),
+                Icon(
+                  spec.icon,
+                  size: 17,
+                  color: active ? Colors.white : _Sidebar.textDim,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    spec.label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: active ? Colors.white : _Sidebar.textDim,
+                      fontSize: 13.5,
+                      fontWeight: active ? FontWeight.w700 : FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Mobile drawer pieces ────────────────────────────────────────────────────
+
 class _Header extends StatelessWidget {
-  const _Header({
-    required this.session,
-    required this.config,
-    this.sidebar = false,
-  });
+  const _Header({required this.session});
 
   final StaffSession session;
-  final MobileConfig? config;
-  final bool sidebar;
 
   @override
   Widget build(BuildContext context) {
@@ -289,8 +422,8 @@ class _Header extends StatelessWidget {
                   borderRadius: BorderRadius.circular(999),
                   border: Border.all(color: AppTheme.border),
                 ),
-                child: Text(
-                  sidebar ? 'DESKTOP' : 'MOBILE',
+                child: const Text(
+                  'MOBILE',
                   style: TextStyle(
                     fontSize: 9,
                     fontWeight: FontWeight.w900,
@@ -372,21 +505,18 @@ class _Header extends StatelessWidget {
 }
 
 class _SectionLabel extends StatelessWidget {
-  const _SectionLabel(this.text, [this.icon, this.sidebar = false]);
+  const _SectionLabel(this.text, this.icon);
   final String text;
-  final IconData? icon;
-  final bool sidebar;
+  final IconData icon;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.fromLTRB(16, sidebar ? 16 : 18, 22, 7),
+      padding: const EdgeInsets.fromLTRB(16, 18, 22, 8),
       child: Row(
         children: [
-          if (icon != null) ...[
-            Icon(icon, size: 13, color: AppTheme.textMuted),
-            const SizedBox(width: 8),
-          ],
+          Icon(icon, size: 13, color: AppTheme.textMuted),
+          const SizedBox(width: 8),
           Text(
             text.toUpperCase(),
             style: const TextStyle(
@@ -403,27 +533,14 @@ class _SectionLabel extends StatelessWidget {
 }
 
 class _NavItem extends StatelessWidget {
-  const _NavItem({
-    required this.id,
-    required this.icon,
-    required this.iconActive,
-    required this.label,
-    required this.activeItemId,
-    required this.onTap,
-    this.sidebar = false,
-  });
+  const _NavItem({required this.spec, required this.activeItemId});
 
-  final String id;
-  final IconData icon;
-  final IconData iconActive;
-  final String label;
+  final _NavSpec spec;
   final String activeItemId;
-  final VoidCallback onTap;
-  final bool sidebar;
 
   @override
   Widget build(BuildContext context) {
-    final isActive = activeItemId == id;
+    final isActive = activeItemId == spec.id;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
@@ -434,22 +551,21 @@ class _NavItem extends StatelessWidget {
         borderRadius: BorderRadius.circular(14),
         child: InkWell(
           onTap: () {
-            if (!sidebar) Navigator.of(context).maybePop();
+            Navigator.of(context).maybePop();
             if (!isActive) {
               Haptics.light();
-              onTap();
+              spec.onTap();
             }
           },
-          borderRadius: BorderRadius.circular(sidebar ? 10 : 14),
+          borderRadius: BorderRadius.circular(14),
           child: Padding(
-            padding: EdgeInsets.symmetric(
-                horizontal: 10, vertical: sidebar ? 9.5 : 11),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 11),
             child: Row(
               children: [
                 AnimatedContainer(
                   duration: const Duration(milliseconds: 220),
-                  width: sidebar ? 32 : 34,
-                  height: sidebar ? 32 : 34,
+                  width: 34,
+                  height: 34,
                   decoration: BoxDecoration(
                     color: isActive
                         ? AppTheme.primary.withValues(alpha: 0.14)
@@ -457,7 +573,7 @@ class _NavItem extends StatelessWidget {
                     borderRadius: BorderRadius.circular(11),
                   ),
                   child: Icon(
-                    isActive ? iconActive : icon,
+                    spec.icon,
                     size: 17,
                     color: isActive
                         ? AppTheme.primaryDark
@@ -467,12 +583,12 @@ class _NavItem extends StatelessWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    label,
+                    spec.label,
                     style: TextStyle(
                       color: isActive
                           ? AppTheme.textPrimary
                           : AppTheme.textSecondary,
-                      fontSize: sidebar ? 13 : 13.5,
+                      fontSize: 13.5,
                       fontWeight: isActive ? FontWeight.w800 : FontWeight.w600,
                     ),
                   ),
@@ -536,9 +652,7 @@ class _DrawerAction extends StatelessWidget {
 }
 
 class _DrawerFooter extends StatelessWidget {
-  const _DrawerFooter({this.sidebar = false});
-
-  final bool sidebar;
+  const _DrawerFooter();
 
   @override
   Widget build(BuildContext context) {
@@ -553,7 +667,7 @@ class _DrawerFooter extends StatelessWidget {
           ),
           const SizedBox(width: 6),
           Text(
-            sidebar ? 'BERPS Desktop · v1.0' : 'BERPS Mobile · v1.0',
+            'BERPS Mobile · v1.0',
             style: TextStyle(
               fontSize: 10.5,
               fontWeight: FontWeight.w800,

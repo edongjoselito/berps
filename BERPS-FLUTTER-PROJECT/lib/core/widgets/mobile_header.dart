@@ -38,7 +38,7 @@ class MobileHeader extends StatelessWidget {
       );
     }
 
-    return Row(
+    final row = Row(
       children: [
         if (leadingIcon != null && onLeadingTap != null) ...[
           MobileHeaderButton(icon: leadingIcon!, onTap: onLeadingTap!),
@@ -53,20 +53,21 @@ class MobileHeader extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                  fontSize: AppTheme.isDesktop ? 24 : 22,
-                  fontWeight: FontWeight.w900,
+                  fontSize: 22,
+                  fontWeight:
+                      AppTheme.isDesktop ? FontWeight.w800 : FontWeight.w900,
                   color: AppTheme.textPrimary,
-                  letterSpacing: -0.6,
+                  letterSpacing: AppTheme.isDesktop ? -0.7 : -0.5,
                 ),
               ),
               if (subtitle?.trim().isNotEmpty == true) ...[
-                const SizedBox(height: 2),
+                SizedBox(height: AppTheme.isDesktop ? 3 : 2),
                 Text(
                   subtitle!,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 12.5,
+                  style: TextStyle(
+                    fontSize: AppTheme.isDesktop ? 13 : 12.5,
                     fontWeight: FontWeight.w600,
                     color: AppTheme.textSecondary,
                   ),
@@ -75,8 +76,18 @@ class MobileHeader extends StatelessWidget {
             ],
           ),
         ),
-        ...trailingWidgets,
+        for (var i = 0; i < trailingWidgets.length; i++) ...[
+          if (i > 0) const SizedBox(width: 8),
+          trailingWidgets[i],
+        ],
       ],
+    );
+    if (!AppTheme.isDesktop) return row;
+    // Desktop toolbar: a little extra vertical room so the page title reads
+    // as a window toolbar rather than a mobile app bar.
+    return Padding(
+      padding: const EdgeInsets.only(top: 10, bottom: 6),
+      child: row,
     );
   }
 }
@@ -95,23 +106,47 @@ class MobileHeaderButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final desktop = AppTheme.isDesktop;
+    if (AppTheme.isDesktop) {
+      return Material(
+        color: filled ? AppTheme.primaryDark : Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(10),
+          child: Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: filled ? AppTheme.primaryDark : AppTheme.border,
+              ),
+            ),
+            child: Icon(
+              icon,
+              size: 17,
+              color: filled ? Colors.white : AppTheme.textPrimary,
+            ),
+          ),
+        ),
+      );
+    }
     return PressScale(
       onTap: onTap,
       child: Container(
-        width: desktop ? 40 : 44,
-        height: desktop ? 40 : 44,
+        width: 44,
+        height: 44,
         decoration: BoxDecoration(
           color: filled ? AppTheme.primaryDark : Colors.white,
-          borderRadius: BorderRadius.circular(desktop ? 11 : 14),
+          borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color: filled ? AppTheme.primaryDark : AppTheme.border,
           ),
-          boxShadow: desktop ? null : AppTheme.shadowSoft,
+          boxShadow: AppTheme.shadowSoft,
         ),
         child: Icon(
           icon,
-          size: desktop ? 19 : 20,
+          size: 20,
           color: filled ? Colors.white : AppTheme.textPrimary,
         ),
       ),

@@ -1,5 +1,7 @@
 import 'package:flutter/widgets.dart';
 
+import '../theme/app_theme.dart';
+
 /// Phone breakpoints — values are inclusive at the lower bound.
 ///
 /// - tiny  : up to 359 (iPhone SE 1st gen / very small Androids)
@@ -36,6 +38,7 @@ extension ResponsiveX on BuildContext {
 
   /// Outer horizontal padding for screen-level containers.
   double get gutter {
+    if (AppTheme.isDesktop) return 32;
     if (isTinyPhone) return 14;
     if (isSmallPhone) return 16;
     return 20;

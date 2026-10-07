@@ -103,8 +103,17 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                         snapshot.hasData && snapshot.data!.notifications.isEmpty
                         ? 'You are all caught up'
                         : 'Recent activity for your account',
-                    leadingIcon: LucideIcons.arrowLeft,
-                    onLeadingTap: () => Navigator.of(context).maybePop(),
+                    leadingIcon:
+                        AppTheme.isDesktop ? null : LucideIcons.arrowLeft,
+                    onLeadingTap: AppTheme.isDesktop
+                        ? null
+                        : () => Navigator.of(context).maybePop(),
+                    trailing: AppTheme.isDesktop
+                        ? MobileHeaderButton(
+                            icon: LucideIcons.x,
+                            onTap: () => Navigator.of(context).maybePop(),
+                          )
+                        : null,
                   ),
                 ),
                 const SizedBox(height: 14),

@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/network/api_exception.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/desktop_kit.dart';
 import '../../../core/utils/haptics.dart';
 import '../../../core/widgets/animations.dart';
 import '../../../core/widgets/app_toast.dart';
@@ -631,7 +632,7 @@ class _CalendarDashboardTabState extends State<CalendarDashboardTab> {
     Haptics.light();
     final dayItems = items.where((e) => _itemCoversDay(e, day)).toList()
       ..sort((a, b) => a.date.compareTo(b.date));
-    showModalBottomSheet<void>(
+    showAppSheet<void>(
       context: context,
       backgroundColor: AppTheme.surface,
       shape: const RoundedRectangleBorder(
@@ -1394,7 +1395,7 @@ class _MonthDetailScreenState extends State<_MonthDetailScreen> {
     Haptics.light();
     final dayItems = items.where((e) => _itemCoversDay(e, day)).toList()
       ..sort((a, b) => a.date.compareTo(b.date));
-    showModalBottomSheet<void>(
+    showAppSheet<void>(
       context: context,
       backgroundColor: AppTheme.surface,
       shape: const RoundedRectangleBorder(
@@ -2135,7 +2136,7 @@ class _DaySheetState extends State<_DaySheet> {
               Center(
                 child: Container(
                   width: 40,
-                  height: 4,
+                  height: AppTheme.isDesktop ? 0 : 4,
                   decoration: BoxDecoration(
                     color: AppTheme.border,
                     borderRadius: BorderRadius.circular(99),

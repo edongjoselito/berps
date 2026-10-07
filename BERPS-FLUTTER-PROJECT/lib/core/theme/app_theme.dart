@@ -205,6 +205,26 @@ class AppTheme {
         ),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       ),
+      dialogTheme: DialogThemeData(
+        backgroundColor: surface,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(isDesktop ? 16 : 24),
+        ),
+      ),
+      tooltipTheme: TooltipThemeData(
+        decoration: BoxDecoration(
+          color: textPrimary,
+          borderRadius: BorderRadius.circular(6),
+        ),
+        textStyle: TextStyle(
+          fontFamily: effectiveFontFamily,
+          color: Colors.white,
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+        ),
+        waitDuration: const Duration(milliseconds: 400),
+      ),
       dividerTheme: const DividerThemeData(
         color: border,
         thickness: 1,

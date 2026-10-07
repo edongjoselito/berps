@@ -4,6 +4,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../core/network/api_exception.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/desktop_kit.dart';
+import '../../../core/widgets/mobile_header.dart';
 import '../../../core/utils/haptics.dart';
 import '../../../core/utils/responsive.dart';
 import '../../../core/widgets/animations.dart';
@@ -155,50 +156,69 @@ class _MyDtrScreenState extends State<MyDtrScreen> {
                         child: _SummaryCard(data: data),
                       ),
                       const SizedBox(height: 24),
-                      FadeSlide(
-                        delay: const Duration(milliseconds: 140),
-                        child: _SectionHeader(
-                          title: 'Daily Records',
+                      if (AppTheme.isDesktop)
+                        DeskPanel(
+                          title: 'Daily records',
                           count: data.rows.length,
+                          padding: EdgeInsets.zero,
+                          child: data.rows.isEmpty
+                              ? Padding(
+                                  padding: const EdgeInsets.all(24),
+                                  child: _EmptyState(
+                                    month: data.month,
+                                    year: data.year,
+                                  ),
+                                )
+                              : _DeskDtrTable(rows: data.rows),
+                        )
+                      else ...[
+                        FadeSlide(
+                          delay: const Duration(milliseconds: 140),
+                          child: _SectionHeader(
+                            title: 'Daily Records',
+                            count: data.rows.length,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 12),
-                      if (data.rows.isEmpty) ...[
-                        const SizedBox(height: 40),
-                        _EmptyState(month: data.month, year: data.year),
-                      ] else ...[
-                        ...data.rows.asMap().entries.map((entry) {
-                          final weekNumber = (entry.key ~/ 7) + 1;
-                          final isWeekBoundary =
-                              entry.key > 0 && entry.key % 7 == 0;
-                          final rowDate = DateTime.tryParse(entry.value.date);
-                          final isToday =
-                              rowDate != null &&
-                              rowDate.year == DateTime.now().year &&
-                              rowDate.month == DateTime.now().month &&
-                              rowDate.day == DateTime.now().day;
-                          final isWeekend =
-                              rowDate != null &&
-                              (rowDate.weekday == 6 || rowDate.weekday == 7);
-                          return Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              if (isWeekBoundary)
-                                _WeekSeparator(weekNumber: weekNumber),
-                              Padding(
-                                padding: const EdgeInsets.only(bottom: 12),
-                                child: FadeSlide(
-                                  delay: Duration(milliseconds: 40 * entry.key),
-                                  child: _DtrRowCard(
-                                    row: entry.value,
-                                    isToday: isToday,
-                                    isWeekend: isWeekend,
+                        const SizedBox(height: 12),
+                        if (data.rows.isEmpty) ...[
+                          const SizedBox(height: 40),
+                          _EmptyState(month: data.month, year: data.year),
+                        ] else ...[
+                          ...data.rows.asMap().entries.map((entry) {
+                            final weekNumber = (entry.key ~/ 7) + 1;
+                            final isWeekBoundary =
+                                entry.key > 0 && entry.key % 7 == 0;
+                            final rowDate = DateTime.tryParse(entry.value.date);
+                            final isToday =
+                                rowDate != null &&
+                                rowDate.year == DateTime.now().year &&
+                                rowDate.month == DateTime.now().month &&
+                                rowDate.day == DateTime.now().day;
+                            final isWeekend =
+                                rowDate != null &&
+                                (rowDate.weekday == 6 || rowDate.weekday == 7);
+                            return Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                if (isWeekBoundary)
+                                  _WeekSeparator(weekNumber: weekNumber),
+                                Padding(
+                                  padding: const EdgeInsets.only(bottom: 12),
+                                  child: FadeSlide(
+                                    delay: Duration(
+                                      milliseconds: 40 * entry.key,
+                                    ),
+                                    child: _DtrRowCard(
+                                      row: entry.value,
+                                      isToday: isToday,
+                                      isWeekend: isWeekend,
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ],
-                          );
-                        }),
+                              ],
+                            );
+                          }),
+                        ],
                       ],
                     ],
                   ],
@@ -221,6 +241,17 @@ class _Header extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (AppTheme.isDesktop) {
+      return Padding(
+        padding: const EdgeInsets.only(top: 12),
+        child: MobileHeader(
+          title: 'My DTR',
+          subtitle: 'Daily time record',
+          leadingIcon: LucideIcons.arrowLeft,
+          onLeadingTap: onBack,
+        ),
+      );
+    }
     return Container(
       padding: EdgeInsets.fromLTRB(context.gutter, 12, context.gutter, 20),
       decoration: const BoxDecoration(
@@ -400,15 +431,9 @@ class _MonthSelector extends StatelessWidget {
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    _MonthArrow(
-                      icon: LucideIcons.chevronLeft,
-                      onTap: onPrev,
-                    ),
+                    _MonthArrow(icon: LucideIcons.chevronLeft, onTap: onPrev),
                     const SizedBox(width: 6),
-                    _MonthArrow(
-                      icon: LucideIcons.chevronRight,
-                      onTap: onNext,
-                    ),
+                    _MonthArrow(icon: LucideIcons.chevronRight, onTap: onNext),
                     const SizedBox(width: 8),
                     Material(
                       color: AppTheme.primarySoft,
@@ -548,67 +573,77 @@ class _SummaryCard extends StatelessWidget {
             ],
           ),
         const SizedBox(height: 14),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFF1E3A5F), Color(0xFF2D5A8A)],
-            ),
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 38,
-                height: 38,
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: const Icon(
-                  LucideIcons.timer,
-                  color: Colors.white,
-                  size: 18,
-                ),
+        if (AppTheme.isDesktop)
+          DeskStatCard(
+            icon: LucideIcons.timer,
+            label: data.presentDays > 0
+                ? 'Total hours this month · ${_avgLabel(data)}'
+                : 'Total hours this month',
+            value: data.monthTotalLabel,
+            accent: AppTheme.primaryDark,
+          )
+        else
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFF1E3A5F), Color(0xFF2D5A8A)],
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Total Hours',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 13,
-                        color: Colors.white70,
-                      ),
-                    ),
-                    if (data.presentDays > 0) ...[
-                      const SizedBox(height: 2),
-                      Text(
-                        _avgLabel(data),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 38,
+                  height: 38,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(
+                    LucideIcons.timer,
+                    color: Colors.white,
+                    size: 18,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Total Hours',
                         style: TextStyle(
-                          fontSize: 10,
                           fontWeight: FontWeight.w700,
-                          color: Colors.white.withValues(alpha: 0.60),
+                          fontSize: 13,
+                          color: Colors.white70,
                         ),
                       ),
+                      if (data.presentDays > 0) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          _avgLabel(data),
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white.withValues(alpha: 0.60),
+                          ),
+                        ),
+                      ],
                     ],
-                  ],
+                  ),
                 ),
-              ),
-              Text(
-                data.monthTotalLabel,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w900,
-                  fontSize: 20,
-                  color: Colors.white,
+                Text(
+                  data.monthTotalLabel,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w900,
+                    fontSize: 20,
+                    color: Colors.white,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
       ],
     );
   }
@@ -737,6 +772,170 @@ class _SectionHeader extends StatelessWidget {
 }
 
 /* ── DTR Row Card ─────────────────────────────────────────────────────── */
+
+/// Desktop timesheet: one compact row per day with AM / PM / total columns.
+class _DeskDtrTable extends StatelessWidget {
+  const _DeskDtrTable({required this.rows});
+
+  final List<MyDtrRow> rows;
+
+  static const _days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  static const _months = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
+  ];
+
+  Color _statusColor(String status) => switch (status) {
+    'Present' => AppTheme.success,
+    'Absent' => AppTheme.danger,
+    'Pending' => AppTheme.warning,
+    _ => AppTheme.textMuted,
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    const headStyle = TextStyle(
+      fontSize: 11,
+      fontWeight: FontWeight.w700,
+      letterSpacing: 0.6,
+      color: AppTheme.textMuted,
+    );
+    final now = DateTime.now();
+
+    Widget cell(List<String> intervals) => Text(
+      intervals.isEmpty ? '—' : intervals.join('\n'),
+      style: TextStyle(
+        fontSize: 12.5,
+        height: 1.5,
+        fontWeight: FontWeight.w600,
+        color: intervals.isEmpty ? AppTheme.textMuted : AppTheme.textPrimary,
+      ),
+    );
+
+    return Column(
+      children: [
+        Container(
+          color: AppTheme.surfaceMuted.withValues(alpha: 0.6),
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 9),
+          child: const Row(
+            children: [
+              SizedBox(width: 150, child: Text('DATE', style: headStyle)),
+              Expanded(child: Text('MORNING', style: headStyle)),
+              Expanded(child: Text('AFTERNOON', style: headStyle)),
+              SizedBox(width: 100, child: Text('TOTAL', style: headStyle)),
+              SizedBox(
+                width: 96,
+                child: Text(
+                  'STATUS',
+                  textAlign: TextAlign.right,
+                  style: headStyle,
+                ),
+              ),
+            ],
+          ),
+        ),
+        for (final row in rows) ...[
+          const Divider(height: 1, color: AppTheme.border),
+          Builder(
+            builder: (context) {
+              final date = DateTime.tryParse(row.date);
+              final isToday =
+                  date != null &&
+                  date.year == now.year &&
+                  date.month == now.month &&
+                  date.day == now.day;
+              final isWeekend = date != null && date.weekday >= 6;
+              final color = _statusColor(row.status);
+              return Container(
+                color: isToday
+                    ? AppTheme.primarySoft.withValues(alpha: 0.6)
+                    : isWeekend
+                    ? AppTheme.surfaceMuted.withValues(alpha: 0.35)
+                    : null,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 18,
+                  vertical: 12,
+                ),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: 150,
+                      child: Text(
+                        date == null
+                            ? row.date
+                            : '${_days[date.weekday - 1]}, ${_months[date.month - 1]} ${date.day}',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: isToday
+                              ? FontWeight.w800
+                              : FontWeight.w700,
+                          color: AppTheme.textPrimary,
+                        ),
+                      ),
+                    ),
+                    Expanded(child: cell(row.amBreakdown)),
+                    Expanded(child: cell(row.pmBreakdown)),
+                    SizedBox(
+                      width: 100,
+                      child: Text(
+                        row.totalSeconds > 0 ? row.totalHours : '—',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w800,
+                          color: row.totalSeconds > 28800
+                              ? AppTheme.success
+                              : row.totalSeconds > 0
+                              ? AppTheme.textPrimary
+                              : AppTheme.textMuted,
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      width: 96,
+                      child: Align(
+                        alignment: Alignment.centerRight,
+                        child: row.status.isEmpty
+                            ? null
+                            : Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 3,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: color.withValues(alpha: 0.10),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Text(
+                                  row.status,
+                                  style: TextStyle(
+                                    color: color,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ],
+      ],
+    );
+  }
+}
 
 class _DtrRowCard extends StatelessWidget {
   const _DtrRowCard({

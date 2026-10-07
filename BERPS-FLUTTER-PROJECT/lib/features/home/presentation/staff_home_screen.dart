@@ -56,14 +56,26 @@ class _StaffHomeScreenState extends State<StaffHomeScreen> {
   /// Cached per-build so navigation helpers know which navigator to target.
   bool _isWide = false;
 
+  /// Sidebar id of the page currently pushed over the tab content (wide
+  /// layouts), so the sidebar highlights the page actually on screen.
+  String? _pushedNavId;
+
   /// Pushes a page. On wide layouts this goes onto the content-area navigator
   /// so the sidebar stays visible; on narrow layouts it's a normal push.
-  Future<T?> _pushContent<T>(Widget page) {
+  /// Sidebar destinations ([navId] set) replace any page already pushed
+  /// instead of stacking on top of it.
+  Future<T?> _pushContent<T>(Widget page, {String? navId}) async {
     final route = MaterialPageRoute<T>(builder: (_) => page);
-    if (_isWide) {
-      return _contentNavKey.currentState!.push<T>(route);
+    if (!_isWide) return Navigator.of(context).push<T>(route);
+
+    final nav = _contentNavKey.currentState!;
+    if (navId != null) nav.popUntil((r) => r.isFirst);
+    setState(() => _pushedNavId = navId);
+    final result = await nav.push<T>(route);
+    if (mounted && _pushedNavId == navId) {
+      setState(() => _pushedNavId = null);
     }
-    return Navigator.of(context).push<T>(route);
+    return result;
   }
   _StaffTab _currentTab = _StaffTab.dashboard;
   String _pendingTasksScope = '';
@@ -166,6 +178,7 @@ class _StaffHomeScreenState extends State<StaffHomeScreen> {
     if (tab != _currentTab) Haptics.light();
     setState(() {
       _currentTab = tab;
+      _pushedNavId = null;
       // Tab nav resets any pending scopes/ranges so the user gets the default
       // view when they hop tabs manually.
       _pendingTasksScope = '';
@@ -184,6 +197,7 @@ class _StaffHomeScreenState extends State<StaffHomeScreen> {
   /// shortcuts), sync the nested navigator: pop pushed pages and rebuild.
   void _syncContentNav() {
     if (!_isWide) return;
+    _pushedNavId = null;
     _contentNavKey.currentState?.popUntil((route) => route.isFirst);
     _tabNotifier.value = _currentTab;
   }
@@ -239,38 +253,51 @@ class _StaffHomeScreenState extends State<StaffHomeScreen> {
 
   Future<void> _openMyDTR() async {
     Haptics.light();
-    await _pushContent(MyDtrScreen(session: widget.session));
+    await _pushContent(MyDtrScreen(session: widget.session), navId: 'my-dtr');
   }
 
   Future<void> _openCalendar() async {
     Haptics.light();
-    await _pushContent(CalendarScreen(session: widget.session));
+    await _pushContent(
+      CalendarScreen(session: widget.session),
+      navId: 'calendar',
+    );
   }
 
   Future<void> _openNotes() async {
     Haptics.light();
-    await _pushContent(NotesScreen(session: widget.session));
+    await _pushContent(NotesScreen(session: widget.session), navId: 'notes');
   }
 
   Future<void> _openReminders() async {
     Haptics.light();
-    await _pushContent(RemindersScreen(session: widget.session));
+    await _pushContent(
+      RemindersScreen(session: widget.session),
+      navId: 'reminders',
+    );
   }
 
   Future<void> _openAnnualGoals() async {
     Haptics.light();
-    await _pushContent(AnnualGoalsScreen(session: widget.session));
+    await _pushContent(
+      AnnualGoalsScreen(session: widget.session),
+      navId: 'annual-goals',
+    );
   }
 
   Future<void> _openSupportDashboard() async {
     Haptics.light();
-    await _pushContent(SupportDashboardScreen(session: widget.session));
+    await _pushContent(
+      SupportDashboardScreen(session: widget.session),
+      navId: 'support-dashboard',
+    );
   }
 
   Future<void> _openSupportIssues({String scope = 'unassigned'}) async {
     Haptics.light();
     await _pushContent(
       SupportIssuesScreen(session: widget.session, initialScope: scope),
+      navId: scope == 'unassigned' ? 'unassigned-tickets' : 'tickets',
     );
     if (!mounted) return;
     setState(() {
@@ -291,12 +318,14 @@ class _StaffHomeScreenState extends State<StaffHomeScreen> {
       session: widget.session,
       config: widget.config,
       sidebar: isWide,
-      activeItemId: switch (_currentTab) {
-        _StaffTab.dashboard => 'dashboard',
-        _StaffTab.attendance => 'attendance',
-        _StaffTab.tasks => 'tasks',
-        _StaffTab.account => 'account',
-      },
+      activeItemId: _pushedNavId ??
+          switch (_currentTab) {
+            _StaffTab.dashboard => 'dashboard',
+            _StaffTab.attendance => 'attendance',
+            _StaffTab.tasks =>
+              _pendingTasksScope == 'forwarded' ? 'forwarded-tasks' : 'tasks',
+            _StaffTab.account => 'account',
+          },
       onSelectDashboard: () => _selectTab(_StaffTab.dashboard),
       onSelectAttendance: () => _selectTab(_StaffTab.attendance),
       onSelectTasks: () => _selectTab(_StaffTab.tasks),

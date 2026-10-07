@@ -3,6 +3,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/network/api_exception.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/desktop_kit.dart';
 import '../../../core/utils/date_formatters.dart';
 import '../../../core/utils/haptics.dart';
 import '../../../core/utils/responsive.dart';
@@ -50,7 +51,7 @@ class _AdminTasksTabState extends State<AdminTasksTab> {
   }
 
   Future<void> _openCreate(AdminTasksData data) async {
-    final created = await showModalBottomSheet<bool>(
+    final created = await showAppSheet<bool>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
@@ -405,7 +406,7 @@ class _CreateTaskSheetState extends State<_CreateTaskSheet> {
               Center(
                 child: Container(
                   width: 42,
-                  height: 4,
+                  height: AppTheme.isDesktop ? 0 : 4,
                   decoration: BoxDecoration(
                     color: AppTheme.border,
                     borderRadius: BorderRadius.circular(99),

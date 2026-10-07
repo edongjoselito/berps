@@ -3,6 +3,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/network/api_exception.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/desktop_kit.dart';
 import '../../../core/utils/haptics.dart';
 import '../../../core/utils/responsive.dart';
 import '../../../core/widgets/animations.dart';
@@ -42,7 +43,7 @@ class _RemindersScreenState extends State<RemindersScreen> {
 
   Future<void> _openEditor({Reminder? existing}) async {
     Haptics.light();
-    final saved = await showModalBottomSheet<bool>(
+    final saved = await showAppSheet<bool>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
@@ -471,7 +472,7 @@ class _ReminderEditorSheetState extends State<_ReminderEditorSheet> {
               Center(
                 child: Container(
                   width: 40,
-                  height: 4,
+                  height: AppTheme.isDesktop ? 0 : 4,
                   decoration: BoxDecoration(
                     color: AppTheme.border,
                     borderRadius: BorderRadius.circular(999),

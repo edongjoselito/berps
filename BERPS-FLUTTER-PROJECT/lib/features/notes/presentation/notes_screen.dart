@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/network/api_exception.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/desktop_kit.dart';
 import '../../../core/utils/haptics.dart';
 import '../../../core/utils/html_to_text.dart';
 import '../../../core/utils/responsive.dart';
@@ -45,7 +46,7 @@ class _NotesScreenState extends State<NotesScreen> {
 
   Future<void> _openEditor({Note? existing}) async {
     Haptics.light();
-    final saved = await showModalBottomSheet<bool>(
+    final saved = await showAppSheet<bool>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
@@ -531,7 +532,7 @@ class _NoteEditorSheetState extends State<_NoteEditorSheet> {
               Center(
                 child: Container(
                   width: 40,
-                  height: 4,
+                  height: AppTheme.isDesktop ? 0 : 4,
                   decoration: BoxDecoration(
                     color: AppTheme.border,
                     borderRadius: BorderRadius.circular(999),
