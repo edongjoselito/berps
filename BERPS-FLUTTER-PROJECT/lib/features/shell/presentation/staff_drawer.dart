@@ -380,7 +380,7 @@ class _SectionLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.fromLTRB(16, sidebar ? 12 : 18, 22, 6),
+      padding: EdgeInsets.fromLTRB(16, sidebar ? 16 : 18, 22, 7),
       child: Row(
         children: [
           if (icon != null) ...[
@@ -443,13 +443,13 @@ class _NavItem extends StatelessWidget {
           borderRadius: BorderRadius.circular(sidebar ? 10 : 14),
           child: Padding(
             padding: EdgeInsets.symmetric(
-                horizontal: 10, vertical: sidebar ? 7.5 : 11),
+                horizontal: 10, vertical: sidebar ? 9.5 : 11),
             child: Row(
               children: [
                 AnimatedContainer(
                   duration: const Duration(milliseconds: 220),
-                  width: sidebar ? 30 : 34,
-                  height: sidebar ? 30 : 34,
+                  width: sidebar ? 32 : 34,
+                  height: sidebar ? 32 : 34,
                   decoration: BoxDecoration(
                     color: isActive
                         ? AppTheme.primary.withValues(alpha: 0.14)

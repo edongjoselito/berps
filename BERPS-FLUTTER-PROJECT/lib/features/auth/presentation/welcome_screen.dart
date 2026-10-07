@@ -11,6 +11,7 @@ import '../../../core/widgets/mobile_header.dart';
 import '../../../core/widgets/orb_background.dart';
 import '../domain/mobile_config.dart';
 import 'auth_controller.dart';
+import 'widgets/auth_side_panel.dart';
 
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key, required this.controller});
@@ -86,6 +87,17 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
         child: SafeArea(
           child: LayoutBuilder(
             builder: (context, constraints) {
+              if (AppTheme.isDesktop && constraints.maxWidth >= 960) {
+                return Row(
+                  children: [
+                    Expanded(
+                      flex: 45,
+                      child: AuthSidePanel(logoUrl: config?.logoUrl ?? ''),
+                    ),
+                    Expanded(flex: 55, child: _desktopPane()),
+                  ],
+                );
+              }
               return SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 20,
@@ -97,9 +109,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   ),
                   child: Center(
                     child: ConstrainedBox(
-                      constraints: BoxConstraints(
-                        maxWidth:
-                            AppTheme.isDesktop ? 480 : double.infinity,
+                      constraints: const BoxConstraints(
+                        maxWidth: double.infinity,
                       ),
                       child: Form(
                     key: _formKey,
@@ -129,6 +140,88 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 ),
               );
             },
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Desktop right-hand pane — heading + bare form, no card chrome.
+  Widget _desktopPane() {
+    return Container(
+      color: AppTheme.surface,
+      alignment: Alignment.center,
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 64, vertical: 56),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 420),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Text(
+                  'Connect your workspace',
+                  style: TextStyle(
+                    fontSize: 30,
+                    fontWeight: FontWeight.w900,
+                    color: AppTheme.textPrimary,
+                    letterSpacing: -1,
+                    height: 1.15,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                const Text(
+                  'Enter the BERPS server address provided by your '
+                  'administrator to reach your workspace.',
+                  style: TextStyle(
+                    fontSize: 15,
+                    color: AppTheme.textSecondary,
+                    height: 1.55,
+                  ),
+                ),
+                const SizedBox(height: 40),
+                TextFormField(
+                  controller: _urlController,
+                  keyboardType: TextInputType.url,
+                  autocorrect: false,
+                  textInputAction: TextInputAction.go,
+                  decoration: const InputDecoration(
+                    labelText: 'Workspace URL',
+                    hintText: 'https://your-workspace.com/berps',
+                    prefixIcon: Icon(LucideIcons.globe),
+                  ),
+                  validator: (value) {
+                    final v = (value ?? '').trim();
+                    if (v.isEmpty) return 'Workspace URL is required.';
+                    return null;
+                  },
+                  onFieldSubmitted: (_) => _continue(),
+                ),
+                if (_error != null) ...[
+                  const SizedBox(height: 16),
+                  _ErrorBanner(message: _error!),
+                ],
+                const SizedBox(height: 26),
+                LoadingButton(
+                  label: 'Connect workspace',
+                  isLoading: _connecting,
+                  onPressed: _continue,
+                ),
+                const SizedBox(height: 22),
+                const Center(
+                  child: Text(
+                    'Ask your administrator if you don\'t have this address.',
+                    style: TextStyle(
+                      fontSize: 12.5,
+                      color: AppTheme.textMuted,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

@@ -13,6 +13,7 @@ import '../../privacy/presentation/privacy_consent_dialog.dart';
 import 'auth_controller.dart';
 import 'forgot_password_screen.dart';
 import 'signup_screen.dart';
+import 'widgets/auth_side_panel.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key, required this.controller});
@@ -239,6 +240,18 @@ class _LoginScreenState extends State<LoginScreen> {
         child: SafeArea(
           child: LayoutBuilder(
             builder: (context, constraints) {
+              if (AppTheme.isDesktop && constraints.maxWidth >= 960) {
+                return Row(
+                  children: [
+                    Expanded(
+                      flex: 45,
+                      child:
+                          AuthSidePanel(logoUrl: config?.logoUrl ?? ''),
+                    ),
+                    Expanded(flex: 55, child: _desktopPane(context)),
+                  ],
+                );
+              }
               return SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 20,
@@ -250,9 +263,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   child: Center(
                     child: ConstrainedBox(
-                      constraints: BoxConstraints(
-                        maxWidth:
-                            AppTheme.isDesktop ? 480 : double.infinity,
+                      constraints: const BoxConstraints(
+                        maxWidth: double.infinity,
                       ),
                       child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -331,6 +343,136 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               );
             },
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Desktop right-hand pane — heading, workspace chip, then the login card.
+  Widget _desktopPane(BuildContext context) {
+    final domain = _extractDomain(widget.controller.baseUrl);
+    final canSwitchWorkspace = !widget.controller.usesConfiguredBaseUrl;
+
+    return Container(
+      color: AppTheme.surface,
+      alignment: Alignment.center,
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 64, vertical: 56),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 430),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Text(
+                'Welcome back',
+                style: TextStyle(
+                  fontSize: 30,
+                  fontWeight: FontWeight.w900,
+                  color: AppTheme.textPrimary,
+                  letterSpacing: -1,
+                  height: 1.15,
+                ),
+              ),
+              const SizedBox(height: 12),
+              if (domain.isNotEmpty)
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 7,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppTheme.primarySoft,
+                      borderRadius: BorderRadius.circular(999),
+                      border: Border.all(color: AppTheme.border),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          LucideIcons.globe,
+                          size: 13,
+                          color: AppTheme.primaryDark,
+                        ),
+                        const SizedBox(width: 7),
+                        Text(
+                          domain,
+                          style: const TextStyle(
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.w800,
+                            color: AppTheme.primaryDark,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              else
+                const Text(
+                  'Sign in to continue.',
+                  style: TextStyle(
+                    fontSize: 15,
+                    color: AppTheme.textSecondary,
+                    height: 1.5,
+                  ),
+                ),
+              const SizedBox(height: 34),
+              FadeSlide(
+                delay: const Duration(milliseconds: 120),
+                child: _LoginCard(
+                  formKey: _formKey,
+                  usernameController: _usernameController,
+                  passwordController: _passwordController,
+                  obscure: _obscure,
+                  remember: _remember,
+                  submitting: _submitting,
+                  error: _error,
+                  onToggleObscure: () {
+                    Haptics.light();
+                    setState(() => _obscure = !_obscure);
+                  },
+                  onToggleRemember: (v) {
+                    Haptics.light();
+                    setState(() => _remember = v);
+                  },
+                  onForgot: _submitting ? null : _openForgotPassword,
+                  onSubmit: _submitting ? null : _signIn,
+                  onSignUp: _submitting ? null : _openSignup,
+                  biometricEnabled: _biometricEnabled,
+                  biometricLabel: _biometricLabel,
+                  onBiometric: _submitting ? null : _tryBiometric,
+                ),
+              ),
+              if (canSwitchWorkspace) ...[
+                const SizedBox(height: 24),
+                Center(
+                  child: TextButton.icon(
+                    onPressed: _submitting
+                        ? null
+                        : () {
+                            Haptics.light();
+                            widget.controller.resetPairing();
+                          },
+                    icon: const Icon(
+                      LucideIcons.arrowLeftRight,
+                      size: 15,
+                      color: AppTheme.textMuted,
+                    ),
+                    label: Text(
+                      'Not your workspace? Switch',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: AppTheme.textMuted.withValues(alpha: 0.85),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ],
           ),
         ),
       ),
@@ -450,8 +592,15 @@ class _LoginCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final fieldPadding = EdgeInsets.symmetric(
+      horizontal: 16,
+      vertical: AppTheme.isDesktop ? 17 : 14,
+    );
+    final fieldGap = AppTheme.isDesktop ? 20.0 : 12.0;
+
     return MobileSurfaceCard(
-      padding: const EdgeInsets.all(16),
+      padding:
+          EdgeInsets.all(AppTheme.isDesktop ? 28 : 16),
       child: Form(
         key: formKey,
         child: Column(
@@ -459,18 +608,15 @@ class _LoginCard extends StatelessWidget {
           children: [
             if (error != null) ...[
               _StatusBanner(message: error!),
-              const SizedBox(height: 12),
+              const SizedBox(height: 14),
             ],
             const _FieldLabel(icon: LucideIcons.user, text: 'Email'),
             TextFormField(
               controller: usernameController,
               autocorrect: false,
               keyboardType: TextInputType.emailAddress,
-              decoration: const InputDecoration(
-                contentPadding: EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 14,
-                ),
+              decoration: InputDecoration(
+                contentPadding: fieldPadding,
               ),
               validator: (value) {
                 if ((value ?? '').trim().isEmpty) {
@@ -479,7 +625,7 @@ class _LoginCard extends StatelessWidget {
                 return null;
               },
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: fieldGap),
             const _FieldLabel(
               icon: LucideIcons.lockKeyhole,
               text: 'Password',
@@ -488,10 +634,7 @@ class _LoginCard extends StatelessWidget {
               controller: passwordController,
               obscureText: obscure,
               decoration: InputDecoration(
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 14,
-                ),
+                contentPadding: fieldPadding,
                 suffixIcon: IconButton(
                   icon: Icon(
                     obscure
@@ -511,7 +654,7 @@ class _LoginCard extends StatelessWidget {
               },
               onFieldSubmitted: (_) => onSubmit?.call(),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: fieldGap - 4),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -519,14 +662,14 @@ class _LoginCard extends StatelessWidget {
                 _UnderlineLink(label: 'Forgot password?', onTap: onForgot),
               ],
             ),
-            const SizedBox(height: 14),
+            SizedBox(height: fieldGap),
             LoadingButton(
               label: 'Sign in',
               isLoading: submitting,
               onPressed: onSubmit,
             ),
             if (biometricEnabled && onBiometric != null) ...[
-              const SizedBox(height: 10),
+              SizedBox(height: fieldGap - 6),
               OutlinedButton.icon(
                 onPressed: onBiometric,
                 icon: Icon(
@@ -541,9 +684,9 @@ class _LoginCard extends StatelessWidget {
                 ),
               ),
             ],
-            const SizedBox(height: 14),
+            SizedBox(height: fieldGap),
             const _CardDivider(),
-            const SizedBox(height: 12),
+            SizedBox(height: fieldGap - 4),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [

@@ -76,9 +76,9 @@ class AppTheme {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: surfaceMuted,
-        contentPadding: const EdgeInsets.symmetric(
+        contentPadding: EdgeInsets.symmetric(
           horizontal: 16,
-          vertical: 16,
+          vertical: isDesktop ? 18 : 16,
         ),
         hintStyle: TextStyle(
           fontFamily: effectiveFontFamily,
@@ -182,7 +182,7 @@ class AppTheme {
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
           backgroundColor: primary,
-          minimumSize: const Size.fromHeight(52),
+          minimumSize: Size.fromHeight(isDesktop ? 54 : 52),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
