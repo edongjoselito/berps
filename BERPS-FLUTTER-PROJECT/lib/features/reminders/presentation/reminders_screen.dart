@@ -104,7 +104,7 @@ class _RemindersScreenState extends State<RemindersScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.background,
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: AppTheme.isDesktop ? null : FloatingActionButton.extended(
         backgroundColor: AppTheme.primaryDark,
         foregroundColor: Colors.white,
         onPressed: () => _openEditor(),
@@ -146,6 +146,13 @@ class _RemindersScreenState extends State<RemindersScreen> {
                       Haptics.light();
                       Navigator.of(context).maybePop();
                     },
+                    trailing: AppTheme.isDesktop
+                        ? DeskButton(
+                            label: 'New reminder',
+                            icon: LucideIcons.plus,
+                            onTap: () => _openEditor(),
+                          )
+                        : null,
                   ),
                   const SizedBox(height: 14),
                   if (loading && data == null)

@@ -7,6 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 /// E2E smoke test: real app, real network, real account.
 /// Run: flutter test integration_test/staff_e2e_test.dart -d macos
@@ -110,6 +111,30 @@ void main() {
       await _settle(tester, 8);
       await _shot('03b_notifications_panel');
       await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+      await _settle(tester, 3);
+    }
+
+    // ── Command palette (⌘K) ──
+    final search = find.text('Search');
+    if (search.evaluate().isNotEmpty) {
+      await tester.tap(search.first, warnIfMissed: false);
+      await _settle(tester, 3);
+      await tester.enterText(find.byType(TextField).last, 'dtr');
+      await _settle(tester, 2);
+      await _shot('03c_command_palette');
+      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+      await _settle(tester, 3);
+    }
+
+    // ── Sign-out confirm (cancelled) ──
+    final signOut = find.byIcon(LucideIcons.logOut);
+    if (signOut.evaluate().isNotEmpty) {
+      await tester.tap(signOut.first);
+      await _settle(tester, 3);
+      await _shot('03d_signout_confirm');
+      expect(find.text('Sign out of BERPS?'), findsOneWidget,
+          reason: 'desktop sign-out confirm should open');
+      await tester.tap(find.text('Cancel').last);
       await _settle(tester, 3);
     }
 

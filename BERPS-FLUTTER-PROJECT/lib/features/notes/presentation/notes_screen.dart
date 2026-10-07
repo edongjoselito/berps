@@ -122,7 +122,7 @@ class _NotesScreenState extends State<NotesScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.background,
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: AppTheme.isDesktop ? null : FloatingActionButton.extended(
         backgroundColor: AppTheme.primaryDark,
         foregroundColor: Colors.white,
         onPressed: () => _openEditor(),
@@ -163,6 +163,13 @@ class _NotesScreenState extends State<NotesScreen> {
                       Haptics.light();
                       Navigator.of(context).maybePop();
                     },
+                    trailing: AppTheme.isDesktop
+                        ? DeskButton(
+                            label: 'New note',
+                            icon: LucideIcons.plus,
+                            onTap: () => _openEditor(),
+                          )
+                        : null,
                   ),
                   const SizedBox(height: 14),
                   if (loading && snapshot.data == null)

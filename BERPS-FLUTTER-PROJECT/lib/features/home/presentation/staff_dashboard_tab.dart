@@ -1659,7 +1659,18 @@ class _LeaderboardRow extends StatelessWidget {
           // Rank pill
           SizedBox(
             width: 32,
-            child: isTop3
+            child: isTop3 && AppTheme.isDesktop
+                ? Container(
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      color: accent.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(9),
+                    ),
+                    alignment: Alignment.center,
+                    child: Icon(_rankIcon, color: accent, size: 15),
+                  )
+                : isTop3
                 ? Container(
                     width: 32,
                     height: 32,
@@ -1705,21 +1716,24 @@ class _LeaderboardRow extends StatelessWidget {
             width: 34,
             height: 34,
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [AppTheme.primary, AppTheme.primaryDark],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
+              color: AppTheme.isDesktop ? AppTheme.primarySoft : null,
+              gradient: AppTheme.isDesktop
+                  ? null
+                  : const LinearGradient(
+                      colors: [AppTheme.primary, AppTheme.primaryDark],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
               borderRadius: BorderRadius.circular(11),
-              border: isCurrent
+              border: isCurrent && !AppTheme.isDesktop
                   ? Border.all(color: AppTheme.success, width: 2)
                   : null,
             ),
             alignment: Alignment.center,
             child: Text(
               entry.initials,
-              style: const TextStyle(
-                color: Colors.white,
+              style: TextStyle(
+                color: AppTheme.isDesktop ? AppTheme.primaryDark : Colors.white,
                 fontWeight: FontWeight.w900,
                 fontSize: 11.5,
                 letterSpacing: 0.4,

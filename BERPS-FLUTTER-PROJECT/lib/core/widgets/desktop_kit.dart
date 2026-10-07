@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../theme/app_theme.dart';
@@ -40,10 +42,17 @@ Future<T?> showAppSheet<T>({
             borderRadius: BorderRadius.circular(16),
             child: Material(
               color: Colors.white,
-              child: MediaQuery.removeViewInsets(
-                context: dialogContext,
-                removeBottom: true,
-                child: builder(dialogContext),
+              // Focused text fields swallow Escape on macOS; close explicitly.
+              child: CallbackShortcuts(
+                bindings: {
+                  const SingleActivator(LogicalKeyboardKey.escape): () =>
+                      Navigator.of(dialogContext).maybePop(),
+                },
+                child: MediaQuery.removeViewInsets(
+                  context: dialogContext,
+                  removeBottom: true,
+                  child: builder(dialogContext),
+                ),
               ),
             ),
           ),
@@ -52,6 +61,137 @@ Future<T?> showAppSheet<T>({
     },
   );
 }
+
+/// Marks a page as a top-level sidebar destination. Headers inside it drop
+/// their back button on desktop, since the sidebar is the navigation.
+class DeskRootScope extends InheritedWidget {
+  const DeskRootScope({super.key, required super.child});
+
+  static bool isRoot(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<DeskRootScope>() != null;
+
+  @override
+  bool updateShouldNotify(DeskRootScope oldWidget) => false;
+}
+
+/// Desktop confirmation dialog: left-aligned title and message, actions on
+/// the right. Falls back to the same layout on mobile.
+Future<bool> showDeskConfirm({
+  required BuildContext context,
+  required String title,
+  required String message,
+  required String confirmLabel,
+  bool danger = false,
+}) async {
+  final result = await showDialog<bool>(
+    context: context,
+    barrierColor: const Color(0x660B1526),
+    builder: (dialogContext) => Dialog(
+      insetPadding: const EdgeInsets.all(32),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 420),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(24, 22, 20, 18),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w800,
+                  color: AppTheme.textPrimary,
+                  letterSpacing: -0.3,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                message,
+                style: const TextStyle(
+                  fontSize: 13.5,
+                  height: 1.5,
+                  color: AppTheme.textSecondary,
+                ),
+              ),
+              const SizedBox(height: 22),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  DeskButton(
+                    label: 'Cancel',
+                    icon: LucideIcons.x,
+                    primary: false,
+                    onTap: () => Navigator.of(dialogContext).pop(false),
+                  ),
+                  const SizedBox(width: 8),
+                  FilledButton(
+                    onPressed: () => Navigator.of(dialogContext).pop(true),
+                    autofocus: true,
+                    style: FilledButton.styleFrom(
+                      backgroundColor: danger
+                          ? AppTheme.danger
+                          : AppTheme.primaryDark,
+                      minimumSize: Size.zero,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      textStyle: TextStyle(
+                        fontFamily: AppTheme.effectiveFontFamily,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    child: Text(confirmLabel),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    ),
+  );
+  return result == true;
+}
+
+/// Small keyboard-shortcut hint ("⌘K").
+class KeyHint extends StatelessWidget {
+  const KeyHint(this.label, {super.key, this.dark = false});
+
+  final String label;
+  final bool dark;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: dark ? const Color(0x14FFFFFF) : AppTheme.surfaceMuted,
+        borderRadius: BorderRadius.circular(5),
+        border: Border.all(
+          color: dark ? const Color(0x1FFFFFFF) : AppTheme.border,
+        ),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 10.5,
+          fontWeight: FontWeight.w700,
+          color: dark ? const Color(0x99FFFFFF) : AppTheme.textSecondary,
+        ),
+      ),
+    );
+  }
+}
+
+/// Platform modifier label for shortcuts: ⌘ on macOS, Ctrl elsewhere.
+String get modKeyLabel =>
+    defaultTargetPlatform == TargetPlatform.macOS ? '⌘' : 'Ctrl+';
 
 /// Opens [child] as a right-hand slide-over panel (desktop) — used for
 /// notifications and other secondary, glanceable surfaces.
@@ -74,7 +214,9 @@ Future<T?> showSidePanel<T>({
         child: Container(
           width: width,
           height: double.infinity,
+          padding: EdgeInsets.only(top: AppTheme.titleBarInset),
           decoration: const BoxDecoration(
+            color: AppTheme.background,
             border: Border(left: BorderSide(color: AppTheme.border)),
           ),
           child: child,
@@ -204,12 +346,16 @@ class DeskButton extends StatelessWidget {
     required this.icon,
     required this.onTap,
     this.primary = true,
+    this.danger = false,
   });
 
   final String label;
   final IconData icon;
   final VoidCallback? onTap;
   final bool primary;
+
+  /// Destructive styling (red text/border on the outlined variant).
+  final bool danger;
 
   @override
   Widget build(BuildContext context) {
@@ -241,11 +387,16 @@ class DeskButton extends StatelessWidget {
       icon: Icon(icon, size: 15),
       label: Text(label),
       style: OutlinedButton.styleFrom(
-        foregroundColor: AppTheme.textPrimary,
+        foregroundColor: danger ? AppTheme.danger : AppTheme.textPrimary,
+        backgroundColor: Colors.white,
         minimumSize: Size.zero,
         padding: padding,
         shape: shape,
-        side: const BorderSide(color: AppTheme.border),
+        side: BorderSide(
+          color: danger
+              ? AppTheme.danger.withValues(alpha: 0.3)
+              : AppTheme.border,
+        ),
         textStyle: style,
       ),
     );
@@ -259,6 +410,7 @@ class DeskSegmented extends StatelessWidget {
     required this.options,
     required this.value,
     required this.onChanged,
+    this.expanded = false,
   });
 
   /// value → label
@@ -266,8 +418,45 @@ class DeskSegmented extends StatelessWidget {
   final String value;
   final ValueChanged<String> onChanged;
 
+  /// When true the control fills its parent's width and every segment gets
+  /// an equal share — the right choice inside narrow panes where intrinsic
+  /// label widths would otherwise overflow.
+  final bool expanded;
+
   @override
   Widget build(BuildContext context) {
+    Widget segment(MapEntry<String, String> entry) => InkWell(
+      onTap: () => onChanged(entry.key),
+      borderRadius: BorderRadius.circular(8),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 160),
+        padding: EdgeInsets.symmetric(
+          horizontal: expanded ? 4 : 14,
+          vertical: 7,
+        ),
+        decoration: BoxDecoration(
+          color: entry.key == value ? Colors.white : null,
+          borderRadius: BorderRadius.circular(8),
+          border: entry.key == value
+              ? Border.all(color: AppTheme.border)
+              : null,
+        ),
+        child: Text(
+          entry.value,
+          textAlign: TextAlign.center,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            fontSize: expanded ? 12 : 12.5,
+            fontWeight: FontWeight.w700,
+            color: entry.key == value
+                ? AppTheme.textPrimary
+                : AppTheme.textSecondary,
+          ),
+        ),
+      ),
+    );
+
     return Container(
       padding: const EdgeInsets.all(3),
       decoration: BoxDecoration(
@@ -276,37 +465,10 @@ class DeskSegmented extends StatelessWidget {
         border: Border.all(color: AppTheme.border),
       ),
       child: Row(
-        mainAxisSize: MainAxisSize.min,
+        mainAxisSize: expanded ? MainAxisSize.max : MainAxisSize.min,
         children: [
           for (final entry in options.entries)
-            InkWell(
-              onTap: () => onChanged(entry.key),
-              borderRadius: BorderRadius.circular(8),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 160),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 7,
-                ),
-                decoration: BoxDecoration(
-                  color: entry.key == value ? Colors.white : null,
-                  borderRadius: BorderRadius.circular(8),
-                  border: entry.key == value
-                      ? Border.all(color: AppTheme.border)
-                      : null,
-                ),
-                child: Text(
-                  entry.value,
-                  style: TextStyle(
-                    fontSize: 12.5,
-                    fontWeight: FontWeight.w700,
-                    color: entry.key == value
-                        ? AppTheme.textPrimary
-                        : AppTheme.textSecondary,
-                  ),
-                ),
-              ),
-            ),
+            if (expanded) Expanded(child: segment(entry)) else segment(entry),
         ],
       ),
     );
@@ -348,9 +510,7 @@ class DeskStatCard extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
-              color: selected
-                  ? accent.withValues(alpha: 0.5)
-                  : AppTheme.border,
+              color: selected ? accent.withValues(alpha: 0.5) : AppTheme.border,
               width: selected ? 1.6 : 1,
             ),
           ),
@@ -397,11 +557,7 @@ class DeskStatCard extends StatelessWidget {
                 ),
               ),
               if (selected)
-                Icon(
-                  LucideIcons.circleCheck,
-                  size: 17,
-                  color: accent,
-                ),
+                Icon(LucideIcons.circleCheck, size: 17, color: accent),
             ],
           ),
         ),

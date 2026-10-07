@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import 'animations.dart';
+import 'desktop_kit.dart';
 
 class MobileHeader extends StatelessWidget {
   const MobileHeader({
@@ -38,9 +39,13 @@ class MobileHeader extends StatelessWidget {
       );
     }
 
+    // Sidebar destinations on desktop don't need a back button.
+    final showLeading = leadingIcon != null &&
+        onLeadingTap != null &&
+        !(AppTheme.isDesktop && DeskRootScope.isRoot(context));
     final row = Row(
       children: [
-        if (leadingIcon != null && onLeadingTap != null) ...[
+        if (showLeading) ...[
           MobileHeaderButton(icon: leadingIcon!, onTap: onLeadingTap!),
           const SizedBox(width: 12),
         ],

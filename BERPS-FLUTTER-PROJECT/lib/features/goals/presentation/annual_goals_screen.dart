@@ -6,6 +6,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/haptics.dart';
 import '../../../core/utils/responsive.dart';
 import '../../../core/widgets/animations.dart';
+import '../../../core/widgets/desktop_kit.dart';
 import '../../../core/widgets/mobile_header.dart';
 import '../../../core/widgets/skeleton.dart';
 import '../../auth/domain/staff_session.dart';
@@ -102,7 +103,54 @@ class _AnnualGoalsScreenState extends State<AnnualGoalsScreen> {
                           : 'Unable to load goals.',
                       onRetry: _reload,
                     )
-                  else if (data != null) ...[
+                  else if (data != null && AppTheme.isDesktop) ...[
+                    if (data.current != null) ...[
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _DeskGoalKpi(
+                              label: 'Clients',
+                              goal: data.current!,
+                              actual: data.current!.actualClients.toDouble(),
+                              target: data.current!.targetClients.toDouble(),
+                              percent: data.current!.clientsProgressPct,
+                              isCurrency: false,
+                              color: AppTheme.primaryDark,
+                              onTap: () => _openYear(data.current!.year),
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: _DeskGoalKpi(
+                              label: 'Income',
+                              goal: data.current!,
+                              actual: data.current!.actualIncome,
+                              target: data.current!.targetIncome,
+                              percent: data.current!.incomeProgressPct,
+                              isCurrency: true,
+                              color: AppTheme.success,
+                              onTap: () => _openYear(data.current!.year),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+                    ],
+                    DeskPanel(
+                      title: 'All years',
+                      count: data.goals.length,
+                      padding: EdgeInsets.zero,
+                      child: data.goals.isEmpty
+                          ? const Padding(
+                              padding: EdgeInsets.all(20),
+                              child: _EmptyState(),
+                            )
+                          : _DeskGoalsTable(
+                              goals: data.goals,
+                              onOpen: _openYear,
+                            ),
+                    ),
+                  ] else if (data != null) ...[
                     if (data.current != null) ...[
                       FadeSlide(
                         delay: const Duration(milliseconds: 60),
@@ -140,6 +188,250 @@ class _AnnualGoalsScreenState extends State<AnnualGoalsScreen> {
           },
         ),
       ),
+    );
+  }
+}
+
+String _goalAmount(double value, bool currency) {
+  final raw = _ProgressRow._thousands(value.toStringAsFixed(0));
+  return currency ? '₱$raw' : raw;
+}
+
+class _DeskGoalKpi extends StatelessWidget {
+  const _DeskGoalKpi({
+    required this.label,
+    required this.goal,
+    required this.actual,
+    required this.target,
+    required this.percent,
+    required this.isCurrency,
+    required this.color,
+    required this.onTap,
+  });
+
+  final String label;
+  final AnnualGoal goal;
+  final double actual;
+  final double target;
+  final double percent;
+  final bool isCurrency;
+  final Color color;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(14),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(14),
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(22, 18, 22, 20),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: AppTheme.border),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Text(
+                    '$label · ${goal.year}',
+                    style: const TextStyle(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w700,
+                      color: AppTheme.textSecondary,
+                    ),
+                  ),
+                  const Spacer(),
+                  Text(
+                    '${percent.toStringAsFixed(1)}%',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w800,
+                      color: color,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                textBaseline: TextBaseline.alphabetic,
+                children: [
+                  Flexible(
+                    child: Text(
+                      _goalAmount(actual, isCurrency),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.w800,
+                        color: AppTheme.textPrimary,
+                        letterSpacing: -1,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'of ${_goalAmount(target, isCurrency)}',
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: AppTheme.textMuted,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 14),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(999),
+                child: LinearProgressIndicator(
+                  value: (percent / 100).clamp(0.0, 1.0),
+                  minHeight: 6,
+                  backgroundColor: AppTheme.surfaceMuted,
+                  valueColor: AlwaysStoppedAnimation(color),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _DeskGoalsTable extends StatelessWidget {
+  const _DeskGoalsTable({required this.goals, required this.onOpen});
+
+  final List<AnnualGoal> goals;
+  final ValueChanged<int> onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    const head = TextStyle(
+      fontSize: 11,
+      fontWeight: FontWeight.w700,
+      letterSpacing: 0.6,
+      color: AppTheme.textMuted,
+    );
+
+    Widget metric(
+      double actual,
+      double target,
+      double percent,
+      bool currency,
+      Color color,
+    ) {
+      return Row(
+        children: [
+          SizedBox(
+            width: 120,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(999),
+              child: LinearProgressIndicator(
+                value: (percent / 100).clamp(0.0, 1.0),
+                minHeight: 5,
+                backgroundColor: AppTheme.surfaceMuted,
+                valueColor: AlwaysStoppedAnimation(color),
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          SizedBox(
+            width: 44,
+            child: Text(
+              '${percent.toStringAsFixed(0)}%',
+              style: TextStyle(
+                fontSize: 12.5,
+                fontWeight: FontWeight.w800,
+                color: color,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              '${_goalAmount(actual, currency)} / ${_goalAmount(target, currency)}',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 12.5,
+                fontWeight: FontWeight.w600,
+                color: AppTheme.textSecondary,
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
+    return Column(
+      children: [
+        Container(
+          color: AppTheme.surfaceMuted.withValues(alpha: 0.6),
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 9),
+          child: const Row(
+            children: [
+              SizedBox(width: 90, child: Text('YEAR', style: head)),
+              Expanded(child: Text('CLIENTS', style: head)),
+              SizedBox(width: 24),
+              Expanded(child: Text('INCOME', style: head)),
+              SizedBox(width: 20),
+            ],
+          ),
+        ),
+        for (final goal in goals) ...[
+          const Divider(height: 1, color: AppTheme.border),
+          InkWell(
+            onTap: () => onOpen(goal.year),
+            hoverColor: AppTheme.primarySoft.withValues(alpha: 0.5),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 15),
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 90,
+                    child: Text(
+                      '${goal.year}',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800,
+                        color: AppTheme.textPrimary,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: metric(
+                      goal.actualClients.toDouble(),
+                      goal.targetClients.toDouble(),
+                      goal.clientsProgressPct,
+                      false,
+                      AppTheme.primaryDark,
+                    ),
+                  ),
+                  const SizedBox(width: 24),
+                  Expanded(
+                    child: metric(
+                      goal.actualIncome,
+                      goal.targetIncome,
+                      goal.incomeProgressPct,
+                      true,
+                      AppTheme.success,
+                    ),
+                  ),
+                  const Icon(
+                    LucideIcons.chevronRight,
+                    size: 15,
+                    color: AppTheme.textMuted,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ],
     );
   }
 }

@@ -33,6 +33,10 @@ class AppTheme {
   static bool get isDesktop =>
       !kIsWeb && (Platform.isMacOS || Platform.isWindows || Platform.isLinux);
 
+  /// Height reserved for the transparent macOS title bar (traffic lights sit
+  /// over app content because the window uses a full-size content view).
+  static double get titleBarInset => !kIsWeb && Platform.isMacOS ? 28 : 0;
+
   /// Font family actually applied by [build] — Sora on desktop.
   static String get effectiveFontFamily => isDesktop ? 'Sora' : fontFamily;
 

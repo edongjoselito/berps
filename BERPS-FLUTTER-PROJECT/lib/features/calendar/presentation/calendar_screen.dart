@@ -233,7 +233,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
     return Scaffold(
       backgroundColor: AppTheme.background,
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: AppTheme.isDesktop ? null : FloatingActionButton.extended(
         backgroundColor: AppTheme.primaryDark,
         foregroundColor: Colors.white,
         onPressed: _openCreate,
@@ -253,6 +253,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 Haptics.light();
                 Navigator.of(context).maybePop();
               },
+              onCreate: _openCreate,
             ),
             Expanded(
               child: ListView.builder(
@@ -678,7 +679,7 @@ class _CalendarDashboardTabState extends State<CalendarDashboardTab> {
     final now = DateTime.now();
     return Scaffold(
       backgroundColor: AppTheme.background,
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: AppTheme.isDesktop ? null : FloatingActionButton.extended(
         backgroundColor: AppTheme.primaryDark,
         foregroundColor: Colors.white,
         onPressed: _openCreateNote,
@@ -919,11 +920,28 @@ class _DashboardPeriodBar extends StatelessWidget {
 }
 
 class _TopBar extends StatelessWidget {
-  const _TopBar({required this.onBack});
+  const _TopBar({required this.onBack, required this.onCreate});
   final VoidCallback onBack;
+  final VoidCallback onCreate;
 
   @override
   Widget build(BuildContext context) {
+    if (AppTheme.isDesktop) {
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+        child: MobileHeader(
+          title: 'Calendar',
+          subtitle: 'Year at a glance — pick a month to see its schedule',
+          leadingIcon: LucideIcons.chevronLeft,
+          onLeadingTap: onBack,
+          trailing: DeskButton(
+            label: 'New note',
+            icon: LucideIcons.plus,
+            onTap: onCreate,
+          ),
+        ),
+      );
+    }
     return Padding(
       padding: const EdgeInsets.fromLTRB(8, 8, 16, 4),
       child: Row(

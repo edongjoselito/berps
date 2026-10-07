@@ -1,8 +1,12 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/haptics.dart';
+import '../../../core/widgets/desktop_kit.dart';
+import '../../shell/presentation/command_palette.dart';
 import '../../attendance/presentation/staff_attendance_tab.dart';
 import '../../auth/data/session_store.dart';
 import '../../auth/domain/mobile_config.dart';
@@ -50,11 +54,35 @@ class _StaffHomeScreenState extends State<StaffHomeScreen> {
 
   /// Drives rebuilds of the nested content navigator's root page on wide
   /// layouts — the route is cached, so setState alone never refreshes it.
-  final ValueNotifier<_StaffTab> _tabNotifier =
-      ValueNotifier(_StaffTab.dashboard);
+  final ValueNotifier<_StaffTab> _tabNotifier = ValueNotifier(
+    _StaffTab.dashboard,
+  );
 
   /// Cached per-build so navigation helpers know which navigator to target.
   bool _isWide = false;
+
+  /// Sidebar destinations as palette commands (refreshed every wide build).
+  List<DeskCommand> _navCommands = const [];
+
+  Future<void> _openPalette() {
+    return showCommandPalette(context, [
+      ..._navCommands,
+      DeskCommand(
+        label: 'My profile',
+        section: 'Account',
+        icon: LucideIcons.userPen,
+        keywords: 'avatar photo edit',
+        onRun: () => _openProfile(),
+      ),
+      DeskCommand(
+        label: 'Sign out',
+        section: 'Account',
+        icon: LucideIcons.logOut,
+        keywords: 'logout log out exit',
+        onRun: _confirmSignOut,
+      ),
+    ]);
+  }
 
   /// Sidebar id of the page currently pushed over the tab content (wide
   /// layouts), so the sidebar highlights the page actually on screen.
@@ -65,8 +93,14 @@ class _StaffHomeScreenState extends State<StaffHomeScreen> {
   /// Sidebar destinations ([navId] set) replace any page already pushed
   /// instead of stacking on top of it.
   Future<T?> _pushContent<T>(Widget page, {String? navId}) async {
-    final route = MaterialPageRoute<T>(builder: (_) => page);
-    if (!_isWide) return Navigator.of(context).push<T>(route);
+    if (!_isWide) {
+      return Navigator.of(
+        context,
+      ).push<T>(MaterialPageRoute<T>(builder: (_) => page));
+    }
+    final route = MaterialPageRoute<T>(
+      builder: (_) => navId != null ? DeskRootScope(child: page) : page,
+    );
 
     final nav = _contentNavKey.currentState!;
     if (navId != null) nav.popUntil((r) => r.isFirst);
@@ -77,6 +111,7 @@ class _StaffHomeScreenState extends State<StaffHomeScreen> {
     }
     return result;
   }
+
   _StaffTab _currentTab = _StaffTab.dashboard;
   String _pendingTasksScope = '';
   String _pendingTasksStatFilter = '';
@@ -97,6 +132,17 @@ class _StaffHomeScreenState extends State<StaffHomeScreen> {
   }
 
   Future<void> _confirmSignOut() async {
+    if (AppTheme.isDesktop) {
+      final ok = await showDeskConfirm(
+        context: context,
+        title: 'Sign out of BERPS?',
+        message: 'You will need to sign in again to continue.',
+        confirmLabel: 'Sign out',
+        danger: true,
+      );
+      if (ok) await widget.onSignOut();
+      return;
+    }
     final confirmed = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
@@ -318,7 +364,8 @@ class _StaffHomeScreenState extends State<StaffHomeScreen> {
       session: widget.session,
       config: widget.config,
       sidebar: isWide,
-      activeItemId: _pushedNavId ??
+      activeItemId:
+          _pushedNavId ??
           switch (_currentTab) {
             _StaffTab.dashboard => 'dashboard',
             _StaffTab.attendance => 'attendance',
@@ -340,37 +387,66 @@ class _StaffHomeScreenState extends State<StaffHomeScreen> {
       onSelectForwardedTasks: _openForwardedTasks,
       onSelectTickets: () => _openSupportIssues(scope: 'open'),
       onSignOut: _confirmSignOut,
+      onOpenCommandPalette: isWide ? () => _openPalette() : null,
     );
 
     final body = _animatedBody(_buildCurrentPage());
 
     if (isWide) {
-      return Scaffold(
-        key: _scaffoldKey,
-        backgroundColor: AppTheme.background,
-        body: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            nav,
-            Expanded(
-              child: Align(
-                alignment: Alignment.topCenter,
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 1360),
-                  child: Navigator(
-                    key: _contentNavKey,
-                    onGenerateRoute: (_) => MaterialPageRoute(
-                      builder: (_) => AnimatedBuilder(
-                        animation: _tabNotifier,
-                        builder: (_, _) =>
-                            _animatedBody(_buildCurrentPage()),
+      _navCommands = nav.navCommands();
+      final mod = defaultTargetPlatform == TargetPlatform.macOS;
+      final digits = [
+        LogicalKeyboardKey.digit1,
+        LogicalKeyboardKey.digit2,
+        LogicalKeyboardKey.digit3,
+        LogicalKeyboardKey.digit4,
+        LogicalKeyboardKey.digit5,
+        LogicalKeyboardKey.digit6,
+        LogicalKeyboardKey.digit7,
+        LogicalKeyboardKey.digit8,
+        LogicalKeyboardKey.digit9,
+      ];
+      return CallbackShortcuts(
+        bindings: {
+          SingleActivator(LogicalKeyboardKey.keyK, meta: mod, control: !mod):
+              _openPalette,
+          for (var i = 0; i < _navCommands.length && i < 9; i++)
+            SingleActivator(digits[i], meta: mod, control: !mod):
+                _navCommands[i].onRun,
+        },
+        child: Focus(
+          autofocus: true,
+          child: Scaffold(
+            key: _scaffoldKey,
+            backgroundColor: AppTheme.background,
+            body: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                nav,
+                Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.only(top: AppTheme.titleBarInset),
+                    child: Align(
+                      alignment: Alignment.topCenter,
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 1360),
+                        child: Navigator(
+                          key: _contentNavKey,
+                          onGenerateRoute: (_) => MaterialPageRoute(
+                            builder: (_) => AnimatedBuilder(
+                              animation: _tabNotifier,
+                              builder: (_, _) =>
+                                  _animatedBody(_buildCurrentPage()),
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
+              ],
             ),
-          ],
+          ),
         ),
       );
     }
@@ -425,10 +501,7 @@ class _StaffHomeScreenState extends State<StaffHomeScreen> {
           ),
         );
       },
-      child: KeyedSubtree(
-        key: ValueKey(_currentTab),
-        child: page,
-      ),
+      child: KeyedSubtree(key: ValueKey(_currentTab), child: page),
     );
   }
 
@@ -470,13 +543,17 @@ class _StaffHomeScreenState extends State<StaffHomeScreen> {
           return CalendarDashboardTab(
             key: ValueKey('calendar-dashboard-$_dashboardReopenKey'),
             session: widget.session,
-            onMenu: _isWide ? null : () => _scaffoldKey.currentState?.openDrawer(),
+            onMenu: _isWide
+                ? null
+                : () => _scaffoldKey.currentState?.openDrawer(),
           );
         }
         return StaffDashboardTab(
           key: ValueKey('dashboard-$_dashboardReopenKey'),
           session: widget.session,
-          onMenu: _isWide ? null : () => _scaffoldKey.currentState?.openDrawer(),
+          onMenu: _isWide
+              ? null
+              : () => _scaffoldKey.currentState?.openDrawer(),
           onOpenAttendance: () => _selectTab(_StaffTab.attendance),
           onOpenTasks: () => _selectTab(_StaffTab.tasks),
           onOpenMyDtr: _openMyDtr,
@@ -493,14 +570,18 @@ class _StaffHomeScreenState extends State<StaffHomeScreen> {
         return StaffAttendanceTab(
           key: ValueKey('attendance-$_attendanceReopenKey'),
           session: widget.session,
-          onMenu: _isWide ? null : () => _scaffoldKey.currentState?.openDrawer(),
+          onMenu: _isWide
+              ? null
+              : () => _scaffoldKey.currentState?.openDrawer(),
           dtrMonthView: _pendingDtrView,
         );
       case _StaffTab.tasks:
         return StaffTasksTab(
           key: ValueKey('tasks-$_tasksReopenKey'),
           session: widget.session,
-          onMenu: _isWide ? null : () => _scaffoldKey.currentState?.openDrawer(),
+          onMenu: _isWide
+              ? null
+              : () => _scaffoldKey.currentState?.openDrawer(),
           initialScope: _pendingTasksScope,
           initialStatFilter: _pendingTasksStatFilter,
         );
@@ -508,7 +589,9 @@ class _StaffHomeScreenState extends State<StaffHomeScreen> {
         return StaffAccountTab(
           session: widget.session,
           config: widget.config,
-          onMenu: _isWide ? null : () => _scaffoldKey.currentState?.openDrawer(),
+          onMenu: _isWide
+              ? null
+              : () => _scaffoldKey.currentState?.openDrawer(),
           onSignOut: _confirmSignOut,
           onOpenMyProfile: () => _openProfile(),
           store: widget.store,

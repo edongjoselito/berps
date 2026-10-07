@@ -128,6 +128,10 @@ class _MyDtrScreenState extends State<MyDtrScreen> {
                         Haptics.light();
                         Navigator.of(context).maybePop();
                       },
+                      selected: _selected,
+                      onPrev: _prevMonth,
+                      onNext: _nextMonth,
+                      onPick: _pickMonth,
                     ),
                     const SizedBox(height: 16),
                     if (loading && data == null)
@@ -139,7 +143,10 @@ class _MyDtrScreenState extends State<MyDtrScreen> {
                             : 'Unable to load DTR.',
                         onRetry: _reload,
                       )
-                    else if (data != null) ...[
+                    else if (data != null && AppTheme.isDesktop) ...[
+                      _DeskDtrSummary(data: data),
+                      const SizedBox(height: 20),
+                    ] else if (data != null) ...[
                       FadeSlide(
                         delay: const Duration(milliseconds: 60),
                         child: _MonthSelector(
@@ -156,6 +163,8 @@ class _MyDtrScreenState extends State<MyDtrScreen> {
                         child: _SummaryCard(data: data),
                       ),
                       const SizedBox(height: 24),
+                    ],
+                    if (data != null) ...[
                       if (AppTheme.isDesktop)
                         DeskPanel(
                           title: 'Daily records',
@@ -235,13 +244,39 @@ class _MyDtrScreenState extends State<MyDtrScreen> {
 /* ── Header ─────────────────────────────────────────────────────────────── */
 
 class _Header extends StatelessWidget {
-  const _Header({required this.onBack});
+  const _Header({
+    required this.onBack,
+    required this.selected,
+    required this.onPrev,
+    required this.onNext,
+    required this.onPick,
+  });
 
   final VoidCallback onBack;
+  final DateTime selected;
+  final VoidCallback onPrev;
+  final VoidCallback onNext;
+  final VoidCallback onPick;
+
+  static const _monthNames = [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
+  ];
 
   @override
   Widget build(BuildContext context) {
     if (AppTheme.isDesktop) {
+      // Month navigation lives in the toolbar on desktop.
       return Padding(
         padding: const EdgeInsets.only(top: 12),
         child: MobileHeader(
@@ -249,6 +284,21 @@ class _Header extends StatelessWidget {
           subtitle: 'Daily time record',
           leadingIcon: LucideIcons.arrowLeft,
           onLeadingTap: onBack,
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              MobileHeaderButton(icon: LucideIcons.chevronLeft, onTap: onPrev),
+              const SizedBox(width: 6),
+              DeskButton(
+                label: '${_monthNames[selected.month - 1]} ${selected.year}',
+                icon: LucideIcons.calendarDays,
+                primary: false,
+                onTap: onPick,
+              ),
+              const SizedBox(width: 6),
+              MobileHeaderButton(icon: LucideIcons.chevronRight, onTap: onNext),
+            ],
+          ),
         ),
       );
     }
@@ -772,6 +822,121 @@ class _SectionHeader extends StatelessWidget {
 }
 
 /* ── DTR Row Card ─────────────────────────────────────────────────────── */
+
+/// Desktop month summary: one strip of figures split by hairline dividers.
+class _DeskDtrSummary extends StatelessWidget {
+  const _DeskDtrSummary({required this.data});
+
+  final MyDtrData data;
+
+  @override
+  Widget build(BuildContext context) {
+    final days = data.presentDays > 0 ? data.presentDays : 1;
+    final avg = data.monthTotalSeconds ~/ days;
+    final avgLabel =
+        '${avg ~/ 3600}h ${((avg % 3600) ~/ 60).toString().padLeft(2, '0')}m';
+
+    Widget figure(String label, String value, Color color, {String? note}) {
+      return Expanded(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 18),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 7,
+                    height: 7,
+                    decoration: BoxDecoration(
+                      color: color,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    label,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: AppTheme.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                textBaseline: TextBaseline.alphabetic,
+                children: [
+                  Text(
+                    value,
+                    style: const TextStyle(
+                      fontSize: 26,
+                      fontWeight: FontWeight.w800,
+                      color: AppTheme.textPrimary,
+                      letterSpacing: -0.8,
+                    ),
+                  ),
+                  if (note != null) ...[
+                    const SizedBox(width: 8),
+                    Text(
+                      note,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: AppTheme.textMuted,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    const divider = SizedBox(
+      height: 46,
+      child: VerticalDivider(width: 1, color: AppTheme.border),
+    );
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppTheme.border),
+      ),
+      child: Row(
+        children: [
+          figure(
+            'Total hours',
+            data.monthTotalLabel,
+            AppTheme.primaryDark,
+            note: data.presentDays > 0 ? '$avgLabel avg/day' : null,
+          ),
+          divider,
+          figure(
+            'Present',
+            '${data.presentDays}',
+            AppTheme.success,
+            note: 'days',
+          ),
+          divider,
+          figure('Absent', '${data.absentDays}', AppTheme.danger, note: 'days'),
+          divider,
+          figure(
+            'Pending',
+            '${data.pendingDays}',
+            AppTheme.warning,
+            note: 'days',
+          ),
+        ],
+      ),
+    );
+  }
+}
 
 /// Desktop timesheet: one compact row per day with AM / PM / total columns.
 class _DeskDtrTable extends StatelessWidget {

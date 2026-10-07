@@ -25,10 +25,19 @@ class SupportIssueViewScreen extends StatefulWidget {
     super.key,
     required this.session,
     required this.issueId,
+    this.embedded = false,
+    this.onChanged,
   });
 
   final StaffSession session;
   final int issueId;
+
+  /// Rendered inside the desktop master-detail pane (no back button).
+  final bool embedded;
+
+  /// Called after the ticket is modified (reply, close, assign, forward,
+  /// tag) so an owning list can refresh.
+  final VoidCallback? onChanged;
 
   @override
   State<SupportIssueViewScreen> createState() => _SupportIssueViewScreenState();
@@ -67,6 +76,11 @@ class _SupportIssueViewScreenState extends State<SupportIssueViewScreen> {
     });
   }
 
+  void _afterChange() {
+    _reload();
+    widget.onChanged?.call();
+  }
+
   Future<void> _sendReply() async {
     final text = _replyController.text.trim();
     if ((text.isEmpty && _selectedAttachment == null) || _sending) return;
@@ -86,7 +100,7 @@ class _SupportIssueViewScreenState extends State<SupportIssueViewScreen> {
       _replyController.clear();
       setState(() => _selectedAttachment = null);
       AppToast.success(context, 'Reply posted.');
-      _reload();
+      _afterChange();
       Future.delayed(const Duration(milliseconds: 350), () {
         if (_scrollController.hasClients) {
           _scrollController.animateTo(
@@ -240,7 +254,7 @@ class _SupportIssueViewScreenState extends State<SupportIssueViewScreen> {
       );
       if (!mounted) return;
       AppToast.success(context, 'Ticket closed.');
-      _reload();
+      _afterChange();
     } on ApiException catch (e) {
       if (!mounted) return;
       AppToast.error(context, e.message);
@@ -263,7 +277,7 @@ class _SupportIssueViewScreenState extends State<SupportIssueViewScreen> {
       );
       if (!mounted) return;
       AppToast.success(context, 'Ticket assigned to you.');
-      _reload();
+      _afterChange();
     } on ApiException catch (e) {
       if (!mounted) return;
       AppToast.error(context, e.message);
@@ -308,7 +322,7 @@ class _SupportIssueViewScreenState extends State<SupportIssueViewScreen> {
       );
       if (!mounted) return;
       AppToast.success(context, 'Ticket forwarded.');
-      _reload();
+      _afterChange();
     } on ApiException catch (e) {
       if (!mounted) return;
       AppToast.error(context, e.message);
@@ -350,7 +364,7 @@ class _SupportIssueViewScreenState extends State<SupportIssueViewScreen> {
       );
       if (!mounted) return;
       AppToast.success(context, 'Tagged successfully.');
-      _reload();
+      _afterChange();
     } on ApiException catch (e) {
       if (!mounted) return;
       AppToast.error(context, e.message);
@@ -410,8 +424,181 @@ class _SupportIssueViewScreenState extends State<SupportIssueViewScreen> {
     }
   }
 
+  /// Desktop: header bar, then conversation + composer beside a details and
+  /// actions rail — the layout of a desktop helpdesk client.
+  Widget _buildDesktop() {
+    return Scaffold(
+      backgroundColor: AppTheme.surface,
+      body: FutureBuilder<SupportIssueDetail>(
+        future: _future,
+        builder: (context, snapshot) {
+          final detail = snapshot.data;
+          final issue = detail?.issue;
+          final status = issue == null ? null : _issueStatus(issue);
+
+          Widget body;
+          if (detail == null && snapshot.hasError) {
+            body = _ErrorState(
+              message: snapshot.error is ApiException
+                  ? (snapshot.error as ApiException).message
+                  : snapshot.error.toString(),
+              onRetry: _reload,
+            );
+          } else if (detail == null) {
+            body = const Center(
+              child: SizedBox(
+                width: 22,
+                height: 22,
+                child: CircularProgressIndicator(strokeWidth: 2.2),
+              ),
+            );
+          } else {
+            body = Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: _DeskConversation(
+                          detail: detail,
+                          scrollController: _scrollController,
+                          onOpenAttachment: _openAttachment,
+                        ),
+                      ),
+                      if (detail.canReplyChat)
+                        _DeskComposer(
+                          controller: _replyController,
+                          sending: _sending,
+                          onSend: _sendReply,
+                          attachment: _selectedAttachment,
+                          onRemoveAttachment: () =>
+                              setState(() => _selectedAttachment = null),
+                          onAttach: _pickFileAttachment,
+                        )
+                      else
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 28,
+                            vertical: 14,
+                          ),
+                          decoration: const BoxDecoration(
+                            border: Border(
+                              top: BorderSide(color: AppTheme.border),
+                            ),
+                          ),
+                          child: const Row(
+                            children: [
+                              Icon(
+                                LucideIcons.lock,
+                                size: 13,
+                                color: AppTheme.textMuted,
+                              ),
+                              SizedBox(width: 8),
+                              Text(
+                                'You can view this conversation but cannot reply.',
+                                style: TextStyle(
+                                  color: AppTheme.textSecondary,
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                const VerticalDivider(width: 1, color: AppTheme.border),
+                SizedBox(
+                  width: 300,
+                  child: _DeskTicketDetails(
+                    detail: detail,
+                    closing: _closing,
+                    onAssignToMe: () => _assignToMe(detail),
+                    onForward: () => _forwardIssue(detail),
+                    onTag: () => _tagIssue(detail),
+                    onCloseTicket: () => _closeTicket(detail.issue),
+                  ),
+                ),
+              ],
+            );
+          }
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Container(
+                height: 58,
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  border: Border(bottom: BorderSide(color: AppTheme.border)),
+                ),
+                child: Row(
+                  children: [
+                    if (!widget.embedded) ...[
+                      MobileHeaderButton(
+                        icon: LucideIcons.arrowLeft,
+                        onTap: () => Navigator.of(context).maybePop(),
+                      ),
+                      const SizedBox(width: 12),
+                    ],
+                    Expanded(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            issue?.title.isNotEmpty == true
+                                ? issue!.title
+                                : 'Support ticket',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w800,
+                              color: AppTheme.textPrimary,
+                              letterSpacing: -0.3,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            issue == null
+                                ? 'Loading ticket…'
+                                : [
+                                    issue.ticketNumber,
+                                    issue.customerName,
+                                  ].where((s) => s.isNotEmpty).join('  ·  '),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w600,
+                              color: AppTheme.textMuted,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (status != null) ...[
+                      const SizedBox(width: 12),
+                      _DeskTag(label: status.label, color: status.color),
+                    ],
+                  ],
+                ),
+              ),
+              Expanded(child: body),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (AppTheme.isDesktop) return _buildDesktop();
     return Scaffold(
       backgroundColor: AppTheme.background,
       body: FutureBuilder<SupportIssueDetail>(
@@ -951,9 +1138,7 @@ class _IssueActionsCard extends StatelessWidget {
       );
       actions.add(
         _ActionChip(
-          icon: closing
-              ? LucideIcons.refreshCw
-              : LucideIcons.circleCheck,
+          icon: closing ? LucideIcons.refreshCw : LucideIcons.circleCheck,
           label: closing ? 'Closing…' : 'Close',
           accent: AppTheme.danger,
           onTap: closing ? null : onCloseTicket,
@@ -1065,16 +1250,7 @@ class _CommentBubble extends StatelessWidget {
   final SupportComment comment;
   final ValueChanged<String> onOpenAttachment;
 
-  String get _cleanedBody {
-    final lines = comment.comment.split('\n');
-    final filtered = lines.where((line) {
-      final trimmed = line.trimLeft();
-      if (trimmed.startsWith('Project:')) return false;
-      if (trimmed.startsWith('Reference Link:')) return false;
-      return true;
-    });
-    return filtered.join('\n').trim();
-  }
+  String get _cleanedBody => _cleanCommentBody(comment.comment);
 
   @override
   Widget build(BuildContext context) {
@@ -1322,6 +1498,549 @@ class _LinkifiedText extends StatelessWidget {
     }
 
     return SelectableText.rich(TextSpan(style: baseStyle, children: spans));
+  }
+}
+
+/// Drops the auto-generated "Project:" / "Reference Link:" lines that the
+/// web portal prepends to the first customer message.
+String _cleanCommentBody(String raw) {
+  return raw
+      .split('\n')
+      .where((line) {
+        final trimmed = line.trimLeft();
+        return !trimmed.startsWith('Project:') &&
+            !trimmed.startsWith('Reference Link:');
+      })
+      .join('\n')
+      .trim();
+}
+
+({String label, Color color}) _issueStatus(SupportIssue issue) {
+  if (issue.isClosed) return (label: 'Closed', color: AppTheme.success);
+  if (issue.isUnassigned) return (label: 'Unassigned', color: AppTheme.warning);
+  final s = issue.status.trim();
+  return (
+    label: s.isEmpty ? 'Open' : '${s[0].toUpperCase()}${s.substring(1)}',
+    color: AppTheme.primaryDark,
+  );
+}
+
+Color _priorityColorOf(String priority) {
+  switch (priority.toLowerCase()) {
+    case 'urgent':
+    case 'high':
+      return AppTheme.danger;
+    case 'low':
+      return AppTheme.success;
+    default:
+      return AppTheme.warning;
+  }
+}
+
+String _initialsOf(String name) {
+  final parts = name
+      .replaceAll(RegExp(r'[^A-Za-z\s]'), ' ')
+      .trim()
+      .split(RegExp(r'\s+'))
+      .where((p) => p.isNotEmpty);
+  if (parts.isEmpty) return '?';
+  final first = parts.first[0];
+  final last = parts.length > 1 ? parts.last[0] : '';
+  return (first + last).toUpperCase();
+}
+
+// ── Desktop ticket view ────────────────────────────────────────────────────
+
+class _DeskTag extends StatelessWidget {
+  const _DeskTag({required this.label, required this.color});
+
+  final String label;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: color,
+          fontSize: 11.5,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
+  }
+}
+
+class _DeskConversation extends StatelessWidget {
+  const _DeskConversation({
+    required this.detail,
+    required this.scrollController,
+    required this.onOpenAttachment,
+  });
+
+  final SupportIssueDetail detail;
+  final ScrollController scrollController;
+  final ValueChanged<String> onOpenAttachment;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!detail.canViewChat) {
+      return const Center(child: SizedBox(width: 420, child: _ChatLocked()));
+    }
+    if (detail.comments.isEmpty) {
+      return const Center(child: SizedBox(width: 420, child: _ChatEmpty()));
+    }
+    return Align(
+      alignment: Alignment.topCenter,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 720),
+        child: ListView.separated(
+          controller: scrollController,
+          padding: const EdgeInsets.fromLTRB(28, 22, 28, 26),
+          itemCount: detail.comments.length,
+          separatorBuilder: (_, _) => const Padding(
+            padding: EdgeInsets.symmetric(vertical: 16),
+            child: Divider(height: 1, color: AppTheme.border),
+          ),
+          itemBuilder: (_, i) => _DeskMessage(
+            comment: detail.comments[i],
+            onOpenAttachment: onOpenAttachment,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Journal-style message: small avatar, one quiet header line
+/// (author · role · time), then plain body text. Internal notes sit in a
+/// soft amber container so they read as staff-only without shouting.
+class _DeskMessage extends StatelessWidget {
+  const _DeskMessage({required this.comment, required this.onOpenAttachment});
+
+  final SupportComment comment;
+  final ValueChanged<String> onOpenAttachment;
+
+  @override
+  Widget build(BuildContext context) {
+    final body = _cleanCommentBody(comment.comment);
+    final isCustomer = comment.isCustomer;
+    final accent = comment.isMine
+        ? AppTheme.primaryDark
+        : isCustomer
+        ? const Color(0xFFB45309)
+        : const Color(0xFF475569);
+    final role = isCustomer ? 'Customer' : 'Staff';
+
+    final header = Row(
+      children: [
+        Flexible(
+          child: Text(
+            comment.isMine ? 'You' : comment.authorName,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              color: AppTheme.textPrimary,
+            ),
+          ),
+        ),
+        Text(
+          '  ·  $role  ·  ${comment.createdLabel}',
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(
+            fontSize: 11.5,
+            fontWeight: FontWeight.w600,
+            color: AppTheme.textMuted,
+          ),
+        ),
+      ],
+    );
+
+    final content = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (comment.isInternal) ...[
+          const Row(
+            children: [
+              Icon(LucideIcons.lock, size: 11, color: Color(0xFFB45309)),
+              SizedBox(width: 5),
+              Text(
+                'Internal note',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFFB45309),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+        ],
+        header,
+        if (body.isNotEmpty) ...[
+          const SizedBox(height: 5),
+          _LinkifiedText(
+            text: body,
+            color: AppTheme.textPrimary,
+            linkColor: AppTheme.primaryDark,
+          ),
+        ],
+        if (comment.attachmentPath.isNotEmpty) ...[
+          const SizedBox(height: 10),
+          _AttachmentChip(
+            label: _fileNameFromPath(comment.attachmentPath),
+            onTap: () => onOpenAttachment(comment.attachmentPath),
+            dark: false,
+          ),
+        ],
+      ],
+    );
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 28,
+          height: 28,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: accent.withValues(alpha: 0.12),
+            shape: BoxShape.circle,
+          ),
+          child: Text(
+            comment.isMine ? 'You' : _initialsOf(comment.authorName),
+            style: TextStyle(
+              color: accent,
+              fontSize: comment.isMine ? 8.5 : 10,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: comment.isInternal
+              ? Container(
+                  padding: const EdgeInsets.fromLTRB(14, 10, 14, 12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF59E0B).withValues(alpha: 0.07),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: const Color(0xFFF59E0B).withValues(alpha: 0.25),
+                    ),
+                  ),
+                  child: content,
+                )
+              : Padding(padding: const EdgeInsets.only(top: 1), child: content),
+        ),
+      ],
+    );
+  }
+}
+
+class _DeskComposer extends StatelessWidget {
+  const _DeskComposer({
+    required this.controller,
+    required this.sending,
+    required this.onSend,
+    required this.attachment,
+    required this.onRemoveAttachment,
+    required this.onAttach,
+  });
+
+  final TextEditingController controller;
+  final bool sending;
+  final VoidCallback onSend;
+  final _SelectedSupportAttachment? attachment;
+  final VoidCallback onRemoveAttachment;
+  final VoidCallback onAttach;
+
+  @override
+  Widget build(BuildContext context) {
+    final mac = defaultTargetPlatform == TargetPlatform.macOS;
+    return Container(
+      padding: const EdgeInsets.fromLTRB(28, 12, 28, 16),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        border: Border(top: BorderSide(color: AppTheme.border)),
+      ),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 720),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: AppTheme.borderStrong),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (attachment != null)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
+                    child: _SelectedAttachmentBanner(
+                      attachment: attachment!,
+                      onRemove: onRemoveAttachment,
+                    ),
+                  ),
+                CallbackShortcuts(
+                  bindings: {
+                    SingleActivator(
+                      LogicalKeyboardKey.enter,
+                      meta: mac,
+                      control: !mac,
+                    ): () {
+                      if (!sending) onSend();
+                    },
+                  },
+                  child: TextField(
+                    controller: controller,
+                    minLines: 2,
+                    maxLines: 8,
+                    textCapitalization: TextCapitalization.sentences,
+                    style: const TextStyle(fontSize: 13.5, height: 1.5),
+                    decoration: const InputDecoration(
+                      hintText: 'Write a reply to the customer…',
+                      filled: false,
+                      border: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                      contentPadding: EdgeInsets.fromLTRB(16, 14, 16, 4),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(6, 0, 10, 10),
+                  child: Row(
+                    children: [
+                      IconButton(
+                        tooltip: 'Attach a file',
+                        onPressed: onAttach,
+                        icon: const Icon(
+                          LucideIcons.paperclip,
+                          size: 17,
+                          color: AppTheme.textSecondary,
+                        ),
+                      ),
+                      const Spacer(),
+                      KeyHint(mac ? '⌘↵' : 'Ctrl+↵'),
+                      const SizedBox(width: 10),
+                      DeskButton(
+                        label: sending ? 'Sending…' : 'Send reply',
+                        icon: LucideIcons.send,
+                        onTap: sending ? null : onSend,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _DeskTicketDetails extends StatelessWidget {
+  const _DeskTicketDetails({
+    required this.detail,
+    required this.closing,
+    required this.onAssignToMe,
+    required this.onForward,
+    required this.onTag,
+    required this.onCloseTicket,
+  });
+
+  final SupportIssueDetail detail;
+  final bool closing;
+  final VoidCallback onAssignToMe;
+  final VoidCallback onForward;
+  final VoidCallback onTag;
+  final VoidCallback onCloseTicket;
+
+  @override
+  Widget build(BuildContext context) {
+    final issue = detail.issue;
+    final priority = _priorityColorOf(issue.priority);
+    final status = _issueStatus(issue);
+
+    Widget section(String title, List<Widget> children) => Container(
+      margin: const EdgeInsets.only(bottom: 4),
+      padding: const EdgeInsets.only(bottom: 18),
+      decoration: const BoxDecoration(
+        border: Border(bottom: BorderSide(color: AppTheme.border)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            title.toUpperCase(),
+            style: const TextStyle(
+              fontSize: 10.5,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.9,
+              color: AppTheme.textMuted,
+            ),
+          ),
+          const SizedBox(height: 12),
+          ...children,
+        ],
+      ),
+    );
+
+    Widget field(String label, Widget value) => Padding(
+      padding: const EdgeInsets.only(bottom: 9),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 84,
+            child: Text(
+              label,
+              style: const TextStyle(
+                fontSize: 12.5,
+                fontWeight: FontWeight.w600,
+                color: AppTheme.textSecondary,
+              ),
+            ),
+          ),
+          Expanded(child: value),
+        ],
+      ),
+    );
+
+    Text valueText(String v) => Text(
+      v.isEmpty ? '—' : v,
+      style: const TextStyle(
+        fontSize: 12.5,
+        fontWeight: FontWeight.w700,
+        color: AppTheme.textPrimary,
+      ),
+    );
+
+    return Container(
+      color: AppTheme.background,
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+        children: [
+          if (!issue.isClosed)
+            section('Actions', [
+              if (issue.isUnassigned) ...[
+                DeskButton(
+                  label: 'Assign to me',
+                  icon: LucideIcons.userPlus,
+                  onTap: onAssignToMe,
+                ),
+                const SizedBox(height: 8),
+              ],
+              DeskButton(
+                label: 'Forward',
+                icon: LucideIcons.cornerUpRight,
+                primary: false,
+                onTap: onForward,
+              ),
+              const SizedBox(height: 8),
+              DeskButton(
+                label: 'Tag teammates',
+                icon: LucideIcons.users,
+                primary: false,
+                onTap: onTag,
+              ),
+              const SizedBox(height: 8),
+              DeskButton(
+                label: closing ? 'Closing…' : 'Close ticket',
+                icon: LucideIcons.circleCheck,
+                primary: false,
+                danger: true,
+                onTap: closing ? null : onCloseTicket,
+              ),
+            ]),
+          section('Details', [
+            field(
+              'Status',
+              Align(
+                alignment: Alignment.centerLeft,
+                child: _DeskTag(label: status.label, color: status.color),
+              ),
+            ),
+            field(
+              'Priority',
+              Align(
+                alignment: Alignment.centerLeft,
+                child: _DeskTag(
+                  label: issue.priority.isEmpty
+                      ? '—'
+                      : '${issue.priority[0].toUpperCase()}${issue.priority.substring(1).toLowerCase()}',
+                  color: priority,
+                ),
+              ),
+            ),
+            field('Department', valueText(issue.departmentName)),
+            if (issue.projectName.isNotEmpty)
+              field('Project', valueText(issue.projectName)),
+            if (issue.category.isNotEmpty)
+              field('Category', valueText(issue.category)),
+            field(
+              'Assignee',
+              valueText(issue.assignedToMe ? 'You' : issue.assignedName),
+            ),
+            field('Created', valueText(issue.createdLabel)),
+            if (issue.updatedLabel.isNotEmpty)
+              field('Updated', valueText(issue.updatedLabel)),
+          ]),
+          section('Customer', [
+            valueText(issue.customerName),
+            if (issue.customerEmail.isNotEmpty) ...[
+              const SizedBox(height: 4),
+              SelectableText(
+                issue.customerEmail,
+                style: const TextStyle(
+                  fontSize: 12.5,
+                  color: AppTheme.textSecondary,
+                ),
+              ),
+            ],
+            if (issue.customerPhone.isNotEmpty) ...[
+              const SizedBox(height: 2),
+              SelectableText(
+                issue.customerPhone,
+                style: const TextStyle(
+                  fontSize: 12.5,
+                  color: AppTheme.textSecondary,
+                ),
+              ),
+            ],
+          ]),
+          if (issue.description.isNotEmpty)
+            section('Description', [
+              _LinkifiedText(
+                text: issue.description,
+                color: AppTheme.textPrimary,
+                linkColor: AppTheme.primaryDark,
+              ),
+            ]),
+          if (issue.referenceLink.isNotEmpty)
+            section('Reference', [
+              _LinkifiedText(
+                text: issue.referenceLink,
+                color: AppTheme.textPrimary,
+                linkColor: AppTheme.primaryDark,
+              ),
+            ]),
+        ],
+      ),
+    );
   }
 }
 

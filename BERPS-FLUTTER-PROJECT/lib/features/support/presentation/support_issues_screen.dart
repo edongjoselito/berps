@@ -7,6 +7,7 @@ import '../../../core/utils/haptics.dart';
 import '../../../core/utils/responsive.dart';
 import '../../../core/widgets/animations.dart';
 import '../../../core/widgets/app_toast.dart';
+import '../../../core/widgets/desktop_kit.dart';
 import '../../../core/widgets/mobile_header.dart';
 import '../../../core/widgets/skeleton.dart';
 import '../../auth/domain/staff_session.dart';
@@ -68,8 +69,133 @@ class _SupportIssuesScreenState extends State<SupportIssuesScreen> {
     if (mounted) _reload();
   }
 
+  /// Ticket selected in the desktop master-detail view (null → first).
+  int? _selectedId;
+
+  /// Desktop: ticket list pane + live ticket pane, like a mail client.
+  Widget _buildDesktop() {
+    return Scaffold(
+      backgroundColor: AppTheme.background,
+      body: FutureBuilder<SupportIssuesData>(
+        future: _future,
+        builder: (context, snapshot) {
+          final data = snapshot.data;
+          final issues = data?.issues ?? const <SupportIssue>[];
+          final selectedId = issues.any((i) => i.id == _selectedId)
+              ? _selectedId
+              : (issues.isEmpty ? null : issues.first.id);
+          final counts = data?.counts;
+
+          Widget listBody;
+          if (data == null && snapshot.hasError) {
+            listBody = _ErrorState(
+              message: snapshot.error is ApiException
+                  ? (snapshot.error as ApiException).message
+                  : snapshot.error.toString(),
+              onRetry: _reload,
+            );
+          } else if (data == null) {
+            listBody = const Center(
+              child: SizedBox(
+                width: 22,
+                height: 22,
+                child: CircularProgressIndicator(strokeWidth: 2.2),
+              ),
+            );
+          } else if (issues.isEmpty) {
+            listBody = const Align(
+              alignment: Alignment.topCenter,
+              child: Padding(
+                padding: EdgeInsets.all(20),
+                child: _EmptyState(),
+              ),
+            );
+          } else {
+            listBody = ListView.separated(
+              itemCount: issues.length,
+              separatorBuilder: (_, _) =>
+                  const Divider(height: 1, color: AppTheme.border),
+              itemBuilder: (_, i) => _DeskIssueRow(
+                issue: issues[i],
+                selected: issues[i].id == selectedId,
+                onTap: () {
+                  Haptics.light();
+                  setState(() => _selectedId = issues[i].id);
+                },
+              ),
+            );
+          }
+
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Container(
+                width: 356,
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  border: Border(right: BorderSide(color: AppTheme.border)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 8, 16, 0),
+                      child: MobileHeader(
+                        title: 'Support',
+                        subtitle: counts == null
+                            ? 'Customer issues and follow-ups'
+                            : '${counts.open} open · ${counts.unassigned} unassigned',
+                        leadingIcon: LucideIcons.arrowLeft,
+                        onLeadingTap: () => Navigator.of(context).maybePop(),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 6, 16, 12),
+                      child: DeskSegmented(
+                        expanded: true,
+                        options: const {
+                          'open': 'Open',
+                          'unassigned': 'Unassigned',
+                          'closed': 'Closed',
+                          'all': 'All',
+                        },
+                        value: _scope,
+                        onChanged: (value) {
+                          Haptics.light();
+                          setState(() {
+                            _scope = value;
+                            _selectedId = null;
+                          });
+                          _reload();
+                        },
+                      ),
+                    ),
+                    const Divider(height: 1, color: AppTheme.border),
+                    Expanded(child: listBody),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: selectedId == null
+                    ? const _DeskNoSelection()
+                    : SupportIssueViewScreen(
+                        key: ValueKey(selectedId),
+                        session: widget.session,
+                        issueId: selectedId,
+                        embedded: true,
+                        onChanged: _reload,
+                      ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (AppTheme.isDesktop) return _buildDesktop();
     return Scaffold(
       backgroundColor: AppTheme.background,
       body: RefreshIndicator(
@@ -279,6 +405,159 @@ class _ScopeChip extends StatelessWidget {
             ],
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _DeskIssueRow extends StatelessWidget {
+  const _DeskIssueRow({
+    required this.issue,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final SupportIssue issue;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final priority = switch (issue.priority.toLowerCase()) {
+      'urgent' || 'high' => AppTheme.danger,
+      'low' => AppTheme.success,
+      _ => AppTheme.warning,
+    };
+    final (statusLabel, statusColor) = issue.isClosed
+        ? ('Closed', AppTheme.success)
+        : issue.isUnassigned
+        ? ('Unassigned', AppTheme.warning)
+        : (
+            issue.status.isEmpty
+                ? 'Open'
+                : '${issue.status[0].toUpperCase()}${issue.status.substring(1)}',
+            AppTheme.primaryDark,
+          );
+
+    final meta = [
+      if (issue.ticketNumber.isNotEmpty) issue.ticketNumber else '#${issue.id}',
+      if (issue.customerName.isNotEmpty) issue.customerName,
+    ].join('  ·  ');
+
+    return Material(
+      color: selected ? AppTheme.primarySoft : Colors.white,
+      child: InkWell(
+        onTap: onTap,
+        hoverColor: AppTheme.primarySoft.withValues(alpha: 0.5),
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(19, 13, 16, 13),
+          decoration: BoxDecoration(
+            border: Border(
+              left: BorderSide(
+                color: selected ? AppTheme.primary : Colors.transparent,
+                width: 3,
+              ),
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  if (priority == AppTheme.danger) ...[
+                    const Icon(
+                      LucideIcons.flag,
+                      size: 12,
+                      color: AppTheme.danger,
+                    ),
+                    const SizedBox(width: 6),
+                  ],
+                  Expanded(
+                    child: Text(
+                      issue.title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 13.5,
+                        fontWeight: selected
+                            ? FontWeight.w800
+                            : FontWeight.w700,
+                        color: AppTheme.textPrimary,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    issue.createdLabel,
+                    style: const TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: AppTheme.textMuted,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 5),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      meta,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 11.5,
+                        color: AppTheme.textMuted,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  if (issue.assignedToMe) ...[
+                    const Icon(
+                      LucideIcons.userCheck,
+                      size: 12,
+                      color: AppTheme.success,
+                    ),
+                    const SizedBox(width: 5),
+                  ],
+                  Text(
+                    statusLabel,
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: statusColor,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _DeskNoSelection extends StatelessWidget {
+  const _DeskNoSelection();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(LucideIcons.inbox, size: 30, color: AppTheme.borderStrong),
+          SizedBox(height: 12),
+          Text(
+            'No ticket selected',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              color: AppTheme.textSecondary,
+            ),
+          ),
+        ],
       ),
     );
   }

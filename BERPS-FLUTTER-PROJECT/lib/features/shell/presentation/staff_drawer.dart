@@ -4,9 +4,11 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/haptics.dart';
 import '../../../core/widgets/brand_logo.dart';
+import '../../../core/widgets/desktop_kit.dart';
 import '../../../core/widgets/staff_avatar.dart';
 import '../../auth/domain/mobile_config.dart';
 import '../../auth/domain/staff_session.dart';
+import 'command_palette.dart';
 
 class StaffDrawer extends StatelessWidget {
   const StaffDrawer({
@@ -29,6 +31,7 @@ class StaffDrawer extends StatelessWidget {
     required this.onSignOut,
     this.activeItemId = 'dashboard',
     this.sidebar = false,
+    this.onOpenCommandPalette,
   });
 
   final StaffSession session;
@@ -53,44 +56,100 @@ class StaffDrawer extends StatelessWidget {
   /// mobile [Drawer].
   final bool sidebar;
 
+  /// Opens the ⌘K command palette (desktop sidebar search field).
+  final VoidCallback? onOpenCommandPalette;
+
+  /// Every navigation destination as a palette command, in sidebar order.
+  /// The first nine get ⌘1–⌘9 shortcuts (see [StaffHomeScreen]).
+  List<DeskCommand> navCommands() {
+    final commands = <DeskCommand>[];
+    for (final section in _sections()) {
+      for (final item in section.items) {
+        final n = commands.length + 1;
+        commands.add(
+          DeskCommand(
+            label: item.label,
+            section: section.label,
+            icon: item.icon,
+            onRun: item.onTap,
+            shortcut: n <= 9 ? '$modKeyLabel$n' : null,
+          ),
+        );
+      }
+    }
+    return commands;
+  }
+
   /// Navigation model shared by the mobile drawer and the desktop sidebar,
   /// grouped into labelled sections and filtered by workspace features.
   List<_NavSection> _sections() {
     return [
       _NavSection('Main', LucideIcons.layoutGrid, [
-        _NavSpec('dashboard', LucideIcons.layoutGrid, 'Dashboard',
-            onSelectDashboard),
+        _NavSpec(
+          'dashboard',
+          LucideIcons.layoutGrid,
+          'Dashboard',
+          onSelectDashboard,
+        ),
         if (session.hasTasks)
           _NavSpec('tasks', LucideIcons.listChecks, 'Tasks', onSelectTasks),
         if (session.hasSupport)
-          _NavSpec('unassigned-tickets', LucideIcons.userMinus,
-              'Unassigned Tickets', onSelectUnassignedTickets),
+          _NavSpec(
+            'unassigned-tickets',
+            LucideIcons.userMinus,
+            'Unassigned Tickets',
+            onSelectUnassignedTickets,
+          ),
         if (session.hasForwardedTasks)
-          _NavSpec('forwarded-tasks', LucideIcons.arrowLeftRight,
-              'Forwarded Tasks', onSelectForwardedTasks),
+          _NavSpec(
+            'forwarded-tasks',
+            LucideIcons.arrowLeftRight,
+            'Forwarded Tasks',
+            onSelectForwardedTasks,
+          ),
         if (session.hasSupport)
           _NavSpec('tickets', LucideIcons.lifeBuoy, 'Tickets', onSelectTickets),
         if (session.hasSupport)
-          _NavSpec('support-dashboard', LucideIcons.trendingUp,
-              'Support Dashboard', onSelectSupportDashboard),
+          _NavSpec(
+            'support-dashboard',
+            LucideIcons.trendingUp,
+            'Support Dashboard',
+            onSelectSupportDashboard,
+          ),
       ]),
       _NavSection('Productivity', LucideIcons.notebookText, [
         if (session.hasAttendance)
-          _NavSpec('attendance', LucideIcons.calendarDays, 'Attendance',
-              onSelectAttendance),
+          _NavSpec(
+            'attendance',
+            LucideIcons.calendarDays,
+            'Attendance',
+            onSelectAttendance,
+          ),
         if (session.hasMyDtr)
           _NavSpec('my-dtr', LucideIcons.clock, 'My DTR', onSelectMyDtr),
         if (session.hasCalendar)
-          _NavSpec('calendar', LucideIcons.calendarRange, 'Calendar',
-              onSelectCalendar),
+          _NavSpec(
+            'calendar',
+            LucideIcons.calendarRange,
+            'Calendar',
+            onSelectCalendar,
+          ),
         if (session.hasNotes)
           _NavSpec('notes', LucideIcons.notebookText, 'Notes', onSelectNotes),
         if (session.hasReminders)
-          _NavSpec('reminders', LucideIcons.bellRing, 'Reminders',
-              onSelectReminders),
+          _NavSpec(
+            'reminders',
+            LucideIcons.bellRing,
+            'Reminders',
+            onSelectReminders,
+          ),
         if (session.hasRanking)
-          _NavSpec('annual-goals', LucideIcons.trophy, 'Annual Goals',
-              onSelectAnnualGoals),
+          _NavSpec(
+            'annual-goals',
+            LucideIcons.trophy,
+            'Annual Goals',
+            onSelectAnnualGoals,
+          ),
       ]),
       _NavSection('Account', LucideIcons.circleUser, [
         _NavSpec('account', LucideIcons.circleUser, 'Account', onSelectAccount),
@@ -193,7 +252,12 @@ class _DesktopSidebar extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 22, 20, 18),
+              padding: EdgeInsets.fromLTRB(
+                20,
+                AppTheme.titleBarInset > 0 ? AppTheme.titleBarInset + 12 : 22,
+                20,
+                16,
+              ),
               child: Row(
                 children: [
                   Container(
@@ -223,6 +287,48 @@ class _DesktopSidebar extends StatelessWidget {
                 ],
               ),
             ),
+            if (drawer.onOpenCommandPalette != null)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(12, 0, 12, 4),
+                child: Material(
+                  color: const Color(0x0FFFFFFF),
+                  borderRadius: BorderRadius.circular(9),
+                  child: InkWell(
+                    onTap: drawer.onOpenCommandPalette,
+                    borderRadius: BorderRadius.circular(9),
+                    hoverColor: _Sidebar.hoverFill,
+                    child: Container(
+                      height: 36,
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(9),
+                        border: Border.all(color: _Sidebar.divider),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            LucideIcons.search,
+                            size: 15,
+                            color: _Sidebar.textFaint,
+                          ),
+                          const SizedBox(width: 9),
+                          const Expanded(
+                            child: Text(
+                              'Search',
+                              style: TextStyle(
+                                color: _Sidebar.textFaint,
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                          KeyHint('${modKeyLabel}K', dark: true),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             Expanded(
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
