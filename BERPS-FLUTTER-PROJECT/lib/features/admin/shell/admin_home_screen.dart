@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:window_manager/window_manager.dart';
 
+import '../../../core/services/notification_service.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/haptics.dart';
 import '../../../core/widgets/brand_logo.dart';
@@ -59,7 +60,28 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     _sidebarCollapsed = widget.store.readSidebarCollapsed();
     if (AppTheme.isDesktop) {
       AppTheme.compactDensity.value = widget.store.readDensityCompact();
+      NotificationService.instance.openRequest.addListener(_consumeOpenRequest);
     }
+  }
+
+  /// A system notification was clicked — jump to the section it targets.
+  void _consumeOpenRequest() {
+    final request = NotificationService.instance.openRequest.value;
+    if (request == null || !mounted) return;
+    NotificationService.instance.openRequest.value = null;
+    _selectDesktop(switch (request) {
+      'tasks' => 'tasks',
+      'attendance' => 'attendance',
+      _ => 'dashboard',
+    });
+  }
+
+  @override
+  void dispose() {
+    NotificationService.instance.openRequest.removeListener(
+      _consumeOpenRequest,
+    );
+    super.dispose();
   }
 
   void _openDrawer() => _scaffoldKey.currentState?.openDrawer();

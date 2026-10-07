@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../core/services/notification_service.dart';
 import '../core/theme/app_theme.dart';
 import '../core/widgets/offline_banner.dart';
 import '../features/auth/data/auth_api.dart';
@@ -55,15 +56,51 @@ class _BerpsMobileAppState extends State<BerpsMobileApp> {
   }
 }
 
-class _AuthFlow extends StatelessWidget {
+class _AuthFlow extends StatefulWidget {
   const _AuthFlow({required this.controller});
   final AuthController controller;
 
   @override
+  State<_AuthFlow> createState() => _AuthFlowState();
+}
+
+/// Owns the desktop notification poller's lifecycle — it runs whenever a
+/// session is active (including with the window hidden) and stops on sign-out.
+class _AuthFlowState extends State<_AuthFlow> {
+  AuthStatus _lastStatus = AuthStatus.loading;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.controller.addListener(_syncNotifier);
+    _syncNotifier();
+  }
+
+  @override
+  void dispose() {
+    widget.controller.removeListener(_syncNotifier);
+    super.dispose();
+  }
+
+  void _syncNotifier() {
+    final status = widget.controller.status;
+    if (status == _lastStatus) return;
+    _lastStatus = status;
+    final service = NotificationService.instance;
+    if (status == AuthStatus.signedIn) {
+      final session = widget.controller.session;
+      if (session != null) service.start(session);
+    } else {
+      service.stop();
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
-      animation: controller,
+      animation: widget.controller,
       builder: (context, _) {
+        final controller = widget.controller;
         final Widget screen;
         switch (controller.status) {
           case AuthStatus.loading:

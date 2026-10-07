@@ -7,6 +7,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:window_manager/window_manager.dart';
 
 import '../../../core/network/api_exception.dart';
+import '../../../core/services/notification_service.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/haptics.dart';
 import '../../../core/widgets/app_toast.dart';
@@ -112,7 +113,21 @@ class _StaffHomeScreenState extends State<StaffHomeScreen> {
         const Duration(seconds: 90),
         (_) => _refreshBadges(),
       );
+      NotificationService.instance.openRequest.addListener(_consumeOpenRequest);
     }
+  }
+
+  /// A system notification was clicked — jump to the tab it targets.
+  void _consumeOpenRequest() {
+    final request = NotificationService.instance.openRequest.value;
+    if (request == null || !mounted) return;
+    NotificationService.instance.openRequest.value = null;
+    final target = switch (request) {
+      'tasks' => _StaffTab.tasks,
+      'attendance' => _StaffTab.attendance,
+      _ => _StaffTab.dashboard,
+    };
+    if (_tabs.contains(target)) _selectTab(target);
   }
 
   /// Polls the same endpoints the screens use to keep sidebar badge counts
@@ -889,6 +904,9 @@ class _StaffHomeScreenState extends State<StaffHomeScreen> {
 
   @override
   void dispose() {
+    NotificationService.instance.openRequest.removeListener(
+      _consumeOpenRequest,
+    );
     _badgeTimer?.cancel();
     _tabNotifier.dispose();
     super.dispose();

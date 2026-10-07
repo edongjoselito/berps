@@ -2,7 +2,7 @@ name: berps_mobile
 description: "Business Resource Planning System built for task management, invoicing, and job order processing so every team stays aligned from request to delivery."
 publish_to: 'none'
 
-version: 1.0.3+5
+version: 1.0.4+6
 
 environment:
   sdk: ^3.11.4
@@ -22,6 +22,9 @@ dependencies:
   html: ^0.15.5
   lucide_icons_flutter: ^3.1.17
   window_manager: ^0.5.2
+  local_notifier: ^0.1.6
+  tray_manager: ^0.5.3
+  launch_at_startup: ^0.5.1
 
 dev_dependencies:
   flutter_test:
