@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/brand_logo.dart';
 
 /// Desktop-only brand panel used on the auth flow's split layout — a deep
@@ -24,16 +25,8 @@ class AuthSidePanel extends StatelessWidget {
       ),
       child: Stack(
         children: [
-          Positioned(
-            right: -90,
-            top: -90,
-            child: _glow(260, 0.07),
-          ),
-          Positioned(
-            left: -70,
-            bottom: 90,
-            child: _glow(190, 0.05),
-          ),
+          Positioned(right: -90, top: -90, child: _glow(260, 0.07)),
+          Positioned(left: -70, bottom: 90, child: _glow(190, 0.05)),
           Padding(
             padding: const EdgeInsets.fromLTRB(44, 40, 44, 34),
             child: Column(
@@ -100,7 +93,7 @@ class AuthSidePanel extends StatelessWidget {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      'BERPS Desktop · v1.0',
+                      AppTheme.productLabel,
                       style: TextStyle(
                         color: Colors.white.withValues(alpha: 0.55),
                         fontSize: 12,
@@ -151,9 +144,7 @@ class _Feature extends StatelessWidget {
           decoration: BoxDecoration(
             color: Colors.white.withValues(alpha: 0.10),
             borderRadius: BorderRadius.circular(10),
-            border: Border.all(
-              color: Colors.white.withValues(alpha: 0.12),
-            ),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
           ),
           child: Icon(icon, size: 16, color: Colors.white),
         ),

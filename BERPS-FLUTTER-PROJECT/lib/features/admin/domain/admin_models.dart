@@ -82,14 +82,14 @@ class TaskCounts {
   final int dueWindowDays;
 
   factory TaskCounts.fromJson(Map<String, dynamic> j) => TaskCounts(
-        open: _asInt(j['open']),
-        closed: _asInt(j['closed']),
-        dueToday: _asInt(j['due_today']),
-        dueSoon: _asInt(j['due_soon']),
-        overdue: _asInt(j['overdue']),
-        withoutDueDate: _asInt(j['without_due_date']),
-        dueWindowDays: _asInt(j['due_window_days']),
-      );
+    open: _asInt(j['open']),
+    closed: _asInt(j['closed']),
+    dueToday: _asInt(j['due_today']),
+    dueSoon: _asInt(j['due_soon']),
+    overdue: _asInt(j['overdue']),
+    withoutDueDate: _asInt(j['without_due_date']),
+    dueWindowDays: _asInt(j['due_window_days']),
+  );
 }
 
 class TaskQueueItem {
@@ -114,15 +114,15 @@ class TaskQueueItem {
   final int progress;
 
   factory TaskQueueItem.fromJson(Map<String, dynamic> j) => TaskQueueItem(
-        id: _asInt(j['id']),
-        title: _asStr(j['title']),
-        subtitle: _asStr(j['subtitle']),
-        assignedName: _asStr(j['assigned_name']),
-        reportedDate: _asStr(j['reported_date']),
-        dueDate: _asStr(j['due_date']),
-        priority: _asStr(j['priority']),
-        progress: _asInt(j['progress']),
-      );
+    id: _asInt(j['id']),
+    title: _asStr(j['title']),
+    subtitle: _asStr(j['subtitle']),
+    assignedName: _asStr(j['assigned_name']),
+    reportedDate: _asStr(j['reported_date']),
+    dueDate: _asStr(j['due_date']),
+    priority: _asStr(j['priority']),
+    progress: _asInt(j['progress']),
+  );
 }
 
 // ── Tasks (projectAddTask) ───────────────────────────────────────────────────
@@ -145,23 +145,23 @@ class AdminTasksData {
   final List<StaffOption> staff;
 
   factory AdminTasksData.fromJson(Map<String, dynamic> json) => AdminTasksData(
-        statusFilter: _asStr(json['status_filter']),
-        counts: TaskCounts.fromJson(
-          (json['counts'] as Map?)?.cast<String, dynamic>() ?? {},
-        ),
-        taskQueue: ((json['task_queue'] as List?) ?? [])
-            .map((e) => TaskQueueItem.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        tasks: ((json['tasks'] as List?) ?? [])
-            .map((e) => AdminTask.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        projects: ((json['projects'] as List?) ?? [])
-            .map((e) => ProjectOption.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        staff: ((json['staff'] as List?) ?? [])
-            .map((e) => StaffOption.fromJson(e as Map<String, dynamic>))
-            .toList(),
-      );
+    statusFilter: _asStr(json['status_filter']),
+    counts: TaskCounts.fromJson(
+      (json['counts'] as Map?)?.cast<String, dynamic>() ?? {},
+    ),
+    taskQueue: ((json['task_queue'] as List?) ?? [])
+        .map((e) => TaskQueueItem.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    tasks: ((json['tasks'] as List?) ?? [])
+        .map((e) => AdminTask.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    projects: ((json['projects'] as List?) ?? [])
+        .map((e) => ProjectOption.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    staff: ((json['staff'] as List?) ?? [])
+        .map((e) => StaffOption.fromJson(e as Map<String, dynamic>))
+        .toList(),
+  );
 }
 
 class AdminTask {
@@ -198,20 +198,20 @@ class AdminTask {
   bool get isOpen => status == 'open';
 
   factory AdminTask.fromJson(Map<String, dynamic> j) => AdminTask(
-        id: _asInt(j['id']),
-        title: _asStr(j['title']),
-        reportedDate: _asStr(j['reported_date']),
-        dueDate: _asStr(j['due_date']),
-        status: _asStr(j['status']),
-        priorityValue: _asStr(j['priority_value']),
-        priorityLabel: _asStr(j['priority_label']),
-        projectName: _asStr(j['project_name']),
-        assignedName: _asStr(j['assigned_person_name']),
-        attachmentLink: _asStr(j['attachment_link']),
-        adminComment: _asStr(j['admin_comment']),
-        dueMetaLabel: _asStr(j['due_meta_label']),
-        dueMetaType: _asStr(j['due_meta_type']),
-      );
+    id: _asInt(j['id']),
+    title: _asStr(j['title']),
+    reportedDate: _asStr(j['reported_date']),
+    dueDate: _asStr(j['due_date']),
+    status: _asStr(j['status']),
+    priorityValue: _asStr(j['priority_value']),
+    priorityLabel: _asStr(j['priority_label']),
+    projectName: _asStr(j['project_name']),
+    assignedName: _asStr(j['assigned_person_name']),
+    attachmentLink: _asStr(j['attachment_link']),
+    adminComment: _asStr(j['admin_comment']),
+    dueMetaLabel: _asStr(j['due_meta_label']),
+    dueMetaType: _asStr(j['due_meta_type']),
+  );
 }
 
 class ProjectOption {
@@ -308,10 +308,10 @@ class EmployeeOption {
   final String name;
   final String position;
   factory EmployeeOption.fromJson(Map<String, dynamic> j) => EmployeeOption(
-        userId: _asInt(j['user_id']),
-        name: _asStr(j['name']),
-        position: _asStr(j['position']),
-      );
+    userId: _asInt(j['user_id']),
+    name: _asStr(j['name']),
+    position: _asStr(j['position']),
+  );
 }
 
 // ── Attendance ───────────────────────────────────────────────────────────────
@@ -358,27 +358,31 @@ class AttendanceRow {
   final List<TimeInterval> intervals;
 
   factory AttendanceRow.fromJson(Map<String, dynamic> j) => AttendanceRow(
-        logDate: _asStr(j['log_date']),
-        employeeName: _asStr(j['employee_name']),
-        accomplishmentCount: _asInt(j['accomplishment_count']),
-        hasTimeIn: _asBool(j['has_time_in']),
-        totalHoursLabel: _asStr(j['total_hours_label']),
-        intervals: ((j['intervals'] as List?) ?? [])
-            .map((e) => TimeInterval.fromJson(e as Map<String, dynamic>))
-            .toList(),
-      );
+    logDate: _asStr(j['log_date']),
+    employeeName: _asStr(j['employee_name']),
+    accomplishmentCount: _asInt(j['accomplishment_count']),
+    hasTimeIn: _asBool(j['has_time_in']),
+    totalHoursLabel: _asStr(j['total_hours_label']),
+    intervals: ((j['intervals'] as List?) ?? [])
+        .map((e) => TimeInterval.fromJson(e as Map<String, dynamic>))
+        .toList(),
+  );
 }
 
 class TimeInterval {
-  TimeInterval({required this.label, required this.seconds, required this.open});
+  TimeInterval({
+    required this.label,
+    required this.seconds,
+    required this.open,
+  });
   final String label;
   final int seconds;
   final bool open;
   factory TimeInterval.fromJson(Map<String, dynamic> j) => TimeInterval(
-        label: _asStr(j['label']),
-        seconds: _asInt(j['seconds']),
-        open: _asBool(j['open']),
-      );
+    label: _asStr(j['label']),
+    seconds: _asInt(j['seconds']),
+    open: _asBool(j['open']),
+  );
 }
 
 // ── Employee DTR ─────────────────────────────────────────────────────────────
@@ -411,22 +415,22 @@ class AdminDtrData {
   final List<DtrDay> days;
 
   factory AdminDtrData.fromJson(Map<String, dynamic> json) => AdminDtrData(
-        selectedEmployee: _asStr(json['selected_employee']),
-        selectedEmployeeName: _asStr(json['selected_employee_name']),
-        month: _asInt(json['selected_month']),
-        year: _asInt(json['selected_year']),
-        filterApplied: _asBool(json['filter_applied']),
-        monthTotalLabel: _asStr(json['month_total_label']),
-        presentDays: _asInt(json['present_days']),
-        absentDays: _asInt(json['absent_days']),
-        pendingDays: _asInt(json['pending_days']),
-        employees: ((json['employees'] as List?) ?? [])
-            .map((e) => DtrStaff.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        days: ((json['data'] as List?) ?? [])
-            .map((e) => DtrDay.fromJson(e as Map<String, dynamic>))
-            .toList(),
-      );
+    selectedEmployee: _asStr(json['selected_employee']),
+    selectedEmployeeName: _asStr(json['selected_employee_name']),
+    month: _asInt(json['selected_month']),
+    year: _asInt(json['selected_year']),
+    filterApplied: _asBool(json['filter_applied']),
+    monthTotalLabel: _asStr(json['month_total_label']),
+    presentDays: _asInt(json['present_days']),
+    absentDays: _asInt(json['absent_days']),
+    pendingDays: _asInt(json['pending_days']),
+    employees: ((json['employees'] as List?) ?? [])
+        .map((e) => DtrStaff.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    days: ((json['data'] as List?) ?? [])
+        .map((e) => DtrDay.fromJson(e as Map<String, dynamic>))
+        .toList(),
+  );
 }
 
 class DtrStaff {
@@ -494,21 +498,21 @@ class DtrDay {
   final bool isPending;
 
   factory DtrDay.fromJson(Map<String, dynamic> j) => DtrDay(
-        logDate: _asStr(j['log_date']),
-        intervals: ((j['intervals'] as List?) ?? [])
-            .map((e) => TimeInterval.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        amIntervals: ((j['am_intervals'] as List?) ?? [])
-            .map((e) => TimeInterval.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        pmIntervals: ((j['pm_intervals'] as List?) ?? [])
-            .map((e) => TimeInterval.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        totalLabel: _asStr(j['total_label']),
-        taskCount: _asInt(j['task_count']),
-        isAbsent: _asBool(j['is_absent']),
-        isPending: _asBool(j['is_pending']),
-      );
+    logDate: _asStr(j['log_date']),
+    intervals: ((j['intervals'] as List?) ?? [])
+        .map((e) => TimeInterval.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    amIntervals: ((j['am_intervals'] as List?) ?? [])
+        .map((e) => TimeInterval.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    pmIntervals: ((j['pm_intervals'] as List?) ?? [])
+        .map((e) => TimeInterval.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    totalLabel: _asStr(j['total_label']),
+    taskCount: _asInt(j['task_count']),
+    isAbsent: _asBool(j['is_absent']),
+    isPending: _asBool(j['is_pending']),
+  );
 }
 
 // ── Clients ──────────────────────────────────────────────────────────────────
@@ -556,32 +560,32 @@ class AdminClient {
   final String notes;
 
   factory AdminClient.fromJson(Map<String, dynamic> j) => AdminClient(
-        custId: _asStr(j['cust_id']),
-        customer: _asStr(j['customer']),
-        address: _asStr(j['address']),
-        contact: _asStr(j['contact']),
-        contactPerson: _asStr(j['contact_person']),
-        companyEmail: _asStr(j['company_email']),
-        clientEmail: _asStr(j['client_email']),
-        clientStat: _asStr(j['client_stat']),
-        clientSource: _asStr(j['client_source']),
-        facebookLink: _asStr(j['facebook_link']),
-        salesAgent: _asStr(j['sales_agent']),
-        notes: _asStr(j['notes']),
-      );
+    custId: _asStr(j['cust_id']),
+    customer: _asStr(j['customer']),
+    address: _asStr(j['address']),
+    contact: _asStr(j['contact']),
+    contactPerson: _asStr(j['contact_person']),
+    companyEmail: _asStr(j['company_email']),
+    clientEmail: _asStr(j['client_email']),
+    clientStat: _asStr(j['client_stat']),
+    clientSource: _asStr(j['client_source']),
+    facebookLink: _asStr(j['facebook_link']),
+    salesAgent: _asStr(j['sales_agent']),
+    notes: _asStr(j['notes']),
+  );
 
   Map<String, dynamic> toPayload() => {
-        'CustID': custId,
-        'Customer': customer,
-        'Address': address,
-        'Contact': contact,
-        'ContactPerson': contactPerson,
-        'CompanyEmail': companyEmail,
-        'client_email': clientEmail,
-        'ClientStat': clientStat,
-        'client_source': clientSource,
-        'facebook_link': facebookLink,
-        'sales_agent': salesAgent,
-        'notes': notes,
-      };
+    'CustID': custId,
+    'Customer': customer,
+    'Address': address,
+    'Contact': contact,
+    'ContactPerson': contactPerson,
+    'CompanyEmail': companyEmail,
+    'client_email': clientEmail,
+    'ClientStat': clientStat,
+    'client_source': clientSource,
+    'facebook_link': facebookLink,
+    'sales_agent': salesAgent,
+    'notes': notes,
+  };
 }

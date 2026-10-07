@@ -105,10 +105,7 @@ class _SupportIssuesScreenState extends State<SupportIssuesScreen> {
           } else if (issues.isEmpty) {
             listBody = const Align(
               alignment: Alignment.topCenter,
-              child: Padding(
-                padding: EdgeInsets.all(20),
-                child: _EmptyState(),
-              ),
+              child: Padding(padding: EdgeInsets.all(20), child: _EmptyState()),
             );
           } else {
             listBody = ListView.separated(
@@ -604,9 +601,9 @@ class _IssueCard extends StatelessWidget {
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(AppTheme.isDesktop ? 14 : 18),
           border: Border.all(color: AppTheme.border),
-          boxShadow: AppTheme.shadowSoft,
+          boxShadow: AppTheme.isDesktop ? null : AppTheme.shadowSoft,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -815,7 +812,7 @@ class _EmptyState extends StatelessWidget {
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(AppTheme.isDesktop ? 14 : 18),
         border: Border.all(color: AppTheme.border),
       ),
       child: Column(
@@ -870,7 +867,7 @@ class _ErrorState extends StatelessWidget {
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(AppTheme.isDesktop ? 14 : 18),
         border: Border.all(color: AppTheme.border),
       ),
       child: Column(

@@ -791,9 +791,9 @@ class _ConversationCard extends StatelessWidget {
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(AppTheme.cardRadius(18)),
         border: Border.all(color: AppTheme.border),
-        boxShadow: AppTheme.shadowSoft,
+        boxShadow: AppTheme.isDesktop ? null : AppTheme.shadowSoft,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -886,9 +886,9 @@ class _IssueSummaryCardState extends State<_IssueSummaryCard> {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(AppTheme.cardRadius(18)),
         border: Border.all(color: AppTheme.border),
-        boxShadow: AppTheme.shadowSoft,
+        boxShadow: AppTheme.isDesktop ? null : AppTheme.shadowSoft,
       ),
       clipBehavior: Clip.antiAlias,
       child: Column(
@@ -1154,9 +1154,9 @@ class _IssueActionsCard extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppTheme.cardRadius(16)),
         border: Border.all(color: AppTheme.border),
-        boxShadow: AppTheme.shadowSoft,
+        boxShadow: AppTheme.isDesktop ? null : AppTheme.shadowSoft,
       ),
       child: Wrap(spacing: 8, runSpacing: 8, children: actions),
     );
@@ -2165,7 +2165,7 @@ class _ChatLocked extends StatelessWidget {
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(AppTheme.cardRadius(18)),
         border: Border.all(color: AppTheme.border),
       ),
       child: Column(
@@ -2218,7 +2218,7 @@ class _ChatEmpty extends StatelessWidget {
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(AppTheme.cardRadius(18)),
         border: Border.all(color: AppTheme.border),
       ),
       child: Column(
@@ -2308,7 +2308,7 @@ class _ErrorState extends StatelessWidget {
           padding: const EdgeInsets.all(18),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(18),
+            borderRadius: BorderRadius.circular(AppTheme.cardRadius(18)),
             border: Border.all(color: AppTheme.border),
           ),
           child: Column(
@@ -2389,9 +2389,9 @@ class _ReplyComposer extends StatelessWidget {
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(18),
+              borderRadius: BorderRadius.circular(AppTheme.cardRadius(18)),
               border: Border.all(color: AppTheme.border),
-              boxShadow: AppTheme.shadowSoft,
+              boxShadow: AppTheme.isDesktop ? null : AppTheme.shadowSoft,
             ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.end,

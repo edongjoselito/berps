@@ -37,15 +37,13 @@ class SupportDashboard {
       thisMonth: SupportMonth.fromJson(m('this_month')),
       avgResolutionHours:
           double.tryParse((json['avg_resolution_hours'] ?? '0').toString()) ??
-              0,
+          0,
       byPriority: l('by_priority').map(SupportCount.fromJson).toList(),
       byStatus: l('by_status').map(SupportCount.fromJson).toList(),
-      byDepartment:
-          l('by_department').map(SupportDepartment.fromJson).toList(),
+      byDepartment: l('by_department').map(SupportDepartment.fromJson).toList(),
       trend: l('trend').map(SupportTrendPoint.fromJson).toList(),
       recent: l('recent').map(SupportTicketLite.fromJson).toList(),
-      oldestOpen:
-          l('oldest_open').map(SupportTicketLite.fromJson).toList(),
+      oldestOpen: l('oldest_open').map(SupportTicketLite.fromJson).toList(),
     );
   }
 }

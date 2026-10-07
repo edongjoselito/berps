@@ -101,9 +101,9 @@ class AdminGreetingCard extends StatelessWidget {
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(AppTheme.cardRadius(20)),
         border: Border.all(color: AppTheme.border),
-        boxShadow: AppTheme.shadowSoft,
+        boxShadow: AppTheme.isDesktop ? null : AppTheme.shadowSoft,
       ),
       child: Row(
         children: [
@@ -282,14 +282,14 @@ class _AdminMetricCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: data.onTap,
-      borderRadius: BorderRadius.circular(18),
+      borderRadius: BorderRadius.circular(AppTheme.cardRadius(18)),
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(AppTheme.cardRadius(18)),
           border: Border.all(color: AppTheme.border),
-          boxShadow: AppTheme.shadowSoft,
+          boxShadow: AppTheme.isDesktop ? null : AppTheme.shadowSoft,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -362,9 +362,9 @@ class AdminErrorView extends StatelessWidget {
       padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(AppTheme.cardRadius(20)),
         border: Border.all(color: AppTheme.border),
-        boxShadow: AppTheme.shadowSoft,
+        boxShadow: AppTheme.isDesktop ? null : AppTheme.shadowSoft,
       ),
       child: Column(
         children: [
@@ -373,7 +373,7 @@ class AdminErrorView extends StatelessWidget {
             height: 52,
             decoration: BoxDecoration(
               color: AppTheme.danger.withValues(alpha: 0.10),
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(AppTheme.cardRadius(16)),
             ),
             child: const Icon(
               LucideIcons.circleAlert,
@@ -427,9 +427,9 @@ class AdminEmptyView extends StatelessWidget {
       padding: const EdgeInsets.all(26),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(AppTheme.cardRadius(20)),
         border: Border.all(color: AppTheme.border),
-        boxShadow: AppTheme.shadowSoft,
+        boxShadow: AppTheme.isDesktop ? null : AppTheme.shadowSoft,
       ),
       child: Column(
         children: [
@@ -438,7 +438,7 @@ class AdminEmptyView extends StatelessWidget {
             height: 60,
             decoration: BoxDecoration(
               color: AppTheme.primarySoft,
-              borderRadius: BorderRadius.circular(18),
+              borderRadius: BorderRadius.circular(AppTheme.cardRadius(18)),
             ),
             child: Icon(icon, color: AppTheme.primaryDark, size: 28),
           ),
@@ -573,9 +573,9 @@ class AccomplishmentCard extends StatelessWidget {
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppTheme.cardRadius(16)),
         border: Border.all(color: AppTheme.border),
-        boxShadow: AppTheme.shadowSoft,
+        boxShadow: AppTheme.isDesktop ? null : AppTheme.shadowSoft,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -827,7 +827,7 @@ class MonthYearButton extends StatelessWidget {
           color: Colors.white,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(color: AppTheme.border),
-          boxShadow: AppTheme.shadowSoft,
+          boxShadow: AppTheme.isDesktop ? null : AppTheme.shadowSoft,
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,

@@ -40,7 +40,8 @@ class MobileHeader extends StatelessWidget {
     }
 
     // Sidebar destinations on desktop don't need a back button.
-    final showLeading = leadingIcon != null &&
+    final showLeading =
+        leadingIcon != null &&
         onLeadingTap != null &&
         !(AppTheme.isDesktop && DeskRootScope.isRoot(context));
     final row = Row(
@@ -59,8 +60,9 @@ class MobileHeader extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontSize: 22,
-                  fontWeight:
-                      AppTheme.isDesktop ? FontWeight.w800 : FontWeight.w900,
+                  fontWeight: AppTheme.isDesktop
+                      ? FontWeight.w800
+                      : FontWeight.w900,
                   color: AppTheme.textPrimary,
                   letterSpacing: AppTheme.isDesktop ? -0.7 : -0.5,
                 ),
@@ -113,23 +115,25 @@ class MobileHeaderButton extends StatelessWidget {
   Widget build(BuildContext context) {
     if (AppTheme.isDesktop) {
       return Material(
-        color: filled ? AppTheme.primaryDark : Colors.white,
-        borderRadius: BorderRadius.circular(10),
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(8),
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(10),
-          child: Container(
-            width: 38,
-            height: 38,
+          borderRadius: BorderRadius.circular(8),
+          hoverColor: filled
+              ? Colors.white.withValues(alpha: 0.12)
+              : const Color(0xFFE3E5EB),
+          splashFactory: filled ? NoSplash.splashFactory : null,
+          child: Ink(
+            width: 34,
+            height: 34,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(
-                color: filled ? AppTheme.primaryDark : AppTheme.border,
-              ),
+              color: filled ? AppTheme.primary : AppTheme.surfaceMuted,
+              borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(
               icon,
-              size: 17,
+              size: 16,
               color: filled ? Colors.white : AppTheme.textPrimary,
             ),
           ),
@@ -147,7 +151,7 @@ class MobileHeaderButton extends StatelessWidget {
           border: Border.all(
             color: filled ? AppTheme.primaryDark : AppTheme.border,
           ),
-          boxShadow: AppTheme.shadowSoft,
+          boxShadow: AppTheme.isDesktop ? null : AppTheme.shadowSoft,
         ),
         child: Icon(
           icon,

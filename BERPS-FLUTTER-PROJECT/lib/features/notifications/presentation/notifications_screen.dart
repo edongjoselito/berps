@@ -86,63 +86,88 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         child: FutureBuilder<StaffNotificationsData>(
           future: _future,
           builder: (context, snapshot) {
-            return ListView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: EdgeInsets.fromLTRB(
-                context.gutter,
-                12,
-                context.gutter,
-                28,
-              ),
-              children: [
-                SafeArea(
-                  bottom: false,
-                  child: MobileHeader(
-                    title: 'Notifications',
-                    subtitle:
-                        snapshot.hasData && snapshot.data!.notifications.isEmpty
-                        ? 'You are all caught up'
-                        : 'Recent activity for your account',
-                    leadingIcon:
-                        AppTheme.isDesktop ? null : LucideIcons.arrowLeft,
-                    onLeadingTap: AppTheme.isDesktop
-                        ? null
-                        : () => Navigator.of(context).maybePop(),
-                    trailing: AppTheme.isDesktop
-                        ? MobileHeaderButton(
-                            icon: LucideIcons.x,
-                            onTap: () => Navigator.of(context).maybePop(),
-                          )
-                        : null,
-                  ),
+            return Align(
+              alignment: Alignment.topCenter,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: AppTheme.isDesktop ? 640 : double.infinity,
                 ),
-                const SizedBox(height: 14),
-                if (snapshot.connectionState == ConnectionState.waiting)
-                  const _NotificationsSkeleton()
-                else if (snapshot.hasError)
-                  _ErrorCard(
-                    message: snapshot.error is ApiException
-                        ? (snapshot.error as ApiException).message
-                        : snapshot.error.toString(),
-                    onRetry: _load,
-                  )
-                else if (snapshot.data == null ||
-                    snapshot.data!.notifications.isEmpty)
-                  const _EmptyState()
-                else
-                  ...snapshot.data!.notifications.asMap().entries.map(
-                    (entry) => Padding(
-                      padding: const EdgeInsets.only(bottom: 10),
-                      child: FadeSlide(
-                        delay: Duration(milliseconds: 50 * entry.key),
-                        child: _NotificationCard(
-                          item: entry.value,
-                          onTap: () => _openItem(entry.value),
-                        ),
+                child: ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: EdgeInsets.fromLTRB(
+                    context.gutter,
+                    12,
+                    context.gutter,
+                    28,
+                  ),
+                  children: [
+                    SafeArea(
+                      bottom: false,
+                      child: MobileHeader(
+                        title: 'Notifications',
+                        subtitle:
+                            snapshot.hasData &&
+                                snapshot.data!.notifications.isEmpty
+                            ? 'You are all caught up'
+                            : 'Recent activity for your account',
+                        leadingIcon: AppTheme.isDesktop
+                            ? null
+                            : LucideIcons.arrowLeft,
+                        onLeadingTap: AppTheme.isDesktop
+                            ? null
+                            : () => Navigator.of(context).maybePop(),
+                        trailing: AppTheme.isDesktop
+                            ? Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  MobileHeaderButton(
+                                    icon: LucideIcons.rotateCw,
+                                    onTap: () {
+                                      Haptics.light();
+                                      _markedSeen = false;
+                                      _load();
+                                    },
+                                  ),
+                                  const SizedBox(width: 6),
+                                  MobileHeaderButton(
+                                    icon: LucideIcons.x,
+                                    onTap: () =>
+                                        Navigator.of(context).maybePop(),
+                                  ),
+                                ],
+                              )
+                            : null,
                       ),
                     ),
-                  ),
-              ],
+                    const SizedBox(height: 14),
+                    if (snapshot.connectionState == ConnectionState.waiting)
+                      const _NotificationsSkeleton()
+                    else if (snapshot.hasError)
+                      _ErrorCard(
+                        message: snapshot.error is ApiException
+                            ? (snapshot.error as ApiException).message
+                            : snapshot.error.toString(),
+                        onRetry: _load,
+                      )
+                    else if (snapshot.data == null ||
+                        snapshot.data!.notifications.isEmpty)
+                      const _EmptyState()
+                    else
+                      ...snapshot.data!.notifications.asMap().entries.map(
+                        (entry) => Padding(
+                          padding: const EdgeInsets.only(bottom: 10),
+                          child: FadeSlide(
+                            delay: Duration(milliseconds: 50 * entry.key),
+                            child: _NotificationCard(
+                              item: entry.value,
+                              onTap: () => _openItem(entry.value),
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
             );
           },
         ),
@@ -171,17 +196,17 @@ class _NotificationCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final unread = !item.isSeen;
     return InkWell(
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(AppTheme.isDesktop ? 14 : 16),
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(AppTheme.isDesktop ? 14 : 16),
           border: Border.all(
             color: unread ? _accent.withValues(alpha: 0.32) : AppTheme.border,
           ),
-          boxShadow: AppTheme.shadowSoft,
+          boxShadow: AppTheme.isDesktop ? null : AppTheme.shadowSoft,
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -306,7 +331,7 @@ class _EmptyState extends StatelessWidget {
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(AppTheme.isDesktop ? 14 : 18),
         border: Border.all(color: AppTheme.border),
       ),
       child: Column(
@@ -401,7 +426,7 @@ class _ErrorCard extends StatelessWidget {
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(AppTheme.isDesktop ? 14 : 18),
         border: Border.all(color: AppTheme.border),
       ),
       child: Column(

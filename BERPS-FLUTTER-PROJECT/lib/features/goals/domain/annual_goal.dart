@@ -24,8 +24,7 @@ class AnnualGoal {
   final String createdBy;
 
   factory AnnualGoal.fromJson(Map<String, dynamic> json) {
-    double d(String k) =>
-        double.tryParse((json[k] ?? '0').toString()) ?? 0;
+    double d(String k) => double.tryParse((json[k] ?? '0').toString()) ?? 0;
     int i(String k) => int.tryParse((json[k] ?? '0').toString()) ?? 0;
     return AnnualGoal(
       goalId: i('goal_id'),
@@ -54,15 +53,15 @@ class AnnualGoalsData {
   final List<AnnualGoal> goals;
 
   factory AnnualGoalsData.fromJson(Map<String, dynamic> json) {
-    final list = (json['goals'] as List?)
+    final list =
+        (json['goals'] as List?)
             ?.whereType<Map>()
             .map((g) => AnnualGoal.fromJson(Map<String, dynamic>.from(g)))
             .toList() ??
         const [];
     final currentRaw = json['current'];
     return AnnualGoalsData(
-      currentYear:
-          int.tryParse((json['current_year'] ?? '0').toString()) ?? 0,
+      currentYear: int.tryParse((json['current_year'] ?? '0').toString()) ?? 0,
       current: currentRaw is Map
           ? AnnualGoal.fromJson(Map<String, dynamic>.from(currentRaw))
           : null,
@@ -104,7 +103,8 @@ class AnnualGoalDetail {
   final List<AnnualGoalMonth> monthly;
 
   factory AnnualGoalDetail.fromJson(Map<String, dynamic> json) {
-    final monthly = (json['monthly'] as List?)
+    final monthly =
+        (json['monthly'] as List?)
             ?.whereType<Map>()
             .map((m) => AnnualGoalMonth.fromJson(Map<String, dynamic>.from(m)))
             .toList() ??

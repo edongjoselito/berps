@@ -41,7 +41,9 @@ class DataDeletionScreen extends StatelessWidget {
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
                           color: AppTheme.danger.withValues(alpha: 0.06),
-                          borderRadius: BorderRadius.circular(18),
+                          borderRadius: BorderRadius.circular(
+                            AppTheme.cardRadius(18),
+                          ),
                           border: Border.all(
                             color: AppTheme.danger.withValues(alpha: 0.2),
                           ),
@@ -84,7 +86,9 @@ class DataDeletionScreen extends StatelessWidget {
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
                           color: Colors.white,
-                          borderRadius: BorderRadius.circular(18),
+                          borderRadius: BorderRadius.circular(
+                            AppTheme.cardRadius(18),
+                          ),
                           border: Border.all(color: AppTheme.border),
                         ),
                         child: Column(
@@ -135,7 +139,9 @@ class DataDeletionScreen extends StatelessWidget {
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
                           color: Colors.white,
-                          borderRadius: BorderRadius.circular(18),
+                          borderRadius: BorderRadius.circular(
+                            AppTheme.cardRadius(18),
+                          ),
                           border: Border.all(color: AppTheme.border),
                         ),
                         child: Column(

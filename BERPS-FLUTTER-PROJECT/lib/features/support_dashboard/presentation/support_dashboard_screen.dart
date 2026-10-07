@@ -279,12 +279,10 @@ class _TotalsGrid extends StatelessWidget {
         Color(0xFF2563EB),
         Color(0xFF1D4ED8),
       ]),
-      _TotalCellData(
-        'Closed',
-        totals.closed,
-        LucideIcons.circleCheck,
-        const [Color(0xFF16A34A), Color(0xFF15803D)],
-      ),
+      _TotalCellData('Closed', totals.closed, LucideIcons.circleCheck, const [
+        Color(0xFF16A34A),
+        Color(0xFF15803D),
+      ]),
       _TotalCellData(
         'Unassigned',
         totals.unassigned,
@@ -334,7 +332,7 @@ class _TotalsGrid extends StatelessWidget {
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(AppTheme.cardRadius(16)),
                   boxShadow: [
                     BoxShadow(
                       color: cell.gradient[0].withValues(alpha: 0.25),
@@ -816,7 +814,7 @@ class _TicketRow extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(AppTheme.cardRadius(18)),
         child: Row(
           children: [
             Container(

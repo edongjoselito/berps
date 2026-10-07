@@ -24,7 +24,9 @@ class StaffNotification {
       createdLabel: (json['created_label'] ?? '').toString(),
       createdAt: (json['created_at'] ?? '').toString(),
       taskId: (json['task_id'] is num) ? (json['task_id'] as num).toInt() : 0,
-      issueId: (json['issue_id'] is num) ? (json['issue_id'] as num).toInt() : 0,
+      issueId: (json['issue_id'] is num)
+          ? (json['issue_id'] as num).toInt()
+          : 0,
       ticketNumber: (json['ticket_number'] ?? '').toString(),
     );
   }
@@ -58,10 +60,7 @@ class StaffNotificationsData {
     final total = json['unseen_total'] is num
         ? (json['unseen_total'] as num).toInt()
         : (json['count'] is num ? (json['count'] as num).toInt() : 0);
-    return StaffNotificationsData(
-      notifications: list,
-      unseenTotal: total,
-    );
+    return StaffNotificationsData(notifications: list, unseenTotal: total);
   }
 
   final List<StaffNotification> notifications;

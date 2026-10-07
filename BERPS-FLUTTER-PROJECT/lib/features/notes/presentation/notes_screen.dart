@@ -18,8 +18,16 @@ import '../data/notes_api.dart';
 import '../domain/note.dart';
 
 class NotesScreen extends StatefulWidget {
-  const NotesScreen({super.key, required this.session});
+  const NotesScreen({
+    super.key,
+    required this.session,
+    this.openEditorOnMount = false,
+  });
   final StaffSession session;
+
+  /// Opens the note editor immediately — used by the desktop "New note"
+  /// command-palette action so the sheet appears as soon as the page lands.
+  final bool openEditorOnMount;
 
   @override
   State<NotesScreen> createState() => _NotesScreenState();
@@ -33,6 +41,11 @@ class _NotesScreenState extends State<NotesScreen> {
   void initState() {
     super.initState();
     _reload();
+    if (widget.openEditorOnMount) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _openEditor();
+      });
+    }
   }
 
   void _reload() {
@@ -74,34 +87,44 @@ class _NotesScreenState extends State<NotesScreen> {
 
   Future<void> _confirmDelete(Note note) async {
     Haptics.warn();
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text(
-          'Delete note?',
-          style: TextStyle(
-            fontWeight: FontWeight.w900,
-            color: AppTheme.textPrimary,
+    final bool? confirmed;
+    if (AppTheme.isDesktop) {
+      confirmed = await showDeskConfirm(
+        context: context,
+        title: 'Delete note?',
+        message: '"${note.displayTitle}" will be removed.',
+        confirmLabel: 'Delete',
+        danger: true,
+      );
+    } else {
+      confirmed = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: const Text(
+            'Delete note?',
+            style: TextStyle(
+              fontWeight: FontWeight.w900,
+              color: AppTheme.textPrimary,
+            ),
           ),
+          content: Text(
+            '"${note.displayTitle}" will be removed.',
+            style: const TextStyle(color: AppTheme.textSecondary),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              style: FilledButton.styleFrom(backgroundColor: AppTheme.danger),
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: const Text('Delete'),
+            ),
+          ],
         ),
-        content: Text(
-          '"${note.displayTitle}" will be removed.',
-          style: const TextStyle(color: AppTheme.textSecondary),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: AppTheme.danger),
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
-    );
+      );
+    }
     if (confirmed != true) return;
 
     try {
@@ -167,10 +190,22 @@ class _NotesScreenState extends State<NotesScreen> {
                       Navigator.of(context).maybePop();
                     },
                     trailing: AppTheme.isDesktop
-                        ? DeskButton(
-                            label: 'New note',
-                            icon: LucideIcons.plus,
-                            onTap: () => _openEditor(),
+                        ? Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              DeskIconButton(
+                                icon: LucideIcons.rotateCw,
+                                tooltip: 'Reload',
+                                onTap: _reload,
+                              ),
+                              const SizedBox(width: 8),
+                              DeskIconButton(
+                                icon: LucideIcons.plus,
+                                filled: true,
+                                tooltip: 'New note',
+                                onTap: () => _openEditor(),
+                              ),
+                            ],
                           )
                         : null,
                   ),
@@ -186,14 +221,19 @@ class _NotesScreenState extends State<NotesScreen> {
                       ),
                     )
                   else if (error != null && snapshot.data == null)
-                    _ErrorCard(
+                    AppErrorCard(
+                      title: 'Unable to load notes',
                       message: error is ApiException
                           ? error.message
-                          : 'Unable to load notes.',
+                          : 'Please try again in a moment.',
                       onRetry: _reload,
                     )
                   else if (notes.isEmpty)
-                    const _EmptyState()
+                    const AppEmptyState(
+                      icon: LucideIcons.notebookText,
+                      title: 'No notes yet',
+                      message: 'Tap "New note" to jot down your first note.',
+                    )
                   else ...[
                     if (favorites.isNotEmpty) ...[
                       const _SectionHeader(
@@ -310,9 +350,9 @@ class _NoteCard extends StatelessWidget {
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(AppTheme.isDesktop ? 14 : 16),
           border: Border.all(color: AppTheme.border),
-          boxShadow: AppTheme.shadowSoft,
+          boxShadow: AppTheme.isDesktop ? null : AppTheme.shadowSoft,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -547,97 +587,101 @@ class _NoteEditorSheetState extends State<_NoteEditorSheet> {
     return Padding(
       padding: EdgeInsets.only(bottom: bottomInset),
       child: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           color: AppTheme.surface,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          borderRadius: AppTheme.isDesktop
+              ? null
+              : const BorderRadius.vertical(top: Radius.circular(24)),
         ),
-        padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: AppTheme.isDesktop ? 0 : 4,
-                  decoration: BoxDecoration(
-                    color: AppTheme.border,
-                    borderRadius: BorderRadius.circular(999),
+        child: AppSheetScaffold(
+          title: _isEditing ? 'Edit note' : 'New note',
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (_error != null) ...[
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppTheme.danger.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      _error!,
+                      style: const TextStyle(
+                        color: AppTheme.danger,
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                _isEditing ? 'Edit note' : 'New note',
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w900,
-                  color: AppTheme.textPrimary,
-                ),
-              ),
-              const SizedBox(height: 16),
-              if (_error != null) ...[
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: AppTheme.danger.withValues(alpha: 0.08),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    _error!,
-                    style: const TextStyle(
-                      color: AppTheme.danger,
-                      fontSize: 12.5,
-                      fontWeight: FontWeight.w600,
+                  const SizedBox(height: 14),
+                ],
+                const _FieldLabel('Title'),
+                TextField(
+                  controller: _titleController,
+                  textCapitalization: TextCapitalization.sentences,
+                  decoration: const InputDecoration(
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 14,
                     ),
                   ),
                 ),
                 const SizedBox(height: 14),
+                const _FieldLabel('Description'),
+                TextField(
+                  controller: _descriptionController,
+                  textCapitalization: TextCapitalization.sentences,
+                  minLines: 3,
+                  maxLines: 8,
+                  decoration: const InputDecoration(
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 14,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 14),
+                const _FieldLabel('Tags (comma separated)'),
+                TextField(
+                  controller: _tagsController,
+                  decoration: const InputDecoration(
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 14,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                if (AppTheme.isDesktop)
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      DeskButton(
+                        label: 'Cancel',
+                        primary: false,
+                        onTap: () => Navigator.of(context).maybePop(),
+                      ),
+                      const SizedBox(width: 8),
+                      DeskButton(
+                        label: _submitting
+                            ? 'Saving…'
+                            : (_isEditing ? 'Save changes' : 'Create note'),
+                        onTap: _submitting ? null : _save,
+                      ),
+                    ],
+                  )
+                else
+                  LoadingButton(
+                    label: _isEditing ? 'Save changes' : 'Create note',
+                    isLoading: _submitting,
+                    onPressed: _submitting ? null : _save,
+                  ),
               ],
-              const _FieldLabel('Title'),
-              TextField(
-                controller: _titleController,
-                textCapitalization: TextCapitalization.sentences,
-                decoration: const InputDecoration(
-                  contentPadding: EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 14,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 14),
-              const _FieldLabel('Description'),
-              TextField(
-                controller: _descriptionController,
-                textCapitalization: TextCapitalization.sentences,
-                minLines: 3,
-                maxLines: 8,
-                decoration: const InputDecoration(
-                  contentPadding: EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 14,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 14),
-              const _FieldLabel('Tags (comma separated)'),
-              TextField(
-                controller: _tagsController,
-                decoration: const InputDecoration(
-                  contentPadding: EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 14,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              LoadingButton(
-                label: _isEditing ? 'Save changes' : 'Create note',
-                isLoading: _submitting,
-                onPressed: _submitting ? null : _save,
-              ),
-            ],
+            ),
           ),
         ),
       ),
@@ -660,123 +704,6 @@ class _FieldLabel extends StatelessWidget {
           fontWeight: FontWeight.w700,
           color: AppTheme.textSecondary,
         ),
-      ),
-    );
-  }
-}
-
-class _EmptyState extends StatelessWidget {
-  const _EmptyState();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(top: 40),
-      padding: const EdgeInsets.all(28),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppTheme.border),
-      ),
-      child: Column(
-        children: [
-          Container(
-            width: 60,
-            height: 60,
-            decoration: BoxDecoration(
-              color: AppTheme.primarySoft,
-              borderRadius: BorderRadius.circular(18),
-            ),
-            child: const Icon(
-              LucideIcons.notebookText,
-              color: AppTheme.primary,
-              size: 28,
-            ),
-          ),
-          const SizedBox(height: 16),
-          const Text(
-            'No notes yet',
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w900,
-              color: AppTheme.textPrimary,
-            ),
-          ),
-          const SizedBox(height: 6),
-          const Text(
-            'Tap "New note" to jot down your first note.',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: AppTheme.textSecondary,
-              fontSize: 12.5,
-              height: 1.4,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ErrorCard extends StatelessWidget {
-  const _ErrorCard({required this.message, required this.onRetry});
-  final String message;
-  final VoidCallback onRetry;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppTheme.border),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: AppTheme.danger.withValues(alpha: 0.10),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(
-                  LucideIcons.circleAlert,
-                  color: AppTheme.danger,
-                  size: 18,
-                ),
-              ),
-              const SizedBox(width: 12),
-              const Expanded(
-                child: Text(
-                  'Unable to load notes',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w900,
-                    color: AppTheme.textPrimary,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Text(
-            message,
-            style: const TextStyle(
-              color: AppTheme.textSecondary,
-              fontSize: 12.5,
-            ),
-          ),
-          const SizedBox(height: 14),
-          FilledButton.icon(
-            onPressed: onRetry,
-            icon: const Icon(LucideIcons.refreshCw, size: 16),
-            label: const Text('Try again'),
-          ),
-        ],
       ),
     );
   }

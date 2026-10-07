@@ -68,9 +68,9 @@ class BrandLogo extends StatelessWidget {
   }
 
   Widget _fallback() => Image.asset(
-        'assets/logo.png',
-        width: size,
-        height: size,
-        fit: BoxFit.contain,
-      );
+    'assets/logo.png',
+    width: size,
+    height: size,
+    fit: BoxFit.contain,
+  );
 }

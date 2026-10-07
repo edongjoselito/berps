@@ -54,9 +54,7 @@ void _serializeNode(html_dom.Node node, StringBuffer out) {
       case 'a':
         final href = (node.attributes['href'] ?? '').trim();
         final inner = out.toString().split('\n').last.trim();
-        if (href.isNotEmpty &&
-            href != inner &&
-            !inner.contains(href)) {
+        if (href.isNotEmpty && href != inner && !inner.contains(href)) {
           out.write(' ($href)');
         }
         break;

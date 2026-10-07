@@ -18,7 +18,9 @@ class _PrivacyConsentDialogState extends State<PrivacyConsentDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppTheme.isDesktop ? 16 : 24),
+      ),
       backgroundColor: AppTheme.surface,
       contentPadding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
       actionsPadding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
@@ -32,7 +34,7 @@ class _PrivacyConsentDialogState extends State<PrivacyConsentDialog> {
               height: 56,
               decoration: BoxDecoration(
                 color: AppTheme.primarySoft,
-                borderRadius: BorderRadius.circular(18),
+                borderRadius: BorderRadius.circular(AppTheme.cardRadius(18)),
               ),
               child: const Icon(
                 LucideIcons.shieldCheck,

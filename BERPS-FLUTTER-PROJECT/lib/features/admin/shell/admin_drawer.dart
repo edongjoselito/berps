@@ -207,7 +207,7 @@ class _Header extends StatelessWidget {
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
               color: AppTheme.primarySoft,
-              borderRadius: BorderRadius.circular(18),
+              borderRadius: BorderRadius.circular(AppTheme.cardRadius(18)),
               border: Border.all(color: AppTheme.border),
             ),
             child: Row(
@@ -447,7 +447,7 @@ class _DrawerFooter extends StatelessWidget {
           ),
           const SizedBox(width: 6),
           Text(
-            'BERPS Mobile · v1.0',
+            AppTheme.productLabel,
             style: TextStyle(
               fontSize: 10.5,
               fontWeight: FontWeight.w800,

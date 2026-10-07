@@ -31,9 +31,9 @@ class RemindersApi {
     final list = data['reminders'];
     final reminders = list is List
         ? list
-            .whereType<Map>()
-            .map((e) => Reminder.fromJson(Map<String, dynamic>.from(e)))
-            .toList(growable: false)
+              .whereType<Map>()
+              .map((e) => Reminder.fromJson(Map<String, dynamic>.from(e)))
+              .toList(growable: false)
         : const <Reminder>[];
     return RemindersData(
       reminders: reminders,
@@ -161,10 +161,10 @@ class RemindersApi {
   }
 
   Map<String, String> _headers(String token) => {
-        HttpHeaders.acceptHeader: 'application/json',
-        HttpHeaders.contentTypeHeader: 'application/json',
-        HttpHeaders.authorizationHeader: 'Bearer $token',
-      };
+    HttpHeaders.acceptHeader: 'application/json',
+    HttpHeaders.contentTypeHeader: 'application/json',
+    HttpHeaders.authorizationHeader: 'Bearer $token',
+  };
 
   Future<http.Response> _request(
     Future<http.Response> Function() action,
@@ -195,7 +195,9 @@ class RemindersApi {
 
     late final Object? decoded;
     try {
-      decoded = jsonDecode(utf8.decode(response.bodyBytes, allowMalformed: true));
+      decoded = jsonDecode(
+        utf8.decode(response.bodyBytes, allowMalformed: true),
+      );
     } on FormatException {
       throw const ApiException('Invalid server response format.');
     }

@@ -38,9 +38,9 @@ class _AdminClientsTabState extends State<AdminClientsTab> {
   }
 
   Future<AdminClientsData> _load() => _api.fetchClients(
-        baseUrl: widget.session.baseUrl,
-        token: widget.session.token,
-      );
+    baseUrl: widget.session.baseUrl,
+    token: widget.session.token,
+  );
 
   void _reload() => setState(() => _future = _load());
 
@@ -63,7 +63,9 @@ class _AdminClientsTabState extends State<AdminClientsTab> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppTheme.isDesktop ? 16 : 20),
+        ),
         title: const Text('Delete client?'),
         content: Text(
           'This permanently removes “${client.customer}”. This cannot be undone.',
@@ -109,9 +111,13 @@ class _AdminClientsTabState extends State<AdminClientsTab> {
             onPressed: () => _openForm(nextId: snapshot.data?.nextCustId),
             backgroundColor: AppTheme.primaryDark,
             icon: const Icon(LucideIcons.plus, color: Colors.white),
-            label: const Text('Add client',
-                style:
-                    TextStyle(color: Colors.white, fontWeight: FontWeight.w800)),
+            label: const Text(
+              'Add client',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
           );
         },
       ),
@@ -138,8 +144,7 @@ class _AdminClientsTabState extends State<AdminClientsTab> {
                   onChanged: (v) => setState(() => _query = v.toLowerCase()),
                   decoration: InputDecoration(
                     hintText: 'Search clients…',
-                    prefixIcon: const Icon(LucideIcons.search,
-                        size: 18),
+                    prefixIcon: const Icon(LucideIcons.search, size: 18),
                   ),
                 ),
                 const SizedBox(height: 14),
@@ -173,11 +178,13 @@ class _AdminClientsTabState extends State<AdminClientsTab> {
     final filtered = _query.isEmpty
         ? data.clients
         : data.clients
-            .where((c) =>
-                c.customer.toLowerCase().contains(_query) ||
-                c.contactPerson.toLowerCase().contains(_query) ||
-                c.custId.toLowerCase().contains(_query))
-            .toList();
+              .where(
+                (c) =>
+                    c.customer.toLowerCase().contains(_query) ||
+                    c.contactPerson.toLowerCase().contains(_query) ||
+                    c.custId.toLowerCase().contains(_query),
+              )
+              .toList();
 
     if (filtered.isEmpty) {
       return const [
@@ -198,15 +205,15 @@ class _AdminClientsTabState extends State<AdminClientsTab> {
     final statColor = stat.toLowerCase() == 'active'
         ? AppTheme.success
         : (stat.toLowerCase() == 'prospect'
-            ? AppTheme.warning
-            : AppTheme.textMuted);
+              ? AppTheme.warning
+              : AppTheme.textMuted);
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppTheme.cardRadius(16)),
         border: Border.all(color: AppTheme.border),
-        boxShadow: AppTheme.shadowSoft,
+        boxShadow: AppTheme.isDesktop ? null : AppTheme.shadowSoft,
       ),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
@@ -266,8 +273,11 @@ class _AdminClientsTabState extends State<AdminClientsTab> {
               ),
             ),
             IconButton(
-              icon: const Icon(LucideIcons.trash2,
-                  size: 18, color: AppTheme.danger),
+              icon: const Icon(
+                LucideIcons.trash2,
+                size: 18,
+                color: AppTheme.danger,
+              ),
               onPressed: () {
                 Haptics.light();
                 _confirmDelete(c);
@@ -424,11 +434,9 @@ class _ClientFormSheetState extends State<_ClientFormSheet> {
                 ),
               ],
               const SizedBox(height: 16),
-              _field('Client / company name', _name,
-                  capitalize: true),
+              _field('Client / company name', _name, capitalize: true),
               _field('Contact person', _contactPerson, capitalize: true),
-              _field('Contact number', _contact,
-                  keyboard: TextInputType.phone),
+              _field('Contact number', _contact, keyboard: TextInputType.phone),
               _field('Address', _address, capitalize: true),
               _field('Email', _email, keyboard: TextInputType.emailAddress),
               _field('Source', _source, capitalize: true),
@@ -447,9 +455,13 @@ class _ClientFormSheetState extends State<_ClientFormSheet> {
                     items: const [
                       DropdownMenuItem(value: 'Active', child: Text('Active')),
                       DropdownMenuItem(
-                          value: 'Prospect', child: Text('Prospect')),
+                        value: 'Prospect',
+                        child: Text('Prospect'),
+                      ),
                       DropdownMenuItem(
-                          value: 'Inactive', child: Text('Inactive')),
+                        value: 'Inactive',
+                        child: Text('Inactive'),
+                      ),
                     ],
                     onChanged: (v) => setState(() => _stat = v ?? 'Active'),
                   ),
@@ -479,16 +491,16 @@ class _ClientFormSheetState extends State<_ClientFormSheet> {
   }
 
   Widget _label(String text) => Padding(
-        padding: const EdgeInsets.only(bottom: 6),
-        child: Text(
-          text,
-          style: const TextStyle(
-            fontWeight: FontWeight.w700,
-            fontSize: 13,
-            color: AppTheme.textSecondary,
-          ),
-        ),
-      );
+    padding: const EdgeInsets.only(bottom: 6),
+    child: Text(
+      text,
+      style: const TextStyle(
+        fontWeight: FontWeight.w700,
+        fontSize: 13,
+        color: AppTheme.textSecondary,
+      ),
+    ),
+  );
 
   Widget _field(
     String label,

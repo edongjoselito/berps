@@ -136,7 +136,7 @@ class AdminMoreTab extends StatelessWidget {
             alignment: Alignment.center,
             decoration: BoxDecoration(
               color: AppTheme.primarySoft,
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(AppTheme.cardRadius(16)),
             ),
             child: const Icon(
               LucideIcons.shieldCheck,
@@ -186,9 +186,9 @@ class AdminMoreTab extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(AppTheme.cardRadius(20)),
         border: Border.all(color: AppTheme.border),
-        boxShadow: AppTheme.shadowSoft,
+        boxShadow: AppTheme.isDesktop ? null : AppTheme.shadowSoft,
       ),
       child: Column(
         children: [
@@ -222,7 +222,7 @@ class _MenuItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(20),
+      borderRadius: BorderRadius.circular(AppTheme.cardRadius(20)),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
         child: Row(

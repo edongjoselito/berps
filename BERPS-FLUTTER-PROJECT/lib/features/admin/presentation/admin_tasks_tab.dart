@@ -35,10 +35,10 @@ class _AdminTasksTabState extends State<AdminTasksTab> {
   }
 
   Future<AdminTasksData> _load() => _api.fetchTasks(
-        baseUrl: widget.session.baseUrl,
-        token: widget.session.token,
-        status: _status,
-      );
+    baseUrl: widget.session.baseUrl,
+    token: widget.session.token,
+    status: _status,
+  );
 
   void _reload() => setState(() => _future = _load());
 
@@ -78,8 +78,13 @@ class _AdminTasksTabState extends State<AdminTasksTab> {
             onPressed: () => _openCreate(snapshot.data!),
             backgroundColor: AppTheme.primaryDark,
             icon: const Icon(LucideIcons.plus, color: Colors.white),
-            label: const Text('New task',
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800)),
+            label: const Text(
+              'New task',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
           );
         },
       ),
@@ -154,9 +159,9 @@ class _AdminTasksTabState extends State<AdminTasksTab> {
       padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(AppTheme.cardRadius(18)),
         border: Border.all(color: AppTheme.border),
-        boxShadow: AppTheme.shadowSoft,
+        boxShadow: AppTheme.isDesktop ? null : AppTheme.shadowSoft,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -176,8 +181,7 @@ class _AdminTasksTabState extends State<AdminTasksTab> {
               ),
               const SizedBox(width: 8),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
                 decoration: BoxDecoration(
                   color: pColor.withValues(alpha: 0.10),
                   borderRadius: BorderRadius.circular(999),
@@ -215,8 +219,7 @@ class _AdminTasksTabState extends State<AdminTasksTab> {
           const SizedBox(height: 3),
           Row(
             children: [
-              Icon(LucideIcons.folder,
-                  size: 13, color: AppTheme.textMuted),
+              Icon(LucideIcons.folder, size: 13, color: AppTheme.textMuted),
               const SizedBox(width: 5),
               Expanded(
                 child: Text(
@@ -235,8 +238,7 @@ class _AdminTasksTabState extends State<AdminTasksTab> {
           Row(
             children: [
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
                 decoration: BoxDecoration(
                   color: dueMetaColor(t.dueMetaType).withValues(alpha: 0.10),
                   borderRadius: BorderRadius.circular(8),
@@ -252,8 +254,7 @@ class _AdminTasksTabState extends State<AdminTasksTab> {
               ),
               const Spacer(),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
                 decoration: BoxDecoration(
                   color: t.isOpen
                       ? AppTheme.primarySoft
@@ -427,7 +428,9 @@ class _CreateTaskSheetState extends State<_CreateTaskSheet> {
               TextField(
                 controller: _taskCtrl,
                 textCapitalization: TextCapitalization.sentences,
-                decoration: const InputDecoration(hintText: 'What needs doing?'),
+                decoration: const InputDecoration(
+                  hintText: 'What needs doing?',
+                ),
               ),
               const SizedBox(height: 14),
               _label('Project'),
@@ -435,7 +438,9 @@ class _CreateTaskSheetState extends State<_CreateTaskSheet> {
                 value: _projectId,
                 hint: 'Select project',
                 items: widget.projects
-                    .map((p) => DropdownMenuItem(value: p.id, child: Text(p.name)))
+                    .map(
+                      (p) => DropdownMenuItem(value: p.id, child: Text(p.name)),
+                    )
                     .toList(),
                 onChanged: (v) => setState(() => _projectId = v),
               ),
@@ -445,8 +450,12 @@ class _CreateTaskSheetState extends State<_CreateTaskSheet> {
                 value: _assignedId,
                 hint: 'Select employee',
                 items: widget.staff
-                    .map((s) =>
-                        DropdownMenuItem(value: s.userId, child: Text(s.name)))
+                    .map(
+                      (s) => DropdownMenuItem(
+                        value: s.userId,
+                        child: Text(s.name),
+                      ),
+                    )
                     .toList(),
                 onChanged: (v) => setState(() => _assignedId = v),
               ),
@@ -464,9 +473,17 @@ class _CreateTaskSheetState extends State<_CreateTaskSheet> {
               const SizedBox(height: 14),
               Row(
                 children: [
-                  Expanded(child: _dateField('Reported', _reported, () => _pickDate(true))),
+                  Expanded(
+                    child: _dateField(
+                      'Reported',
+                      _reported,
+                      () => _pickDate(true),
+                    ),
+                  ),
                   const SizedBox(width: 12),
-                  Expanded(child: _dateField('Due', _due, () => _pickDate(false))),
+                  Expanded(
+                    child: _dateField('Due', _due, () => _pickDate(false)),
+                  ),
                 ],
               ),
               const SizedBox(height: 14),
@@ -498,16 +515,16 @@ class _CreateTaskSheetState extends State<_CreateTaskSheet> {
   }
 
   Widget _label(String text) => Padding(
-        padding: const EdgeInsets.only(bottom: 6),
-        child: Text(
-          text,
-          style: const TextStyle(
-            fontWeight: FontWeight.w700,
-            fontSize: 13,
-            color: AppTheme.textSecondary,
-          ),
-        ),
-      );
+    padding: const EdgeInsets.only(bottom: 6),
+    child: Text(
+      text,
+      style: const TextStyle(
+        fontWeight: FontWeight.w700,
+        fontSize: 13,
+        color: AppTheme.textSecondary,
+      ),
+    ),
+  );
 
   Widget _dropdown<T>({
     required T? value,
@@ -526,8 +543,10 @@ class _CreateTaskSheetState extends State<_CreateTaskSheet> {
         child: DropdownButton<T>(
           value: value,
           isExpanded: true,
-          hint: Text(hint,
-              style: const TextStyle(color: AppTheme.textMuted, fontSize: 14)),
+          hint: Text(
+            hint,
+            style: const TextStyle(color: AppTheme.textMuted, fontSize: 14),
+          ),
           items: items,
           onChanged: onChanged,
         ),
@@ -544,7 +563,9 @@ class _CreateTaskSheetState extends State<_CreateTaskSheet> {
           padding: const EdgeInsets.symmetric(vertical: 11),
           alignment: Alignment.center,
           decoration: BoxDecoration(
-            color: active ? color.withValues(alpha: 0.12) : AppTheme.surfaceMuted,
+            color: active
+                ? color.withValues(alpha: 0.12)
+                : AppTheme.surfaceMuted,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: active ? color : AppTheme.border,
@@ -580,8 +601,11 @@ class _CreateTaskSheetState extends State<_CreateTaskSheet> {
             ),
             child: Row(
               children: [
-                Icon(LucideIcons.calendarDays,
-                    size: 16, color: AppTheme.textSecondary),
+                Icon(
+                  LucideIcons.calendarDays,
+                  size: 16,
+                  color: AppTheme.textSecondary,
+                ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(

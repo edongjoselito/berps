@@ -263,6 +263,218 @@ class _StaffProfileScreenState extends State<StaffProfileScreen> {
     );
   }
 
+  /// Desktop layout: identity hero in the left rail, three information
+  /// panels in the main column.
+  Widget _desktopBody(StaffProfile profile) {
+    final editBar = _editing
+        ? Padding(
+            padding: const EdgeInsets.only(top: 14),
+            child: Row(
+              children: [
+                Expanded(
+                  child: DeskButton(
+                    label: 'Cancel',
+                    icon: LucideIcons.x,
+                    primary: false,
+                    onTap: _saving ? null : _cancelEditing,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: DeskButton(
+                    label: _saving ? 'Saving…' : 'Save',
+                    icon: LucideIcons.check,
+                    onTap: _saving ? null : _saveProfile,
+                  ),
+                ),
+              ],
+            ),
+          )
+        : const SizedBox.shrink();
+
+    Widget infoPanel(String title, List<_InfoRow> rows) => DeskPanel(
+      title: title,
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 4),
+      child: Column(
+        children: [
+          for (var i = 0; i < rows.length; i++) ...[
+            _InfoRowTile(row: rows[i]),
+            if (i != rows.length - 1)
+              const Divider(height: 1, color: AppTheme.border),
+          ],
+        ],
+      ),
+    );
+
+    Widget editPanel(String title, List<_EditField> fields) => DeskPanel(
+      title: title,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final w = (constraints.maxWidth - 12) / 2;
+          return Wrap(
+            spacing: 12,
+            children: [
+              for (final f in fields)
+                SizedBox(
+                  width: w,
+                  child: _DeskEditFieldTile(field: f),
+                ),
+            ],
+          );
+        },
+      ),
+    );
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: AppTheme.railWidth,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _ProfileHeaderCard(
+                profile: profile,
+                avatarOverrideUrl: _avatarOverrideUrl,
+                uploading: _uploading,
+                onTapAvatar: _showPhotoSourceSheet,
+              ),
+              editBar,
+            ],
+          ),
+        ),
+        const SizedBox(width: 20),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              infoPanel('Official Information', [
+                _InfoRow(
+                  'Employee No.',
+                  profile.employeeNo,
+                  LucideIcons.badgeCheck,
+                ),
+                _InfoRow('Position', profile.position, LucideIcons.crown),
+                _InfoRow(
+                  'Department',
+                  profile.department,
+                  LucideIcons.building2,
+                ),
+                _InfoRow(
+                  'Date Hired',
+                  profile.dateHired,
+                  LucideIcons.calendarCheck,
+                ),
+                _InfoRow('TIN', profile.tinNo, LucideIcons.fileText),
+                _InfoRow('GSIS BP No.', profile.gsisNo, LucideIcons.fileText),
+                _InfoRow(
+                  'PAG-IBIG No.',
+                  profile.pagibigNo,
+                  LucideIcons.fileText,
+                ),
+                _InfoRow('SSS', profile.sssNo, LucideIcons.fileText),
+                _InfoRow(
+                  'PhilHealth No.',
+                  profile.philHealthNo,
+                  LucideIcons.fileText,
+                ),
+              ]),
+              const SizedBox(height: 16),
+              _editing
+                  ? editPanel('Personal Information', [
+                      _EditField(
+                        label: 'Birth Date',
+                        controller: _birthDateController,
+                      ),
+                      _EditField(
+                        label: 'Birth Place',
+                        controller: _birthPlaceController,
+                      ),
+                      _EditField(
+                        label: 'Blood Type',
+                        controller: _bloodTypeController,
+                      ),
+                      _EditField(
+                        label: 'Marital Status',
+                        controller: _maritalStatusController,
+                      ),
+                      _EditField(
+                        label: 'Height',
+                        controller: _heightController,
+                      ),
+                      _EditField(
+                        label: 'Weight',
+                        controller: _weightController,
+                      ),
+                    ])
+                  : infoPanel('Personal Information', [
+                      _InfoRow('Gender', profile.gender, LucideIcons.users),
+                      _InfoRow(
+                        'Birth Date',
+                        profile.birthDate,
+                        LucideIcons.cake,
+                      ),
+                      _InfoRow(
+                        'Birth Place',
+                        profile.birthPlace,
+                        LucideIcons.mapPin,
+                      ),
+                      _InfoRow(
+                        'Blood Type',
+                        profile.bloodType,
+                        LucideIcons.heart,
+                      ),
+                      _InfoRow(
+                        'Marital Status',
+                        profile.maritalStatus,
+                        LucideIcons.heart,
+                      ),
+                      _InfoRow('Height', profile.height, LucideIcons.ruler),
+                      _InfoRow('Weight', profile.weight, LucideIcons.scale),
+                    ]),
+              const SizedBox(height: 16),
+              _editing
+                  ? editPanel('Contact Information', [
+                      _EditField(
+                        label: 'Contact No.',
+                        controller: _contactController,
+                        keyboardType: TextInputType.phone,
+                      ),
+                      _EditField(
+                        label: 'Official Email',
+                        controller: _officialEmailController,
+                        keyboardType: TextInputType.emailAddress,
+                      ),
+                      _EditField(
+                        label: 'Address',
+                        controller: _addressController,
+                      ),
+                    ])
+                  : infoPanel('Contact Information', [
+                      _InfoRow(
+                        'Contact No.',
+                        profile.contactNo,
+                        LucideIcons.smartphone,
+                      ),
+                      _InfoRow(
+                        'Account Email',
+                        profile.email,
+                        LucideIcons.mail,
+                      ),
+                      _InfoRow(
+                        'Official Email',
+                        profile.officialEmail,
+                        LucideIcons.mail,
+                      ),
+                      _InfoRow('Address', profile.address, LucideIcons.house),
+                    ]),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -299,7 +511,16 @@ class _StaffProfileScreenState extends State<StaffProfileScreen> {
                         Navigator.of(context).maybePop();
                       }
                     },
-                    trailing: (profile != null && !_editing)
+                    trailing: AppTheme.isDesktop
+                        ? (profile != null && !_editing)
+                              ? DeskButton(
+                                  label: 'Edit profile',
+                                  icon: LucideIcons.pencil,
+                                  primary: false,
+                                  onTap: () => _startEditing(profile),
+                                )
+                              : null
+                        : (profile != null && !_editing)
                         ? IconButton(
                             onPressed: () => _startEditing(profile),
                             icon: const Icon(
@@ -314,11 +535,17 @@ class _StaffProfileScreenState extends State<StaffProfileScreen> {
                   if (loading && profile == null)
                     const _ProfileSkeleton()
                   else if (error != null && profile == null)
-                    _ErrorCard(
+                    AppErrorCard(
+                      title: 'Profile unavailable',
                       message: error is ApiException
                           ? error.message
                           : 'Unable to load profile.',
                       onRetry: _reload,
+                    )
+                  else if (profile != null && AppTheme.isDesktop)
+                    FadeSlide(
+                      delay: const Duration(milliseconds: 60),
+                      child: _desktopBody(profile),
                     )
                   else if (profile != null) ...[
                     FadeSlide(
@@ -363,11 +590,7 @@ class _StaffProfileScreenState extends State<StaffProfileScreen> {
                             profile.dateHired,
                             LucideIcons.calendarCheck,
                           ),
-                          _InfoRow(
-                            'TIN',
-                            profile.tinNo,
-                            LucideIcons.fileText,
-                          ),
+                          _InfoRow('TIN', profile.tinNo, LucideIcons.fileText),
                           _InfoRow(
                             'GSIS BP No.',
                             profile.gsisNo,
@@ -378,11 +601,7 @@ class _StaffProfileScreenState extends State<StaffProfileScreen> {
                             profile.pagibigNo,
                             LucideIcons.fileText,
                           ),
-                          _InfoRow(
-                            'SSS',
-                            profile.sssNo,
-                            LucideIcons.fileText,
-                          ),
+                          _InfoRow('SSS', profile.sssNo, LucideIcons.fileText),
                           _InfoRow(
                             'PhilHealth No.',
                             profile.philHealthNo,
@@ -614,12 +833,12 @@ class _ProfileHeaderCard extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(0, 24, 0, 22),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [Color(0xFF1E3A5F), Color(0xFF2D5A8A)],
+          colors: [AppTheme.navy, AppTheme.navyLight],
         ),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(AppTheme.isDesktop ? 14 : 20),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF1E3A5F).withValues(alpha: 0.22),
+            color: AppTheme.navy.withValues(alpha: 0.22),
             blurRadius: 18,
             offset: const Offset(0, 6),
           ),
@@ -685,10 +904,7 @@ class _ProfileHeaderCard extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: Colors.white,
                         shape: BoxShape.circle,
-                        border: Border.all(
-                          color: const Color(0xFF1E3A5F),
-                          width: 2,
-                        ),
+                        border: Border.all(color: AppTheme.navy, width: 2),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black.withValues(alpha: 0.15),
@@ -726,7 +942,7 @@ class _ProfileHeaderCard extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(AppTheme.cardRadius(20)),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -906,12 +1122,12 @@ class _PhotoSourceTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(AppTheme.cardRadius(16)),
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
           color: AppTheme.surfaceMuted,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(AppTheme.cardRadius(16)),
         ),
         child: Row(
           children: [
@@ -1027,6 +1243,49 @@ class _EditField {
   final TextInputType keyboardType;
 }
 
+/// Single labeled field in the desktop two-column edit grid.
+class _DeskEditFieldTile extends StatelessWidget {
+  const _DeskEditFieldTile({required this.field});
+  final _EditField field;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            field.label,
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: AppTheme.textSecondary,
+            ),
+          ),
+          const SizedBox(height: 6),
+          TextField(
+            controller: field.controller,
+            keyboardType: field.keyboardType,
+            style: const TextStyle(
+              fontSize: 13.5,
+              fontWeight: FontWeight.w700,
+              color: AppTheme.textPrimary,
+            ),
+            decoration: const InputDecoration(
+              isDense: true,
+              contentPadding: EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 11,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _EditCard extends StatelessWidget {
   const _EditCard({required this.fields});
 
@@ -1072,71 +1331,6 @@ class _EditCard extends StatelessWidget {
             ),
           );
         }).toList(),
-      ),
-    );
-  }
-}
-
-class _ErrorCard extends StatelessWidget {
-  const _ErrorCard({required this.message, required this.onRetry});
-  final String message;
-  final VoidCallback onRetry;
-
-  @override
-  Widget build(BuildContext context) {
-    return MobileSurfaceCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 38,
-                height: 38,
-                decoration: BoxDecoration(
-                  color: AppTheme.danger.withValues(alpha: 0.10),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(
-                  LucideIcons.circleAlert,
-                  color: AppTheme.danger,
-                  size: 20,
-                ),
-              ),
-              const SizedBox(width: 12),
-              const Expanded(
-                child: Text(
-                  'Profile unavailable',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w900,
-                    color: AppTheme.textPrimary,
-                    fontSize: 15,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Text(
-            message,
-            style: const TextStyle(
-              color: AppTheme.textSecondary,
-              fontSize: 13,
-              height: 1.4,
-            ),
-          ),
-          const SizedBox(height: 14),
-          Align(
-            alignment: Alignment.centerRight,
-            child: FilledButton(
-              onPressed: onRetry,
-              style: FilledButton.styleFrom(
-                backgroundColor: AppTheme.primaryDark,
-              ),
-              child: const Text('Retry'),
-            ),
-          ),
-        ],
       ),
     );
   }

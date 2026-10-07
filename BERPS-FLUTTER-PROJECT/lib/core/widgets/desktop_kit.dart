@@ -14,6 +14,7 @@ Future<T?> showAppSheet<T>({
   bool isScrollControlled = false,
   Color? backgroundColor,
   ShapeBorder? shape,
+  double maxWidth = 560,
 }) {
   if (!AppTheme.isDesktop) {
     return showModalBottomSheet<T>(
@@ -26,7 +27,7 @@ Future<T?> showAppSheet<T>({
   }
   return showDialog<T>(
     context: context,
-    barrierColor: const Color(0x660B1526),
+    barrierColor: const Color(0x590B1526),
     builder: (dialogContext) {
       final size = MediaQuery.sizeOf(dialogContext);
       return Dialog(
@@ -35,23 +36,37 @@ Future<T?> showAppSheet<T>({
         insetPadding: const EdgeInsets.all(32),
         child: ConstrainedBox(
           constraints: BoxConstraints(
-            maxWidth: 560,
+            maxWidth: maxWidth,
             maxHeight: size.height * 0.86,
           ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(16),
-            child: Material(
-              color: Colors.white,
-              // Focused text fields swallow Escape on macOS; close explicitly.
-              child: CallbackShortcuts(
-                bindings: {
-                  const SingleActivator(LogicalKeyboardKey.escape): () =>
-                      Navigator.of(dialogContext).maybePop(),
-                },
-                child: MediaQuery.removeViewInsets(
-                  context: dialogContext,
-                  removeBottom: true,
-                  child: builder(dialogContext),
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(18),
+              // macOS sheet shadow — wide, soft, no tint.
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x330B1526),
+                  blurRadius: 48,
+                  offset: Offset(0, 18),
+                ),
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(18),
+              child: Material(
+                color: Colors.white,
+                // Focused text fields swallow Escape on macOS; close
+                // explicitly.
+                child: CallbackShortcuts(
+                  bindings: {
+                    const SingleActivator(LogicalKeyboardKey.escape): () =>
+                        Navigator.of(dialogContext).maybePop(),
+                  },
+                  child: MediaQuery.removeViewInsets(
+                    context: dialogContext,
+                    removeBottom: true,
+                    child: builder(dialogContext),
+                  ),
                 ),
               ),
             ),
@@ -60,6 +75,97 @@ Future<T?> showAppSheet<T>({
       );
     },
   );
+}
+
+/// Title row for desktop modal content — bold title + optional actions and a
+/// squircle close button, separated from the body by a hairline.
+class DeskModalHeader extends StatelessWidget {
+  const DeskModalHeader({
+    super.key,
+    required this.title,
+    this.subtitle,
+    this.actions,
+  });
+
+  final String title;
+  final String? subtitle;
+  final List<Widget>? actions;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(22, 16, 14, 14),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w800,
+                        color: AppTheme.textPrimary,
+                        letterSpacing: -0.2,
+                      ),
+                    ),
+                    if (subtitle != null)
+                      Text(
+                        subtitle!,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: AppTheme.textSecondary,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              if (actions != null) ...[...actions!, const SizedBox(width: 6)],
+              DeskIconButton(
+                icon: LucideIcons.x,
+                tooltip: 'Close',
+                onTap: () => Navigator.of(context).maybePop(),
+              ),
+            ],
+          ),
+        ),
+        const Divider(height: 1, color: AppTheme.border),
+      ],
+    );
+  }
+}
+
+/// Bottom action bar for desktop modal content — right-aligned buttons on a
+/// hairline-separated strip.
+class DeskModalFooter extends StatelessWidget {
+  const DeskModalFooter({super.key, required this.children});
+
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const Divider(height: 1, color: AppTheme.border),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(18, 12, 18, 14),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: children,
+          ),
+        ),
+      ],
+    );
+  }
 }
 
 /// Marks a page as a top-level sidebar destination. Headers inside it drop
@@ -120,33 +226,14 @@ Future<bool> showDeskConfirm({
                 children: [
                   DeskButton(
                     label: 'Cancel',
-                    icon: LucideIcons.x,
                     primary: false,
                     onTap: () => Navigator.of(dialogContext).pop(false),
                   ),
                   const SizedBox(width: 8),
-                  FilledButton(
-                    onPressed: () => Navigator.of(dialogContext).pop(true),
-                    autofocus: true,
-                    style: FilledButton.styleFrom(
-                      backgroundColor: danger
-                          ? AppTheme.danger
-                          : AppTheme.primaryDark,
-                      minimumSize: Size.zero,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      textStyle: TextStyle(
-                        fontFamily: AppTheme.effectiveFontFamily,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    child: Text(confirmLabel),
+                  DeskButton(
+                    label: confirmLabel,
+                    danger: danger,
+                    onTap: () => Navigator.of(dialogContext).pop(true),
                   ),
                 ],
               ),
@@ -338,66 +425,97 @@ class DeskLink extends StatelessWidget {
   }
 }
 
-/// Compact primary action button for toolbars (e.g. "New task").
+/// macOS-style push button — 30px, 8px radius. Primary is a flat accent fill;
+/// the neutral variant is a light-gray fill (not an outline, which reads as a
+/// stroked pill). Destructive actions use red fill or red text on gray.
 class DeskButton extends StatelessWidget {
   const DeskButton({
     super.key,
     required this.label,
-    required this.icon,
+    this.icon,
     required this.onTap,
     this.primary = true,
     this.danger = false,
   });
 
   final String label;
-  final IconData icon;
+  final IconData? icon;
   final VoidCallback? onTap;
   final bool primary;
 
-  /// Destructive styling (red text/border on the outlined variant).
+  /// Destructive styling — red fill when [primary], red text on the gray
+  /// neutral otherwise.
   final bool danger;
 
   @override
   Widget build(BuildContext context) {
+    final enabled = onTap != null;
     final style = TextStyle(
       fontFamily: AppTheme.effectiveFontFamily,
       fontSize: 13,
-      fontWeight: FontWeight.w700,
+      fontWeight: FontWeight.w600,
+      letterSpacing: -0.1,
     );
-    final shape = RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(10),
-    );
-    const padding = EdgeInsets.symmetric(horizontal: 14, vertical: 12);
+    const padding = EdgeInsets.symmetric(horizontal: 12, vertical: 7);
+    const radius = 8.0;
+
+    final Color fg;
+    final Color bg;
+    final Color hover;
+    final List<BoxShadow>? shadow;
     if (primary) {
-      return FilledButton.icon(
-        onPressed: onTap,
-        icon: Icon(icon, size: 15),
-        label: Text(label),
-        style: FilledButton.styleFrom(
-          backgroundColor: AppTheme.primaryDark,
-          minimumSize: Size.zero,
-          padding: padding,
-          shape: shape,
-          textStyle: style,
+      fg = Colors.white;
+      bg = danger ? AppTheme.danger : AppTheme.primary;
+      hover = danger ? const Color(0xFFDC2626) : AppTheme.primaryDark;
+      shadow = [
+        BoxShadow(
+          color: (danger ? AppTheme.danger : AppTheme.primary).withValues(
+            alpha: 0.22,
+          ),
+          blurRadius: 6,
+          offset: const Offset(0, 1),
         ),
-      );
+      ];
+    } else {
+      fg = danger
+          ? AppTheme.danger
+          : enabled
+          ? AppTheme.textPrimary
+          : AppTheme.textMuted;
+      bg = AppTheme.surfaceMuted;
+      hover = const Color(0xFFE3E5EB);
+      shadow = null;
     }
-    return OutlinedButton.icon(
-      onPressed: onTap,
-      icon: Icon(icon, size: 15),
-      label: Text(label),
-      style: OutlinedButton.styleFrom(
-        foregroundColor: danger ? AppTheme.danger : AppTheme.textPrimary,
-        backgroundColor: Colors.white,
-        minimumSize: Size.zero,
-        padding: padding,
-        shape: shape,
-        side: BorderSide(
-          color: danger
-              ? AppTheme.danger.withValues(alpha: 0.3)
-              : AppTheme.border,
+
+    return Material(
+      color: Colors.transparent,
+      borderRadius: BorderRadius.circular(radius),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(radius),
+        hoverColor: primary ? Colors.white.withValues(alpha: 0.12) : hover,
+        splashFactory: primary ? NoSplash.splashFactory : null,
+        child: Ink(
+          decoration: BoxDecoration(
+            color: bg,
+            borderRadius: BorderRadius.circular(radius),
+            boxShadow: enabled ? shadow : null,
+          ),
+          child: Container(
+            padding: padding,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                if (icon != null) ...[
+                  Icon(icon, size: 13.5, color: fg),
+                  const SizedBox(width: 6),
+                ],
+                Text(label, style: style.copyWith(color: fg)),
+              ],
+            ),
+          ),
         ),
-        textStyle: style,
       ),
     );
   }
@@ -425,44 +543,50 @@ class DeskSegmented extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget segment(MapEntry<String, String> entry) => InkWell(
-      onTap: () => onChanged(entry.key),
-      borderRadius: BorderRadius.circular(8),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 160),
-        padding: EdgeInsets.symmetric(
-          horizontal: expanded ? 4 : 14,
-          vertical: 7,
-        ),
-        decoration: BoxDecoration(
-          color: entry.key == value ? Colors.white : null,
-          borderRadius: BorderRadius.circular(8),
-          border: entry.key == value
-              ? Border.all(color: AppTheme.border)
-              : null,
-        ),
-        child: Text(
-          entry.value,
-          textAlign: TextAlign.center,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(
-            fontSize: expanded ? 12 : 12.5,
-            fontWeight: FontWeight.w700,
-            color: entry.key == value
-                ? AppTheme.textPrimary
-                : AppTheme.textSecondary,
+    Widget segment(MapEntry<String, String> entry) {
+      final selected = entry.key == value;
+      return InkWell(
+        onTap: selected ? null : () => onChanged(entry.key),
+        borderRadius: BorderRadius.circular(6),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 140),
+          padding: EdgeInsets.symmetric(
+            horizontal: expanded ? 4 : 13,
+            vertical: 5,
+          ),
+          decoration: BoxDecoration(
+            color: selected ? Colors.white : null,
+            borderRadius: BorderRadius.circular(6),
+            boxShadow: selected
+                ? const [
+                    BoxShadow(
+                      color: Color(0x1A0B1526),
+                      blurRadius: 3,
+                      offset: Offset(0, 1),
+                    ),
+                  ]
+                : null,
+          ),
+          child: Text(
+            entry.value,
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: expanded ? 11.5 : 12,
+              fontWeight: FontWeight.w600,
+              color: selected ? AppTheme.textPrimary : AppTheme.textSecondary,
+            ),
           ),
         ),
-      ),
-    );
+      );
+    }
 
     return Container(
-      padding: const EdgeInsets.all(3),
+      padding: const EdgeInsets.all(2),
       decoration: BoxDecoration(
-        color: AppTheme.surfaceMuted,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: AppTheme.border),
+        color: const Color(0xFFE8EAF0),
+        borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
         mainAxisSize: expanded ? MainAxisSize.max : MainAxisSize.min,
@@ -561,6 +685,380 @@ class DeskStatCard extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Squircle toolbar button — 34px rounded square. The default variant is a
+/// neutral surface that softens on hover; `filled` is the flat accent used
+/// for the leading "New …" action in toolbars.
+class DeskIconButton extends StatelessWidget {
+  const DeskIconButton({
+    super.key,
+    required this.icon,
+    required this.onTap,
+    this.tooltip,
+    this.filled = false,
+  });
+
+  final IconData icon;
+  final VoidCallback? onTap;
+  final String? tooltip;
+  final bool filled;
+
+  @override
+  Widget build(BuildContext context) {
+    final enabled = onTap != null;
+    final fg = filled
+        ? Colors.white
+        : enabled
+        ? AppTheme.textPrimary
+        : AppTheme.textMuted;
+    Widget button = InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      hoverColor: filled
+          ? Colors.white.withValues(alpha: 0.12)
+          : const Color(0xFFE3E5EB),
+      splashFactory: filled ? NoSplash.splashFactory : null,
+      child: Ink(
+        width: 34,
+        height: 34,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8),
+          color: filled ? AppTheme.primary : AppTheme.surfaceMuted,
+        ),
+        child: Icon(icon, size: 16, color: fg),
+      ),
+    );
+    if (tooltip != null) {
+      button = Tooltip(message: tooltip!, child: button);
+    }
+    return Material(
+      color: Colors.transparent,
+      borderRadius: BorderRadius.circular(8),
+      child: button,
+    );
+  }
+}
+
+/// Shared empty state — a centered icon tile, title and optional message
+/// inside the platform-appropriate surface (flat 14px card on desktop,
+/// rounded card on mobile).
+class AppEmptyState extends StatelessWidget {
+  const AppEmptyState({
+    super.key,
+    required this.icon,
+    required this.title,
+    this.message,
+    this.accent = AppTheme.primaryDark,
+  });
+
+  final IconData icon;
+  final String title;
+  final String? message;
+  final Color accent;
+
+  @override
+  Widget build(BuildContext context) {
+    final desktop = AppTheme.isDesktop;
+    final card = Container(
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(
+        horizontal: 24,
+        vertical: desktop ? 36 : 30,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(desktop ? 14 : 20),
+        border: Border.all(color: AppTheme.border),
+        boxShadow: desktop ? null : AppTheme.shadowSoft,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: desktop ? 48 : 56,
+            height: desktop ? 48 : 56,
+            decoration: BoxDecoration(
+              color: accent.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(desktop ? 14 : 18),
+            ),
+            child: Icon(icon, color: accent, size: desktop ? 22 : 26),
+          ),
+          const SizedBox(height: 14),
+          Text(
+            title,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontWeight: FontWeight.w800,
+              fontSize: 15,
+              color: AppTheme.textPrimary,
+            ),
+          ),
+          if ((message ?? '').isNotEmpty) ...[
+            const SizedBox(height: 6),
+            Text(
+              message!,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: AppTheme.textSecondary,
+                fontSize: 12.5,
+                height: 1.45,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+    // On desktop a full-bleed empty card reads as a stretched mobile widget —
+    // cap it and let the surrounding canvas breathe.
+    if (!desktop) return card;
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 520),
+        child: card,
+      ),
+    );
+  }
+}
+
+/// Shared error state — matches [AppEmptyState] visually with a danger icon
+/// and a retry action.
+class AppErrorCard extends StatelessWidget {
+  const AppErrorCard({
+    super.key,
+    required this.message,
+    required this.onRetry,
+    this.title = 'Something went wrong',
+  });
+
+  final String message;
+  final VoidCallback onRetry;
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    final desktop = AppTheme.isDesktop;
+    final card = Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(desktop ? 24 : 22),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(desktop ? 14 : 20),
+        border: Border.all(color: AppTheme.border),
+        boxShadow: desktop ? null : AppTheme.shadowSoft,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: desktop ? 48 : 52,
+            height: desktop ? 48 : 52,
+            decoration: BoxDecoration(
+              color: AppTheme.danger.withValues(alpha: 0.10),
+              borderRadius: BorderRadius.circular(desktop ? 14 : 16),
+            ),
+            child: const Icon(
+              LucideIcons.circleAlert,
+              color: AppTheme.danger,
+              size: 24,
+            ),
+          ),
+          const SizedBox(height: 14),
+          Text(
+            title,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontWeight: FontWeight.w800,
+              fontSize: 15.5,
+              color: AppTheme.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            message,
+            textAlign: TextAlign.center,
+            style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13),
+          ),
+          const SizedBox(height: 16),
+          OutlinedButton.icon(
+            onPressed: onRetry,
+            icon: const Icon(LucideIcons.rotateCw, size: 16),
+            label: const Text('Try again'),
+            style: OutlinedButton.styleFrom(
+              minimumSize: Size(0, desktop ? 40 : 46),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (!desktop) return card;
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 520),
+        child: card,
+      ),
+    );
+  }
+}
+
+/// Shared chrome for content hosted inside [showAppSheet]. On mobile the
+/// sheet gets a top grab handle; on desktop it gets a plain title row with a
+/// close button (the dialog frame already supplies the rounded corners).
+class AppSheetScaffold extends StatelessWidget {
+  const AppSheetScaffold({
+    super.key,
+    required this.title,
+    required this.child,
+    this.icon,
+    this.onClose,
+    this.titleColor = AppTheme.textPrimary,
+    this.padding = const EdgeInsets.fromLTRB(20, 14, 20, 18),
+  });
+
+  final String title;
+  final IconData? icon;
+  final Widget child;
+  final VoidCallback? onClose;
+  final Color titleColor;
+  final EdgeInsetsGeometry padding;
+
+  @override
+  Widget build(BuildContext context) {
+    final desktop = AppTheme.isDesktop;
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: padding,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (!desktop)
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: AppTheme.border,
+                    borderRadius: BorderRadius.circular(99),
+                  ),
+                ),
+              ),
+            SizedBox(height: desktop ? 6 : 14),
+            Row(
+              children: [
+                if (icon != null) ...[
+                  Icon(icon, size: 17, color: AppTheme.primaryDark),
+                  const SizedBox(width: 10),
+                ],
+                Expanded(
+                  child: Text(
+                    title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: desktop ? 15.5 : 16.5,
+                      fontWeight: FontWeight.w900,
+                      color: titleColor,
+                      letterSpacing: -0.2,
+                    ),
+                  ),
+                ),
+                if (desktop)
+                  IconButton(
+                    visualDensity: VisualDensity.compact,
+                    onPressed:
+                        onClose ?? () => Navigator.of(context).maybePop(),
+                    icon: const Icon(
+                      LucideIcons.x,
+                      size: 16,
+                      color: AppTheme.textMuted,
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 14),
+            Flexible(child: child),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Thin status strip pinned to the bottom of the desktop shell — workspace
+/// domain, connection state and product version.
+class DeskStatusBar extends StatelessWidget {
+  const DeskStatusBar({
+    super.key,
+    required this.domain,
+    this.syncLabel,
+    this.actions = const [],
+  });
+
+  /// Workspace host (e.g. `berps.online`).
+  final String domain;
+
+  /// Optional "last sync" text shown after the connection state.
+  final String? syncLabel;
+
+  /// Trailing widgets rendered at the right edge.
+  final List<Widget> actions;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: AppTheme.statusBarHeight,
+      padding: const EdgeInsets.symmetric(horizontal: 14),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        border: Border(top: BorderSide(color: AppTheme.border)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 7,
+            height: 7,
+            decoration: const BoxDecoration(
+              color: AppTheme.success,
+              shape: BoxShape.circle,
+            ),
+          ),
+          const SizedBox(width: 7),
+          Text(
+            domain.isEmpty ? 'Connected' : 'Connected · $domain',
+            style: const TextStyle(
+              fontSize: 11.5,
+              fontWeight: FontWeight.w700,
+              color: AppTheme.textSecondary,
+            ),
+          ),
+          if (syncLabel != null) ...[
+            const SizedBox(width: 14),
+            Text(
+              syncLabel!,
+              style: const TextStyle(
+                fontSize: 11.5,
+                fontWeight: FontWeight.w600,
+                color: AppTheme.textMuted,
+              ),
+            ),
+          ],
+          const Spacer(),
+          for (final action in actions) action,
+          const SizedBox(width: 6),
+          Text(
+            AppTheme.productLabel,
+            style: const TextStyle(
+              fontSize: 11.5,
+              fontWeight: FontWeight.w600,
+              color: AppTheme.textMuted,
+            ),
+          ),
+        ],
       ),
     );
   }

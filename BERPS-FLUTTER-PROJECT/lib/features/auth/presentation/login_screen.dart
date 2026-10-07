@@ -186,6 +186,7 @@ class _LoginScreenState extends State<LoginScreen> {
           builder: (_) => SignupScreen(
             api: widget.controller.api,
             baseUrl: widget.controller.baseUrl,
+            logoUrl: widget.controller.config?.logoUrl ?? '',
           ),
         ),
       );
@@ -213,6 +214,7 @@ class _LoginScreenState extends State<LoginScreen> {
           builder: (_) => ForgotPasswordScreen(
             api: widget.controller.api,
             baseUrl: widget.controller.baseUrl,
+            logoUrl: widget.controller.config?.logoUrl ?? '',
           ),
         ),
       );
@@ -245,8 +247,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   children: [
                     Expanded(
                       flex: 45,
-                      child:
-                          AuthSidePanel(logoUrl: config?.logoUrl ?? ''),
+                      child: AuthSidePanel(logoUrl: config?.logoUrl ?? ''),
                     ),
                     Expanded(flex: 55, child: _desktopPane(context)),
                   ],
@@ -267,76 +268,78 @@ class _LoginScreenState extends State<LoginScreen> {
                         maxWidth: double.infinity,
                       ),
                       child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      FadeSlide(
-                        delay: const Duration(milliseconds: 60),
-                        child: _LoginHero(
-                          title: title,
-                          logoUrl: config?.logoUrl ?? '',
-                          domain: domain,
-                        ),
-                      ),
-                      const SizedBox(height: 14),
-                      FadeSlide(
-                        delay: const Duration(milliseconds: 140),
-                        child: _LoginCard(
-                          formKey: _formKey,
-                          usernameController: _usernameController,
-                          passwordController: _passwordController,
-                          obscure: _obscure,
-                          remember: _remember,
-                          submitting: _submitting,
-                          error: _error,
-                          onToggleObscure: () {
-                            Haptics.light();
-                            setState(() => _obscure = !_obscure);
-                          },
-                          onToggleRemember: (v) {
-                            Haptics.light();
-                            setState(() => _remember = v);
-                          },
-                          onForgot: _submitting ? null : _openForgotPassword,
-                          onSubmit: _submitting ? null : _signIn,
-                          onSignUp: _submitting ? null : _openSignup,
-                          biometricEnabled: _biometricEnabled,
-                          biometricLabel: _biometricLabel,
-                          onBiometric: _submitting ? null : _tryBiometric,
-                        ),
-                      ),
-                      if (canSwitchWorkspace) ...[
-                        const SizedBox(height: 14),
-                        FadeSlide(
-                          delay: const Duration(milliseconds: 200),
-                          child: Center(
-                            child: TextButton.icon(
-                              onPressed: _submitting
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          FadeSlide(
+                            delay: const Duration(milliseconds: 60),
+                            child: _LoginHero(
+                              title: title,
+                              logoUrl: config?.logoUrl ?? '',
+                              domain: domain,
+                            ),
+                          ),
+                          const SizedBox(height: 14),
+                          FadeSlide(
+                            delay: const Duration(milliseconds: 140),
+                            child: _LoginCard(
+                              formKey: _formKey,
+                              usernameController: _usernameController,
+                              passwordController: _passwordController,
+                              obscure: _obscure,
+                              remember: _remember,
+                              submitting: _submitting,
+                              error: _error,
+                              onToggleObscure: () {
+                                Haptics.light();
+                                setState(() => _obscure = !_obscure);
+                              },
+                              onToggleRemember: (v) {
+                                Haptics.light();
+                                setState(() => _remember = v);
+                              },
+                              onForgot: _submitting
                                   ? null
-                                  : () {
-                                      Haptics.light();
-                                      widget.controller.resetPairing();
-                                    },
-                              icon: const Icon(
-                                LucideIcons.arrowLeftRight,
-                                size: 16,
-                                color: AppTheme.textMuted,
-                              ),
-                              label: Text(
-                                'Not your workspace? Switch',
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w700,
-                                  color: AppTheme.textMuted.withValues(
-                                    alpha: 0.8,
+                                  : _openForgotPassword,
+                              onSubmit: _submitting ? null : _signIn,
+                              onSignUp: _submitting ? null : _openSignup,
+                              biometricEnabled: _biometricEnabled,
+                              biometricLabel: _biometricLabel,
+                              onBiometric: _submitting ? null : _tryBiometric,
+                            ),
+                          ),
+                          if (canSwitchWorkspace) ...[
+                            const SizedBox(height: 14),
+                            FadeSlide(
+                              delay: const Duration(milliseconds: 200),
+                              child: Center(
+                                child: TextButton.icon(
+                                  onPressed: _submitting
+                                      ? null
+                                      : () {
+                                          Haptics.light();
+                                          widget.controller.resetPairing();
+                                        },
+                                  icon: const Icon(
+                                    LucideIcons.arrowLeftRight,
+                                    size: 16,
+                                    color: AppTheme.textMuted,
+                                  ),
+                                  label: Text(
+                                    'Not your workspace? Switch',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w700,
+                                      color: AppTheme.textMuted.withValues(
+                                        alpha: 0.8,
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
-                          ),
-                        ),
-                      ],
-                    ],
+                          ],
+                        ],
                       ),
                     ),
                   ),
@@ -599,8 +602,7 @@ class _LoginCard extends StatelessWidget {
     final fieldGap = AppTheme.isDesktop ? 20.0 : 12.0;
 
     return MobileSurfaceCard(
-      padding:
-          EdgeInsets.all(AppTheme.isDesktop ? 28 : 16),
+      padding: EdgeInsets.all(AppTheme.isDesktop ? 28 : 16),
       child: Form(
         key: formKey,
         child: Column(
@@ -615,9 +617,7 @@ class _LoginCard extends StatelessWidget {
               controller: usernameController,
               autocorrect: false,
               keyboardType: TextInputType.emailAddress,
-              decoration: InputDecoration(
-                contentPadding: fieldPadding,
-              ),
+              decoration: InputDecoration(contentPadding: fieldPadding),
               validator: (value) {
                 if ((value ?? '').trim().isEmpty) {
                   return 'Email is required.';
@@ -626,10 +626,7 @@ class _LoginCard extends StatelessWidget {
               },
             ),
             SizedBox(height: fieldGap),
-            const _FieldLabel(
-              icon: LucideIcons.lockKeyhole,
-              text: 'Password',
-            ),
+            const _FieldLabel(icon: LucideIcons.lockKeyhole, text: 'Password'),
             TextFormField(
               controller: passwordController,
               obscureText: obscure,
@@ -637,9 +634,7 @@ class _LoginCard extends StatelessWidget {
                 contentPadding: fieldPadding,
                 suffixIcon: IconButton(
                   icon: Icon(
-                    obscure
-                        ? LucideIcons.eye
-                        : LucideIcons.eyeOff,
+                    obscure ? LucideIcons.eye : LucideIcons.eyeOff,
                     color: obscure ? AppTheme.textMuted : AppTheme.primary,
                     size: 18,
                   ),
@@ -788,11 +783,7 @@ class _RememberToggle extends StatelessWidget {
                 ),
               ),
               child: value
-                  ? const Icon(
-                      LucideIcons.check,
-                      size: 12,
-                      color: Colors.white,
-                    )
+                  ? const Icon(LucideIcons.check, size: 12, color: Colors.white)
                   : null,
             ),
             const SizedBox(width: 8),

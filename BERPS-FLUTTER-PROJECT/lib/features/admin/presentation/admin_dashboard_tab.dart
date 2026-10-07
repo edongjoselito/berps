@@ -211,9 +211,9 @@ class _AdminDashboardTabState extends State<AdminDashboardTab> {
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(AppTheme.cardRadius(20)),
                 border: Border.all(color: AppTheme.border),
-                boxShadow: AppTheme.shadowSoft,
+                boxShadow: AppTheme.isDesktop ? null : AppTheme.shadowSoft,
               ),
               child: Column(
                 children: [
@@ -261,7 +261,7 @@ class _AdminDashboardTabState extends State<AdminDashboardTab> {
           padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
           decoration: BoxDecoration(
             color: color.withValues(alpha: 0.08),
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(AppTheme.cardRadius(16)),
             border: Border.all(color: color.withValues(alpha: 0.18)),
           ),
           child: Column(
@@ -294,12 +294,7 @@ class _AdminDashboardTabState extends State<AdminDashboardTab> {
 
     return Row(
       children: [
-        chip(
-          'Due today',
-          c.dueToday,
-          AppTheme.warning,
-          LucideIcons.clock,
-        ),
+        chip('Due today', c.dueToday, AppTheme.warning, LucideIcons.clock),
         const SizedBox(width: 10),
         chip(
           'Due soon',
@@ -308,12 +303,7 @@ class _AdminDashboardTabState extends State<AdminDashboardTab> {
           LucideIcons.calendarDays,
         ),
         const SizedBox(width: 10),
-        chip(
-          'Overdue',
-          c.overdue,
-          AppTheme.danger,
-          LucideIcons.circleAlert,
-        ),
+        chip('Overdue', c.overdue, AppTheme.danger, LucideIcons.circleAlert),
       ],
     );
   }
@@ -324,9 +314,9 @@ class _AdminDashboardTabState extends State<AdminDashboardTab> {
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(AppTheme.cardRadius(18)),
         border: Border.all(color: AppTheme.border),
-        boxShadow: AppTheme.shadowSoft,
+        boxShadow: AppTheme.isDesktop ? null : AppTheme.shadowSoft,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -413,7 +403,7 @@ class _AdminDashboardTabState extends State<AdminDashboardTab> {
       padding: const EdgeInsets.symmetric(vertical: 22, horizontal: 16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppTheme.cardRadius(16)),
         border: Border.all(color: AppTheme.border),
       ),
       child: Text(

@@ -4,6 +4,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/haptics.dart';
 import '../../../core/widgets/brand_logo.dart';
+import '../../../core/widgets/desk_nav.dart';
 import '../../../core/widgets/desktop_kit.dart';
 import '../../../core/widgets/staff_avatar.dart';
 import '../../auth/domain/mobile_config.dart';
@@ -27,10 +28,14 @@ class StaffDrawer extends StatelessWidget {
     required this.onSelectSupportDashboard,
     required this.onSelectForwardedTasks,
     required this.onSelectTickets,
+    required this.onSelectNotifications,
     required this.onSignOut,
     this.activeItemId = 'dashboard',
     this.sidebar = false,
     this.onOpenCommandPalette,
+    this.badges = const {},
+    this.collapsed = false,
+    this.onToggleCollapse,
   });
 
   final StaffSession session;
@@ -47,6 +52,7 @@ class StaffDrawer extends StatelessWidget {
   final VoidCallback onSelectSupportDashboard;
   final VoidCallback onSelectForwardedTasks;
   final VoidCallback onSelectTickets;
+  final VoidCallback onSelectNotifications;
   final Future<void> Function() onSignOut;
   final String activeItemId;
 
@@ -56,6 +62,13 @@ class StaffDrawer extends StatelessWidget {
 
   /// Opens the ⌘K command palette (desktop sidebar search field).
   final VoidCallback? onOpenCommandPalette;
+
+  /// Unread/pending counts keyed by nav item id (desktop only).
+  final Map<String, int> badges;
+
+  /// Icon-only rail when true (desktop only).
+  final bool collapsed;
+  final VoidCallback? onToggleCollapse;
 
   /// Every navigation destination as a palette command, in sidebar order.
   /// The first nine get ⌘1–⌘9 shortcuts (see [StaffHomeScreen]).
@@ -106,6 +119,15 @@ class StaffDrawer extends StatelessWidget {
             LucideIcons.trendingUp,
             'Support Dashboard',
             onSelectSupportDashboard,
+          ),
+        // The bell in each header already opens notifications — the sidebar
+        // slot stays reserved for real destinations.
+        if (!sidebar)
+          _NavSpec(
+            'notifications',
+            LucideIcons.bell,
+            'Notifications',
+            onSelectNotifications,
           ),
       ]),
       _NavSection('Productivity', LucideIcons.notebookText, [
@@ -218,270 +240,215 @@ class _NavSpec {
 
 // ── Desktop sidebar ─────────────────────────────────────────────────────────
 
-class _Sidebar {
-  static const background = Color(0xFF0E1A2D);
-  static const divider = Color(0x14FFFFFF);
-  static const textDim = Color(0x8CFFFFFF);
-  static const textFaint = Color(0x59FFFFFF);
-  static const activeFill = Color(0x1AFFFFFF);
-  static const hoverFill = Color(0x0DFFFFFF);
-}
-
 class _DesktopSidebar extends StatelessWidget {
   const _DesktopSidebar({required this.drawer});
 
   final StaffDrawer drawer;
 
-  @override
-  Widget build(BuildContext context) {
-    final session = drawer.session;
-    return Container(
-      width: 248,
-      color: _Sidebar.background,
-      child: SafeArea(
+  Widget get _logo => Container(
+    width: 30,
+    height: 30,
+    padding: const EdgeInsets.all(4),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(8),
+    ),
+    child: BrandLogo(
+      url: drawer.config?.logoUrl ?? '',
+      size: 22,
+      framed: false,
+    ),
+  );
+
+  Widget _footer(bool collapsed, StaffSession session) {
+    if (collapsed) {
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(0, 10, 0, 12),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Padding(
-              padding: EdgeInsets.fromLTRB(
-                20,
-                AppTheme.titleBarInset > 0 ? AppTheme.titleBarInset + 12 : 22,
-                20,
-                16,
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    width: 30,
-                    height: 30,
-                    padding: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: BrandLogo(
-                      url: drawer.config?.logoUrl ?? '',
-                      size: 22,
-                      framed: false,
-                    ),
-                  ),
-                  const SizedBox(width: 11),
-                  const Text(
-                    'BERPS',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 1.4,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            if (drawer.onOpenCommandPalette != null)
-              Padding(
-                padding: const EdgeInsets.fromLTRB(12, 0, 12, 4),
-                child: Material(
-                  color: const Color(0x0FFFFFFF),
-                  borderRadius: BorderRadius.circular(9),
-                  child: InkWell(
-                    onTap: drawer.onOpenCommandPalette,
-                    borderRadius: BorderRadius.circular(9),
-                    hoverColor: _Sidebar.hoverFill,
-                    child: Container(
-                      height: 36,
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(9),
-                        border: Border.all(color: _Sidebar.divider),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(
-                            LucideIcons.search,
-                            size: 15,
-                            color: _Sidebar.textFaint,
-                          ),
-                          const SizedBox(width: 9),
-                          const Expanded(
-                            child: Text(
-                              'Search',
-                              style: TextStyle(
-                                color: _Sidebar.textFaint,
-                                fontSize: 12.5,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                          KeyHint('${modKeyLabel}K', dark: true),
-                        ],
-                      ),
-                    ),
+            Tooltip(
+              message: session.formalName,
+              child: InkWell(
+                onTap: drawer.onSelectAccount,
+                borderRadius: BorderRadius.circular(10),
+                hoverColor: DeskNavColors.hoverFill,
+                child: Padding(
+                  padding: const EdgeInsets.all(4),
+                  child: StaffAvatar(
+                    url: session.avatarUrl,
+                    size: 34,
+                    radius: 10,
+                    background: Colors.white,
+                    placeholderColor: AppTheme.primary,
                   ),
                 ),
               ),
-            Expanded(
-              child: ListView(
-                padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-                children: [
-                  for (final section in drawer._sections()) ...[
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(10, 16, 10, 6),
-                      child: Text(
-                        section.label.toUpperCase(),
-                        style: const TextStyle(
-                          color: _Sidebar.textFaint,
-                          fontSize: 10.5,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 1.4,
-                        ),
-                      ),
-                    ),
-                    for (final item in section.items)
-                      _SidebarItem(
-                        spec: item,
-                        active: drawer.activeItemId == item.id,
-                      ),
-                  ],
-                ],
-              ),
             ),
-            const Divider(height: 1, color: _Sidebar.divider),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(12, 10, 8, 12),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: InkWell(
-                      onTap: drawer.onSelectAccount,
-                      borderRadius: BorderRadius.circular(10),
-                      hoverColor: _Sidebar.hoverFill,
-                      child: Padding(
-                        padding: const EdgeInsets.all(6),
-                        child: Row(
-                          children: [
-                            StaffAvatar(
-                              url: session.avatarUrl,
-                              size: 34,
-                              radius: 10,
-                              background: Colors.white,
-                              placeholderColor: AppTheme.primary,
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    session.formalName,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    session.position.isEmpty
-                                        ? 'Staff'
-                                        : session.position,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      color: _Sidebar.textDim,
-                                      fontSize: 11.5,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  IconButton(
-                    tooltip: 'Sign out',
-                    onPressed: drawer.onSignOut,
-                    hoverColor: _Sidebar.hoverFill,
-                    icon: const Icon(
-                      LucideIcons.logOut,
-                      size: 17,
-                      color: _Sidebar.textDim,
-                    ),
-                  ),
-                ],
+            const SizedBox(height: 6),
+            IconButton(
+              tooltip: 'Sign out',
+              onPressed: drawer.onSignOut,
+              hoverColor: DeskNavColors.hoverFill,
+              visualDensity: VisualDensity.compact,
+              icon: const Icon(
+                LucideIcons.logOut,
+                size: 17,
+                color: DeskNavColors.textDim,
               ),
             ),
           ],
         ),
+      );
+    }
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 10, 8, 12),
+      child: Row(
+        children: [
+          Expanded(
+            child: InkWell(
+              onTap: drawer.onSelectAccount,
+              borderRadius: BorderRadius.circular(10),
+              hoverColor: DeskNavColors.hoverFill,
+              child: Padding(
+                padding: const EdgeInsets.all(6),
+                child: Row(
+                  children: [
+                    StaffAvatar(
+                      url: session.avatarUrl,
+                      size: 34,
+                      radius: 10,
+                      background: Colors.white,
+                      placeholderColor: AppTheme.primary,
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            session.formalName,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            session.position.isEmpty
+                                ? 'Staff'
+                                : session.position,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: DeskNavColors.textDim,
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          IconButton(
+            tooltip: 'Sign out',
+            onPressed: drawer.onSignOut,
+            hoverColor: DeskNavColors.hoverFill,
+            icon: const Icon(
+              LucideIcons.logOut,
+              size: 17,
+              color: DeskNavColors.textDim,
+            ),
+          ),
+        ],
       ),
     );
   }
-}
-
-class _SidebarItem extends StatelessWidget {
-  const _SidebarItem({required this.spec, required this.active});
-
-  final _NavSpec spec;
-  final bool active;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 1),
-      child: Material(
-        color: active ? _Sidebar.activeFill : Colors.transparent,
-        borderRadius: BorderRadius.circular(9),
-        child: InkWell(
-          onTap: active
-              ? null
-              : () {
-                  Haptics.light();
-                  spec.onTap();
-                },
-          borderRadius: BorderRadius.circular(9),
-          hoverColor: _Sidebar.hoverFill,
-          child: SizedBox(
-            height: 38,
-            child: Row(
-              children: [
-                AnimatedContainer(
-                  duration: const Duration(milliseconds: 180),
-                  width: 3,
-                  height: active ? 18 : 0,
+    final session = drawer.session;
+    return DeskSideNav(
+      logo: _logo,
+      title: 'BERPS',
+      collapsed: drawer.collapsed,
+      onToggleCollapse: drawer.onToggleCollapse,
+      activeId: drawer.activeItemId,
+      onSelect: (id) {
+        for (final section in drawer._sections()) {
+          for (final item in section.items) {
+            if (item.id == id) {
+              item.onTap();
+              return;
+            }
+          }
+        }
+      },
+      search: drawer.onOpenCommandPalette == null
+          ? null
+          : Material(
+              color: const Color(0x0FFFFFFF),
+              borderRadius: BorderRadius.circular(9),
+              child: InkWell(
+                onTap: drawer.onOpenCommandPalette,
+                borderRadius: BorderRadius.circular(9),
+                hoverColor: DeskNavColors.hoverFill,
+                child: Container(
+                  height: 36,
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
                   decoration: BoxDecoration(
-                    color: AppTheme.primary,
-                    borderRadius: BorderRadius.circular(2),
+                    borderRadius: BorderRadius.circular(9),
+                    border: Border.all(color: DeskNavColors.divider),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        LucideIcons.search,
+                        size: 15,
+                        color: DeskNavColors.textFaint,
+                      ),
+                      const SizedBox(width: 9),
+                      const Expanded(
+                        child: Text(
+                          'Search',
+                          style: TextStyle(
+                            color: DeskNavColors.textFaint,
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                      KeyHint('${modKeyLabel}K', dark: true),
+                    ],
                   ),
                 ),
-                const SizedBox(width: 9),
-                Icon(
-                  spec.icon,
-                  size: 17,
-                  color: active ? Colors.white : _Sidebar.textDim,
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    spec.label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: active ? Colors.white : _Sidebar.textDim,
-                      fontSize: 13.5,
-                      fontWeight: active ? FontWeight.w700 : FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ],
+              ),
             ),
+      sections: [
+        for (final section in drawer._sections())
+          DeskNavSectionSpec(
+            label: section.label,
+            items: [
+              for (final item in section.items)
+                DeskNavItemSpec(
+                  id: item.id,
+                  icon: item.icon,
+                  label: item.label,
+                  badge: drawer.badges[item.id] ?? 0,
+                ),
+            ],
           ),
-        ),
-      ),
+      ],
+      bottomContent: session.hasCalendar
+          ? _MiniMonth(onOpenCalendar: drawer.onSelectCalendar)
+          : null,
+      footerBuilder: (collapsed) => _footer(collapsed, session),
     );
   }
 }
@@ -536,7 +503,7 @@ class _Header extends StatelessWidget {
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
               color: AppTheme.primarySoft,
-              borderRadius: BorderRadius.circular(18),
+              borderRadius: BorderRadius.circular(AppTheme.cardRadius(18)),
               border: Border.all(color: AppTheme.border),
             ),
             child: Row(
@@ -764,13 +731,137 @@ class _DrawerFooter extends StatelessWidget {
           ),
           const SizedBox(width: 6),
           Text(
-            'BERPS Mobile · v1.0',
+            AppTheme.productLabel,
             style: TextStyle(
               fontSize: 10.5,
               fontWeight: FontWeight.w800,
               letterSpacing: 0.4,
               color: AppTheme.textMuted.withValues(alpha: 0.9),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Glanceable mini calendar pinned above the sidebar footer — current month,
+/// today ringed in red, tap any cell to open the full calendar.
+class _MiniMonth extends StatelessWidget {
+  const _MiniMonth({required this.onOpenCalendar});
+
+  final VoidCallback onOpenCalendar;
+
+  static const _months = [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
+  ];
+  static const _letters = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+
+  @override
+  Widget build(BuildContext context) {
+    final now = DateTime.now();
+    final first = DateTime(now.year, now.month, 1);
+    final daysInMonth = DateTime(now.year, now.month + 1, 0).day;
+    final lead = first.weekday % 7; // Sunday-first
+    final cellCount = ((lead + daysInMonth) / 7).ceil() * 7;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(14, 2, 14, 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Text(
+                '${_months[now.month - 1]} ${now.year}',
+                style: const TextStyle(
+                  color: DeskNavColors.textDim,
+                  fontSize: 11.5,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const Spacer(),
+              InkWell(
+                onTap: onOpenCalendar,
+                borderRadius: BorderRadius.circular(6),
+                hoverColor: DeskNavColors.hoverFill,
+                child: const Padding(
+                  padding: EdgeInsets.all(4),
+                  child: Icon(
+                    LucideIcons.calendarDays,
+                    size: 13,
+                    color: DeskNavColors.textFaint,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Row(
+            children: [
+              for (final letter in _letters)
+                Expanded(
+                  child: Text(
+                    letter,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      color: DeskNavColors.textFaint,
+                      fontSize: 9,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 7,
+              mainAxisSpacing: 1,
+              crossAxisSpacing: 1,
+              childAspectRatio: 1.25,
+            ),
+            itemCount: cellCount,
+            itemBuilder: (context, index) {
+              final day = index - lead + 1;
+              if (day < 1 || day > daysInMonth) {
+                return const SizedBox.shrink();
+              }
+              final isToday = day == now.day;
+              return InkWell(
+                onTap: onOpenCalendar,
+                borderRadius: BorderRadius.circular(5),
+                hoverColor: DeskNavColors.hoverFill,
+                child: Container(
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: isToday ? AppTheme.danger : Colors.transparent,
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                  child: Text(
+                    '$day',
+                    style: TextStyle(
+                      color: isToday ? Colors.white : DeskNavColors.textDim,
+                      fontSize: 10,
+                      fontWeight: isToday ? FontWeight.w800 : FontWeight.w600,
+                    ),
+                  ),
+                ),
+              );
+            },
           ),
         ],
       ),

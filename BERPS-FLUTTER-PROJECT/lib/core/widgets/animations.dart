@@ -30,17 +30,20 @@ class _PressScaleState extends State<PressScale> {
   @override
   Widget build(BuildContext context) {
     final disabled = widget.onTap == null;
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTapDown: disabled ? null : (_) => setState(() => _down = true),
-      onTapCancel: disabled ? null : () => setState(() => _down = false),
-      onTapUp: disabled ? null : (_) => setState(() => _down = false),
-      onTap: widget.onTap,
-      child: AnimatedScale(
-        duration: widget.duration,
-        curve: Curves.easeOut,
-        scale: _down ? widget.scale : 1.0,
-        child: widget.child,
+    return MouseRegion(
+      cursor: disabled ? SystemMouseCursors.basic : SystemMouseCursors.click,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTapDown: disabled ? null : (_) => setState(() => _down = true),
+        onTapCancel: disabled ? null : () => setState(() => _down = false),
+        onTapUp: disabled ? null : (_) => setState(() => _down = false),
+        onTap: widget.onTap,
+        child: AnimatedScale(
+          duration: widget.duration,
+          curve: Curves.easeOut,
+          scale: _down ? widget.scale : 1.0,
+          child: widget.child,
+        ),
       ),
     );
   }

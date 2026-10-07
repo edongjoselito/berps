@@ -9,18 +9,41 @@ import '../../../core/widgets/animations.dart';
 import '../../../core/widgets/mobile_header.dart';
 import '../../../core/widgets/orb_background.dart';
 import '../data/auth_api.dart';
+import 'widgets/auth_side_panel.dart';
 
 enum _Step { email, otp, password, done }
+
+/// Step-aware heading copy, shared by the mobile hero card and the desktop
+/// split-pane heading.
+({String title, String subtitle}) _stepCopy(_Step step, String email) {
+  final title = switch (step) {
+    _Step.email => 'Forgot password?',
+    _Step.otp => 'Check your email',
+    _Step.password => 'Set a new password',
+    _Step.done => 'All set',
+  };
+  final subtitle = switch (step) {
+    _Step.email =>
+      'Enter the email tied to your BERPS account and we\'ll send you a verification code.',
+    _Step.otp =>
+      'We sent a 6-digit code to ${email.isEmpty ? "your email" : email}. It expires in 15 minutes.',
+    _Step.password => 'Choose a strong password you haven\'t used before.',
+    _Step.done => 'Your password has been updated successfully.',
+  };
+  return (title: title, subtitle: subtitle);
+}
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({
     super.key,
     required this.api,
     required this.baseUrl,
+    this.logoUrl = '',
   });
 
   final AuthApi api;
   final String baseUrl;
+  final String logoUrl;
 
   @override
   State<ForgotPasswordScreen> createState() => _ForgotPasswordScreenState();
@@ -189,6 +212,59 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     Navigator.of(context).pop();
   }
 
+  /// Desktop right-hand pane — back control, step pill, heading, then the
+  /// form card. Matches the login screen's split-panel layout.
+  Widget _desktopPane(BuildContext context) {
+    final copy = _stepCopy(_step, _email);
+    return Container(
+      color: AppTheme.surface,
+      alignment: Alignment.center,
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 64, vertical: 56),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 430),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  MobileHeaderButton(
+                    icon: LucideIcons.arrowLeft,
+                    onTap: _submitting ? () {} : _back,
+                  ),
+                  const Spacer(),
+                  _StepPill(step: _step),
+                ],
+              ),
+              const SizedBox(height: 26),
+              Text(
+                copy.title,
+                style: const TextStyle(
+                  fontSize: 30,
+                  fontWeight: FontWeight.w900,
+                  color: AppTheme.textPrimary,
+                  letterSpacing: -0.8,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                copy.subtitle,
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: AppTheme.textSecondary,
+                  height: 1.55,
+                ),
+              ),
+              const SizedBox(height: 28),
+              MobileSurfaceCard(child: _buildBody()),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -196,6 +272,17 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         child: SafeArea(
           child: LayoutBuilder(
             builder: (context, constraints) {
+              if (AppTheme.isDesktop && constraints.maxWidth >= 960) {
+                return Row(
+                  children: [
+                    Expanded(
+                      flex: 45,
+                      child: AuthSidePanel(logoUrl: widget.logoUrl),
+                    ),
+                    Expanded(flex: 55, child: _desktopPane(context)),
+                  ],
+                );
+              }
               return SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 20,
@@ -344,10 +431,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           _StatusBanner(message: _error!, isError: true),
           const SizedBox(height: 16),
         ],
-        const _FieldLabel(
-          icon: LucideIcons.lockKeyhole,
-          text: 'New password',
-        ),
+        const _FieldLabel(icon: LucideIcons.lockKeyhole, text: 'New password'),
         TextField(
           controller: _passwordController,
           obscureText: _obscure,
@@ -375,9 +459,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             hintText: 'Re-enter your new password',
             suffixIcon: IconButton(
               icon: Icon(
-                _obscureConfirm
-                    ? LucideIcons.eye
-                    : LucideIcons.eyeOff,
+                _obscureConfirm ? LucideIcons.eye : LucideIcons.eyeOff,
                 color: _obscureConfirm ? AppTheme.textMuted : AppTheme.primary,
                 size: 18,
               ),
@@ -407,7 +489,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             height: 64,
             decoration: BoxDecoration(
               color: AppTheme.success.withValues(alpha: 0.10),
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(AppTheme.cardRadius(20)),
             ),
             child: const Icon(
               LucideIcons.circleCheck,
@@ -495,20 +577,9 @@ class _ResetHero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final title = switch (step) {
-      _Step.email => 'Forgot password?',
-      _Step.otp => 'Check your email',
-      _Step.password => 'Set a new password',
-      _Step.done => 'All set',
-    };
-    final subtitle = switch (step) {
-      _Step.email =>
-        'Enter the email tied to your BERPS account and we\'ll send you a verification code.',
-      _Step.otp =>
-        'We sent a 6-digit code to ${email.isEmpty ? "your email" : email}. It expires in 15 minutes.',
-      _Step.password => 'Choose a strong password you haven\'t used before.',
-      _Step.done => 'Your password has been updated successfully.',
-    };
+    final copy = _stepCopy(step, email);
+    final title = copy.title;
+    final subtitle = copy.subtitle;
 
     return MobileSurfaceCard(
       child: Column(
@@ -518,7 +589,7 @@ class _ResetHero extends StatelessWidget {
             height: 56,
             decoration: BoxDecoration(
               color: AppTheme.primarySoft,
-              borderRadius: BorderRadius.circular(18),
+              borderRadius: BorderRadius.circular(AppTheme.cardRadius(18)),
             ),
             child: const Icon(
               LucideIcons.lockKeyholeOpen,
@@ -588,9 +659,7 @@ class _StatusBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = isError ? AppTheme.danger : AppTheme.primaryDark;
-    final icon = isError
-        ? LucideIcons.circleAlert
-        : LucideIcons.info;
+    final icon = isError ? LucideIcons.circleAlert : LucideIcons.info;
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(

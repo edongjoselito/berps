@@ -34,8 +34,10 @@ class StaffTasksData {
       stats: TaskStats.fromJson(stats),
       projects: _mapList(json['projects'], ProjectOption.fromJson),
       staffOptions: _mapList(json['staff_options'], StaffOption.fromJson),
-      priorityOptions:
-          _mapList(json['priority_options'], PriorityOption.fromJson),
+      priorityOptions: _mapList(
+        json['priority_options'],
+        PriorityOption.fromJson,
+      ),
       tasks: _mapList(json['tasks'], StaffTask.fromJson),
     );
   }
@@ -241,11 +243,11 @@ class TaskChecklistItem {
   final bool isCompleted;
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'item_description': itemDescription,
-        'status': status,
-        'is_completed': isCompleted,
-      };
+    'id': id,
+    'item_description': itemDescription,
+    'status': status,
+    'is_completed': isCompleted,
+  };
 
   factory TaskChecklistItem.fromJson(Map<String, dynamic> json) {
     return TaskChecklistItem(
@@ -286,10 +288,7 @@ class TaskHistoryEntry {
   }
 }
 
-List<T> _mapList<T>(
-  dynamic raw,
-  T Function(Map<String, dynamic> json) mapper,
-) {
+List<T> _mapList<T>(dynamic raw, T Function(Map<String, dynamic> json) mapper) {
   if (raw is! List) return <T>[];
   return raw
       .whereType<Map>()

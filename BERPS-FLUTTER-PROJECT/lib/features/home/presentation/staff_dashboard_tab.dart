@@ -15,6 +15,7 @@ import '../../../core/widgets/app_toast.dart';
 import '../../../core/widgets/mobile_header.dart';
 import '../../../core/widgets/skeleton.dart';
 import '../../../core/widgets/staff_avatar.dart';
+import '../../attendance/domain/staff_attendance.dart';
 import '../../auth/domain/staff_session.dart';
 import '../../notifications/presentation/notification_bell.dart';
 import '../../notes/data/notes_api.dart';
@@ -99,10 +100,12 @@ class _StaffDashboardTabState extends State<StaffDashboardTab> {
   }
 
   Future<List<Reminder>> _loadReminders() {
-    return _remindersApi.fetchReminders(
-      baseUrl: widget.session.baseUrl,
-      token: widget.session.token,
-    ).then((data) => data.reminders);
+    return _remindersApi
+        .fetchReminders(
+          baseUrl: widget.session.baseUrl,
+          token: widget.session.token,
+        )
+        .then((data) => data.reminders);
   }
 
   void _reload() {
@@ -203,6 +206,7 @@ class _StaffDashboardTabState extends State<StaffDashboardTab> {
                   rankingFuture: _rankingFuture,
                   notesFuture: _notesFuture,
                   remindersFuture: _remindersFuture,
+                  onPunched: _reload,
                   onOpenTasks: widget.onOpenTasks,
                   onOpenMyDtr: widget.onOpenMyDtr,
                   onOpenForwardedTasks: widget.onOpenForwardedTasks,
@@ -242,8 +246,7 @@ class _GreetingCard extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(18, 18, 18, 18),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius:
-            BorderRadius.circular(AppTheme.isDesktop ? 14 : 20),
+        borderRadius: BorderRadius.circular(AppTheme.isDesktop ? 14 : 20),
         border: Border.all(color: AppTheme.border),
         boxShadow: AppTheme.isDesktop ? null : AppTheme.shadowSoft,
       ),
@@ -379,6 +382,7 @@ class _DashboardContent extends StatelessWidget {
     required this.onOpenCalendar,
     required this.onOpenNotes,
     this.onOpenTasksWithFilter,
+    this.onPunched,
   });
 
   final StaffDashboard data;
@@ -386,6 +390,7 @@ class _DashboardContent extends StatelessWidget {
   final Future<StaffRanking> rankingFuture;
   final Future<List<Note>> notesFuture;
   final Future<List<Reminder>> remindersFuture;
+  final VoidCallback? onPunched;
   final VoidCallback onOpenTasks;
   final VoidCallback onOpenMyDtr;
   final VoidCallback onOpenForwardedTasks;
@@ -570,7 +575,10 @@ class _DashboardContent extends StatelessWidget {
             count: data.ongoingTasks.length,
             action: DeskLink(label: 'View all tasks', onTap: onOpenTasks),
             padding: EdgeInsets.zero,
-            child: _DeskTaskList(tasks: data.ongoingTasks),
+            child: _DeskTaskList(
+              tasks: data.ongoingTasks,
+              onOpenTasks: onOpenTasks,
+            ),
           ),
         ],
       ],
@@ -585,6 +593,8 @@ class _DashboardContent extends StatelessWidget {
             hoursLabel: data.todayHoursLabel,
             notice: data.attendanceNotice,
             onViewDtr: onOpenMyDtr,
+            session: session,
+            onPunched: onPunched,
           ),
           const SizedBox(height: 20),
         ],
@@ -632,7 +642,7 @@ class _DashboardContent extends StatelessWidget {
         children: [
           Expanded(child: main),
           const SizedBox(width: 20),
-          SizedBox(width: 360, child: rail),
+          SizedBox(width: AppTheme.railWidth, child: rail),
         ],
       ),
     );
@@ -640,11 +650,13 @@ class _DashboardContent extends StatelessWidget {
 }
 
 /// Desktop table-style list of in-progress tasks: one row per task with
-/// progress, due date and priority aligned in columns.
+/// progress, due date and priority aligned in columns. Tapping a row opens
+/// the Tasks tab.
 class _DeskTaskList extends StatelessWidget {
-  const _DeskTaskList({required this.tasks});
+  const _DeskTaskList({required this.tasks, this.onOpenTasks});
 
   final List<OngoingTask> tasks;
+  final VoidCallback? onOpenTasks;
 
   @override
   Widget build(BuildContext context) {
@@ -665,97 +677,109 @@ class _DeskTaskList extends StatelessWidget {
       children: [
         for (var i = 0; i < tasks.length; i++) ...[
           if (i > 0) const Divider(height: 1, color: AppTheme.border),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 13),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        tasks[i].title,
+          Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: onOpenTasks,
+              hoverColor: AppTheme.surfaceMuted.withValues(alpha: 0.6),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 18,
+                  vertical: 13,
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            tasks[i].title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 13.5,
+                              fontWeight: FontWeight.w700,
+                              color: AppTheme.textPrimary,
+                            ),
+                          ),
+                          if (tasks[i].subtitle.isNotEmpty) ...[
+                            const SizedBox(height: 3),
+                            Text(
+                              tasks[i].subtitle,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: AppTheme.textSecondary,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 20),
+                    SizedBox(
+                      width: 150,
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(999),
+                              child: LinearProgressIndicator(
+                                minHeight: 5,
+                                value: tasks[i].progress / 100,
+                                backgroundColor: AppTheme.surfaceMuted,
+                                valueColor: const AlwaysStoppedAnimation(
+                                  AppTheme.primary,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          SizedBox(
+                            width: 36,
+                            child: Text(
+                              '${tasks[i].progress}%',
+                              textAlign: TextAlign.right,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                                color: AppTheme.textSecondary,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 24),
+                    SizedBox(
+                      width: 110,
+                      child: Text(
+                        tasks[i].dueDate.isEmpty
+                            ? 'No due date'
+                            : tasks[i].dueDate,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
-                          fontSize: 13.5,
-                          fontWeight: FontWeight.w700,
-                          color: AppTheme.textPrimary,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: AppTheme.textSecondary,
                         ),
                       ),
-                      if (tasks[i].subtitle.isNotEmpty) ...[
-                        const SizedBox(height: 3),
-                        Text(
-                          tasks[i].subtitle,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: AppTheme.textSecondary,
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 20),
-                SizedBox(
-                  width: 150,
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(999),
-                          child: LinearProgressIndicator(
-                            minHeight: 5,
-                            value: tasks[i].progress / 100,
-                            backgroundColor: AppTheme.surfaceMuted,
-                            valueColor: const AlwaysStoppedAnimation(
-                              AppTheme.primary,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      SizedBox(
-                        width: 36,
-                        child: Text(
-                          '${tasks[i].progress}%',
-                          textAlign: TextAlign.right,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            color: AppTheme.textSecondary,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 24),
-                SizedBox(
-                  width: 110,
-                  child: Text(
-                    tasks[i].dueDate.isEmpty ? 'No due date' : tasks[i].dueDate,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: AppTheme.textSecondary,
                     ),
-                  ),
+                    SizedBox(
+                      width: 72,
+                      child: tasks[i].priority.isEmpty
+                          ? null
+                          : Align(
+                              alignment: Alignment.centerRight,
+                              child: _PriorityTag(label: tasks[i].priority),
+                            ),
+                    ),
+                  ],
                 ),
-                SizedBox(
-                  width: 72,
-                  child: tasks[i].priority.isEmpty
-                      ? null
-                      : Align(
-                          alignment: Alignment.centerRight,
-                          child: _PriorityTag(label: tasks[i].priority),
-                        ),
-                ),
-              ],
+              ),
             ),
           ),
         ],
@@ -810,7 +834,8 @@ class _QuickActionsStrip extends StatelessWidget {
       builder: (context, constraints) {
         final perRow = constraints.maxWidth >= 520 ? 4 : 2;
         final spacing = 12.0;
-        final tileWidth = (constraints.maxWidth - spacing * (perRow - 1)) / perRow;
+        final tileWidth =
+            (constraints.maxWidth - spacing * (perRow - 1)) / perRow;
         return Wrap(
           spacing: spacing,
           runSpacing: 12,
@@ -857,8 +882,8 @@ class _QuickActionTile extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 10),
         decoration: BoxDecoration(
           color: AppTheme.surface,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: AppTheme.shadowSoft,
+          borderRadius: BorderRadius.circular(AppTheme.cardRadius(16)),
+          boxShadow: AppTheme.isDesktop ? null : AppTheme.shadowSoft,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -909,12 +934,18 @@ class _DtrPreviewCard extends StatelessWidget {
     required this.hoursLabel,
     required this.notice,
     required this.onViewDtr,
+    this.session,
+    this.onPunched,
   });
 
   final String statusLabel;
   final String hoursLabel;
   final String notice;
   final VoidCallback onViewDtr;
+
+  /// When set, the desktop card shows a live Time in / Time out button.
+  final StaffSession? session;
+  final VoidCallback? onPunched;
 
   Color get _statusColor {
     final label = statusLabel.toLowerCase();
@@ -1023,6 +1054,10 @@ class _DtrPreviewCard extends StatelessWidget {
               ),
             ),
           ],
+          if (session != null && onPunched != null) ...[
+            const SizedBox(height: 14),
+            _QuickPunch(session: session!, onPunched: onPunched!),
+          ],
         ],
       ),
     );
@@ -1038,14 +1073,12 @@ class _DtrPreviewCard extends StatelessWidget {
         gradient: const LinearGradient(
           colors: [Color(0xFF1E3A5F), Color(0xFF2D5A8A)],
         ),
-        borderRadius:
-            BorderRadius.circular(AppTheme.isDesktop ? 14 : 18),
+        borderRadius: BorderRadius.circular(AppTheme.isDesktop ? 14 : 18),
         boxShadow: AppTheme.isDesktop
             ? null
             : [
                 BoxShadow(
-                  color:
-                      const Color(0xFF1E3A5F).withValues(alpha: 0.20),
+                  color: const Color(0xFF1E3A5F).withValues(alpha: 0.20),
                   blurRadius: 16,
                   offset: const Offset(0, 6),
                 ),
@@ -1272,8 +1305,7 @@ class _MetricGrid extends StatelessWidget {
       builder: (context, constraints) {
         if (AppTheme.isDesktop) {
           final perRow = constraints.maxWidth >= 720 ? cards.length : 2;
-          final width =
-              (constraints.maxWidth - 12 * (perRow - 1)) / perRow;
+          final width = (constraints.maxWidth - 12 * (perRow - 1)) / perRow;
           return Wrap(
             spacing: 12,
             runSpacing: 12,
@@ -1319,8 +1351,7 @@ class _MetricCard extends StatelessWidget {
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius:
-            BorderRadius.circular(AppTheme.isDesktop ? 14 : 18),
+        borderRadius: BorderRadius.circular(AppTheme.isDesktop ? 14 : 18),
         border: Border.all(color: AppTheme.border),
         boxShadow: AppTheme.isDesktop ? null : AppTheme.shadowSoft,
       ),
@@ -1508,8 +1539,9 @@ class _LeaderboardCard extends StatelessWidget {
                         ? null
                         : [
                             BoxShadow(
-                              color: const Color(0xFFF59E0B)
-                                  .withValues(alpha: 0.35),
+                              color: const Color(
+                                0xFFF59E0B,
+                              ).withValues(alpha: 0.35),
                               blurRadius: 14,
                               offset: const Offset(0, 6),
                             ),
@@ -1872,9 +1904,9 @@ class _RankingFallback extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(AppTheme.cardRadius(20)),
         border: Border.all(color: AppTheme.border),
-        boxShadow: AppTheme.shadowSoft,
+        boxShadow: AppTheme.isDesktop ? null : AppTheme.shadowSoft,
       ),
       child: Row(
         children: [
@@ -1984,11 +2016,7 @@ class _ViewAllLink extends StatelessWidget {
               ),
             ),
             SizedBox(width: 4),
-            Icon(
-              LucideIcons.arrowRight,
-              size: 10,
-              color: AppTheme.primaryDark,
-            ),
+            Icon(LucideIcons.arrowRight, size: 10, color: AppTheme.primaryDark),
           ],
         ),
       ),
@@ -2009,9 +2037,9 @@ class _TaskPanel extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(AppTheme.cardRadius(18)),
           border: Border.all(color: AppTheme.border),
-          boxShadow: AppTheme.shadowSoft,
+          boxShadow: AppTheme.isDesktop ? null : AppTheme.shadowSoft,
         ),
         child: Row(
           children: [
@@ -2064,9 +2092,9 @@ class _OngoingTaskTile extends StatelessWidget {
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppTheme.cardRadius(16)),
         border: Border.all(color: AppTheme.border),
-        boxShadow: AppTheme.shadowSoft,
+        boxShadow: AppTheme.isDesktop ? null : AppTheme.shadowSoft,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -2196,15 +2224,15 @@ class _NotesRemindersSnapshot extends StatelessWidget {
                 .toList();
 
             // Reminders: show all, sorted by remind_at
-            final reminders = (remindersSnapshot.data ?? const <Reminder>[])
-                .toList()
-              ..sort((a, b) => a.remindAt.compareTo(b.remindAt));
+            final reminders =
+                (remindersSnapshot.data ?? const <Reminder>[]).toList()
+                  ..sort((a, b) => a.remindAt.compareTo(b.remindAt));
 
             final hasNotes = notes.isNotEmpty;
             final hasReminders = reminders.isNotEmpty;
             final loading =
                 notesSnapshot.connectionState == ConnectionState.waiting ||
-                    remindersSnapshot.connectionState == ConnectionState.waiting;
+                remindersSnapshot.connectionState == ConnectionState.waiting;
 
             if (loading && !hasNotes && !hasReminders) {
               return const _SnapshotSkeleton();
@@ -2291,7 +2319,7 @@ class _ReminderSnapshotRow extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppTheme.surface,
         borderRadius: BorderRadius.circular(14),
-        boxShadow: AppTheme.shadowSoft,
+        boxShadow: AppTheme.isDesktop ? null : AppTheme.shadowSoft,
       ),
       child: Row(
         children: [
@@ -2368,7 +2396,7 @@ class _NoteSnapshotRow extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppTheme.surface,
         borderRadius: BorderRadius.circular(14),
-        boxShadow: AppTheme.shadowSoft,
+        boxShadow: AppTheme.isDesktop ? null : AppTheme.shadowSoft,
       ),
       child: Row(
         children: [
@@ -2422,8 +2450,10 @@ class _NoteSnapshotRow extends StatelessWidget {
                       final uri = Uri.tryParse(url);
                       if (uri == null) return;
                       Haptics.light();
-                      await launchUrl(uri,
-                          mode: LaunchMode.externalApplication);
+                      await launchUrl(
+                        uri,
+                        mode: LaunchMode.externalApplication,
+                      );
                     },
                   ),
                 ],
@@ -2492,8 +2522,8 @@ class _EmptySnapshot extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppTheme.surface,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: AppTheme.shadowSoft,
+        borderRadius: BorderRadius.circular(AppTheme.cardRadius(16)),
+        boxShadow: AppTheme.isDesktop ? null : AppTheme.shadowSoft,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -2510,12 +2540,15 @@ class _EmptySnapshot extends StatelessWidget {
           const SizedBox(height: 12),
           if (onOpenReminders != null)
             FilledButton.icon(
-              style: FilledButton.styleFrom(backgroundColor: AppTheme.primaryDark),
+              style: FilledButton.styleFrom(
+                backgroundColor: AppTheme.primaryDark,
+              ),
               onPressed: onOpenReminders,
               icon: const Icon(LucideIcons.bellRing, size: 16),
               label: const Text('Open reminders'),
             ),
-          if (onOpenReminders != null && onOpenNotes != null) const SizedBox(height: 8),
+          if (onOpenReminders != null && onOpenNotes != null)
+            const SizedBox(height: 8),
           if (onOpenNotes != null)
             OutlinedButton.icon(
               onPressed: onOpenNotes,
@@ -2625,7 +2658,7 @@ class _ErrorState extends StatelessWidget {
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(AppTheme.cardRadius(18)),
         border: Border.all(color: AppTheme.border),
       ),
       child: Column(
@@ -2677,6 +2710,201 @@ class _ErrorState extends StatelessWidget {
             label: const Text('Try again'),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Self-contained Time in / Time out button for the desktop "Today" rail
+/// card. Fetches today's attendance status once, shows the next sensible
+/// action (Time out when a shift is open, Time in otherwise), punches via
+/// the staff API and then asks the dashboard to refresh.
+class _QuickPunch extends StatefulWidget {
+  const _QuickPunch({required this.session, required this.onPunched});
+
+  final StaffSession session;
+  final VoidCallback onPunched;
+
+  @override
+  State<_QuickPunch> createState() => _QuickPunchState();
+}
+
+class _QuickPunchState extends State<_QuickPunch> {
+  final StaffApi _api = StaffApi();
+  Future<StaffAttendanceData>? _future;
+  bool _busy = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _future = _load();
+  }
+
+  Future<StaffAttendanceData> _load() => _api.fetchAttendance(
+    baseUrl: widget.session.baseUrl,
+    token: widget.session.token,
+  );
+
+  Future<void> _punch({required bool clockIn}) async {
+    if (_busy) return;
+    Haptics.medium();
+    setState(() => _busy = true);
+    try {
+      final message = clockIn
+          ? await _api.timeIn(
+              baseUrl: widget.session.baseUrl,
+              token: widget.session.token,
+            )
+          : await _api.timeOut(
+              baseUrl: widget.session.baseUrl,
+              token: widget.session.token,
+            );
+      if (!mounted) return;
+      AppToast.success(context, message);
+      setState(() => _future = _load());
+      widget.onPunched();
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      AppToast.error(context, e.message);
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<StaffAttendanceData>(
+      future: _future,
+      builder: (context, snapshot) {
+        final status = snapshot.data?.status;
+        // Mirror the attendance hero: an open shift makes Time out the
+        // primary action, otherwise Time in.
+        final canOut = status?.canTimeOut ?? false;
+        final canIn = status?.canTimeIn ?? false;
+        if (snapshot.hasError) {
+          return TextButton.icon(
+            onPressed: () => setState(() => _future = _load()),
+            icon: const Icon(LucideIcons.refreshCw, size: 13),
+            label: const Text(
+              'Retry punch status',
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+            ),
+          );
+        }
+        if (status == null && !snapshot.hasError) {
+          return const SizedBox(
+            height: 38,
+            child: Center(
+              child: SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+            ),
+          );
+        }
+        if (!canIn && !canOut) {
+          return Container(
+            height: 38,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: AppTheme.surfaceMuted,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Text(
+              status?.openSlotLabel.isNotEmpty == true
+                  ? '${status!.openSlotLabel} complete'
+                  : 'Attendance complete for today',
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: AppTheme.textMuted,
+              ),
+            ),
+          );
+        }
+        return Row(
+          children: [
+            if (canOut)
+              Expanded(
+                child: _PunchButton(
+                  label: _busy ? 'Working…' : 'Time out',
+                  icon: LucideIcons.logOut,
+                  onTap: _busy ? null : () => _punch(clockIn: false),
+                ),
+              ),
+            if (canOut && canIn) const SizedBox(width: 8),
+            if (canIn)
+              Expanded(
+                child: _PunchButton(
+                  label: _busy ? 'Working…' : 'Time in',
+                  icon: LucideIcons.logIn,
+                  primary: !canOut,
+                  onTap: _busy ? null : () => _punch(clockIn: true),
+                ),
+              ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _PunchButton extends StatelessWidget {
+  const _PunchButton({
+    required this.label,
+    required this.icon,
+    required this.onTap,
+    this.primary = true,
+  });
+
+  final String label;
+  final IconData icon;
+  final VoidCallback? onTap;
+  final bool primary;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: primary ? AppTheme.primaryDark : AppTheme.surface,
+      borderRadius: BorderRadius.circular(8),
+      child: Ink(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8),
+          color: primary ? AppTheme.primary : AppTheme.surfaceMuted,
+        ),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(8),
+          hoverColor: primary
+              ? Colors.white.withValues(alpha: 0.12)
+              : const Color(0xFFE3E5EB),
+          splashFactory: primary ? NoSplash.splashFactory : null,
+          child: Container(
+            height: 36,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  icon,
+                  size: 14,
+                  color: primary ? Colors.white : AppTheme.textPrimary,
+                ),
+                const SizedBox(width: 7),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w700,
+                    color: primary ? Colors.white : AppTheme.textPrimary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

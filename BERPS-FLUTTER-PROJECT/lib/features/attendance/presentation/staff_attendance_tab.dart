@@ -5,6 +5,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/network/api_exception.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/csv_export.dart';
 import '../../../core/widgets/desktop_kit.dart';
 import '../../../core/utils/date_formatters.dart';
 import '../../../core/utils/haptics.dart';
@@ -63,6 +64,41 @@ class _StaffAttendanceTabState extends State<StaffAttendanceTab> {
         to: _to,
       );
     });
+  }
+
+  /// Exports the loaded date range as a DTR-style CSV — one row per record
+  /// with the interval pairs flattened into columns.
+  Future<void> _exportCsv(List<AttendanceRecord> records) async {
+    Haptics.light();
+    final maxIntervals = records.fold<int>(
+      0,
+      (max, r) => r.intervals.length > max ? r.intervals.length : max,
+    );
+    final header = <String>['Date', 'Status'];
+    for (var i = 0; i < maxIntervals; i++) {
+      header.addAll(['Time in ${i + 1}', 'Time out ${i + 1}']);
+    }
+    header.add('Total hours');
+    final csv = CsvExport.build(header, [
+      for (final r in records)
+        [
+          r.dateLabel.isEmpty ? r.date : r.dateLabel,
+          r.status,
+          for (var i = 0; i < maxIntervals; i++) ...[
+            i < r.intervals.length ? r.intervals[i].timeInLabel : '',
+            i < r.intervals.length ? r.intervals[i].timeOutLabel : '',
+          ],
+          r.totalHoursLabel,
+        ],
+    ]);
+    final saved = await CsvExport.save(
+      fileName: 'dtr-$_from-to-$_to.csv',
+      csv: csv,
+    );
+    if (!mounted) return;
+    if (saved != null) {
+      AppToast.success(context, 'DTR exported to $saved');
+    }
   }
 
   Future<void> _pickDateRange() async {
@@ -195,18 +231,14 @@ class _StaffAttendanceTabState extends State<StaffAttendanceTab> {
         const SizedBox(height: 16),
         _SummaryRow(summary: data.summary),
         const SizedBox(height: 20),
-        const _SectionTitle('Entries'),
-        const SizedBox(height: 10),
         if (data.records.isEmpty)
-          const _EmptyState(
+          const AppEmptyState(
+            icon: LucideIcons.inbox,
+            title: 'No attendance entries',
             message: 'No attendance entries were found for this range.',
           )
         else
-          for (final record in data.records)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 10),
-              child: _AttendanceRecordCard(record: record),
-            ),
+          _DeskAttendanceTable(records: data.records),
       ],
     );
 
@@ -218,21 +250,28 @@ class _StaffAttendanceTabState extends State<StaffAttendanceTab> {
           Expanded(child: main),
           const SizedBox(width: 20),
           SizedBox(
-            width: 340,
-            child: _PunchHeroCard(
-              data: data,
-              onTimeIn: () => _runPunchAction(
-                () => _api.timeIn(
-                  baseUrl: widget.session.baseUrl,
-                  token: widget.session.token,
+            width: AppTheme.railWidth,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _PunchHeroCard(
+                  data: data,
+                  onTimeIn: () => _runPunchAction(
+                    () => _api.timeIn(
+                      baseUrl: widget.session.baseUrl,
+                      token: widget.session.token,
+                    ),
+                  ),
+                  onTimeOut: () => _runPunchAction(
+                    () => _api.timeOut(
+                      baseUrl: widget.session.baseUrl,
+                      token: widget.session.token,
+                    ),
+                  ),
                 ),
-              ),
-              onTimeOut: () => _runPunchAction(
-                () => _api.timeOut(
-                  baseUrl: widget.session.baseUrl,
-                  token: widget.session.token,
-                ),
-              ),
+                const SizedBox(height: 16),
+                _WeeklyHoursChart(records: data.records),
+              ],
             ),
           ),
         ],
@@ -272,7 +311,30 @@ class _StaffAttendanceTabState extends State<StaffAttendanceTab> {
                           Haptics.light();
                           widget.onMenu!();
                         },
-                  trailing: NotificationBell(session: widget.session),
+                  trailing: AppTheme.isDesktop
+                      ? Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            DeskIconButton(
+                              icon: LucideIcons.rotateCw,
+                              tooltip: 'Reload (⌘R)',
+                              onTap: _reload,
+                            ),
+                            const SizedBox(width: 8),
+                            DeskIconButton(
+                              icon: LucideIcons.download,
+                              tooltip: 'Export CSV',
+                              onTap:
+                                  snapshot.hasData &&
+                                      snapshot.data!.records.isNotEmpty
+                                  ? () => _exportCsv(snapshot.data!.records)
+                                  : null,
+                            ),
+                            const SizedBox(width: 8),
+                            NotificationBell(session: widget.session),
+                          ],
+                        )
+                      : NotificationBell(session: widget.session),
                 ),
               ),
               const SizedBox(height: 16),
@@ -303,7 +365,8 @@ class _StaffAttendanceTabState extends State<StaffAttendanceTab> {
               if (snapshot.connectionState == ConnectionState.waiting)
                 const _AttendanceSkeleton()
               else if (snapshot.hasError)
-                _AttendanceError(
+                AppErrorCard(
+                  title: 'Unable to load attendance',
                   message: snapshot.error is ApiException
                       ? (snapshot.error as ApiException).message
                       : snapshot.error.toString(),
@@ -313,7 +376,8 @@ class _StaffAttendanceTabState extends State<StaffAttendanceTab> {
                   },
                 )
               else if (!snapshot.hasData)
-                _AttendanceError(
+                AppErrorCard(
+                  title: 'Unable to load attendance',
                   message: 'Attendance data is unavailable right now.',
                   onRetry: () {
                     Haptics.medium();
@@ -365,7 +429,9 @@ class _StaffAttendanceTabState extends State<StaffAttendanceTab> {
                   ),
                 ),
                 if (snapshot.data!.records.isEmpty)
-                  const _EmptyState(
+                  const AppEmptyState(
+                    icon: LucideIcons.inbox,
+                    title: 'No attendance entries',
                     message: 'No attendance entries were found for this range.',
                   ),
               ],
@@ -433,9 +499,9 @@ class _RangeCard extends StatelessWidget {
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppTheme.cardRadius(16)),
         border: Border.all(color: AppTheme.border),
-        boxShadow: AppTheme.shadowSoft,
+        boxShadow: AppTheme.isDesktop ? null : AppTheme.shadowSoft,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -698,7 +764,7 @@ class _PunchHeroCard extends StatelessWidget {
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(22),
+        borderRadius: BorderRadius.circular(AppTheme.cardRadius(22)),
         border: Border.all(color: AppTheme.border),
         boxShadow: AppTheme.shadowMedium,
       ),
@@ -717,7 +783,7 @@ class _PunchHeroCard extends StatelessWidget {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
-              borderRadius: BorderRadius.circular(18),
+              borderRadius: BorderRadius.circular(AppTheme.cardRadius(18)),
               boxShadow: [
                 BoxShadow(
                   color: AppTheme.primaryDark.withValues(alpha: 0.30),
@@ -885,40 +951,45 @@ class _PunchButton extends StatelessWidget {
           ? AppTheme.textMuted
           : primary
           ? Colors.white
-          : AppTheme.primaryDark;
+          : AppTheme.textPrimary;
       return Material(
-        color: !enabled
-            ? AppTheme.surfaceMuted
-            : primary
-            ? AppTheme.primaryDark
-            : Colors.white,
-        borderRadius: BorderRadius.circular(10),
-        child: InkWell(
-          onTap: enabled ? onTap : null,
-          borderRadius: BorderRadius.circular(10),
-          child: Container(
-            height: 44,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              border: primary || !enabled
-                  ? null
-                  : Border.all(color: AppTheme.borderStrong),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(icon, size: 15, color: fg),
-                const SizedBox(width: 8),
-                Text(
-                  label,
-                  style: TextStyle(
-                    color: fg,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 13.5,
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(9),
+        child: Ink(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(9),
+            color: !enabled
+                ? AppTheme.surfaceMuted
+                : primary
+                ? AppTheme.primary
+                : AppTheme.surfaceMuted,
+          ),
+          child: InkWell(
+            onTap: enabled ? onTap : null,
+            borderRadius: BorderRadius.circular(9),
+            hoverColor: primary
+                ? Colors.white.withValues(alpha: 0.12)
+                : const Color(0xFFE3E5EB),
+            splashFactory: primary ? NoSplash.splashFactory : null,
+            child: Container(
+              height: 40,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(borderRadius: BorderRadius.circular(9)),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(icon, size: 15, color: fg),
+                  const SizedBox(width: 8),
+                  Text(
+                    label,
+                    style: TextStyle(
+                      color: fg,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 13.5,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
@@ -1278,7 +1349,9 @@ class _SummaryRow extends StatelessWidget {
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
-                      borderRadius: BorderRadius.circular(18),
+                      borderRadius: BorderRadius.circular(
+                        AppTheme.cardRadius(18),
+                      ),
                       boxShadow: [
                         BoxShadow(
                           color: item.color.withValues(alpha: 0.25),
@@ -1374,9 +1447,9 @@ class _AttendanceRecordCard extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(AppTheme.cardRadius(20)),
         border: Border.all(color: AppTheme.border),
-        boxShadow: AppTheme.shadowSoft,
+        boxShadow: AppTheme.isDesktop ? null : AppTheme.shadowSoft,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1450,6 +1523,207 @@ class _AttendanceRecordCard extends StatelessWidget {
                 child: _IntervalRow(interval: interval),
               ),
             ),
+        ],
+      ),
+    );
+  }
+}
+
+/// DTR-style table of attendance entries — the desktop counterpart of the
+/// mobile `_AttendanceRecordCard` list.
+class _DeskAttendanceTable extends StatelessWidget {
+  const _DeskAttendanceTable({required this.records});
+
+  final List<AttendanceRecord> records;
+
+  @override
+  Widget build(BuildContext context) {
+    const headStyle = TextStyle(
+      fontSize: 11,
+      fontWeight: FontWeight.w800,
+      letterSpacing: 0.6,
+      color: AppTheme.textMuted,
+    );
+    return DeskPanel(
+      title: 'Entries',
+      count: records.length,
+      padding: EdgeInsets.zero,
+      child: Column(
+        children: [
+          Container(
+            color: AppTheme.surfaceMuted.withValues(alpha: 0.6),
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 9),
+            child: const Row(
+              children: [
+                Expanded(flex: 3, child: Text('DATE', style: headStyle)),
+                Expanded(flex: 3, child: Text('MORNING', style: headStyle)),
+                Expanded(flex: 3, child: Text('AFTERNOON', style: headStyle)),
+                SizedBox(width: 90, child: Text('TOTAL', style: headStyle)),
+                SizedBox(width: 110, child: Text('STATUS', style: headStyle)),
+              ],
+            ),
+          ),
+          for (var i = 0; i < records.length; i++) ...[
+            const Divider(height: 1, color: AppTheme.border),
+            _DeskAttendanceRow(record: records[i]),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _DeskAttendanceRow extends StatelessWidget {
+  const _DeskAttendanceRow({required this.record});
+
+  final AttendanceRecord record;
+
+  static const _weekdays = [
+    'Monday',
+    'Tuesday',
+    'Wednesday',
+    'Thursday',
+    'Friday',
+    'Saturday',
+    'Sunday',
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final statusColor = switch (record.status) {
+      'pending' => AppTheme.warning,
+      'absent' => AppTheme.danger,
+      _ => AppTheme.success,
+    };
+    final date = DateTime.tryParse(record.date);
+    final weekday = date == null ? '' : _weekdays[date.weekday - 1];
+    // The backend emits intervals in AM-then-PM order.
+    final morning = record.intervals.isNotEmpty
+        ? record.intervals.first.label
+        : '--';
+    final afternoon = record.intervals.length > 1
+        ? record.intervals[1].label
+        : '--';
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+      child: Row(
+        children: [
+          Expanded(
+            flex: 3,
+            child: Row(
+              children: [
+                Container(
+                  width: 8,
+                  height: 8,
+                  decoration: BoxDecoration(
+                    color: statusColor,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        formatDisplayDate(record.date, includeYear: false),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 13.5,
+                          fontWeight: FontWeight.w700,
+                          color: AppTheme.textPrimary,
+                        ),
+                      ),
+                      if (weekday.isNotEmpty)
+                        Text(
+                          weekday,
+                          style: const TextStyle(
+                            fontSize: 11.5,
+                            color: AppTheme.textMuted,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            flex: 3,
+            child: Text(
+              morning,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 12.5,
+                fontWeight: FontWeight.w600,
+                color: AppTheme.textPrimary,
+              ),
+            ),
+          ),
+          Expanded(
+            flex: 3,
+            child: Text(
+              afternoon,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 12.5,
+                fontWeight: FontWeight.w600,
+                color: AppTheme.textPrimary,
+              ),
+            ),
+          ),
+          SizedBox(
+            width: 90,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  record.totalHoursLabel,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w800,
+                    color: AppTheme.textPrimary,
+                  ),
+                ),
+                if (record.accomplishmentCount > 0)
+                  Text(
+                    '${record.accomplishmentCount} done',
+                    style: const TextStyle(
+                      fontSize: 10.5,
+                      color: AppTheme.textMuted,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          SizedBox(
+            width: 110,
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: statusColor.withValues(alpha: 0.10),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  record.status.toUpperCase(),
+                  style: TextStyle(
+                    color: statusColor,
+                    fontWeight: FontWeight.w900,
+                    fontSize: 10,
+                    letterSpacing: 0.6,
+                  ),
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -1570,6 +1844,48 @@ class _AttendanceSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (AppTheme.isDesktop) {
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Row(
+                  children: [
+                    Skeleton(width: 180, height: 18),
+                    Spacer(),
+                    Skeleton(width: 220, height: 32, radius: 9),
+                    SizedBox(width: 8),
+                    Skeleton(width: 120, height: 32, radius: 9),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                const Row(
+                  children: [
+                    Expanded(child: SkeletonCard(child: SizedBox(height: 84))),
+                    SizedBox(width: 12),
+                    Expanded(child: SkeletonCard(child: SizedBox(height: 84))),
+                    SizedBox(width: 12),
+                    Expanded(child: SkeletonCard(child: SizedBox(height: 84))),
+                    SizedBox(width: 12),
+                    Expanded(child: SkeletonCard(child: SizedBox(height: 84))),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                const SkeletonCard(radius: 14, child: SizedBox(height: 320)),
+              ],
+            ),
+          ),
+          const SizedBox(width: 20),
+          const SizedBox(
+            width: AppTheme.railWidth,
+            child: SkeletonCard(radius: 14, child: SizedBox(height: 300)),
+          ),
+        ],
+      );
+    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1629,90 +1945,93 @@ class _AttendanceSkeleton extends StatelessWidget {
   }
 }
 
-class _AttendanceError extends StatelessWidget {
-  const _AttendanceError({required this.message, required this.onRetry});
+/// Hours-per-day bar chart for the last 7 days, fed from the loaded records.
+/// Shown under the punch clock in the desktop rail.
+class _WeeklyHoursChart extends StatelessWidget {
+  const _WeeklyHoursChart({required this.records});
 
-  final String message;
-  final VoidCallback onRetry;
+  final List<AttendanceRecord> records;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppTheme.border),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Unable to load attendance',
-            style: TextStyle(
-              fontWeight: FontWeight.w900,
-              color: AppTheme.textPrimary,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            message,
-            style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13),
-          ),
-          const SizedBox(height: 14),
-          FilledButton.icon(
-            onPressed: onRetry,
-            icon: const Icon(LucideIcons.refreshCw, size: 16),
-            label: const Text('Try again'),
-          ),
-        ],
+    final byDate = {for (final r in records) r.date: r.totalSeconds};
+    final days = List.generate(7, (i) {
+      final d = DateTime.now().subtract(Duration(days: 6 - i));
+      return (date: _isoDate(d), weekday: d.weekday);
+    });
+    final maxSeconds = days.fold<int>(
+      1,
+      (max, d) => (byDate[d.date] ?? 0) > max ? byDate[d.date]! : max,
+    );
+    const barHeight = 72.0;
+    const weekdayLabels = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+    final hasData = maxSeconds > 1;
+
+    return DeskPanel(
+      title: 'Hours this week',
+      child: SizedBox(
+        height: barHeight + 40,
+        child: hasData
+            ? Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  for (var i = 0; i < days.length; i++)
+                    Expanded(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Text(
+                            _hoursLabel(byDate[days[i].date] ?? 0),
+                            style: const TextStyle(
+                              fontSize: 9.5,
+                              fontWeight: FontWeight.w700,
+                              color: AppTheme.textSecondary,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Container(
+                            height:
+                                barHeight *
+                                ((byDate[days[i].date] ?? 0) / maxSeconds)
+                                    .clamp(0.03, 1.0),
+                            margin: const EdgeInsets.symmetric(horizontal: 5),
+                            decoration: BoxDecoration(
+                              color: days[i].date == _today()
+                                  ? AppTheme.primary
+                                  : AppTheme.primary.withValues(alpha: 0.28),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            weekdayLabels[days[i].weekday - 1],
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w700,
+                              color: days[i].date == _today()
+                                  ? AppTheme.primary
+                                  : AppTheme.textMuted,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
+              )
+            : const Center(
+                child: Text(
+                  'No hours logged in the last 7 days',
+                  style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                ),
+              ),
       ),
     );
   }
-}
 
-class _EmptyState extends StatelessWidget {
-  const _EmptyState({required this.message});
-
-  final String message;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppTheme.border),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 38,
-            height: 38,
-            decoration: BoxDecoration(
-              color: AppTheme.primarySoft,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Icon(
-              LucideIcons.inbox,
-              color: AppTheme.primaryDark,
-              size: 18,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              message,
-              style: const TextStyle(
-                color: AppTheme.textSecondary,
-                fontSize: 13,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
+  String _hoursLabel(int seconds) {
+    if (seconds <= 0) return '—';
+    final h = seconds / 3600;
+    return h >= 10 ? h.toStringAsFixed(0) : h.toStringAsFixed(1);
   }
 }
 

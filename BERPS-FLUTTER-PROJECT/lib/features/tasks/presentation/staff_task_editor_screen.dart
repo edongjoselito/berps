@@ -3,6 +3,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/network/api_exception.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/haptics.dart';
 import '../../../core/widgets/desktop_kit.dart';
 import '../../../core/utils/date_formatters.dart';
 import '../../../core/widgets/animations.dart';
@@ -19,12 +20,17 @@ class StaffTaskEditorScreen extends StatefulWidget {
     required this.projects,
     required this.staffOptions,
     this.taskId,
+    this.modal = false,
   });
 
   final StaffSession session;
   final List<ProjectOption> projects;
   final List<StaffOption> staffOptions;
   final int? taskId;
+
+  /// Desktop only — renders as centered-dialog content (DeskModalHeader +
+  /// footer action bar) instead of a full page. Ignored on mobile.
+  final bool modal;
 
   bool get isEditing => taskId != null;
 
@@ -323,6 +329,151 @@ class _StaffTaskEditorScreenState extends State<StaffTaskEditorScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final body = widget.isEditing
+        ? FutureBuilder<StaffTaskDetail>(
+            future: _detailFuture,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (snapshot.hasError) {
+                final message = snapshot.error is ApiException
+                    ? (snapshot.error as ApiException).message
+                    : snapshot.error.toString();
+                return _TaskEditorError(message: message);
+              }
+              final detail = snapshot.data!;
+              _applyDetail(detail);
+              return _EditorBody(
+                modal: widget.modal,
+                formKey: _formKey,
+                taskController: _taskController,
+                attachmentController: _attachmentController,
+                checklist: _checklist,
+                projects: widget.projects,
+                projectId: _projectId,
+                onProjectChanged: (value) => setState(() => _projectId = value),
+                priority: _priority,
+                onPriorityChanged: (value) => setState(() => _priority = value),
+                reportedDate: _reportedDate,
+                dueDate: _dueDate,
+                onPickReported: () => _pickDate(
+                  currentValue: _reportedDate,
+                  onSelected: (value) => setState(() => _reportedDate = value),
+                ),
+                onPickDue: () => _pickDate(
+                  currentValue: _dueDate,
+                  onSelected: (value) => setState(() => _dueDate = value),
+                ),
+                onAddChecklist: () =>
+                    setState(() => _checklist.add(_ChecklistDraft())),
+                onRemoveChecklist: (item) => setState(() {
+                  item.dispose();
+                  _checklist.remove(item);
+                  if (_checklist.isEmpty) _checklist.add(_ChecklistDraft());
+                }),
+                onToggleChecklist: (item, value) =>
+                    setState(() => item.isCompleted = value),
+                saving: _saving,
+                onSave: _save,
+                detail: detail,
+                onCloseTask: () => _submitStatus('0'),
+                onReopenTask: () => _submitStatus('1'),
+              );
+            },
+          )
+        : _EditorBody(
+            modal: widget.modal,
+            formKey: _formKey,
+            taskController: _taskController,
+            attachmentController: _attachmentController,
+            checklist: _checklist,
+            projects: widget.projects,
+            projectId: _projectId,
+            onProjectChanged: (value) => setState(() => _projectId = value),
+            priority: _priority,
+            onPriorityChanged: (value) => setState(() => _priority = value),
+            reportedDate: _reportedDate,
+            dueDate: _dueDate,
+            onPickReported: () => _pickDate(
+              currentValue: _reportedDate,
+              onSelected: (value) => setState(() => _reportedDate = value),
+            ),
+            onPickDue: () => _pickDate(
+              currentValue: _dueDate,
+              onSelected: (value) => setState(() => _dueDate = value),
+            ),
+            onAddChecklist: () =>
+                setState(() => _checklist.add(_ChecklistDraft())),
+            onRemoveChecklist: (item) => setState(() {
+              item.dispose();
+              _checklist.remove(item);
+              if (_checklist.isEmpty) _checklist.add(_ChecklistDraft());
+            }),
+            onToggleChecklist: (item, value) =>
+                setState(() => item.isCompleted = value),
+            saving: _saving,
+            onSave: _save,
+          );
+
+    if (AppTheme.isDesktop) {
+      if (widget.modal) {
+        return Material(
+          color: Colors.white,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              DeskModalHeader(
+                title: widget.isEditing ? 'Update task' : 'New task',
+                subtitle: widget.isEditing
+                    ? 'Edit details, checklist and schedule'
+                    : null,
+                actions: [
+                  if (widget.isEditing)
+                    DeskButton(
+                      label: 'Forward',
+                      icon: LucideIcons.arrowLeftRight,
+                      primary: false,
+                      onTap: _forwardTask,
+                    ),
+                ],
+              ),
+              Flexible(child: body),
+            ],
+          ),
+        );
+      }
+      return Scaffold(
+        backgroundColor: AppTheme.background,
+        body: SafeArea(
+          child: Column(
+            children: [
+              MobileHeader(
+                title: widget.isEditing ? 'Update Task' : 'Add Task',
+                subtitle: widget.isEditing
+                    ? 'Edit details, checklist and schedule'
+                    : 'Create a new task',
+                leadingIcon: LucideIcons.chevronLeft,
+                onLeadingTap: () {
+                  Haptics.light();
+                  Navigator.of(context).maybePop();
+                },
+                trailing: widget.isEditing
+                    ? DeskButton(
+                        label: 'Forward',
+                        icon: LucideIcons.arrowLeftRight,
+                        primary: false,
+                        onTap: _forwardTask,
+                      )
+                    : null,
+              ),
+              Expanded(child: body),
+            ],
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.isEditing ? 'Update Task' : 'Add Task'),
@@ -334,99 +485,14 @@ class _StaffTaskEditorScreenState extends State<StaffTaskEditorScreen> {
             ),
         ],
       ),
-      body: widget.isEditing
-          ? FutureBuilder<StaffTaskDetail>(
-              future: _detailFuture,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                if (snapshot.hasError) {
-                  final message = snapshot.error is ApiException
-                      ? (snapshot.error as ApiException).message
-                      : snapshot.error.toString();
-                  return _TaskEditorError(message: message);
-                }
-                final detail = snapshot.data!;
-                _applyDetail(detail);
-                return _EditorBody(
-                  formKey: _formKey,
-                  taskController: _taskController,
-                  attachmentController: _attachmentController,
-                  checklist: _checklist,
-                  projects: widget.projects,
-                  projectId: _projectId,
-                  onProjectChanged: (value) =>
-                      setState(() => _projectId = value),
-                  priority: _priority,
-                  onPriorityChanged: (value) =>
-                      setState(() => _priority = value),
-                  reportedDate: _reportedDate,
-                  dueDate: _dueDate,
-                  onPickReported: () => _pickDate(
-                    currentValue: _reportedDate,
-                    onSelected: (value) =>
-                        setState(() => _reportedDate = value),
-                  ),
-                  onPickDue: () => _pickDate(
-                    currentValue: _dueDate,
-                    onSelected: (value) => setState(() => _dueDate = value),
-                  ),
-                  onAddChecklist: () =>
-                      setState(() => _checklist.add(_ChecklistDraft())),
-                  onRemoveChecklist: (item) => setState(() {
-                    item.dispose();
-                    _checklist.remove(item);
-                    if (_checklist.isEmpty) _checklist.add(_ChecklistDraft());
-                  }),
-                  onToggleChecklist: (item, value) =>
-                      setState(() => item.isCompleted = value),
-                  saving: _saving,
-                  onSave: _save,
-                  detail: detail,
-                  onCloseTask: () => _submitStatus('0'),
-                  onReopenTask: () => _submitStatus('1'),
-                );
-              },
-            )
-          : _EditorBody(
-              formKey: _formKey,
-              taskController: _taskController,
-              attachmentController: _attachmentController,
-              checklist: _checklist,
-              projects: widget.projects,
-              projectId: _projectId,
-              onProjectChanged: (value) => setState(() => _projectId = value),
-              priority: _priority,
-              onPriorityChanged: (value) => setState(() => _priority = value),
-              reportedDate: _reportedDate,
-              dueDate: _dueDate,
-              onPickReported: () => _pickDate(
-                currentValue: _reportedDate,
-                onSelected: (value) => setState(() => _reportedDate = value),
-              ),
-              onPickDue: () => _pickDate(
-                currentValue: _dueDate,
-                onSelected: (value) => setState(() => _dueDate = value),
-              ),
-              onAddChecklist: () =>
-                  setState(() => _checklist.add(_ChecklistDraft())),
-              onRemoveChecklist: (item) => setState(() {
-                item.dispose();
-                _checklist.remove(item);
-                if (_checklist.isEmpty) _checklist.add(_ChecklistDraft());
-              }),
-              onToggleChecklist: (item, value) =>
-                  setState(() => item.isCompleted = value),
-              saving: _saving,
-              onSave: _save,
-            ),
+      body: body,
     );
   }
 }
 
 class _EditorBody extends StatelessWidget {
   const _EditorBody({
+    required this.modal,
     required this.formKey,
     required this.taskController,
     required this.attachmentController,
@@ -450,6 +516,7 @@ class _EditorBody extends StatelessWidget {
     this.onReopenTask,
   });
 
+  final bool modal;
   final GlobalKey<FormState> formKey;
   final TextEditingController taskController;
   final TextEditingController attachmentController;
@@ -472,8 +539,368 @@ class _EditorBody extends StatelessWidget {
   final VoidCallback? onCloseTask;
   final VoidCallback? onReopenTask;
 
+  Widget _projectField() {
+    return DropdownButtonFormField<int>(
+      isExpanded: true,
+      menuMaxHeight: 320,
+      initialValue: projectId,
+      items: projects
+          .map(
+            (project) => DropdownMenuItem<int>(
+              value: project.id,
+              child: Text(
+                project.name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          )
+          .toList(),
+      selectedItemBuilder: (context) => projects
+          .map(
+            (project) => Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                project.name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          )
+          .toList(),
+      onChanged: onProjectChanged,
+      validator: (value) =>
+          value == null || value <= 0 ? 'Project is required.' : null,
+      decoration: const InputDecoration(labelText: 'Project'),
+    );
+  }
+
+  Widget _detailsCard() {
+    return MobileSurfaceCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _projectField(),
+          const SizedBox(height: 14),
+          TextFormField(
+            controller: taskController,
+            textCapitalization: TextCapitalization.sentences,
+            validator: (value) =>
+                (value ?? '').trim().isEmpty ? 'Task name is required.' : null,
+            decoration: const InputDecoration(labelText: 'Task'),
+          ),
+          const SizedBox(height: 14),
+          TextFormField(
+            controller: attachmentController,
+            decoration: const InputDecoration(
+              labelText: 'Attachment Link',
+              hintText: 'https://example.com/file',
+            ),
+          ),
+          if (!AppTheme.isDesktop) ...[
+            const SizedBox(height: 14),
+            Row(
+              children: [
+                Expanded(
+                  child: _DateButton(
+                    label: 'Reported Date',
+                    value: formatCompactDate(reportedDate),
+                    onTap: onPickReported,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _DateButton(
+                    label: 'Due Date',
+                    value: formatCompactDate(dueDate),
+                    onTap: onPickDue,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 14),
+            _SectionLabel(icon: LucideIcons.flag, text: 'Priority'),
+            const SizedBox(height: 8),
+            _priorityRow(),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _priorityRow() {
+    return Row(
+      children: [
+        _PriorityChip(
+          label: 'High',
+          color: AppTheme.danger,
+          selected: priority == '1',
+          onTap: () => onPriorityChanged('1'),
+        ),
+        const SizedBox(width: 8),
+        _PriorityChip(
+          label: 'Medium',
+          color: AppTheme.warning,
+          selected: priority == '2',
+          onTap: () => onPriorityChanged('2'),
+        ),
+        const SizedBox(width: 8),
+        _PriorityChip(
+          label: 'Low',
+          color: AppTheme.success,
+          selected: priority == '3',
+          onTap: () => onPriorityChanged('3'),
+        ),
+      ],
+    );
+  }
+
+  Widget _checklistCard() {
+    return MobileSurfaceCard(
+      child: Column(
+        children: [
+          Row(
+            children: [
+              const Expanded(
+                child: Text(
+                  'Checklist',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w800,
+                    color: AppTheme.textPrimary,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+              TextButton.icon(
+                onPressed: onAddChecklist,
+                icon: const Icon(LucideIcons.plus),
+                label: const Text('Add Item'),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          ...checklist.map(
+            (item) => Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Checkbox(
+                    value: item.isCompleted,
+                    onChanged: (value) =>
+                        onToggleChecklist(item, value ?? false),
+                  ),
+                  Expanded(
+                    child: TextFormField(
+                      controller: item.controller,
+                      decoration: const InputDecoration(
+                        hintText: 'Checklist item',
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: checklist.length == 1
+                        ? null
+                        : () => onRemoveChecklist(item),
+                    icon: const Icon(LucideIcons.circleMinus),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _historySection() {
+    if (detail == null) return const SizedBox.shrink();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'History',
+          style: TextStyle(
+            fontWeight: FontWeight.w800,
+            color: AppTheme.textPrimary,
+          ),
+        ),
+        const SizedBox(height: 10),
+        if (detail!.history.isEmpty)
+          const Text(
+            'No task history yet.',
+            style: TextStyle(color: AppTheme.textSecondary),
+          )
+        else
+          ...detail!.history.map(
+            (entry) => Container(
+              margin: const EdgeInsets.only(bottom: 10),
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(
+                  AppTheme.isDesktop ? 14 : 16,
+                ),
+                border: Border.all(color: AppTheme.border),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    entry.note.isEmpty ? 'No note' : entry.note,
+                    style: const TextStyle(
+                      color: AppTheme.textPrimary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    '${entry.postedBy} • ${formatCompactDate(entry.postedAt.isEmpty ? _today() : entry.postedAt)}',
+                    style: const TextStyle(color: AppTheme.textSecondary),
+                  ),
+                ],
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  /// Desktop layout: form panels in the main column; status, schedule and
+  /// priority stacked in the right rail. In modal mode the actions move to a
+  /// bottom bar instead of the rail.
+  Widget _buildDesktopForm() {
+    final task = detail?.task;
+    return ListView(
+      shrinkWrap: modal,
+      padding: EdgeInsets.fromLTRB(
+        modal ? 20 : 24,
+        modal ? 16 : 12,
+        modal ? 20 : 24,
+        20,
+      ),
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _detailsCard(),
+                  const SizedBox(height: 16),
+                  _checklistCard(),
+                  const SizedBox(height: 16),
+                  _historySection(),
+                ],
+              ),
+            ),
+            const SizedBox(width: 20),
+            SizedBox(
+              width: AppTheme.railWidth,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (task != null) ...[
+                    _StatusBanner(task: task),
+                    const SizedBox(height: 16),
+                  ],
+                  MobileSurfaceCard(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const _SectionLabel(
+                          icon: LucideIcons.calendarDays,
+                          text: 'Schedule',
+                        ),
+                        const SizedBox(height: 10),
+                        _DateButton(
+                          label: 'Reported Date',
+                          value: formatCompactDate(reportedDate),
+                          onTap: onPickReported,
+                        ),
+                        const SizedBox(height: 8),
+                        _DateButton(
+                          label: 'Due Date',
+                          value: formatCompactDate(dueDate),
+                          onTap: onPickDue,
+                        ),
+                        const SizedBox(height: 14),
+                        const _SectionLabel(
+                          icon: LucideIcons.flag,
+                          text: 'Priority',
+                        ),
+                        const SizedBox(height: 8),
+                        _priorityRow(),
+                      ],
+                    ),
+                  ),
+                  if (!modal) ...[
+                    const SizedBox(height: 16),
+                    DeskButton(
+                      label: saving ? 'Saving…' : 'Save Task',
+                      icon: LucideIcons.check,
+                      onTap: saving ? null : onSave,
+                    ),
+                    if (task != null) ...[
+                      const SizedBox(height: 8),
+                      DeskButton(
+                        label: task.isClosed ? 'Reopen Task' : 'Mark Complete',
+                        icon: task.isClosed
+                            ? LucideIcons.rotateCcw
+                            : LucideIcons.circleCheck,
+                        primary: false,
+                        onTap: task.isClosed ? onReopenTask : onCloseTask,
+                      ),
+                    ],
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (AppTheme.isDesktop) {
+      if (!modal) {
+        return Form(key: formKey, child: _buildDesktopForm());
+      }
+      final task = detail?.task;
+      return Form(
+        key: formKey,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Flexible(child: _buildDesktopForm()),
+            DeskModalFooter(
+              children: [
+                if (task != null) ...[
+                  DeskButton(
+                    label: task.isClosed ? 'Reopen Task' : 'Mark Complete',
+                    primary: false,
+                    onTap: task.isClosed ? onReopenTask : onCloseTask,
+                  ),
+                ],
+                DeskButton(
+                  label: 'Cancel',
+                  primary: false,
+                  onTap: () => Navigator.of(context).maybePop(),
+                ),
+                const SizedBox(width: 8),
+                DeskButton(
+                  label: saving ? 'Saving…' : 'Save Task',
+                  onTap: saving ? null : onSave,
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+    }
     return Form(
       key: formKey,
       child: ListView(
@@ -483,166 +910,9 @@ class _EditorBody extends StatelessWidget {
             _StatusBanner(task: detail!.task),
             const SizedBox(height: 16),
           ],
-          MobileSurfaceCard(
-            child: Column(
-              children: [
-                DropdownButtonFormField<int>(
-                  isExpanded: true,
-                  menuMaxHeight: 320,
-                  initialValue: projectId,
-                  items: projects
-                      .map(
-                        (project) => DropdownMenuItem<int>(
-                          value: project.id,
-                          child: Text(
-                            project.name,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      )
-                      .toList(),
-                  selectedItemBuilder: (context) => projects
-                      .map(
-                        (project) => Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            project.name,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      )
-                      .toList(),
-                  onChanged: onProjectChanged,
-                  validator: (value) => value == null || value <= 0
-                      ? 'Project is required.'
-                      : null,
-                  decoration: const InputDecoration(labelText: 'Project'),
-                ),
-                const SizedBox(height: 14),
-                TextFormField(
-                  controller: taskController,
-                  textCapitalization: TextCapitalization.sentences,
-                  validator: (value) => (value ?? '').trim().isEmpty
-                      ? 'Task name is required.'
-                      : null,
-                  decoration: const InputDecoration(labelText: 'Task'),
-                ),
-                const SizedBox(height: 14),
-                TextFormField(
-                  controller: attachmentController,
-                  decoration: const InputDecoration(
-                    labelText: 'Attachment Link',
-                    hintText: 'https://example.com/file',
-                  ),
-                ),
-                const SizedBox(height: 14),
-                Row(
-                  children: [
-                    Expanded(
-                      child: _DateButton(
-                        label: 'Reported Date',
-                        value: formatCompactDate(reportedDate),
-                        onTap: onPickReported,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: _DateButton(
-                        label: 'Due Date',
-                        value: formatCompactDate(dueDate),
-                        onTap: onPickDue,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 14),
-                _SectionLabel(icon: LucideIcons.flag, text: 'Priority'),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    _PriorityChip(
-                      label: 'High',
-                      color: AppTheme.danger,
-                      selected: priority == '1',
-                      onTap: () => onPriorityChanged('1'),
-                    ),
-                    const SizedBox(width: 8),
-                    _PriorityChip(
-                      label: 'Medium',
-                      color: AppTheme.warning,
-                      selected: priority == '2',
-                      onTap: () => onPriorityChanged('2'),
-                    ),
-                    const SizedBox(width: 8),
-                    _PriorityChip(
-                      label: 'Low',
-                      color: AppTheme.success,
-                      selected: priority == '3',
-                      onTap: () => onPriorityChanged('3'),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
+          _detailsCard(),
           const SizedBox(height: 20),
-          MobileSurfaceCard(
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    const Expanded(
-                      child: Text(
-                        'Checklist',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w800,
-                          color: AppTheme.textPrimary,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ),
-                    TextButton.icon(
-                      onPressed: onAddChecklist,
-                      icon: const Icon(LucideIcons.plus),
-                      label: const Text('Add Item'),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                ...checklist.map(
-                  (item) => Padding(
-                    padding: const EdgeInsets.only(bottom: 10),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Checkbox(
-                          value: item.isCompleted,
-                          onChanged: (value) =>
-                              onToggleChecklist(item, value ?? false),
-                        ),
-                        Expanded(
-                          child: TextFormField(
-                            controller: item.controller,
-                            decoration: const InputDecoration(
-                              hintText: 'Checklist item',
-                            ),
-                          ),
-                        ),
-                        IconButton(
-                          onPressed: checklist.length == 1
-                              ? null
-                              : () => onRemoveChecklist(item),
-                          icon: const Icon(LucideIcons.circleMinus),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
+          _checklistCard(),
           const SizedBox(height: 20),
           LoadingButton(
             label: 'Save Task',
@@ -666,48 +936,7 @@ class _EditorBody extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 20),
-            const Text(
-              'History',
-              style: TextStyle(
-                fontWeight: FontWeight.w800,
-                color: AppTheme.textPrimary,
-              ),
-            ),
-            const SizedBox(height: 10),
-            if (detail!.history.isEmpty)
-              const Text(
-                'No task history yet.',
-                style: TextStyle(color: AppTheme.textSecondary),
-              )
-            else
-              ...detail!.history.map(
-                (entry) => Container(
-                  margin: const EdgeInsets.only(bottom: 10),
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: AppTheme.border),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        entry.note.isEmpty ? 'No note' : entry.note,
-                        style: const TextStyle(
-                          color: AppTheme.textPrimary,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        '${entry.postedBy} • ${formatCompactDate(entry.postedAt.isEmpty ? _today() : entry.postedAt)}',
-                        style: const TextStyle(color: AppTheme.textSecondary),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+            _historySection(),
           ],
         ],
       ),
@@ -775,14 +1004,12 @@ class _StatusBanner extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(AppTheme.isDesktop ? 10 : 18),
       ),
       child: Row(
         children: [
           Icon(
-            task.isClosed
-                ? LucideIcons.circleCheck
-                : LucideIcons.timer,
+            task.isClosed ? LucideIcons.circleCheck : LucideIcons.timer,
             color: color,
           ),
           const SizedBox(width: 10),
@@ -839,28 +1066,33 @@ class _PriorityChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final desktop = AppTheme.isDesktop;
     return Expanded(
       child: PressScale(
         onTap: onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
-          height: 40,
+          height: desktop ? 34 : 40,
           alignment: Alignment.center,
           decoration: BoxDecoration(
-            gradient: selected
+            gradient: !desktop && selected
                 ? LinearGradient(
                     colors: [color, color.withValues(alpha: 0.85)],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   )
                 : null,
-            color: selected ? null : AppTheme.surfaceMuted,
-            borderRadius: BorderRadius.circular(12),
+            color: selected
+                ? (desktop ? color.withValues(alpha: 0.14) : null)
+                : AppTheme.surfaceMuted,
+            borderRadius: BorderRadius.circular(desktop ? 8 : 12),
             border: Border.all(
-              color: selected ? color : AppTheme.border,
-              width: selected ? 1.5 : 1,
+              color: selected
+                  ? (desktop ? color.withValues(alpha: 0.45) : color)
+                  : (desktop ? Colors.transparent : AppTheme.border),
+              width: 1,
             ),
-            boxShadow: selected
+            boxShadow: !desktop && selected
                 ? [
                     BoxShadow(
                       color: color.withValues(alpha: 0.25),
@@ -873,9 +1105,11 @@ class _PriorityChip extends StatelessWidget {
           child: Text(
             label,
             style: TextStyle(
-              fontWeight: FontWeight.w900,
+              fontWeight: desktop ? FontWeight.w700 : FontWeight.w900,
               fontSize: 12.5,
-              color: selected ? Colors.white : AppTheme.textSecondary,
+              color: selected
+                  ? (desktop ? color : Colors.white)
+                  : AppTheme.textSecondary,
             ),
           ),
         ),

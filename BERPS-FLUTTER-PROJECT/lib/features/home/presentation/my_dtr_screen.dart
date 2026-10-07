@@ -418,7 +418,7 @@ class _MonthSelector extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppTheme.cardRadius(16)),
         border: Border.all(color: AppTheme.border),
         boxShadow: [
           BoxShadow(
@@ -430,10 +430,10 @@ class _MonthSelector extends StatelessWidget {
       ),
       child: Material(
         color: Colors.transparent,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppTheme.cardRadius(16)),
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(AppTheme.cardRadius(16)),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             child: Row(
@@ -639,7 +639,7 @@ class _SummaryCard extends StatelessWidget {
               gradient: const LinearGradient(
                 colors: [Color(0xFF1E3A5F), Color(0xFF2D5A8A)],
               ),
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(AppTheme.cardRadius(16)),
             ),
             child: Row(
               children: [
@@ -1156,7 +1156,7 @@ class _DtrRowCard extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           color: isWeekend ? const Color(0xFFF8F9FB) : Colors.white,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(AppTheme.cardRadius(16)),
           border: Border.all(
             color: isTodayRow ? AppTheme.primary : AppTheme.border,
             width: isTodayRow ? 1.5 : 1,
@@ -1172,7 +1172,7 @@ class _DtrRowCard extends StatelessWidget {
               : null,
         ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(AppTheme.cardRadius(16)),
           child: IntrinsicHeight(
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1518,7 +1518,7 @@ class _ErrorCard extends StatelessWidget {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(AppTheme.cardRadius(20)),
         border: Border.all(color: AppTheme.border),
       ),
       child: Column(
@@ -1598,7 +1598,7 @@ class _EmptyState extends StatelessWidget {
       padding: const EdgeInsets.all(32),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(AppTheme.cardRadius(20)),
         border: Border.all(color: AppTheme.border),
       ),
       child: Column(

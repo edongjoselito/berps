@@ -164,9 +164,9 @@ class _EmpDtrScreenState extends State<EmpDtrScreen> {
       padding: const EdgeInsets.all(9),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppTheme.cardRadius(16)),
         border: Border.all(color: AppTheme.border),
-        boxShadow: AppTheme.shadowSoft,
+        boxShadow: AppTheme.isDesktop ? null : AppTheme.shadowSoft,
       ),
       child: Row(
         children: [
@@ -200,9 +200,9 @@ class _EmpDtrScreenState extends State<EmpDtrScreen> {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppTheme.cardRadius(16)),
         border: Border.all(color: AppTheme.border),
-        boxShadow: AppTheme.shadowSoft,
+        boxShadow: AppTheme.isDesktop ? null : AppTheme.shadowSoft,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -824,9 +824,7 @@ class _EmployeeTile extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
-                selected
-                    ? LucideIcons.circleCheck
-                    : LucideIcons.user,
+                selected ? LucideIcons.circleCheck : LucideIcons.user,
                 size: 18,
                 color: selected ? Colors.white : AppTheme.primaryDark,
               ),

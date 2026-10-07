@@ -82,22 +82,23 @@ class _NotificationBellState extends State<NotificationBell>
   @override
   Widget build(BuildContext context) {
     if (AppTheme.isDesktop) {
-      // Quiet ghost button with a small count pill — desktop toolbars keep
-      // secondary actions visually light.
+      // Squircle matching the other toolbar buttons; the count rides as a
+      // red dot overlay instead of an inline pill.
       return Tooltip(
         message: 'Notifications',
         child: Material(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(10),
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(8),
           child: InkWell(
             onTap: _open,
-            borderRadius: BorderRadius.circular(10),
-            child: Container(
-              height: 38,
-              padding: const EdgeInsets.symmetric(horizontal: 11),
+            borderRadius: BorderRadius.circular(8),
+            hoverColor: const Color(0xFFE3E5EB),
+            child: Ink(
+              height: 34,
+              padding: const EdgeInsets.symmetric(horizontal: 10),
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: AppTheme.border),
+                color: AppTheme.surfaceMuted,
+                borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
@@ -108,10 +109,10 @@ class _NotificationBellState extends State<NotificationBell>
                     color: AppTheme.textPrimary,
                   ),
                   if (_count > 0) ...[
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 7),
                     Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 6,
+                        horizontal: 5,
                         vertical: 1,
                       ),
                       decoration: BoxDecoration(
@@ -123,7 +124,7 @@ class _NotificationBellState extends State<NotificationBell>
                         style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.w800,
-                          fontSize: 10.5,
+                          fontSize: 10,
                         ),
                       ),
                     ),
@@ -150,7 +151,7 @@ class _NotificationBellState extends State<NotificationBell>
                 color: AppTheme.primaryDark,
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(color: AppTheme.primaryDark),
-                boxShadow: AppTheme.shadowSoft,
+                boxShadow: AppTheme.isDesktop ? null : AppTheme.shadowSoft,
               ),
               child: const Icon(
                 LucideIcons.bell,
@@ -163,7 +164,10 @@ class _NotificationBellState extends State<NotificationBell>
                 right: -4,
                 top: -4,
                 child: Container(
-                  constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
+                  constraints: const BoxConstraints(
+                    minWidth: 18,
+                    minHeight: 18,
+                  ),
                   padding: const EdgeInsets.symmetric(horizontal: 5),
                   decoration: BoxDecoration(
                     color: AppTheme.accent,

@@ -34,11 +34,11 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
       '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
 
   Future<AdminAttendanceData> _load() => _api.fetchAttendance(
-        baseUrl: widget.session.baseUrl,
-        token: widget.session.token,
-        from: _fmt(_from),
-        to: _fmt(_to),
-      );
+    baseUrl: widget.session.baseUrl,
+    token: widget.session.token,
+    from: _fmt(_from),
+    to: _fmt(_to),
+  );
 
   void _reload() => setState(() => _future = _load());
 
@@ -86,17 +86,24 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
                   onTap: _pickRange,
                   child: Container(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 14, vertical: 13),
+                      horizontal: 14,
+                      vertical: 13,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(14),
                       border: Border.all(color: AppTheme.border),
-                      boxShadow: AppTheme.shadowSoft,
+                      boxShadow: AppTheme.isDesktop
+                          ? null
+                          : AppTheme.shadowSoft,
                     ),
                     child: Row(
                       children: [
-                        const Icon(LucideIcons.calendarDays,
-                            size: 18, color: AppTheme.primaryDark),
+                        const Icon(
+                          LucideIcons.calendarDays,
+                          size: 18,
+                          color: AppTheme.primaryDark,
+                        ),
                         const SizedBox(width: 10),
                         Expanded(
                           child: Text(
@@ -108,8 +115,11 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
                             ),
                           ),
                         ),
-                        const Icon(LucideIcons.chevronRight,
-                            size: 15, color: AppTheme.textMuted),
+                        const Icon(
+                          LucideIcons.chevronRight,
+                          size: 15,
+                          color: AppTheme.textMuted,
+                        ),
                       ],
                     ),
                   ),
@@ -120,12 +130,17 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
                       color: AppTheme.primaryDark,
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(
+                        AppTheme.cardRadius(16),
+                      ),
                     ),
                     child: Row(
                       children: [
-                        const Icon(LucideIcons.clock,
-                            color: Colors.white, size: 20),
+                        const Icon(
+                          LucideIcons.clock,
+                          color: Colors.white,
+                          size: 20,
+                        ),
                         const SizedBox(width: 10),
                         const Text(
                           'Total hours (all staff)',
@@ -189,9 +204,9 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppTheme.cardRadius(16)),
         border: Border.all(color: AppTheme.border),
-        boxShadow: AppTheme.shadowSoft,
+        boxShadow: AppTheme.isDesktop ? null : AppTheme.shadowSoft,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -209,8 +224,7 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
                 ),
               ),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
                 decoration: BoxDecoration(
                   color: AppTheme.primarySoft,
                   borderRadius: BorderRadius.circular(999),
@@ -229,22 +243,32 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
           const SizedBox(height: 4),
           Row(
             children: [
-              Icon(LucideIcons.calendarDays,
-                  size: 12, color: AppTheme.textMuted),
+              Icon(
+                LucideIcons.calendarDays,
+                size: 12,
+                color: AppTheme.textMuted,
+              ),
               const SizedBox(width: 4),
               Text(
                 formatCompactDate(r.logDate),
-                style:
-                    const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: AppTheme.textSecondary,
+                ),
               ),
               const SizedBox(width: 12),
-              Icon(LucideIcons.squareCheck,
-                  size: 12, color: AppTheme.textMuted),
+              Icon(
+                LucideIcons.squareCheck,
+                size: 12,
+                color: AppTheme.textMuted,
+              ),
               const SizedBox(width: 4),
               Text(
                 '${r.accomplishmentCount} done',
-                style:
-                    const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: AppTheme.textSecondary,
+                ),
               ),
             ],
           ),
@@ -257,7 +281,9 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
                   .map(
                     (i) => Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 9, vertical: 5),
+                        horizontal: 9,
+                        vertical: 5,
+                      ),
                       decoration: BoxDecoration(
                         color: AppTheme.surfaceMuted,
                         borderRadius: BorderRadius.circular(8),

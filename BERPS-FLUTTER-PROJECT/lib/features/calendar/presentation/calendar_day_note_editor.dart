@@ -170,7 +170,9 @@ class _CalendarDayNoteEditorState extends State<CalendarDayNoteEditor> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppTheme.isDesktop ? 16 : 20),
+        ),
         title: const Text(
           'Delete note?',
           style: TextStyle(

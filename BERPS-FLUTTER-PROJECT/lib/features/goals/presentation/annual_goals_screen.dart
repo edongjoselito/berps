@@ -446,7 +446,7 @@ class _CurrentGoalCard extends StatelessWidget {
     return MobileSurfaceCard(
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(AppTheme.cardRadius(18)),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -537,7 +537,7 @@ class _YearCard extends StatelessWidget {
       padding: const EdgeInsets.all(14),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(AppTheme.cardRadius(18)),
         child: Row(
           children: [
             Container(
@@ -807,7 +807,7 @@ class _EmptyState extends StatelessWidget {
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(AppTheme.cardRadius(18)),
         border: Border.all(color: AppTheme.border),
       ),
       child: Column(

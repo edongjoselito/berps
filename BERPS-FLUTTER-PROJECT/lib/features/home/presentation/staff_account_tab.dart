@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
@@ -6,6 +8,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/haptics.dart';
 import '../../../core/utils/responsive.dart';
 import '../../../core/widgets/animations.dart';
+import '../../../core/widgets/desktop_kit.dart';
 import '../../../core/widgets/mobile_header.dart';
 import '../../../core/widgets/staff_avatar.dart';
 import '../../auth/data/session_store.dart';
@@ -92,7 +95,9 @@ class _StaffAccountTabState extends State<StaffAccountTab> {
       context: context,
       barrierDismissible: false,
       builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppTheme.isDesktop ? 16 : 20),
+        ),
         title: const Text('Enter your password'),
         content: TextField(
           controller: controller,
@@ -116,8 +121,376 @@ class _StaffAccountTabState extends State<StaffAccountTab> {
     return password?.trim();
   }
 
+  /// Desktop settings layout: profile/workspace panels on the left, security,
+  /// privacy and session controls stacked in the right rail.
+  Widget _buildDesktop() {
+    final session = widget.session;
+    return ListView(
+      padding: EdgeInsets.fromLTRB(context.gutter, 12, context.gutter, 32),
+      children: [
+        SafeArea(
+          bottom: false,
+          child: MobileHeader(
+            title: 'Account',
+            subtitle: 'Workspace, security and session settings',
+            trailing: NotificationBell(session: session),
+          ),
+        ),
+        const SizedBox(height: 16),
+        FadeSlide(
+          delay: const Duration(milliseconds: 60),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    DeskPanel(
+                      title: 'Profile',
+                      action: DeskButton(
+                        label: 'Open full profile',
+                        icon: LucideIcons.arrowUpRight,
+                        primary: false,
+                        onTap: () {
+                          Haptics.light();
+                          widget.onOpenMyProfile();
+                        },
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              StaffAvatar(
+                                url: session.avatarUrl,
+                                size: 56,
+                                radius: 16,
+                                placeholderColor: AppTheme.primaryDark,
+                                placeholderSize: 30,
+                              ),
+                              const SizedBox(width: 14),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      session.fullName.isEmpty
+                                          ? session.username
+                                          : session.fullName,
+                                      style: const TextStyle(
+                                        color: AppTheme.textPrimary,
+                                        fontWeight: FontWeight.w900,
+                                        fontSize: 16,
+                                        letterSpacing: -0.2,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      session.position.isEmpty
+                                          ? 'Staff'
+                                          : session.position,
+                                      style: const TextStyle(
+                                        color: AppTheme.textSecondary,
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 12.5,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 14),
+                          _ProfileInfoRow(
+                            icon: LucideIcons.mail,
+                            label: session.email.isEmpty
+                                ? 'No email on file'
+                                : session.email,
+                          ),
+                          const SizedBox(height: 8),
+                          _ProfileInfoRow(
+                            icon: LucideIcons.idCard,
+                            label: 'Username: ${session.username}',
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    DeskPanel(
+                      title: 'Workspace',
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 38,
+                            height: 38,
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [AppTheme.navyLight, AppTheme.navy],
+                              ),
+                              borderRadius: BorderRadius.circular(11),
+                            ),
+                            child: const Icon(
+                              LucideIcons.globe,
+                              color: Colors.white,
+                              size: 17,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  widget.config?.appName ?? 'Workspace',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w800,
+                                    fontSize: 13.5,
+                                    color: AppTheme.textPrimary,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  _domainLabel(session.baseUrl),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppTheme.textSecondary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppTheme.success.withValues(alpha: 0.10),
+                              borderRadius: BorderRadius.circular(999),
+                            ),
+                            child: const Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  LucideIcons.circleCheck,
+                                  size: 11,
+                                  color: AppTheme.success,
+                                ),
+                                SizedBox(width: 4),
+                                Text(
+                                  'Connected',
+                                  style: TextStyle(
+                                    fontSize: 10.5,
+                                    fontWeight: FontWeight.w800,
+                                    color: AppTheme.success,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 20),
+              SizedBox(
+                width: AppTheme.railWidth,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (_biometricAvailable)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 16),
+                        child: DeskPanel(
+                          title: 'Security',
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 34,
+                                height: 34,
+                                decoration: BoxDecoration(
+                                  color: AppTheme.primarySoft,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: const Icon(
+                                  LucideIcons.fingerprint,
+                                  size: 16,
+                                  color: AppTheme.primaryDark,
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Text(
+                                  '$_biometricLabel login',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 13,
+                                    color: AppTheme.textPrimary,
+                                  ),
+                                ),
+                              ),
+                              Switch.adaptive(
+                                value: _biometricEnabled,
+                                onChanged: _toggleBiometric,
+                                activeTrackColor: AppTheme.primary,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: DeskPanel(
+                        title: 'Appearance',
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 34,
+                              height: 34,
+                              decoration: BoxDecoration(
+                                color: AppTheme.primarySoft,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: const Icon(
+                                LucideIcons.rows3,
+                                size: 16,
+                                color: AppTheme.primaryDark,
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            const Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Compact density',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 13,
+                                      color: AppTheme.textPrimary,
+                                    ),
+                                  ),
+                                  Text(
+                                    'Tighter rows in tables and the sidebar.',
+                                    style: TextStyle(
+                                      fontSize: 11.5,
+                                      color: AppTheme.textSecondary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            ValueListenableBuilder<bool>(
+                              valueListenable: AppTheme.compactDensity,
+                              builder: (context, compact, _) => Switch.adaptive(
+                                value: compact,
+                                onChanged: _toggleDensity,
+                                activeTrackColor: AppTheme.primary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    DeskPanel(
+                      title: 'Privacy',
+                      padding: EdgeInsets.zero,
+                      child: Column(
+                        children: [
+                          _DeskAccountRow(
+                            icon: LucideIcons.shield,
+                            title: 'Privacy Policy',
+                            subtitle: 'How we collect and protect your data.',
+                            onTap: () {
+                              Haptics.light();
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) => PrivacyPolicyScreen(
+                                    workspaceUrl: session.baseUrl,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                          const Divider(height: 1, color: AppTheme.border),
+                          _DeskAccountRow(
+                            icon: LucideIcons.trash2,
+                            title: 'Delete My Data',
+                            subtitle: 'Request deletion of your personal data.',
+                            danger: true,
+                            onTap: () {
+                              Haptics.light();
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) => const DataDeletionScreen(),
+                                ),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    DeskPanel(
+                      title: 'Session',
+                      child: Row(
+                        children: [
+                          const Expanded(
+                            child: Text(
+                              'End the current session on this device.',
+                              style: TextStyle(
+                                color: AppTheme.textSecondary,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          DeskButton(
+                            label: 'Sign out',
+                            icon: LucideIcons.logOut,
+                            danger: true,
+                            onTap: () async {
+                              await widget.onSignOut();
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    const _AppFooter(),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _toggleDensity(bool compact) {
+    Haptics.light();
+    AppTheme.compactDensity.value = compact;
+    unawaited(widget.store.saveDensityCompact(compact));
+  }
+
+  String _domainLabel(String url) {
+    final host = Uri.tryParse(url)?.host ?? '';
+    return host.isEmpty ? url : host;
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (AppTheme.isDesktop) return _buildDesktop();
     return ListView(
       padding: EdgeInsets.fromLTRB(context.gutter, 12, context.gutter, 32),
       children: [
@@ -127,11 +500,11 @@ class _StaffAccountTabState extends State<StaffAccountTab> {
             title: 'Account',
             leadingIcon: LucideIcons.list,
             onLeadingTap: widget.onMenu == null
-                      ? null
-                      : () {
-                          Haptics.light();
-                          widget.onMenu!();
-                        },
+                ? null
+                : () {
+                    Haptics.light();
+                    widget.onMenu!();
+                  },
             trailing: NotificationBell(session: widget.session),
           ),
         ),
@@ -151,10 +524,7 @@ class _StaffAccountTabState extends State<StaffAccountTab> {
         const SizedBox(height: 20),
         FadeSlide(
           delay: const Duration(milliseconds: 100),
-          child: _SectionLabel(
-            icon: LucideIcons.circleUser,
-            text: 'Profile',
-          ),
+          child: _SectionLabel(icon: LucideIcons.circleUser, text: 'Profile'),
         ),
         const SizedBox(height: 10),
         FadeSlide(
@@ -173,10 +543,7 @@ class _StaffAccountTabState extends State<StaffAccountTab> {
         const SizedBox(height: 20),
         FadeSlide(
           delay: const Duration(milliseconds: 200),
-          child: _SectionLabel(
-            icon: LucideIcons.shieldCheck,
-            text: 'Security',
-          ),
+          child: _SectionLabel(icon: LucideIcons.shieldCheck, text: 'Security'),
         ),
         const SizedBox(height: 10),
         if (_biometricAvailable)
@@ -212,7 +579,7 @@ class _StaffAccountTabState extends State<StaffAccountTab> {
                   vertical: 4,
                 ),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(18),
+                  borderRadius: BorderRadius.circular(AppTheme.cardRadius(18)),
                 ),
               ),
             ),
@@ -220,10 +587,7 @@ class _StaffAccountTabState extends State<StaffAccountTab> {
         const SizedBox(height: 20),
         FadeSlide(
           delay: const Duration(milliseconds: 240),
-          child: _SectionLabel(
-            icon: LucideIcons.fileText,
-            text: 'Privacy',
-          ),
+          child: _SectionLabel(icon: LucideIcons.fileText, text: 'Privacy'),
         ),
         const SizedBox(height: 10),
         FadeSlide(
@@ -346,7 +710,7 @@ class _WorkspaceCard extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppTheme.cardRadius(16)),
         border: Border.all(color: AppTheme.border),
       ),
       child: Row(
@@ -360,11 +724,7 @@ class _WorkspaceCard extends StatelessWidget {
               ),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Icon(
-              LucideIcons.globe,
-              color: Colors.white,
-              size: 18,
-            ),
+            child: const Icon(LucideIcons.globe, color: Colors.white, size: 18),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -548,7 +908,7 @@ class _ActionCard extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(AppTheme.cardRadius(18)),
         child: Row(
           children: [
             Container(
@@ -610,6 +970,76 @@ class _ActionCard extends StatelessWidget {
   }
 }
 
+/// Flat settings-style row used inside desktop panels.
+class _DeskAccountRow extends StatelessWidget {
+  const _DeskAccountRow({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+    this.danger = false,
+  });
+
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+  final bool danger;
+
+  @override
+  Widget build(BuildContext context) {
+    final accent = danger ? AppTheme.danger : AppTheme.primaryDark;
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Row(
+          children: [
+            Container(
+              width: 34,
+              height: 34,
+              decoration: BoxDecoration(
+                color: accent.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(icon, color: accent, size: 16),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w800,
+                      color: danger ? AppTheme.danger : AppTheme.textPrimary,
+                      fontSize: 13.5,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: AppTheme.textSecondary,
+                      fontSize: 11.5,
+                      height: 1.35,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 10),
+            Icon(LucideIcons.chevronRight, size: 14, color: accent),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _AppFooter extends StatelessWidget {
   const _AppFooter();
 
@@ -629,7 +1059,7 @@ class _AppFooter extends StatelessWidget {
               ),
               const SizedBox(width: 5),
               Text(
-                'BERPS Mobile',
+                AppTheme.productName,
                 style: TextStyle(
                   fontSize: 11.5,
                   fontWeight: FontWeight.w800,
@@ -641,7 +1071,7 @@ class _AppFooter extends StatelessWidget {
           ),
           const SizedBox(height: 3),
           Text(
-            'Version 1.0.0',
+            'Version ${AppTheme.appVersion}',
             style: TextStyle(
               fontSize: 10,
               fontWeight: FontWeight.w600,

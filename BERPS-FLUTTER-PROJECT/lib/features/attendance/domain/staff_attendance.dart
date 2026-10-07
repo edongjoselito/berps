@@ -32,9 +32,12 @@ class StaffAttendanceData {
       status: AttendanceStatus.fromJson(status),
       records: recordsRaw is List
           ? recordsRaw
-              .whereType<Map>()
-              .map((e) => AttendanceRecord.fromJson(Map<String, dynamic>.from(e)))
-              .toList()
+                .whereType<Map>()
+                .map(
+                  (e) =>
+                      AttendanceRecord.fromJson(Map<String, dynamic>.from(e)),
+                )
+                .toList()
           : const <AttendanceRecord>[],
     );
   }
@@ -146,9 +149,12 @@ class AttendanceRecord {
       status: (json['status'] ?? 'present').toString(),
       intervals: intervalsRaw is List
           ? intervalsRaw
-              .whereType<Map>()
-              .map((e) => AttendanceInterval.fromJson(Map<String, dynamic>.from(e)))
-              .toList()
+                .whereType<Map>()
+                .map(
+                  (e) =>
+                      AttendanceInterval.fromJson(Map<String, dynamic>.from(e)),
+                )
+                .toList()
           : const <AttendanceInterval>[],
       totalSeconds: _toInt(json['total_seconds']),
       totalHoursLabel: (json['total_hours_label'] ?? '00:00').toString(),

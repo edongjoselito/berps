@@ -177,8 +177,10 @@ class _EmployeeAccomplishmentScreenState
         }
         if (snapshot.hasError) {
           return _pickerShell(
-            child: const Text('Failed to load employees',
-                style: TextStyle(color: AppTheme.danger)),
+            child: const Text(
+              'Failed to load employees',
+              style: TextStyle(color: AppTheme.danger),
+            ),
           );
         }
         final employees = snapshot.data ?? [];
@@ -187,11 +189,12 @@ class _EmployeeAccomplishmentScreenState
             child: DropdownButton<EmployeeOption>(
               value: _selected,
               isExpanded: true,
-              hint: const Text('Select employee',
-                  style: TextStyle(color: AppTheme.textMuted)),
+              hint: const Text(
+                'Select employee',
+                style: TextStyle(color: AppTheme.textMuted),
+              ),
               items: employees
-                  .map((e) =>
-                      DropdownMenuItem(value: e, child: Text(e.name)))
+                  .map((e) => DropdownMenuItem(value: e, child: Text(e.name)))
                   .toList(),
               onChanged: (v) {
                 setState(() => _selected = v);
@@ -211,12 +214,15 @@ class _EmployeeAccomplishmentScreenState
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: AppTheme.border),
-        boxShadow: AppTheme.shadowSoft,
+        boxShadow: AppTheme.isDesktop ? null : AppTheme.shadowSoft,
       ),
       child: Row(
         children: [
-          const Icon(LucideIcons.circleUser,
-              size: 18, color: AppTheme.primaryDark),
+          const Icon(
+            LucideIcons.circleUser,
+            size: 18,
+            color: AppTheme.primaryDark,
+          ),
           const SizedBox(width: 10),
           Expanded(child: child),
         ],

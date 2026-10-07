@@ -35,11 +35,11 @@ class _AdminAccomplishmentsScreenState
   }
 
   Future<List<AdminAccomplishment>> _load() => _api.fetchAccomplishments(
-        baseUrl: widget.session.baseUrl,
-        token: widget.session.token,
-        month: _month,
-        year: _year,
-      );
+    baseUrl: widget.session.baseUrl,
+    token: widget.session.token,
+    month: _month,
+    year: _year,
+  );
 
   void _reload() => setState(() => _future = _load());
 

@@ -5,12 +5,7 @@ import '../theme/app_theme.dart';
 /// Continuously animates a subtle shimmer used by every skeleton placeholder
 /// in the app, providing a premium loading state.
 class Skeleton extends StatefulWidget {
-  const Skeleton({
-    super.key,
-    this.width,
-    this.height = 14,
-    this.radius = 8,
-  });
+  const Skeleton({super.key, this.width, this.height = 14, this.radius = 8});
 
   final double? width;
   final double height;

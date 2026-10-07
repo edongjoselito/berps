@@ -8,15 +8,22 @@ import '../../../core/widgets/animations.dart';
 import '../../../core/widgets/mobile_header.dart';
 import '../../../core/widgets/orb_background.dart';
 import '../data/auth_api.dart';
+import 'widgets/auth_side_panel.dart';
 
 /// Self-service signup. Mirrors the web "Create Your Account" flow: collects
 /// name, email and password, creates a company (Admin) account and triggers an
 /// email confirmation before the user can sign in.
 class SignupScreen extends StatefulWidget {
-  const SignupScreen({super.key, required this.api, required this.baseUrl});
+  const SignupScreen({
+    super.key,
+    required this.api,
+    required this.baseUrl,
+    this.logoUrl = '',
+  });
 
   final AuthApi api;
   final String baseUrl;
+  final String logoUrl;
 
   @override
   State<SignupScreen> createState() => _SignupScreenState();
@@ -79,6 +86,58 @@ class _SignupScreenState extends State<SignupScreen> {
     }
   }
 
+  /// Desktop right-hand pane — back control, heading, then the form card.
+  /// Matches the login screen's split-panel layout.
+  Widget _desktopPane(BuildContext context) {
+    return Container(
+      color: AppTheme.surface,
+      alignment: Alignment.center,
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 64, vertical: 56),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 430),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Align(
+                alignment: Alignment.centerLeft,
+                child: MobileHeaderButton(
+                  icon: LucideIcons.arrowLeft,
+                  onTap: _submitting
+                      ? () {}
+                      : () => Navigator.of(context).pop(),
+                ),
+              ),
+              const SizedBox(height: 26),
+              const Text(
+                'Create your account',
+                style: TextStyle(
+                  fontSize: 30,
+                  fontWeight: FontWeight.w900,
+                  color: AppTheme.textPrimary,
+                  letterSpacing: -0.8,
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Get started with BERPS — Tasks, Notes and Calendar to '
+                'keep your team aligned from request to delivery.',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: AppTheme.textSecondary,
+                  height: 1.55,
+                ),
+              ),
+              const SizedBox(height: 28),
+              MobileSurfaceCard(child: _done ? _buildDone() : _buildForm()),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -86,6 +145,17 @@ class _SignupScreenState extends State<SignupScreen> {
         child: SafeArea(
           child: LayoutBuilder(
             builder: (context, constraints) {
+              if (AppTheme.isDesktop && constraints.maxWidth >= 960) {
+                return Row(
+                  children: [
+                    Expanded(
+                      flex: 45,
+                      child: AuthSidePanel(logoUrl: widget.logoUrl),
+                    ),
+                    Expanded(flex: 55, child: _desktopPane(context)),
+                  ],
+                );
+              }
               return SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 20,
@@ -165,9 +235,8 @@ class _SignupScreenState extends State<SignupScreen> {
                           vertical: 14,
                         ),
                       ),
-                      validator: (v) => (v ?? '').trim().isEmpty
-                          ? 'Required.'
-                          : null,
+                      validator: (v) =>
+                          (v ?? '').trim().isEmpty ? 'Required.' : null,
                     ),
                   ],
                 ),
@@ -190,9 +259,8 @@ class _SignupScreenState extends State<SignupScreen> {
                           vertical: 14,
                         ),
                       ),
-                      validator: (v) => (v ?? '').trim().isEmpty
-                          ? 'Required.'
-                          : null,
+                      validator: (v) =>
+                          (v ?? '').trim().isEmpty ? 'Required.' : null,
                     ),
                   ],
                 ),
@@ -233,9 +301,7 @@ class _SignupScreenState extends State<SignupScreen> {
               ),
               suffixIcon: IconButton(
                 icon: Icon(
-                  _obscure
-                      ? LucideIcons.eye
-                      : LucideIcons.eyeOff,
+                  _obscure ? LucideIcons.eye : LucideIcons.eyeOff,
                   color: _obscure ? AppTheme.textMuted : AppTheme.primary,
                   size: 18,
                 ),
@@ -275,7 +341,7 @@ class _SignupScreenState extends State<SignupScreen> {
             height: 64,
             decoration: BoxDecoration(
               color: AppTheme.success.withValues(alpha: 0.10),
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(AppTheme.cardRadius(20)),
             ),
             child: const Icon(
               LucideIcons.circleCheck,
@@ -327,7 +393,7 @@ class _SignupHero extends StatelessWidget {
             height: 56,
             decoration: BoxDecoration(
               color: AppTheme.primarySoft,
-              borderRadius: BorderRadius.circular(18),
+              borderRadius: BorderRadius.circular(AppTheme.cardRadius(18)),
             ),
             child: const Icon(
               LucideIcons.userPlus,
@@ -405,11 +471,7 @@ class _StatusBanner extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Icon(
-            LucideIcons.circleAlert,
-            color: AppTheme.danger,
-            size: 18,
-          ),
+          const Icon(LucideIcons.circleAlert, color: AppTheme.danger, size: 18),
           const SizedBox(width: 10),
           Expanded(
             child: Text(

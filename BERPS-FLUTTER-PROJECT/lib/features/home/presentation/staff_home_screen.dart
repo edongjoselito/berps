@@ -1,10 +1,15 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:window_manager/window_manager.dart';
 
+import '../../../core/network/api_exception.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/haptics.dart';
+import '../../../core/widgets/app_toast.dart';
 import '../../../core/widgets/desktop_kit.dart';
 import '../../shell/presentation/command_palette.dart';
 import '../../attendance/presentation/staff_attendance_tab.dart';
@@ -14,11 +19,16 @@ import '../../auth/domain/staff_session.dart';
 import '../../calendar/presentation/calendar_screen.dart';
 import '../../goals/presentation/annual_goals_screen.dart';
 import '../../notes/presentation/notes_screen.dart';
+import '../../notifications/presentation/notifications_screen.dart';
+import '../../reminders/data/reminders_api.dart';
+import '../../reminders/domain/reminder.dart';
 import '../../reminders/presentation/reminders_screen.dart';
 import '../../shell/presentation/staff_drawer.dart';
 import '../../support/presentation/support_issues_screen.dart';
 import '../../support_dashboard/presentation/support_dashboard_screen.dart';
+import '../../tasks/presentation/staff_task_editor_screen.dart';
 import '../../tasks/presentation/staff_tasks_tab.dart';
+import '../data/staff_api.dart';
 import 'my_dtr_screen.dart';
 import 'staff_account_tab.dart';
 import 'staff_dashboard_tab.dart';
@@ -51,6 +61,7 @@ class StaffHomeScreen extends StatefulWidget {
 class _StaffHomeScreenState extends State<StaffHomeScreen> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   final GlobalKey<NavigatorState> _contentNavKey = GlobalKey<NavigatorState>();
+  final StaffApi _api = StaffApi();
 
   /// Drives rebuilds of the nested content navigator's root page on wide
   /// layouts — the route is cached, so setState alone never refreshes it.
@@ -64,8 +75,331 @@ class _StaffHomeScreenState extends State<StaffHomeScreen> {
   /// Sidebar destinations as palette commands (refreshed every wide build).
   List<DeskCommand> _navCommands = const [];
 
+  /// Collapsed-to-icons desktop sidebar (persisted across launches).
+  bool _sidebarCollapsed = false;
+
+  /// Unread/pending counts shown on sidebar items (desktop only).
+  Map<String, int> _badges = const {};
+  Timer? _badgeTimer;
+
+  /// Reminders already surfaced as in-app notifications this session, so the
+  /// poll doesn't re-toast the same one every cycle.
+  final Set<int> _notifiedReminders = {};
+
+  @override
+  void initState() {
+    super.initState();
+    if (AppTheme.isDesktop) {
+      _sidebarCollapsed = widget.store.readSidebarCollapsed();
+      AppTheme.compactDensity.value = widget.store.readDensityCompact();
+      // Restore the last open tab, but only if the session has that feature.
+      final lastTab = widget.store.readLastTab();
+      final allowed = <_StaffTab>[
+        _StaffTab.dashboard,
+        if (widget.session.hasAttendance) _StaffTab.attendance,
+        if (widget.session.hasTasks) _StaffTab.tasks,
+        _StaffTab.account,
+      ];
+      if (lastTab > 0 && lastTab < _StaffTab.values.length) {
+        final candidate = _StaffTab.values[lastTab];
+        if (allowed.contains(candidate)) {
+          _currentTab = candidate;
+          _tabNotifier.value = candidate;
+        }
+      }
+      _refreshBadges();
+      _badgeTimer = Timer.periodic(
+        const Duration(seconds: 90),
+        (_) => _refreshBadges(),
+      );
+    }
+  }
+
+  /// Polls the same endpoints the screens use to keep sidebar badge counts
+  /// (unread notifications, open tasks, reminders due today) fresh.
+  Future<void> _refreshBadges() async {
+    if (!mounted) return;
+    final badges = <String, int>{};
+    try {
+      final notifications = await _api.fetchNotifications(
+        baseUrl: widget.session.baseUrl,
+        token: widget.session.token,
+        limit: 1,
+      );
+      if (notifications.unseenTotal > 0) {
+        badges['notifications'] = notifications.unseenTotal;
+      }
+    } catch (_) {}
+    if (widget.session.hasTasks) {
+      try {
+        final tasks = await _api.fetchTasks(
+          baseUrl: widget.session.baseUrl,
+          token: widget.session.token,
+        );
+        if (tasks.stats.open > 0) badges['tasks'] = tasks.stats.open;
+        if (widget.session.hasForwardedTasks && tasks.stats.forwarded > 0) {
+          badges['forwarded-tasks'] = tasks.stats.forwarded;
+        }
+      } catch (_) {}
+    }
+    if (widget.session.hasReminders) {
+      try {
+        final reminders = await RemindersApi().fetchReminders(
+          baseUrl: widget.session.baseUrl,
+          token: widget.session.token,
+        );
+        if (reminders.dueTodayCount > 0) {
+          badges['reminders'] = reminders.dueTodayCount;
+        }
+        _surfaceDueReminders(reminders.reminders);
+      } catch (_) {}
+    }
+    if (mounted) setState(() => _badges = badges);
+  }
+
+  /// In-app "desktop notification" for reminders that came due since the last
+  /// poll — surfaces a toast the first time each reminder goes past its time.
+  void _surfaceDueReminders(List<Reminder> reminders) {
+    if (!mounted) return;
+    final now = DateTime.now();
+    // Only notify for reminders that went due within the last poll window —
+    // older ones are already covered by the badge count, not a popup.
+    final window = now.subtract(const Duration(minutes: 3));
+    for (final reminder in reminders) {
+      final due = reminder.remindAtDate;
+      if (due == null || _notifiedReminders.contains(reminder.id)) continue;
+      if (!due.isAfter(now) && due.isAfter(window)) {
+        _notifiedReminders.add(reminder.id);
+        AppToast.info(
+          context,
+          'Reminder: ${reminder.title.isEmpty ? reminder.remindAtLabel : reminder.title}',
+        );
+      }
+    }
+  }
+
+  void _toggleSidebar() {
+    Haptics.light();
+    setState(() => _sidebarCollapsed = !_sidebarCollapsed);
+    unawaited(widget.store.saveSidebarCollapsed(_sidebarCollapsed));
+  }
+
+  /// Rebuilds the visible tab's root page, which refetches its data — the
+  /// desktop equivalent of pull-to-refresh (⌘R).
+  void _reloadCurrentTab() {
+    Haptics.light();
+    setState(() {
+      switch (_currentTab) {
+        case _StaffTab.dashboard:
+          _dashboardReopenKey++;
+        case _StaffTab.attendance:
+          _attendanceReopenKey++;
+        case _StaffTab.tasks:
+          _tasksReopenKey++;
+        case _StaffTab.account:
+      }
+    });
+    _refreshBadges();
+  }
+
+  void _showShortcutsHelp() {
+    final mod = defaultTargetPlatform == TargetPlatform.macOS ? '⌘' : 'Ctrl+';
+    final alt = defaultTargetPlatform == TargetPlatform.macOS ? '⌥' : 'Alt+';
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) => Dialog(
+        insetPadding: const EdgeInsets.all(32),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 400),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(24, 22, 24, 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Keyboard shortcuts',
+                  style: TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w800,
+                    color: AppTheme.textPrimary,
+                    letterSpacing: -0.3,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                _shortcutRow('${mod}K', 'Command palette'),
+                _shortcutRow('${mod}1–9', 'Jump to sidebar section'),
+                _shortcutRow('${mod}R', 'Reload current page'),
+                _shortcutRow('${mod}N', 'New task / note'),
+                _shortcutRow('$mod/', 'This cheat sheet'),
+                _shortcutRow('${alt}W', 'Close current page'),
+                const SizedBox(height: 14),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: DeskButton(
+                    label: 'Done',
+                    icon: LucideIcons.check,
+                    primary: false,
+                    onTap: () => Navigator.of(dialogContext).pop(),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  static Widget _shortcutRow(String keys, String action) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 5),
+      child: Row(
+        children: [
+          KeyHint(keys),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              action,
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: AppTheme.textSecondary,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Quick actions exposed through the command palette.
+  Future<void> _newTask() async {
+    if (!widget.session.hasTasks) return;
+    Haptics.light();
+    try {
+      final data = await _api.fetchTasks(
+        baseUrl: widget.session.baseUrl,
+        token: widget.session.token,
+      );
+      if (!mounted) return;
+      if (AppTheme.isDesktop) {
+        await showAppSheet<bool>(
+          context: context,
+          maxWidth: 940,
+          builder: (_) => StaffTaskEditorScreen(
+            session: widget.session,
+            projects: data.projects,
+            staffOptions: data.staffOptions,
+            modal: true,
+          ),
+        );
+      } else {
+        await _pushContent(
+          StaffTaskEditorScreen(
+            session: widget.session,
+            projects: data.projects,
+            staffOptions: data.staffOptions,
+          ),
+          navId: 'tasks',
+        );
+      }
+      if (!mounted) return;
+      setState(() => _tasksReopenKey++);
+    } on ApiException catch (e) {
+      if (mounted) AppToast.error(context, e.message);
+    }
+  }
+
+  Future<void> _newNote() async {
+    Haptics.light();
+    await _pushContent(
+      NotesScreen(session: widget.session, openEditorOnMount: true),
+      navId: 'notes',
+    );
+  }
+
+  Future<void> _newReminder() async {
+    Haptics.light();
+    await _pushContent(
+      RemindersScreen(session: widget.session, openEditorOnMount: true),
+      navId: 'reminders',
+    );
+  }
+
+  /// Punches in or out depending on the live attendance status — the desktop
+  /// "quick punch" used by the palette and the dashboard Today card.
+  Future<void> _quickPunch() async {
+    if (!widget.session.hasAttendance) return;
+    Haptics.medium();
+    try {
+      final data = await _api.fetchAttendance(
+        baseUrl: widget.session.baseUrl,
+        token: widget.session.token,
+      );
+      if (!mounted) return;
+      final String message;
+      if (data.status.canTimeIn) {
+        message = await _api.timeIn(
+          baseUrl: widget.session.baseUrl,
+          token: widget.session.token,
+        );
+      } else if (data.status.canTimeOut) {
+        message = await _api.timeOut(
+          baseUrl: widget.session.baseUrl,
+          token: widget.session.token,
+        );
+      } else {
+        AppToast.info(context, 'No punch slot available right now.');
+        return;
+      }
+      if (!mounted) return;
+      AppToast.success(context, message);
+      setState(() {
+        _attendanceReopenKey++;
+        _dashboardReopenKey++;
+      });
+      _refreshBadges();
+    } on ApiException catch (e) {
+      if (mounted) AppToast.error(context, e.message);
+    }
+  }
+
   Future<void> _openPalette() {
+    final session = widget.session;
     return showCommandPalette(context, [
+      DeskCommand(
+        label: 'New task',
+        section: 'Actions',
+        icon: LucideIcons.squarePen,
+        keywords: 'create add task',
+        shortcut: '${modKeyLabel}N',
+        onRun: _newTask,
+      ),
+      if (session.hasNotes)
+        DeskCommand(
+          label: 'New note',
+          section: 'Actions',
+          icon: LucideIcons.notebookPen,
+          keywords: 'create add note write',
+          onRun: _newNote,
+        ),
+      if (session.hasReminders)
+        DeskCommand(
+          label: 'New reminder',
+          section: 'Actions',
+          icon: LucideIcons.bellPlus,
+          keywords: 'create add reminder alert',
+          onRun: _newReminder,
+        ),
+      if (session.hasAttendance)
+        DeskCommand(
+          label: 'Time in / out',
+          section: 'Actions',
+          icon: LucideIcons.timer,
+          keywords: 'punch clock attendance dtr',
+          onRun: _quickPunch,
+        ),
       ..._navCommands,
       DeskCommand(
         label: 'My profile',
@@ -73,6 +407,14 @@ class _StaffHomeScreenState extends State<StaffHomeScreen> {
         icon: LucideIcons.userPen,
         keywords: 'avatar photo edit',
         onRun: () => _openProfile(),
+      ),
+      DeskCommand(
+        label: 'Keyboard shortcuts',
+        section: 'Account',
+        icon: LucideIcons.keyboard,
+        keywords: 'keys help cheat sheet',
+        shortcut: '$modKeyLabel/',
+        onRun: _showShortcutsHelp,
       ),
       DeskCommand(
         label: 'Sign out',
@@ -147,7 +489,9 @@ class _StaffHomeScreenState extends State<StaffHomeScreen> {
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppTheme.isDesktop ? 16 : 24),
+        ),
         backgroundColor: AppTheme.surface,
         contentPadding: const EdgeInsets.fromLTRB(24, 28, 24, 20),
         content: Column(
@@ -222,6 +566,7 @@ class _StaffHomeScreenState extends State<StaffHomeScreen> {
 
   void _selectTab(_StaffTab tab) {
     if (tab != _currentTab) Haptics.light();
+    unawaited(widget.store.saveLastTab(tab.index));
     setState(() {
       _currentTab = tab;
       _pushedNavId = null;
@@ -327,6 +672,17 @@ class _StaffHomeScreenState extends State<StaffHomeScreen> {
     );
   }
 
+  Future<void> _openNotifications() async {
+    Haptics.light();
+    await _pushContent(
+      NotificationsScreen(session: widget.session),
+      navId: 'notifications',
+    );
+    // Opening the list marks everything seen — refresh badges now rather
+    // than waiting for the next poll cycle.
+    _refreshBadges();
+  }
+
   Future<void> _openAnnualGoals() async {
     Haptics.light();
     await _pushContent(
@@ -389,8 +745,12 @@ class _StaffHomeScreenState extends State<StaffHomeScreen> {
       onSelectSupportDashboard: _openSupportDashboard,
       onSelectForwardedTasks: _openForwardedTasks,
       onSelectTickets: () => _openSupportIssues(scope: 'open'),
+      onSelectNotifications: _openNotifications,
       onSignOut: _confirmSignOut,
       onOpenCommandPalette: isWide ? () => _openPalette() : null,
+      badges: _badges,
+      collapsed: isWide && _sidebarCollapsed,
+      onToggleCollapse: isWide ? _toggleSidebar : null,
     );
 
     final body = _animatedBody(_buildCurrentPage());
@@ -413,6 +773,12 @@ class _StaffHomeScreenState extends State<StaffHomeScreen> {
         bindings: {
           SingleActivator(LogicalKeyboardKey.keyK, meta: mod, control: !mod):
               _openPalette,
+          SingleActivator(LogicalKeyboardKey.keyR, meta: mod, control: !mod):
+              _reloadCurrentTab,
+          SingleActivator(LogicalKeyboardKey.keyN, meta: mod, control: !mod):
+              widget.session.hasTasks ? _newTask : _newNote,
+          SingleActivator(LogicalKeyboardKey.slash, meta: mod, control: !mod):
+              _showShortcutsHelp,
           for (var i = 0; i < _navCommands.length && i < 9; i++)
             SingleActivator(digits[i], meta: mod, control: !mod):
                 _navCommands[i].onRun,
@@ -422,31 +788,71 @@ class _StaffHomeScreenState extends State<StaffHomeScreen> {
           child: Scaffold(
             key: _scaffoldKey,
             backgroundColor: AppTheme.background,
-            body: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+            body: Stack(
               children: [
-                nav,
-                Expanded(
-                  child: Padding(
-                    padding: EdgeInsets.only(top: AppTheme.titleBarInset),
-                    child: Align(
-                      alignment: Alignment.topCenter,
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 1360),
-                        child: Navigator(
-                          key: _contentNavKey,
-                          onGenerateRoute: (_) => MaterialPageRoute(
-                            builder: (_) => AnimatedBuilder(
-                              animation: _tabNotifier,
-                              builder: (_, _) =>
-                                  _animatedBody(_buildCurrentPage()),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          nav,
+                          Expanded(
+                            child: Padding(
+                              padding: EdgeInsets.only(
+                                top: AppTheme.titleBarInset,
+                              ),
+                              child: Align(
+                                alignment: Alignment.topCenter,
+                                child: ConstrainedBox(
+                                  constraints: const BoxConstraints(
+                                    maxWidth: 1360,
+                                  ),
+                                  child: Navigator(
+                                    key: _contentNavKey,
+                                    onGenerateRoute: (_) => MaterialPageRoute(
+                                      builder: (_) => AnimatedBuilder(
+                                        animation: _tabNotifier,
+                                        builder: (_, _) =>
+                                            _animatedBody(_buildCurrentPage()),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
-                        ),
+                        ],
                       ),
                     ),
-                  ),
+                    DeskStatusBar(
+                      domain: Uri.tryParse(widget.session.baseUrl)?.host ?? '',
+                      actions: [
+                        Text(
+                          '${modKeyLabel}K Search',
+                          style: const TextStyle(
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.w600,
+                            color: AppTheme.textMuted,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
+                // macOS runs the content edge-to-edge under a hidden title
+                // bar — this strip gives the window a draggable region.
+                if (AppTheme.titleBarInset > 0)
+                  Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    height: AppTheme.titleBarInset,
+                    child: const DragToMoveArea(
+                      child: ColoredBox(color: Colors.transparent),
+                    ),
+                  ),
               ],
             ),
           ),
@@ -483,6 +889,7 @@ class _StaffHomeScreenState extends State<StaffHomeScreen> {
 
   @override
   void dispose() {
+    _badgeTimer?.cancel();
     _tabNotifier.dispose();
     super.dispose();
   }

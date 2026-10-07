@@ -45,10 +45,14 @@ class MobileConfig {
           ? roles.map((e) => e.toString()).toList()
           : const <String>['Staff'],
       themePrimary: _parseColor(theme['primary'], const Color(0xFF1B5ED6)),
-      themePrimaryDark:
-          _parseColor(theme['primary_dark'], const Color(0xFF114CB3)),
-      themeBackground:
-          _parseColor(theme['background'], const Color(0xFFE8F1FB)),
+      themePrimaryDark: _parseColor(
+        theme['primary_dark'],
+        const Color(0xFF114CB3),
+      ),
+      themeBackground: _parseColor(
+        theme['background'],
+        const Color(0xFFE8F1FB),
+      ),
     );
   }
 

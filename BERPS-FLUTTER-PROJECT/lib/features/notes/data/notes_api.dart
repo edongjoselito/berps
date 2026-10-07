@@ -152,10 +152,10 @@ class NotesApi {
   }
 
   Map<String, String> _headers(String token) => {
-        HttpHeaders.acceptHeader: 'application/json',
-        HttpHeaders.contentTypeHeader: 'application/json',
-        HttpHeaders.authorizationHeader: 'Bearer $token',
-      };
+    HttpHeaders.acceptHeader: 'application/json',
+    HttpHeaders.contentTypeHeader: 'application/json',
+    HttpHeaders.authorizationHeader: 'Bearer $token',
+  };
 
   Future<http.Response> _request(
     Future<http.Response> Function() action,
@@ -186,7 +186,9 @@ class NotesApi {
 
     late final Object? decoded;
     try {
-      decoded = jsonDecode(utf8.decode(response.bodyBytes, allowMalformed: true));
+      decoded = jsonDecode(
+        utf8.decode(response.bodyBytes, allowMalformed: true),
+      );
     } on FormatException {
       throw const ApiException('Invalid server response format.');
     }

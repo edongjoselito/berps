@@ -113,26 +113,26 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                         maxWidth: double.infinity,
                       ),
                       child: Form(
-                    key: _formKey,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        FadeSlide(
-                          delay: const Duration(milliseconds: 40),
-                          child: _WelcomeHero(config: config),
-                        ),
-                        const SizedBox(height: 28),
-                        FadeSlide(
-                          delay: const Duration(milliseconds: 120),
-                          child: _ConnectCard(
-                            urlController: _urlController,
-                            connecting: _connecting,
-                            error: _error,
-                            onSubmit: _continue,
-                          ),
-                        ),
-                      ],
+                        key: _formKey,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            FadeSlide(
+                              delay: const Duration(milliseconds: 40),
+                              child: _WelcomeHero(config: config),
+                            ),
+                            const SizedBox(height: 28),
+                            FadeSlide(
+                              delay: const Duration(milliseconds: 120),
+                              child: _ConnectCard(
+                                urlController: _urlController,
+                                connecting: _connecting,
+                                error: _error,
+                                onSubmit: _continue,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
@@ -240,8 +240,8 @@ class _WelcomeHero extends StatelessWidget {
       children: [
         BrandLogo(url: config?.logoUrl ?? '', size: 72),
         const SizedBox(height: 20),
-        const Text(
-          'BERPS Mobile',
+        Text(
+          AppTheme.productName,
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 28,
@@ -332,11 +332,7 @@ class _ErrorBanner extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Icon(
-            LucideIcons.circleAlert,
-            color: AppTheme.danger,
-            size: 18,
-          ),
+          const Icon(LucideIcons.circleAlert, color: AppTheme.danger, size: 18),
           const SizedBox(width: 10),
           Expanded(
             child: Text(

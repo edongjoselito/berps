@@ -1,8 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/network/api_exception.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/csv_export.dart';
 import '../../../core/widgets/desktop_kit.dart';
 import '../../../core/utils/date_formatters.dart';
 import '../../../core/utils/haptics.dart';
@@ -11,6 +15,7 @@ import '../../../core/widgets/animations.dart';
 import '../../../core/widgets/app_toast.dart';
 import '../../../core/widgets/mobile_header.dart';
 import '../../../core/widgets/skeleton.dart';
+import '../../auth/data/session_store.dart';
 import '../../auth/domain/staff_session.dart';
 import '../../home/data/staff_api.dart';
 import '../../notifications/presentation/notification_bell.dart';
@@ -37,10 +42,42 @@ class StaffTasksTab extends StatefulWidget {
 
 class _StaffTasksTabState extends State<StaffTasksTab> {
   final StaffApi _api = StaffApi();
+  SessionStore? _store;
   Future<StaffTasksData>? _future;
   String _status = 'open';
   String _scope = '';
   String _statFilter = ''; // '', 'open', 'due_today', 'overdue', 'done'
+
+  /// Desktop table sorting — null keeps the server's default ordering.
+  String? _sortColumn; // 'title' | 'priority' | 'due' | 'reported'
+  bool _sortAsc = true;
+
+  void _toggleSort(String column) {
+    Haptics.light();
+    setState(() {
+      if (_sortColumn == column) {
+        _sortAsc = !_sortAsc;
+      } else {
+        _sortColumn = column;
+        _sortAsc = column != 'due'; // dates read better newest-first by default
+      }
+    });
+  }
+
+  int _compareTasks(StaffTask a, StaffTask b) {
+    int byString(String x, String y) =>
+        x.toLowerCase().compareTo(y.toLowerCase());
+    final cmp = switch (_sortColumn) {
+      'title' => byString(a.title, b.title),
+      'priority' => (int.tryParse(a.priorityValue) ?? 9).compareTo(
+        int.tryParse(b.priorityValue) ?? 9,
+      ),
+      'due' => a.dueDate.compareTo(b.dueDate),
+      'reported' => a.reportedDate.compareTo(b.reportedDate),
+      _ => 0,
+    };
+    return _sortAsc ? cmp : -cmp;
+  }
 
   @override
   void initState() {
@@ -48,6 +85,27 @@ class _StaffTasksTabState extends State<StaffTasksTab> {
     _scope = widget.initialScope;
     _statFilter = widget.initialStatFilter;
     _applyStatFilterState();
+    _reload();
+    unawaited(_restoreFilterPreset());
+  }
+
+  /// Restores the saved status/scope preset when the tab wasn't opened with
+  /// an explicit filter (e.g. from the sidebar instead of a dashboard link).
+  Future<void> _restoreFilterPreset() async {
+    final store = SessionStore(await SharedPreferences.getInstance());
+    if (!mounted) return;
+    _store = store;
+    if (widget.initialScope.isNotEmpty || widget.initialStatFilter.isNotEmpty) {
+      return;
+    }
+    final saved = store.readTasksFilter();
+    if (saved == null) return;
+    final parts = saved.split('|');
+    if (parts.length != 2 || (parts[0] == _status && parts[1] == _scope)) {
+      return;
+    }
+    _status = parts[0];
+    _scope = parts[1];
     _reload();
   }
 
@@ -82,6 +140,36 @@ class _StaffTasksTabState extends State<StaffTasksTab> {
         scope: _scope,
       );
     });
+    unawaited(_store?.saveTasksFilter(_status, _scope) ?? Future.value());
+  }
+
+  /// Exports the currently visible task set (status/scope filtered) to CSV.
+  Future<void> _exportCsv(List<StaffTask> tasks) async {
+    Haptics.light();
+    final csv = CsvExport.build(
+      const ['Title', 'Project', 'Priority', 'Reported', 'Due', 'Status'],
+      [
+        for (final t in tasks)
+          [
+            t.title,
+            t.projectName,
+            t.priorityLabel,
+            t.reportedDate,
+            t.dueDate.isEmpty ? t.dueMetaLabel : t.dueDate,
+            t.status,
+          ],
+      ],
+    );
+    final today = DateTime.now();
+    final saved = await CsvExport.save(
+      fileName:
+          'tasks-${today.year}${today.month.toString().padLeft(2, '0')}${today.day.toString().padLeft(2, '0')}.csv',
+      csv: csv,
+    );
+    if (!mounted) return;
+    if (saved != null) {
+      AppToast.success(context, 'Tasks exported to $saved');
+    }
   }
 
   String _sectionTitle() {
@@ -139,6 +227,9 @@ class _StaffTasksTabState extends State<StaffTasksTab> {
 
   /// Desktop body: stat filters, one toolbar row, then a table-style list.
   List<Widget> _buildDesktopBody(StaffTasksData data) {
+    final tasks = _sortColumn == null
+        ? data.tasks
+        : (List.of(data.tasks)..sort(_compareTasks));
     return [
       _TaskStatsRow(
         stats: data.stats,
@@ -157,28 +248,25 @@ class _StaffTasksTabState extends State<StaffTasksTab> {
         action: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _FilterChip(
-              label: 'Forwarded',
-              icon: LucideIcons.arrowLeftRight,
-              selected: _scope == 'forwarded',
-              onSelected: (selected) {
-                Haptics.light();
-                setState(() {
-                  _statFilter = '';
-                  _scope = selected ? 'forwarded' : '';
-                });
-                _reload();
-              },
-            ),
-            const SizedBox(width: 10),
             DeskSegmented(
-              options: const {'open': 'Open', 'closed': 'Closed', 'all': 'All'},
-              value: _status,
+              options: const {
+                'open': 'Open',
+                'closed': 'Closed',
+                'forwarded': 'Forwarded',
+                'all': 'All',
+              },
+              value: _scope == 'forwarded' ? 'forwarded' : _status,
               onChanged: (value) {
                 Haptics.light();
                 setState(() {
                   _statFilter = '';
-                  _status = value;
+                  if (value == 'forwarded') {
+                    _scope = 'forwarded';
+                    _status = 'open';
+                  } else {
+                    _scope = '';
+                    _status = value;
+                  }
                 });
                 _reload();
               },
@@ -189,12 +277,21 @@ class _StaffTasksTabState extends State<StaffTasksTab> {
         child: data.tasks.isEmpty
             ? const Padding(
                 padding: EdgeInsets.all(16),
-                child: _TaskEmptyState(),
+                child: AppEmptyState(
+                  icon: LucideIcons.squareCheck,
+                  title: 'No tasks match the current filter',
+                  message:
+                      'Try a different status or clear the active stat filter.',
+                ),
               )
             : Column(
                 children: [
-                  const _DeskTaskHeaderRow(),
-                  for (final task in data.tasks) ...[
+                  _DeskTaskHeaderRow(
+                    sortColumn: _sortColumn,
+                    ascending: _sortAsc,
+                    onSort: _toggleSort,
+                  ),
+                  for (final task in tasks) ...[
                     const Divider(height: 1, color: AppTheme.border),
                     _DeskTaskRow(
                       task: task,
@@ -209,16 +306,26 @@ class _StaffTasksTabState extends State<StaffTasksTab> {
 
   Future<void> _openEditor(StaffTasksData data, {int? taskId}) async {
     Haptics.light();
-    final changed = await Navigator.of(context).push<bool>(
-      MaterialPageRoute(
-        builder: (_) => StaffTaskEditorScreen(
-          session: widget.session,
-          projects: data.projects,
-          staffOptions: data.staffOptions,
-          taskId: taskId,
-        ),
-      ),
+    final editor = StaffTaskEditorScreen(
+      session: widget.session,
+      projects: data.projects,
+      staffOptions: data.staffOptions,
+      taskId: taskId,
+      modal: AppTheme.isDesktop,
     );
+    // Desktop opens the editor as a centered dialog, not a pushed page.
+    final bool? changed;
+    if (AppTheme.isDesktop) {
+      changed = await showAppSheet<bool>(
+        context: context,
+        maxWidth: 940,
+        builder: (_) => editor,
+      );
+    } else {
+      changed = await Navigator.of(
+        context,
+      ).push<bool>(MaterialPageRoute(builder: (_) => editor));
+    }
 
     if (changed == true && mounted) {
       _reload();
@@ -474,37 +581,47 @@ class _StaffTasksTabState extends State<StaffTasksTab> {
 
   Future<void> _confirmDelete(StaffTask task) async {
     Haptics.warn();
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text(
-          'Delete this task?',
-          style: TextStyle(
-            fontWeight: FontWeight.w900,
-            color: AppTheme.textPrimary,
-          ),
-        ),
-        content: Text(
-          '"${task.title}" will be permanently removed.',
-          style: const TextStyle(color: AppTheme.textSecondary),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            style: FilledButton.styleFrom(
-              backgroundColor: AppTheme.danger,
-              minimumSize: const Size(96, 44),
+    final bool? confirmed;
+    if (AppTheme.isDesktop) {
+      confirmed = await showDeskConfirm(
+        context: context,
+        title: 'Delete this task?',
+        message: '"${task.title}" will be permanently removed.',
+        confirmLabel: 'Delete',
+        danger: true,
+      );
+    } else {
+      confirmed = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text(
+            'Delete this task?',
+            style: TextStyle(
+              fontWeight: FontWeight.w900,
+              color: AppTheme.textPrimary,
             ),
-            child: const Text('Delete'),
           ),
-        ],
-      ),
-    );
+          content: Text(
+            '"${task.title}" will be permanently removed.',
+            style: const TextStyle(color: AppTheme.textSecondary),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              style: FilledButton.styleFrom(
+                backgroundColor: AppTheme.danger,
+                minimumSize: const Size(96, 44),
+              ),
+              child: const Text('Delete'),
+            ),
+          ],
+        ),
+      );
+    }
 
     if (confirmed != true || !mounted) return;
 
@@ -562,9 +679,26 @@ class _StaffTasksTabState extends State<StaffTasksTab> {
                       ? Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            DeskButton(
-                              label: 'New task',
+                            DeskIconButton(
+                              icon: LucideIcons.rotateCw,
+                              tooltip: 'Reload (⌘R)',
+                              onTap: _reload,
+                            ),
+                            const SizedBox(width: 8),
+                            DeskIconButton(
+                              icon: LucideIcons.download,
+                              tooltip: 'Export CSV',
+                              onTap:
+                                  snapshot.hasData &&
+                                      snapshot.data!.tasks.isNotEmpty
+                                  ? () => _exportCsv(snapshot.data!.tasks)
+                                  : null,
+                            ),
+                            const SizedBox(width: 8),
+                            DeskIconButton(
                               icon: LucideIcons.plus,
+                              filled: true,
+                              tooltip: 'New task (⌘N)',
                               onTap: snapshot.hasData
                                   ? () => _openEditor(snapshot.data!)
                                   : null,
@@ -580,7 +714,8 @@ class _StaffTasksTabState extends State<StaffTasksTab> {
               if (snapshot.connectionState == ConnectionState.waiting)
                 const _TasksSkeleton()
               else if (snapshot.hasError)
-                _TaskTabError(
+                AppErrorCard(
+                  title: 'Unable to load tasks',
                   message: snapshot.error is ApiException
                       ? (snapshot.error as ApiException).message
                       : snapshot.error.toString(),
@@ -645,7 +780,12 @@ class _StaffTasksTabState extends State<StaffTasksTab> {
                 ),
                 const SizedBox(height: 10),
                 if (snapshot.data!.tasks.isEmpty)
-                  const _TaskEmptyState()
+                  const AppEmptyState(
+                    icon: LucideIcons.squareCheck,
+                    title: 'No tasks match the current filter',
+                    message:
+                        'Try a different status or clear the active stat filter.',
+                  )
                 else
                   ...snapshot.data!.tasks.asMap().entries.map(
                     (entry) => Padding(
@@ -756,7 +896,9 @@ class _TaskStatsRow extends StatelessWidget {
                       ? Matrix4.diagonal3Values(0.97, 0.97, 1.0)
                       : Matrix4.identity(),
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(
+                      AppTheme.cardRadius(16),
+                    ),
                     border: isActive
                         ? Border.all(color: Colors.white, width: 2.5)
                         : null,
@@ -784,7 +926,9 @@ class _TaskStatsRow extends StatelessWidget {
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(
+                        AppTheme.cardRadius(16),
+                      ),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -938,11 +1082,7 @@ class _AddTaskButton extends StatelessWidget {
                   ),
                 ),
               ),
-              const Icon(
-                LucideIcons.arrowRight,
-                size: 14,
-                color: Colors.white,
-              ),
+              const Icon(LucideIcons.arrowRight, size: 14, color: Colors.white),
             ],
           ),
         ),
@@ -1265,34 +1405,63 @@ class _TaskSectionHeader extends StatelessWidget {
 const _deskTaskColumns = (priority: 96.0, due: 170.0, reported: 120.0);
 
 class _DeskTaskHeaderRow extends StatelessWidget {
-  const _DeskTaskHeaderRow();
+  const _DeskTaskHeaderRow({
+    required this.sortColumn,
+    required this.ascending,
+    required this.onSort,
+  });
+
+  final String? sortColumn;
+  final bool ascending;
+  final ValueChanged<String> onSort;
+
+  Widget _headerCell(String label, String column) {
+    final active = sortColumn == column;
+    final icon = active
+        ? (ascending ? LucideIcons.arrowUp : LucideIcons.arrowDown)
+        : LucideIcons.arrowUpDown;
+    final color = active ? AppTheme.primaryDark : AppTheme.textMuted;
+    return InkWell(
+      onTap: () => onSort(column),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0.6,
+              color: color,
+            ),
+          ),
+          const SizedBox(width: 4),
+          Icon(icon, size: 11, color: color),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    const style = TextStyle(
-      fontSize: 11,
-      fontWeight: FontWeight.w700,
-      letterSpacing: 0.6,
-      color: AppTheme.textMuted,
-    );
+    Widget wrap(Widget child, {double? width}) => width == null
+        ? Expanded(child: child)
+        : SizedBox(width: width, child: child);
     return Container(
       color: AppTheme.surfaceMuted.withValues(alpha: 0.6),
       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 9),
       child: Row(
         children: [
           const SizedBox(width: 20),
-          const Expanded(child: Text('TASK', style: style)),
-          SizedBox(
+          wrap(_headerCell('TASK', 'title')),
+          wrap(
+            _headerCell('PRIORITY', 'priority'),
             width: _deskTaskColumns.priority,
-            child: const Text('PRIORITY', style: style),
           ),
-          SizedBox(
-            width: _deskTaskColumns.due,
-            child: const Text('DUE', style: style),
-          ),
-          SizedBox(
+          wrap(_headerCell('DUE', 'due'), width: _deskTaskColumns.due),
+          wrap(
+            _headerCell('REPORTED', 'reported'),
             width: _deskTaskColumns.reported,
-            child: const Text('REPORTED', style: style),
           ),
         ],
       ),
@@ -1318,127 +1487,135 @@ class _DeskTaskRow extends StatelessWidget {
     final priorityColor = p.contains('high')
         ? AppTheme.danger
         : p.contains('medium')
-            ? AppTheme.warning
-            : p.contains('low')
-                ? AppTheme.success
-                : AppTheme.textSecondary;
+        ? AppTheme.warning
+        : p.contains('low')
+        ? AppTheme.success
+        : AppTheme.textSecondary;
 
     return InkWell(
       onTap: onTap,
       hoverColor: AppTheme.primarySoft.withValues(alpha: 0.5),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 13),
-        child: Row(
-          children: [
-            Container(
-              width: 8,
-              height: 8,
-              decoration: BoxDecoration(
-                color: dueColor,
-                shape: BoxShape.circle,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    task.title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 13.5,
-                      fontWeight: FontWeight.w700,
-                      color: AppTheme.textPrimary,
-                    ),
-                  ),
-                  const SizedBox(height: 3),
-                  Text.rich(
-                    TextSpan(
-                      children: [
-                        if (task.projectName.isNotEmpty)
-                          TextSpan(
-                            text: task.projectName,
-                            style: const TextStyle(
-                              color: AppTheme.primaryDark,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        if (task.isForwardedPending)
-                          TextSpan(
-                            text: task.projectName.isNotEmpty
-                                ? '  ·  Needs your first action'
-                                : 'Needs your first action',
-                            style: const TextStyle(
-                              color: AppTheme.warning,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        if (task.adminComment.isNotEmpty)
-                          TextSpan(
-                            text: '  ·  ${task.adminComment}',
-                            style: const TextStyle(
-                              color: AppTheme.textSecondary,
-                            ),
-                          ),
-                      ],
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 12),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 12),
-            SizedBox(
-              width: _deskTaskColumns.priority,
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: priorityColor.withValues(alpha: 0.10),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Text(
-                    task.priorityLabel,
-                    style: TextStyle(
-                      color: priorityColor,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            SizedBox(
-              width: _deskTaskColumns.due,
-              child: Text(
-                task.dueMetaLabel,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
+      child: ValueListenableBuilder<bool>(
+        valueListenable: AppTheme.compactDensity,
+        builder: (context, compact, _) => Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: 18,
+            vertical: compact ? 9 : 13,
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 8,
+                height: 8,
+                decoration: BoxDecoration(
                   color: dueColor,
-                  fontSize: 12.5,
-                  fontWeight: FontWeight.w700,
+                  shape: BoxShape.circle,
                 ),
               ),
-            ),
-            SizedBox(
-              width: _deskTaskColumns.reported,
-              child: Text(
-                formatCompactDate(task.reportedDate),
-                style: const TextStyle(
-                  color: AppTheme.textSecondary,
-                  fontSize: 12.5,
-                  fontWeight: FontWeight.w600,
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      task.title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.w700,
+                        color: AppTheme.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text.rich(
+                      TextSpan(
+                        children: [
+                          if (task.projectName.isNotEmpty)
+                            TextSpan(
+                              text: task.projectName,
+                              style: const TextStyle(
+                                color: AppTheme.primaryDark,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          if (task.isForwardedPending)
+                            TextSpan(
+                              text: task.projectName.isNotEmpty
+                                  ? '  ·  Needs your first action'
+                                  : 'Needs your first action',
+                              style: const TextStyle(
+                                color: AppTheme.warning,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          if (task.adminComment.isNotEmpty)
+                            TextSpan(
+                              text: '  ·  ${task.adminComment}',
+                              style: const TextStyle(
+                                color: AppTheme.textSecondary,
+                              ),
+                            ),
+                        ],
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontSize: 12),
+                    ),
+                  ],
                 ),
               ),
-            ),
-          ],
+              const SizedBox(width: 12),
+              SizedBox(
+                width: _deskTaskColumns.priority,
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
+                    decoration: BoxDecoration(
+                      color: priorityColor.withValues(alpha: 0.10),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      task.priorityLabel,
+                      style: TextStyle(
+                        color: priorityColor,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(
+                width: _deskTaskColumns.due,
+                child: Text(
+                  task.dueMetaLabel,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: dueColor,
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+              SizedBox(
+                width: _deskTaskColumns.reported,
+                child: Text(
+                  formatCompactDate(task.reportedDate),
+                  style: const TextStyle(
+                    color: AppTheme.textSecondary,
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -1666,6 +1843,72 @@ class _TasksSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (AppTheme.isDesktop) {
+      // Mirrors the desktop layout: stat-card row, then a flat panel of rows.
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Row(
+            children: [
+              Expanded(child: SkeletonCard(child: SizedBox(height: 84))),
+              SizedBox(width: 12),
+              Expanded(child: SkeletonCard(child: SizedBox(height: 84))),
+              SizedBox(width: 12),
+              Expanded(child: SkeletonCard(child: SizedBox(height: 84))),
+              SizedBox(width: 12),
+              Expanded(child: SkeletonCard(child: SizedBox(height: 84))),
+            ],
+          ),
+          const SizedBox(height: 20),
+          SkeletonCard(
+            radius: 14,
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Row(
+                  children: [
+                    Skeleton(width: 120, height: 14),
+                    SizedBox(width: 10),
+                    Skeleton(width: 24, height: 14, radius: 999),
+                    Spacer(),
+                    Skeleton(width: 190, height: 30, radius: 9),
+                  ],
+                ),
+                const SizedBox(height: 14),
+                const Divider(height: 1, color: AppTheme.border),
+                for (var i = 0; i < 6; i++) ...[
+                  const SizedBox(height: 12),
+                  const Row(
+                    children: [
+                      Skeleton(width: 8, height: 8, radius: 999),
+                      SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Skeleton(width: 260, height: 12),
+                            SizedBox(height: 4),
+                            Skeleton(width: 150, height: 9),
+                          ],
+                        ),
+                      ),
+                      Skeleton(width: 60, height: 18, radius: 6),
+                      SizedBox(width: 16),
+                      Skeleton(width: 90, height: 11),
+                      SizedBox(width: 16),
+                      Skeleton(width: 70, height: 11),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  if (i < 5) const Divider(height: 1, color: AppTheme.border),
+                ],
+              ],
+            ),
+          ),
+        ],
+      );
+    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1725,48 +1968,6 @@ class _TasksSkeleton extends StatelessWidget {
             ),
           ),
       ],
-    );
-  }
-}
-
-class _TaskTabError extends StatelessWidget {
-  const _TaskTabError({required this.message, required this.onRetry});
-
-  final String message;
-  final VoidCallback onRetry;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppTheme.border),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Unable to load tasks',
-            style: TextStyle(
-              fontWeight: FontWeight.w900,
-              color: AppTheme.textPrimary,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            message,
-            style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13),
-          ),
-          const SizedBox(height: 14),
-          FilledButton.icon(
-            onPressed: onRetry,
-            icon: const Icon(LucideIcons.refreshCw, size: 16),
-            label: const Text('Try again'),
-          ),
-        ],
-      ),
     );
   }
 }
@@ -1848,24 +2049,28 @@ class _SheetContainer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: AppTheme.isDesktop
+            ? null
+            : const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: SafeArea(
         top: false,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const SizedBox(height: 10),
-            Container(
-              width: 36,
-              height: AppTheme.isDesktop ? 0 : 4,
-              decoration: BoxDecoration(
-                color: AppTheme.border,
-                borderRadius: BorderRadius.circular(2),
+            if (!AppTheme.isDesktop) ...[
+              const SizedBox(height: 10),
+              Container(
+                width: 36,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: AppTheme.border,
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
-            ),
+            ],
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 14, 20, 6),
               child: Row(
@@ -1906,6 +2111,12 @@ class _SheetContainer extends StatelessWidget {
                       ],
                     ),
                   ),
+                  if (AppTheme.isDesktop)
+                    DeskIconButton(
+                      icon: LucideIcons.x,
+                      tooltip: 'Close',
+                      onTap: () => Navigator.of(context).maybePop(),
+                    ),
                 ],
               ),
             ),
@@ -2074,46 +2285,6 @@ class _StatusChoice extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _TaskEmptyState extends StatelessWidget {
-  const _TaskEmptyState();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppTheme.border),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: AppTheme.primarySoft,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Icon(
-              LucideIcons.squareCheck,
-              color: AppTheme.primaryDark,
-              size: 18,
-            ),
-          ),
-          const SizedBox(width: 14),
-          const Expanded(
-            child: Text(
-              'No tasks match the current filter.',
-              style: TextStyle(color: AppTheme.textSecondary, fontSize: 13),
-            ),
-          ),
-        ],
       ),
     );
   }

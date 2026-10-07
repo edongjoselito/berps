@@ -1,8 +1,15 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:window_manager/window_manager.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/haptics.dart';
+import '../../../core/widgets/brand_logo.dart';
+import '../../../core/widgets/desk_nav.dart';
+import '../../../core/widgets/desktop_kit.dart';
+import '../../../core/widgets/staff_avatar.dart';
 import '../../auth/data/session_store.dart';
 import '../../auth/domain/mobile_config.dart';
 import '../../auth/domain/staff_session.dart';
@@ -43,8 +50,24 @@ class AdminHomeScreen extends StatefulWidget {
 class _AdminHomeScreenState extends State<AdminHomeScreen> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   int _currentIndex = 0;
+  String _desktopNavId = 'dashboard';
+  bool _sidebarCollapsed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _sidebarCollapsed = widget.store.readSidebarCollapsed();
+    if (AppTheme.isDesktop) {
+      AppTheme.compactDensity.value = widget.store.readDensityCompact();
+    }
+  }
 
   void _openDrawer() => _scaffoldKey.currentState?.openDrawer();
+
+  void _toggleSidebar() {
+    setState(() => _sidebarCollapsed = !_sidebarCollapsed);
+    unawaited(widget.store.saveSidebarCollapsed(_sidebarCollapsed));
+  }
 
   void _selectIndex(int index) {
     if (index != _currentIndex) Haptics.light();
@@ -61,7 +84,9 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppTheme.isDesktop ? 16 : 24),
+        ),
         backgroundColor: AppTheme.surface,
         contentPadding: const EdgeInsets.fromLTRB(24, 28, 24, 20),
         content: Column(
@@ -131,6 +156,312 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     if (confirmed == true) await widget.onSignOut();
   }
 
+  // ── Desktop shell ───────────────────────────────────────────────────────
+
+  void _selectDesktop(String id) {
+    if (id != _desktopNavId) Haptics.light();
+    setState(() => _desktopNavId = id);
+  }
+
+  List<DeskNavSectionSpec> get _desktopSections => [
+    DeskNavSectionSpec(
+      label: 'Main',
+      items: [
+        DeskNavItemSpec(
+          id: 'dashboard',
+          icon: LucideIcons.layoutGrid,
+          label: 'Dashboard',
+        ),
+        DeskNavItemSpec(
+          id: 'tasks',
+          icon: LucideIcons.listChecks,
+          label: 'Tasks',
+        ),
+        DeskNavItemSpec(
+          id: 'clients',
+          icon: LucideIcons.users,
+          label: 'Clients',
+        ),
+      ],
+    ),
+    DeskNavSectionSpec(
+      label: 'Workforce',
+      items: [
+        DeskNavItemSpec(
+          id: 'employee-tasks',
+          icon: LucideIcons.users,
+          label: 'Employee Tasks',
+        ),
+        DeskNavItemSpec(
+          id: 'accomplishments',
+          icon: LucideIcons.trophy,
+          label: 'Accomplishments',
+        ),
+        DeskNavItemSpec(
+          id: 'employee-accomplishment',
+          icon: LucideIcons.userSearch,
+          label: 'Employee Report',
+        ),
+      ],
+    ),
+    DeskNavSectionSpec(
+      label: 'Attendance',
+      items: [
+        DeskNavItemSpec(
+          id: 'attendance',
+          icon: LucideIcons.calendarDays,
+          label: 'Attendance List',
+        ),
+        DeskNavItemSpec(
+          id: 'dtr',
+          icon: LucideIcons.calendarCheck,
+          label: 'Employee DTR',
+        ),
+      ],
+    ),
+    DeskNavSectionSpec(
+      label: 'Workspace',
+      items: [
+        DeskNavItemSpec(
+          id: 'calendar',
+          icon: LucideIcons.calendarDays,
+          label: 'Calendar',
+        ),
+        DeskNavItemSpec(
+          id: 'more',
+          icon: LucideIcons.slidersHorizontal,
+          label: 'Settings',
+        ),
+      ],
+    ),
+  ];
+
+  Widget _desktopPage() => switch (_desktopNavId) {
+    'tasks' => AdminTasksTab(session: widget.session, onMenu: _openDrawer),
+    'clients' => AdminClientsTab(session: widget.session, onMenu: _openDrawer),
+    'employee-tasks' => EmployeeTasksScreen(session: widget.session),
+    'accomplishments' => AdminAccomplishmentsScreen(session: widget.session),
+    'employee-accomplishment' => EmployeeAccomplishmentScreen(
+      session: widget.session,
+    ),
+    'attendance' => AdminAttendanceScreen(session: widget.session),
+    'dtr' => EmpDtrScreen(session: widget.session),
+    'calendar' => CalendarScreen(session: widget.session),
+    'more' => AdminMoreTab(
+      session: widget.session,
+      config: widget.config,
+      onMenu: _openDrawer,
+      onSignOut: _confirmSignOut,
+    ),
+    _ => AdminDashboardTab(
+      session: widget.session,
+      onMenu: _openDrawer,
+      onOpenTasks: () => _selectDesktop('tasks'),
+      onOpenClients: () => _selectDesktop('clients'),
+    ),
+  };
+
+  Widget _sidebarFooter(bool collapsed) {
+    final session = widget.session;
+    if (collapsed) {
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(0, 10, 0, 12),
+        child: Column(
+          children: [
+            Tooltip(
+              message: session.formalName,
+              child: InkWell(
+                onTap: () => _selectDesktop('more'),
+                borderRadius: BorderRadius.circular(10),
+                hoverColor: DeskNavColors.hoverFill,
+                child: Padding(
+                  padding: const EdgeInsets.all(4),
+                  child: StaffAvatar(
+                    url: session.avatarUrl,
+                    size: 34,
+                    radius: 10,
+                    background: Colors.white,
+                    placeholderColor: AppTheme.primary,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 6),
+            IconButton(
+              tooltip: 'Sign out',
+              onPressed: _confirmSignOut,
+              hoverColor: DeskNavColors.hoverFill,
+              visualDensity: VisualDensity.compact,
+              icon: const Icon(
+                LucideIcons.logOut,
+                size: 17,
+                color: DeskNavColors.textDim,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 10, 8, 12),
+      child: Row(
+        children: [
+          Expanded(
+            child: InkWell(
+              onTap: () => _selectDesktop('more'),
+              borderRadius: BorderRadius.circular(10),
+              hoverColor: DeskNavColors.hoverFill,
+              child: Padding(
+                padding: const EdgeInsets.all(6),
+                child: Row(
+                  children: [
+                    StaffAvatar(
+                      url: session.avatarUrl,
+                      size: 34,
+                      radius: 10,
+                      background: Colors.white,
+                      placeholderColor: AppTheme.primary,
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            session.formalName,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          const Text(
+                            'Administrator',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: DeskNavColors.textDim,
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          IconButton(
+            tooltip: 'Sign out',
+            onPressed: _confirmSignOut,
+            hoverColor: DeskNavColors.hoverFill,
+            icon: const Icon(
+              LucideIcons.logOut,
+              size: 17,
+              color: DeskNavColors.textDim,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDesktopShell() {
+    final content = AnimatedSwitcher(
+      duration: const Duration(milliseconds: 220),
+      transitionBuilder: (child, animation) =>
+          FadeTransition(opacity: animation, child: child),
+      child: KeyedSubtree(
+        key: ValueKey(_desktopNavId),
+        child: DeskRootScope(child: _desktopPage()),
+      ),
+    );
+
+    return Scaffold(
+      key: _scaffoldKey,
+      backgroundColor: AppTheme.background,
+      body: Stack(
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    DeskSideNav(
+                      logo: Container(
+                        width: 30,
+                        height: 30,
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: BrandLogo(
+                          url: widget.config?.logoUrl ?? '',
+                          size: 22,
+                          framed: false,
+                        ),
+                      ),
+                      title: 'BERPS',
+                      sections: _desktopSections,
+                      activeId: _desktopNavId,
+                      onSelect: _selectDesktop,
+                      collapsed: _sidebarCollapsed,
+                      onToggleCollapse: _toggleSidebar,
+                      footerBuilder: _sidebarFooter,
+                    ),
+                    Expanded(
+                      child: Padding(
+                        padding: EdgeInsets.only(top: AppTheme.titleBarInset),
+                        child: Align(
+                          alignment: Alignment.topCenter,
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 1360),
+                            child: content,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              DeskStatusBar(
+                domain: Uri.tryParse(widget.session.baseUrl)?.host ?? '',
+                actions: const [
+                  Text(
+                    'Admin console',
+                    style: TextStyle(
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w600,
+                      color: AppTheme.textMuted,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          if (AppTheme.titleBarInset > 0)
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              height: AppTheme.titleBarInset,
+              child: const DragToMoveArea(
+                child: ColoredBox(color: Colors.transparent),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
   String get _activeItemId => switch (_currentIndex) {
     0 => 'dashboard',
     1 => 'tasks',
@@ -140,6 +471,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (AppTheme.isDesktop) return _buildDesktopShell();
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: AppTheme.background,

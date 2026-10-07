@@ -16,13 +16,10 @@ import '../../notes/data/notes_api.dart';
 import '../../notes/domain/note.dart';
 import '../../reminders/data/reminders_api.dart';
 import '../../reminders/domain/reminder.dart';
+import '../../notifications/presentation/notification_bell.dart';
 import '../domain/calendar_event.dart';
 import 'calendar_day_note_editor.dart';
 import 'calendar_event_editor.dart';
-
-/// Apple Calendar signature red — used for the year, the current month and
-/// the "today" marker, exactly like the iOS Calendar year view.
-const Color kAppleRed = Color(0xFFFF3B30);
 
 const List<String> _monthNamesFull = [
   'January',
@@ -212,14 +209,17 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
   Future<void> _openCreate() async {
     Haptics.light();
-    await Navigator.of(context).push<bool>(
-      MaterialPageRoute(
-        builder: (_) => CalendarDayNoteEditor(
-          session: widget.session,
-          date: DateTime.now(),
-        ),
-      ),
+    final editor = CalendarDayNoteEditor(
+      session: widget.session,
+      date: DateTime.now(),
     );
+    if (AppTheme.isDesktop) {
+      await showAppSheet<bool>(context: context, builder: (_) => editor);
+      return;
+    }
+    await Navigator.of(
+      context,
+    ).push<bool>(MaterialPageRoute(builder: (_) => editor));
   }
 
   Future<void> _openMonth(int year, int month) async {
@@ -414,16 +414,25 @@ class _CalendarDashboardTabState extends State<CalendarDashboardTab> {
     setState(() => _view = view);
   }
 
+  /// Editors are full routes on mobile; on desktop they open as centered
+  /// dialogs so the calendar stays in place underneath.
+  Future<bool?> _openEditorRoute(Widget editor) {
+    if (AppTheme.isDesktop) {
+      return showAppSheet<bool>(context: context, builder: (_) => editor);
+    }
+    return Navigator.of(
+      context,
+    ).push<bool>(MaterialPageRoute(builder: (_) => editor));
+  }
+
   Future<void> _openCreateNote() async {
     Haptics.light();
-    final saved = await Navigator.of(context).push<bool>(
-      MaterialPageRoute(
-        builder: (_) => CalendarDayNoteEditor(
-          session: widget.session,
-          date: _view == _CalendarView.day
-              ? _selectedDay
-              : DateTime(_year, _month, DateTime.now().day),
-        ),
+    final saved = await _openEditorRoute(
+      CalendarDayNoteEditor(
+        session: widget.session,
+        date: _view == _CalendarView.day
+            ? _selectedDay
+            : DateTime(_year, _month, DateTime.now().day),
       ),
     );
     if (saved == true) _reload();
@@ -431,14 +440,12 @@ class _CalendarDashboardTabState extends State<CalendarDashboardTab> {
 
   Future<void> _openCreateEvent() async {
     Haptics.light();
-    final saved = await Navigator.of(context).push<bool>(
-      MaterialPageRoute(
-        builder: (_) => CalendarEventEditor(
-          session: widget.session,
-          initialDate: _view == _CalendarView.day
-              ? _selectedDay
-              : DateTime(_year, _month, DateTime.now().day),
-        ),
+    final saved = await _openEditorRoute(
+      CalendarEventEditor(
+        session: widget.session,
+        initialDate: _view == _CalendarView.day
+            ? _selectedDay
+            : DateTime(_year, _month, DateTime.now().day),
       ),
     );
     if (saved == true) _reload();
@@ -447,14 +454,12 @@ class _CalendarDashboardTabState extends State<CalendarDashboardTab> {
   Future<void> _openCreateReminder() async {
     Haptics.light();
     // Reuse the reminders screen editor via a bottom sheet
-    final saved = await Navigator.of(context).push<bool>(
-      MaterialPageRoute(
-        builder: (_) => _ReminderQuickEditor(
-          session: widget.session,
-          date: _view == _CalendarView.day
-              ? _selectedDay
-              : DateTime(_year, _month, DateTime.now().day),
-        ),
+    final saved = await _openEditorRoute(
+      _ReminderQuickEditor(
+        session: widget.session,
+        date: _view == _CalendarView.day
+            ? _selectedDay
+            : DateTime(_year, _month, DateTime.now().day),
       ),
     );
     if (saved == true) _reload();
@@ -462,13 +467,11 @@ class _CalendarDashboardTabState extends State<CalendarDashboardTab> {
 
   Future<void> _openEditNote(Note note) async {
     Haptics.light();
-    final saved = await Navigator.of(context).push<bool>(
-      MaterialPageRoute(
-        builder: (_) => CalendarDayNoteEditor(
-          session: widget.session,
-          date: _parseDate(note.date),
-          existing: note,
-        ),
+    final saved = await _openEditorRoute(
+      CalendarDayNoteEditor(
+        session: widget.session,
+        date: _parseDate(note.date),
+        existing: note,
       ),
     );
     if (saved == true) _reload();
@@ -476,24 +479,19 @@ class _CalendarDashboardTabState extends State<CalendarDashboardTab> {
 
   Future<void> _openEditEvent(CalendarEvent event) async {
     Haptics.light();
-    final saved = await Navigator.of(context).push<bool>(
-      MaterialPageRoute(
-        builder: (_) =>
-            CalendarEventEditor(session: widget.session, existing: event),
-      ),
+    final saved = await _openEditorRoute(
+      CalendarEventEditor(session: widget.session, existing: event),
     );
     if (saved == true) _reload();
   }
 
   Future<void> _openEditReminder(Reminder reminder) async {
     Haptics.light();
-    final saved = await Navigator.of(context).push<bool>(
-      MaterialPageRoute(
-        builder: (_) => _ReminderQuickEditor(
-          session: widget.session,
-          date: _parseDate(reminder.remindAt),
-          existing: reminder,
-        ),
+    final saved = await _openEditorRoute(
+      _ReminderQuickEditor(
+        session: widget.session,
+        date: _parseDate(reminder.remindAt),
+        existing: reminder,
       ),
     );
     if (saved == true) _reload();
@@ -501,34 +499,47 @@ class _CalendarDashboardTabState extends State<CalendarDashboardTab> {
 
   Future<void> _confirmDeleteNote(Note note) async {
     Haptics.warn();
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text(
-          'Delete note?',
-          style: TextStyle(
-            fontWeight: FontWeight.w900,
-            color: AppTheme.textPrimary,
+    final bool? confirmed;
+    if (AppTheme.isDesktop) {
+      confirmed = await showDeskConfirm(
+        context: context,
+        title: 'Delete note?',
+        message: '"${note.displayTitle}" will be permanently removed.',
+        confirmLabel: 'Delete',
+        danger: true,
+      );
+    } else {
+      confirmed = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppTheme.cardRadius(20)),
           ),
+          title: const Text(
+            'Delete note?',
+            style: TextStyle(
+              fontWeight: FontWeight.w900,
+              color: AppTheme.textPrimary,
+            ),
+          ),
+          content: Text(
+            '"${note.displayTitle}" will be permanently removed.',
+            style: const TextStyle(color: AppTheme.textSecondary),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              style: FilledButton.styleFrom(backgroundColor: AppTheme.danger),
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: const Text('Delete'),
+            ),
+          ],
         ),
-        content: Text(
-          '"${note.displayTitle}" will be permanently removed.',
-          style: const TextStyle(color: AppTheme.textSecondary),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: AppTheme.danger),
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
-    );
+      );
+    }
     if (confirmed != true) return;
     try {
       await _notesApi.deleteNote(
@@ -548,34 +559,47 @@ class _CalendarDashboardTabState extends State<CalendarDashboardTab> {
 
   Future<void> _confirmDeleteEvent(CalendarEvent event) async {
     Haptics.warn();
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text(
-          'Delete event?',
-          style: TextStyle(
-            fontWeight: FontWeight.w900,
-            color: AppTheme.textPrimary,
+    final bool? confirmed;
+    if (AppTheme.isDesktop) {
+      confirmed = await showDeskConfirm(
+        context: context,
+        title: 'Delete event?',
+        message: '"${event.title}" will be permanently removed.',
+        confirmLabel: 'Delete',
+        danger: true,
+      );
+    } else {
+      confirmed = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppTheme.cardRadius(20)),
           ),
+          title: const Text(
+            'Delete event?',
+            style: TextStyle(
+              fontWeight: FontWeight.w900,
+              color: AppTheme.textPrimary,
+            ),
+          ),
+          content: Text(
+            '"${event.title}" will be permanently removed.',
+            style: const TextStyle(color: AppTheme.textSecondary),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              style: FilledButton.styleFrom(backgroundColor: AppTheme.danger),
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: const Text('Delete'),
+            ),
+          ],
         ),
-        content: Text(
-          '"${event.title}" will be permanently removed.',
-          style: const TextStyle(color: AppTheme.textSecondary),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: AppTheme.danger),
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
-    );
+      );
+    }
     if (confirmed != true) return;
     try {
       await _staffApi.deleteCalendarEvent(
@@ -595,34 +619,47 @@ class _CalendarDashboardTabState extends State<CalendarDashboardTab> {
 
   Future<void> _confirmDeleteReminder(Reminder reminder) async {
     Haptics.warn();
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text(
-          'Delete reminder?',
-          style: TextStyle(
-            fontWeight: FontWeight.w900,
-            color: AppTheme.textPrimary,
+    final bool? confirmed;
+    if (AppTheme.isDesktop) {
+      confirmed = await showDeskConfirm(
+        context: context,
+        title: 'Delete reminder?',
+        message: '"${reminder.title}" will be permanently removed.',
+        confirmLabel: 'Delete',
+        danger: true,
+      );
+    } else {
+      confirmed = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppTheme.cardRadius(20)),
           ),
+          title: const Text(
+            'Delete reminder?',
+            style: TextStyle(
+              fontWeight: FontWeight.w900,
+              color: AppTheme.textPrimary,
+            ),
+          ),
+          content: Text(
+            '"${reminder.title}" will be permanently removed.',
+            style: const TextStyle(color: AppTheme.textSecondary),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              style: FilledButton.styleFrom(backgroundColor: AppTheme.danger),
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: const Text('Delete'),
+            ),
+          ],
         ),
-        content: Text(
-          '"${reminder.title}" will be permanently removed.',
-          style: const TextStyle(color: AppTheme.textSecondary),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: AppTheme.danger),
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
-    );
+      );
+    }
     if (confirmed != true) return;
     try {
       await _remindersApi.deleteReminder(
@@ -725,6 +762,14 @@ class _CalendarDashboardTabState extends State<CalendarDashboardTab> {
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
+                          DeskIconButton(
+                            icon: LucideIcons.rotateCw,
+                            tooltip: 'Refresh',
+                            onTap: _reload,
+                          ),
+                          const SizedBox(width: 8),
+                          NotificationBell(session: widget.session),
+                          const SizedBox(width: 8),
                           MobileHeaderButton(
                             icon: LucideIcons.chevronLeft,
                             onTap: () => _shiftPeriod(-1),
@@ -990,7 +1035,7 @@ class _DashboardPeriodBar extends StatelessWidget {
           TextButton(
             onPressed: onToday,
             style: TextButton.styleFrom(
-              foregroundColor: kAppleRed,
+              foregroundColor: AppTheme.danger,
               padding: const EdgeInsets.symmetric(horizontal: 10),
               minimumSize: const Size(0, 36),
             ),
@@ -1080,7 +1125,7 @@ class _YearBlock extends StatelessWidget {
               fontSize: 30,
               fontWeight: FontWeight.w800,
               letterSpacing: -0.5,
-              color: isCurrentYear ? kAppleRed : AppTheme.textPrimary,
+              color: isCurrentYear ? AppTheme.danger : AppTheme.textPrimary,
             ),
           ),
         ),
@@ -1143,7 +1188,7 @@ class _MiniMonth extends StatelessWidget {
               style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w800,
-                color: isCurrentMonth ? kAppleRed : AppTheme.textPrimary,
+                color: isCurrentMonth ? AppTheme.danger : AppTheme.textPrimary,
               ),
             ),
           ),
@@ -1197,7 +1242,7 @@ class _MiniDayCell extends StatelessWidget {
         height: 14,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: kAppleRed,
+          color: AppTheme.danger,
           borderRadius: BorderRadius.circular(4),
         ),
         child: text,
@@ -1293,14 +1338,21 @@ class _MonthDetailScreenState extends State<_MonthDetailScreen> {
     _reload();
   }
 
+  Future<bool?> _openEditorRoute(Widget editor) {
+    if (AppTheme.isDesktop) {
+      return showAppSheet<bool>(context: context, builder: (_) => editor);
+    }
+    return Navigator.of(
+      context,
+    ).push<bool>(MaterialPageRoute(builder: (_) => editor));
+  }
+
   Future<void> _openCreateNote() async {
     Haptics.light();
-    final saved = await Navigator.of(context).push<bool>(
-      MaterialPageRoute(
-        builder: (_) => CalendarDayNoteEditor(
-          session: widget.session,
-          date: DateTime(_year, _month, DateTime.now().day),
-        ),
+    final saved = await _openEditorRoute(
+      CalendarDayNoteEditor(
+        session: widget.session,
+        date: DateTime(_year, _month, DateTime.now().day),
       ),
     );
     if (saved == true) _reload();
@@ -1308,12 +1360,10 @@ class _MonthDetailScreenState extends State<_MonthDetailScreen> {
 
   Future<void> _openCreateEvent() async {
     Haptics.light();
-    final saved = await Navigator.of(context).push<bool>(
-      MaterialPageRoute(
-        builder: (_) => CalendarEventEditor(
-          session: widget.session,
-          initialDate: DateTime(_year, _month, DateTime.now().day),
-        ),
+    final saved = await _openEditorRoute(
+      CalendarEventEditor(
+        session: widget.session,
+        initialDate: DateTime(_year, _month, DateTime.now().day),
       ),
     );
     if (saved == true) _reload();
@@ -1321,12 +1371,10 @@ class _MonthDetailScreenState extends State<_MonthDetailScreen> {
 
   Future<void> _openCreateReminder() async {
     Haptics.light();
-    final saved = await Navigator.of(context).push<bool>(
-      MaterialPageRoute(
-        builder: (_) => _ReminderQuickEditor(
-          session: widget.session,
-          date: DateTime(_year, _month, DateTime.now().day),
-        ),
+    final saved = await _openEditorRoute(
+      _ReminderQuickEditor(
+        session: widget.session,
+        date: DateTime(_year, _month, DateTime.now().day),
       ),
     );
     if (saved == true) _reload();
@@ -1334,13 +1382,11 @@ class _MonthDetailScreenState extends State<_MonthDetailScreen> {
 
   Future<void> _openEditNote(Note note) async {
     Haptics.light();
-    final saved = await Navigator.of(context).push<bool>(
-      MaterialPageRoute(
-        builder: (_) => CalendarDayNoteEditor(
-          session: widget.session,
-          date: _parseDate(note.date),
-          existing: note,
-        ),
+    final saved = await _openEditorRoute(
+      CalendarDayNoteEditor(
+        session: widget.session,
+        date: _parseDate(note.date),
+        existing: note,
       ),
     );
     if (saved == true) _reload();
@@ -1348,24 +1394,19 @@ class _MonthDetailScreenState extends State<_MonthDetailScreen> {
 
   Future<void> _openEditEvent(CalendarEvent event) async {
     Haptics.light();
-    final saved = await Navigator.of(context).push<bool>(
-      MaterialPageRoute(
-        builder: (_) =>
-            CalendarEventEditor(session: widget.session, existing: event),
-      ),
+    final saved = await _openEditorRoute(
+      CalendarEventEditor(session: widget.session, existing: event),
     );
     if (saved == true) _reload();
   }
 
   Future<void> _openEditReminder(Reminder reminder) async {
     Haptics.light();
-    final saved = await Navigator.of(context).push<bool>(
-      MaterialPageRoute(
-        builder: (_) => _ReminderQuickEditor(
-          session: widget.session,
-          date: _parseDate(reminder.remindAt),
-          existing: reminder,
-        ),
+    final saved = await _openEditorRoute(
+      _ReminderQuickEditor(
+        session: widget.session,
+        date: _parseDate(reminder.remindAt),
+        existing: reminder,
       ),
     );
     if (saved == true) _reload();
@@ -1373,34 +1414,47 @@ class _MonthDetailScreenState extends State<_MonthDetailScreen> {
 
   Future<void> _confirmDeleteNote(Note note) async {
     Haptics.warn();
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text(
-          'Delete note?',
-          style: TextStyle(
-            fontWeight: FontWeight.w900,
-            color: AppTheme.textPrimary,
+    final bool? confirmed;
+    if (AppTheme.isDesktop) {
+      confirmed = await showDeskConfirm(
+        context: context,
+        title: 'Delete note?',
+        message: '"${note.displayTitle}" will be permanently removed.',
+        confirmLabel: 'Delete',
+        danger: true,
+      );
+    } else {
+      confirmed = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppTheme.cardRadius(20)),
           ),
+          title: const Text(
+            'Delete note?',
+            style: TextStyle(
+              fontWeight: FontWeight.w900,
+              color: AppTheme.textPrimary,
+            ),
+          ),
+          content: Text(
+            '"${note.displayTitle}" will be permanently removed.',
+            style: const TextStyle(color: AppTheme.textSecondary),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              style: FilledButton.styleFrom(backgroundColor: AppTheme.danger),
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: const Text('Delete'),
+            ),
+          ],
         ),
-        content: Text(
-          '"${note.displayTitle}" will be permanently removed.',
-          style: const TextStyle(color: AppTheme.textSecondary),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: AppTheme.danger),
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
-    );
+      );
+    }
     if (confirmed != true) return;
     try {
       await _notesApi.deleteNote(
@@ -1420,34 +1474,47 @@ class _MonthDetailScreenState extends State<_MonthDetailScreen> {
 
   Future<void> _confirmDeleteEvent(CalendarEvent event) async {
     Haptics.warn();
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text(
-          'Delete event?',
-          style: TextStyle(
-            fontWeight: FontWeight.w900,
-            color: AppTheme.textPrimary,
+    final bool? confirmed;
+    if (AppTheme.isDesktop) {
+      confirmed = await showDeskConfirm(
+        context: context,
+        title: 'Delete event?',
+        message: '"${event.title}" will be permanently removed.',
+        confirmLabel: 'Delete',
+        danger: true,
+      );
+    } else {
+      confirmed = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppTheme.cardRadius(20)),
           ),
+          title: const Text(
+            'Delete event?',
+            style: TextStyle(
+              fontWeight: FontWeight.w900,
+              color: AppTheme.textPrimary,
+            ),
+          ),
+          content: Text(
+            '"${event.title}" will be permanently removed.',
+            style: const TextStyle(color: AppTheme.textSecondary),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              style: FilledButton.styleFrom(backgroundColor: AppTheme.danger),
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: const Text('Delete'),
+            ),
+          ],
         ),
-        content: Text(
-          '"${event.title}" will be permanently removed.',
-          style: const TextStyle(color: AppTheme.textSecondary),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: AppTheme.danger),
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
-    );
+      );
+    }
     if (confirmed != true) return;
     try {
       await _staffApi.deleteCalendarEvent(
@@ -1467,34 +1534,47 @@ class _MonthDetailScreenState extends State<_MonthDetailScreen> {
 
   Future<void> _confirmDeleteReminder(Reminder reminder) async {
     Haptics.warn();
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text(
-          'Delete reminder?',
-          style: TextStyle(
-            fontWeight: FontWeight.w900,
-            color: AppTheme.textPrimary,
+    final bool? confirmed;
+    if (AppTheme.isDesktop) {
+      confirmed = await showDeskConfirm(
+        context: context,
+        title: 'Delete reminder?',
+        message: '"${reminder.title}" will be permanently removed.',
+        confirmLabel: 'Delete',
+        danger: true,
+      );
+    } else {
+      confirmed = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppTheme.cardRadius(20)),
           ),
+          title: const Text(
+            'Delete reminder?',
+            style: TextStyle(
+              fontWeight: FontWeight.w900,
+              color: AppTheme.textPrimary,
+            ),
+          ),
+          content: Text(
+            '"${reminder.title}" will be permanently removed.',
+            style: const TextStyle(color: AppTheme.textSecondary),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              style: FilledButton.styleFrom(backgroundColor: AppTheme.danger),
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: const Text('Delete'),
+            ),
+          ],
         ),
-        content: Text(
-          '"${reminder.title}" will be permanently removed.',
-          style: const TextStyle(color: AppTheme.textSecondary),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: AppTheme.danger),
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
-    );
+      );
+    }
     if (confirmed != true) return;
     try {
       await _remindersApi.deleteReminder(
@@ -1622,7 +1702,7 @@ class _MonthHeader extends StatelessWidget {
             onPressed: onBack,
             icon: const Icon(
               LucideIcons.chevronLeft,
-              color: kAppleRed,
+              color: AppTheme.danger,
               size: 20,
             ),
           ),
@@ -1797,14 +1877,18 @@ class _MonthDayCell extends StatelessWidget {
   }
 
   /// Real calendar cell — day number top-left, event chips underneath, all
-  /// inside a hairline grid cell. Today gets a tinted surface + red marker.
+  /// inside a hairline grid cell. Today gets a tinted surface + red marker;
+  /// weekends take the muted surface so the work week stands out.
   Widget _buildDesktop() {
     const maxChips = 3;
     final visible = dayItems.take(maxChips).toList();
     final extra = dayItems.length - visible.length;
+    final weekend = date.weekday >= DateTime.saturday;
 
     return Material(
-      color: isToday ? AppTheme.primarySoft.withValues(alpha: 0.4) : null,
+      color: isToday
+          ? AppTheme.primarySoft.withValues(alpha: 0.4)
+          : (weekend ? AppTheme.surfaceMuted.withValues(alpha: 0.5) : null),
       child: InkWell(
         onTap: () => onTap(date),
         child: Container(
@@ -1823,7 +1907,7 @@ class _MonthDayCell extends StatelessWidget {
                 height: 22,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: isToday ? kAppleRed : Colors.transparent,
+                  color: isToday ? AppTheme.danger : Colors.transparent,
                   shape: BoxShape.circle,
                 ),
                 child: Text(
@@ -1882,11 +1966,13 @@ class _MonthDayCell extends StatelessWidget {
     // Days with events get a soft red highlight so they're easy to spot at a
     // glance; "today" keeps its solid red marker and takes precedence.
     final Color background = isToday
-        ? kAppleRed
-        : (hasEvents ? kAppleRed.withValues(alpha: 0.14) : Colors.transparent);
+        ? AppTheme.danger
+        : (hasEvents
+              ? AppTheme.danger.withValues(alpha: 0.14)
+              : Colors.transparent);
     final Color textColor = isToday
         ? Colors.white
-        : (hasEvents ? kAppleRed : AppTheme.textPrimary);
+        : (hasEvents ? AppTheme.danger : AppTheme.textPrimary);
 
     return InkWell(
       borderRadius: BorderRadius.circular(12),
@@ -2551,7 +2637,7 @@ class _DaySheetState extends State<_DaySheet> {
                   fontSize: 11,
                   fontWeight: FontWeight.w900,
                   letterSpacing: 1.4,
-                  color: kAppleRed,
+                  color: AppTheme.danger,
                 ),
               ),
               const SizedBox(height: 2),
@@ -2801,6 +2887,14 @@ class _WeekView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final days = [for (var i = 0; i < 7; i++) weekStart.add(Duration(days: i))];
+    if (AppTheme.isDesktop) {
+      return _WeekGrid(
+        days: days,
+        today: today,
+        items: items,
+        onDayTap: onDayTap,
+      );
+    }
     return ListView.builder(
       padding: const EdgeInsets.fromLTRB(12, 4, 12, 100),
       itemCount: days.length,
@@ -2816,6 +2910,225 @@ class _WeekView extends StatelessWidget {
           onTap: () => onDayTap(day),
         );
       },
+    );
+  }
+}
+
+/// Desktop week view — a seven-column grid inside a bordered white surface,
+/// header row pinned on top, today highlighted, weekends shaded.
+class _WeekGrid extends StatelessWidget {
+  const _WeekGrid({
+    required this.days,
+    required this.today,
+    required this.items,
+    required this.onDayTap,
+  });
+
+  final List<DateTime> days;
+  final DateTime today;
+  final List<CalendarDayItem> items;
+  final ValueChanged<DateTime> onDayTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 0, 24, 22),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppTheme.border),
+          ),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  for (final day in days) Expanded(child: _WeekHeaderCell(day)),
+                ],
+              ),
+              Expanded(
+                child: Row(
+                  children: [
+                    for (final day in days)
+                      Expanded(
+                        child: _WeekDayCell(
+                          day: day,
+                          isToday: _sameDay(day, today),
+                          items:
+                              items
+                                  .where((e) => _itemCoversDay(e, day))
+                                  .toList()
+                                ..sort((a, b) => a.date.compareTo(b.date)),
+                          onTap: () => onDayTap(day),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _WeekHeaderCell extends StatelessWidget {
+  const _WeekHeaderCell(this.day);
+  final DateTime day;
+
+  @override
+  Widget build(BuildContext context) {
+    final isToday = _sameDay(day, DateTime.now());
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      decoration: const BoxDecoration(
+        color: AppTheme.surfaceMuted,
+        border: Border(
+          right: BorderSide(color: AppTheme.border),
+          bottom: BorderSide(color: AppTheme.border),
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            _weekdayLetters[day.weekday % 7].toUpperCase(),
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0.8,
+              color: isToday ? AppTheme.danger : AppTheme.textMuted,
+            ),
+          ),
+          const SizedBox(width: 6),
+          Container(
+            width: 24,
+            height: 24,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: isToday ? AppTheme.danger : Colors.transparent,
+              shape: BoxShape.circle,
+            ),
+            child: Text(
+              '${day.day}',
+              style: TextStyle(
+                fontSize: 12.5,
+                fontWeight: FontWeight.w800,
+                color: isToday ? Colors.white : AppTheme.textPrimary,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _WeekDayCell extends StatelessWidget {
+  const _WeekDayCell({
+    required this.day,
+    required this.isToday,
+    required this.items,
+    required this.onTap,
+  });
+
+  final DateTime day;
+  final bool isToday;
+  final List<CalendarDayItem> items;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final weekend = day.weekday >= DateTime.saturday;
+    return Material(
+      color: isToday
+          ? AppTheme.primarySoft.withValues(alpha: 0.4)
+          : (weekend ? AppTheme.surfaceMuted.withValues(alpha: 0.5) : null),
+      child: InkWell(
+        onTap: onTap,
+        child: Container(
+          decoration: const BoxDecoration(
+            border: Border(right: BorderSide(color: AppTheme.border)),
+          ),
+          padding: const EdgeInsets.fromLTRB(6, 8, 6, 8),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (items.isEmpty)
+                const Padding(
+                  padding: EdgeInsets.only(top: 4),
+                  child: Text(
+                    '—',
+                    style: TextStyle(
+                      color: AppTheme.textMuted,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                )
+              else
+                for (final item in items.take(6))
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 4),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 7,
+                          height: 7,
+                          decoration: BoxDecoration(
+                            color: item.color,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        if (item.isEvent &&
+                            item.event != null &&
+                            !item.event!.allDay)
+                          Text(
+                            '${_formatTime(item.event!.start)} ',
+                            style: const TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w700,
+                              color: AppTheme.textMuted,
+                            ),
+                          ),
+                        Expanded(
+                          child: Text(
+                            item.title.isEmpty
+                                ? (item.isNote
+                                      ? 'Untitled note'
+                                      : item.isEvent
+                                      ? 'Untitled event'
+                                      : 'Untitled reminder')
+                                : item.title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              color: item.color,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+              if (items.length > 6)
+                Text(
+                  '+${items.length - 6} more',
+                  style: const TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                    color: AppTheme.textMuted,
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
@@ -2844,12 +3157,12 @@ class _WeekDayRow extends StatelessWidget {
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             color: isToday
-                ? kAppleRed.withValues(alpha: 0.06)
+                ? AppTheme.danger.withValues(alpha: 0.06)
                 : AppTheme.surface,
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
               color: isToday
-                  ? kAppleRed.withValues(alpha: 0.3)
+                  ? AppTheme.danger.withValues(alpha: 0.3)
                   : AppTheme.border,
             ),
           ),
@@ -2865,7 +3178,7 @@ class _WeekDayRow extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w800,
-                        color: isToday ? kAppleRed : AppTheme.textMuted,
+                        color: isToday ? AppTheme.danger : AppTheme.textMuted,
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -2874,7 +3187,7 @@ class _WeekDayRow extends StatelessWidget {
                       height: 28,
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
-                        color: isToday ? kAppleRed : Colors.transparent,
+                        color: isToday ? AppTheme.danger : Colors.transparent,
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
@@ -3018,6 +3331,10 @@ class _DayView extends StatelessWidget {
         .toList();
     final isToday = _sameDay(day, today);
 
+    if (AppTheme.isDesktop) {
+      return _buildDesktop(events, reminders, notes, isToday);
+    }
+
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 100),
       children: [
@@ -3026,12 +3343,12 @@ class _DayView extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: isToday
-                ? kAppleRed.withValues(alpha: 0.06)
+                ? AppTheme.danger.withValues(alpha: 0.06)
                 : AppTheme.surface,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(AppTheme.cardRadius(16)),
             border: Border.all(
               color: isToday
-                  ? kAppleRed.withValues(alpha: 0.2)
+                  ? AppTheme.danger.withValues(alpha: 0.2)
                   : AppTheme.border,
             ),
           ),
@@ -3046,7 +3363,7 @@ class _DayView extends StatelessWidget {
                       fontSize: 11,
                       fontWeight: FontWeight.w900,
                       letterSpacing: 1.4,
-                      color: kAppleRed,
+                      color: AppTheme.danger,
                     ),
                   ),
                   const SizedBox(height: 2),
@@ -3141,6 +3458,183 @@ class _DayView extends StatelessWidget {
               ),
             ),
       ],
+    );
+  }
+
+  /// Desktop: day header on the left, agenda columns on the right — events in
+  /// the wide column, reminders and notes stacked in the rail.
+  Widget _buildDesktop(
+    List<CalendarEvent> events,
+    List<Reminder> reminders,
+    List<Note> notes,
+    bool isToday,
+  ) {
+    final header = Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: isToday
+            ? AppTheme.danger.withValues(alpha: 0.05)
+            : AppTheme.surface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: isToday
+              ? AppTheme.danger.withValues(alpha: 0.2)
+              : AppTheme.border,
+        ),
+      ),
+      child: Row(
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                _weekdayFull(day.weekday).toUpperCase(),
+                style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 1.4,
+                  color: AppTheme.danger,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                '${_monthNamesFull[day.month - 1]} ${day.day}, ${day.year}',
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: -0.3,
+                  color: AppTheme.textPrimary,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+
+    final quickAdds = Row(
+      children: [
+        Expanded(
+          child: DeskButton(
+            label: 'Event',
+            icon: LucideIcons.calendarPlus,
+            onTap: onAddEvent,
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: DeskButton(
+            label: 'Reminder',
+            icon: LucideIcons.bellPlus,
+            onTap: onAddReminder,
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: DeskButton(
+            label: 'Note',
+            icon: LucideIcons.stickyNote,
+            onTap: onAddNote,
+          ),
+        ),
+      ],
+    );
+
+    Widget railSection({
+      required String label,
+      required Widget empty,
+      required List<Widget> rows,
+    }) {
+      return DeskPanel(
+        title: label,
+        count: rows.length,
+        padding: const EdgeInsets.all(12),
+        child: rows.isEmpty ? empty : Column(children: rows),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 0, 24, 22),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 320,
+            child: ListView(
+              children: [header, const SizedBox(height: 12), quickAdds],
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: ListView(
+              children: [
+                railSection(
+                  label: 'Events',
+                  empty: const _EmptyHint(
+                    icon: LucideIcons.calendarOff,
+                    text: 'No events on this day',
+                  ),
+                  rows: [
+                    for (final event in events)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: _DayEventRow(
+                          event: event,
+                          onTap: () => onEditEvent(event),
+                          onDelete: () => onDeleteEvent(event),
+                        ),
+                      ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: ListView(
+              children: [
+                railSection(
+                  label: 'Reminders',
+                  empty: const _EmptyHint(
+                    icon: LucideIcons.bellOff,
+                    text: 'No reminders on this day',
+                  ),
+                  rows: [
+                    for (final reminder in reminders)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: _DayReminderRow(
+                          reminder: reminder,
+                          onTap: () => onEditReminder(reminder),
+                          onDelete: () => onDeleteReminder(reminder),
+                        ),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 14),
+                railSection(
+                  label: 'Notes',
+                  empty: const _EmptyHint(
+                    icon: LucideIcons.notebookPen,
+                    text: 'No notes on this day',
+                  ),
+                  rows: [
+                    for (final note in notes)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: _DayNoteRow(
+                          note: note,
+                          onTap: () => onEditNote(note),
+                          onDelete: () => onDeleteNote(note),
+                        ),
+                      ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

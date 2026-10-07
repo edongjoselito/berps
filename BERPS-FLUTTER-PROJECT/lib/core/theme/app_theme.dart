@@ -26,7 +26,37 @@ class AppTheme {
   static const Color warning = Color(0xFFB97A0E);
   static const Color danger = Color(0xFFB91C1C);
 
+  /// Semantic sets — keep feature colors in one place instead of hardcoded
+  /// hex values scattered through the screens.
+  static const Color reminderAccent = Color(0xFFEA580C);
+  static const Color reminderSoft = Color(0xFFFFF7ED);
+  static const Color reminderBorder = Color(0xFFFED7AA);
+  static const Color reminderDeep = Color(0xFF9A3412);
+
+  static const Color navy = Color(0xFF1E3A5F);
+  static const Color navyLight = Color(0xFF2D5A8A);
+
+  static const Color rankGold = Color(0xFFD97706);
+  static const Color rankBronze = Color(0xFFB45309);
+
   static const String fontFamily = 'InstrumentSans';
+
+  /// Product/release branding — single source of truth so footers, the auth
+  /// side panel and the status bar never drift apart.
+  static const String appVersion = '1.0.2';
+  static String get productName => isDesktop ? 'BERPS Desktop' : 'BERPS Mobile';
+  static String get productLabel => '$productName · v$appVersion';
+
+  /// Width of the right-hand detail rail used on desktop screens (dashboard,
+  /// attendance, etc.) — shared so every rail lines up.
+  static const double railWidth = 340;
+
+  /// Desktop sidebar widths — expanded and collapsed-to-icons.
+  static const double sidebarWidth = 248;
+  static const double sidebarCollapsedWidth = 68;
+
+  /// Height of the status bar strip pinned to the bottom of the desktop shell.
+  static const double statusBarHeight = 28;
 
   /// True on macOS/Windows/Linux builds — used for desktop-only styling
   /// (Sora typeface, sidebar layout, wider density).
@@ -39,6 +69,16 @@ class AppTheme {
 
   /// Font family actually applied by [build] — Sora on desktop.
   static String get effectiveFontFamily => isDesktop ? 'Sora' : fontFamily;
+
+  /// Card chrome: flat 14px corners on desktop, the given rounder radius on
+  /// mobile. Use for outer card surfaces (panels, stat cards, list cards) —
+  /// inner chips/avatars keep their own radii.
+  static double cardRadius([double mobile = 16]) => isDesktop ? 14 : mobile;
+
+  /// Compact-density toggle — desktop tables, rows and the sidebar render
+  /// tighter when on. Persisted via SessionStore; widgets that care listen
+  /// through ValueListenableBuilder.
+  static final ValueNotifier<bool> compactDensity = ValueNotifier(false);
 
   /// Reusable shadow tokens so cards share an exact elevation language.
   static const List<BoxShadow> shadowSoft = [
@@ -79,39 +119,43 @@ class AppTheme {
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: surfaceMuted,
+        // macOS-style fields read as white wells on the gray canvas; mobile
+        // keeps the softer filled-gray look.
+        fillColor: isDesktop ? Colors.white : surfaceMuted,
         contentPadding: EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: isDesktop ? 18 : 16,
+          horizontal: isDesktop ? 12 : 16,
+          vertical: isDesktop ? 10 : 16,
         ),
         hintStyle: TextStyle(
           fontFamily: effectiveFontFamily,
           color: textMuted,
           fontWeight: FontWeight.w500,
+          fontSize: isDesktop ? 13 : null,
         ),
         labelStyle: TextStyle(
           fontFamily: effectiveFontFamily,
           color: textSecondary,
+          fontSize: isDesktop ? 13 : null,
         ),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(isDesktop ? 10 : 14),
           borderSide: const BorderSide(color: border),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(isDesktop ? 10 : 16),
           borderSide: const BorderSide(color: border),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: primary, width: 1.8),
+          borderRadius: BorderRadius.circular(isDesktop ? 10 : 16),
+          borderSide: const BorderSide(color: primary, width: 1.6),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          minimumSize: const Size.fromHeight(50),
+          minimumSize: Size.fromHeight(isDesktop ? 40 : 50),
           side: const BorderSide(color: borderStrong, width: 1.2),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(isDesktop ? 10 : 16),
           ),
           textStyle: TextStyle(
             fontFamily: effectiveFontFamily,
@@ -179,16 +223,16 @@ class AppTheme {
         elevation: 0,
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(22),
+          borderRadius: BorderRadius.circular(isDesktop ? 14 : 22),
           side: const BorderSide(color: border),
         ),
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
           backgroundColor: primary,
-          minimumSize: Size.fromHeight(isDesktop ? 54 : 52),
+          minimumSize: Size.fromHeight(isDesktop ? 44 : 52),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(isDesktop ? 10 : 16),
           ),
           textStyle: TextStyle(
             fontFamily: effectiveFontFamily,
@@ -233,6 +277,18 @@ class AppTheme {
         color: border,
         thickness: 1,
         space: 1,
+      ),
+      // Desktop scrollables get a thin, always-visible scrollbar; mobile keeps
+      // the default overlay behavior.
+      scrollbarTheme: ScrollbarThemeData(
+        thumbVisibility: WidgetStateProperty.all(isDesktop),
+        thickness: WidgetStateProperty.all(isDesktop ? 8 : 4),
+        radius: const Radius.circular(8),
+        interactive: isDesktop,
+        thumbColor: WidgetStateProperty.resolveWith(
+          (states) =>
+              states.contains(WidgetState.hovered) ? textMuted : borderStrong,
+        ),
       ),
     );
   }

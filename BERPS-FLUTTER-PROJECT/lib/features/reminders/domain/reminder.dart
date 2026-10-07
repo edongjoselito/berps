@@ -19,7 +19,8 @@ class Reminder {
   /// once | monthly | yearly
   final String recurrence;
 
-  DateTime? get remindAtDate => DateTime.tryParse(remindAt.replaceFirst(' ', 'T'));
+  DateTime? get remindAtDate =>
+      DateTime.tryParse(remindAt.replaceFirst(' ', 'T'));
 
   String get recurrenceLabel {
     switch (recurrence) {

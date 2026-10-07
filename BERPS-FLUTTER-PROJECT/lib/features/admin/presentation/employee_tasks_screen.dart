@@ -31,10 +31,10 @@ class _EmployeeTasksScreenState extends State<EmployeeTasksScreen> {
   }
 
   Future<List<EmployeeTaskGroup>> _load() => _api.fetchEmployeeTasks(
-        baseUrl: widget.session.baseUrl,
-        token: widget.session.token,
-        taskFilter: _filter,
-      );
+    baseUrl: widget.session.baseUrl,
+    token: widget.session.token,
+    taskFilter: _filter,
+  );
 
   void _reload() => setState(() => _future = _load());
 
@@ -119,9 +119,9 @@ class _EmployeeTasksScreenState extends State<EmployeeTasksScreen> {
       margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppTheme.cardRadius(16)),
         border: Border.all(color: AppTheme.border),
-        boxShadow: AppTheme.shadowSoft,
+        boxShadow: AppTheme.isDesktop ? null : AppTheme.shadowSoft,
       ),
       child: Theme(
         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
@@ -181,7 +181,9 @@ class _EmployeeTasksScreenState extends State<EmployeeTasksScreen> {
                     child: Text(
                       'No pending tasks.',
                       style: TextStyle(
-                          color: AppTheme.textSecondary, fontSize: 12.5),
+                        color: AppTheme.textSecondary,
+                        fontSize: 12.5,
+                      ),
                     ),
                   ),
                 ]
@@ -235,19 +237,28 @@ class _EmployeeTasksScreenState extends State<EmployeeTasksScreen> {
           const SizedBox(height: 6),
           Row(
             children: [
-              Icon(LucideIcons.calendarDays,
-                  size: 12, color: AppTheme.textMuted),
+              Icon(
+                LucideIcons.calendarDays,
+                size: 12,
+                color: AppTheme.textMuted,
+              ),
               const SizedBox(width: 4),
               Text(
-                t.dueDate.isEmpty ? 'No due date' : formatCompactDate(t.dueDate),
-                style:
-                    const TextStyle(fontSize: 11.5, color: AppTheme.textSecondary),
+                t.dueDate.isEmpty
+                    ? 'No due date'
+                    : formatCompactDate(t.dueDate),
+                style: const TextStyle(
+                  fontSize: 11.5,
+                  color: AppTheme.textSecondary,
+                ),
               ),
               const Spacer(),
               Text(
                 t.projectName,
-                style:
-                    const TextStyle(fontSize: 11.5, color: AppTheme.textMuted),
+                style: const TextStyle(
+                  fontSize: 11.5,
+                  color: AppTheme.textMuted,
+                ),
               ),
             ],
           ),

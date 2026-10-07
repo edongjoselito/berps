@@ -67,7 +67,8 @@ class _CalendarEventEditorState extends State<CalendarEventEditor> {
     _notes = TextEditingController(text: e?.notes ?? '');
     _location = TextEditingController(text: e?.location ?? '');
     _reminderEmail = TextEditingController(text: e?.reminderEmail ?? '');
-    _start = e?.start ??
+    _start =
+        e?.start ??
         (widget.initialDate ?? DateTime.now()).add(const Duration(hours: 1));
     _end = e?.end ?? _start.add(const Duration(hours: 1));
     _allDay = e?.allDay ?? false;
@@ -208,7 +209,9 @@ class _CalendarEventEditorState extends State<CalendarEventEditor> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppTheme.isDesktop ? 16 : 20),
+        ),
         title: const Text(
           'Delete event?',
           style: TextStyle(
@@ -356,10 +359,7 @@ class _CalendarEventEditorState extends State<CalendarEventEditor> {
                 ),
               ),
               const SizedBox(height: 18),
-              _SectionHeader(
-                icon: LucideIcons.palette,
-                title: 'Appearance',
-              ),
+              _SectionHeader(icon: LucideIcons.palette, title: 'Appearance'),
               const SizedBox(height: 10),
               MobileSurfaceCard(
                 child: Column(
@@ -482,7 +482,10 @@ class _CalendarEventEditorState extends State<CalendarEventEditor> {
                 ),
               ),
               const SizedBox(height: 18),
-              _SectionHeader(icon: LucideIcons.notebookText, title: 'Day notes'),
+              _SectionHeader(
+                icon: LucideIcons.notebookText,
+                title: 'Day notes',
+              ),
               const SizedBox(height: 10),
               SizedBox(
                 width: double.infinity,

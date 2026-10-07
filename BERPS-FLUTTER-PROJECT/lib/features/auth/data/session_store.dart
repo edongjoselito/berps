@@ -15,6 +15,11 @@ class SessionStore {
   static const _biometricKey = 'berps_biometric_enabled';
   static const _biometricCredentialsKey = 'berps_biometric_credentials';
   static const _privacyConsentKey = 'berps_privacy_consent_v1';
+  static const _sidebarCollapsedKey = 'berps_sidebar_collapsed';
+  static const _lastTabKey = 'berps_desktop_last_tab';
+  static const _densityCompactKey = 'berps_density_compact';
+  static const _windowBoundsKey = 'berps_window_bounds';
+  static const _tasksFilterKey = 'berps_tasks_filter';
 
   String readBaseUrl() => _preferences.getString(_baseUrlKey) ?? '';
 
@@ -76,4 +81,38 @@ class SessionStore {
       _preferences.setBool(_privacyConsentKey, accepted);
 
   Future<void> clearPrivacyConsent() => _preferences.remove(_privacyConsentKey);
+
+  /// Desktop sidebar collapsed-to-icons state (UI preference, kept across
+  /// restarts rather than per session).
+  bool readSidebarCollapsed() =>
+      _preferences.getBool(_sidebarCollapsedKey) ?? false;
+
+  Future<void> saveSidebarCollapsed(bool collapsed) =>
+      _preferences.setBool(_sidebarCollapsedKey, collapsed);
+
+  /// Last selected desktop tab — restored on next launch so the app reopens
+  /// where the staff member left off.
+  int readLastTab() => _preferences.getInt(_lastTabKey) ?? 0;
+
+  Future<void> saveLastTab(int index) =>
+      _preferences.setInt(_lastTabKey, index);
+
+  /// Compact row-density preference for desktop tables and the sidebar.
+  bool readDensityCompact() =>
+      _preferences.getBool(_densityCompactKey) ?? false;
+
+  Future<void> saveDensityCompact(bool compact) =>
+      _preferences.setBool(_densityCompactKey, compact);
+
+  /// Last window frame as "x,y,width,height" — restored at launch.
+  String? readWindowBounds() => _preferences.getString(_windowBoundsKey);
+
+  Future<void> saveWindowBounds(String bounds) =>
+      _preferences.setString(_windowBoundsKey, bounds);
+
+  /// Saved task filter preset as "status|scope" (desktop convenience).
+  String? readTasksFilter() => _preferences.getString(_tasksFilterKey);
+
+  Future<void> saveTasksFilter(String status, String scope) =>
+      _preferences.setString(_tasksFilterKey, '$status|$scope');
 }
