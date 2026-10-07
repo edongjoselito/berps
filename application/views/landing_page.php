@@ -376,10 +376,35 @@
             transform: translateY(-2px);
         }
 
-        .download-card i {
-            font-size: 26px;
-            color: var(--primary);
-            margin-bottom: 6px;
+        .download-card .os-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 52px;
+            height: 52px;
+            border-radius: 13px;
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .download-card .os-icon.macos {
+            background: #eef2f8;
+            color: #17243a;
+        }
+
+        .download-card .os-icon.windows {
+            background: #e3f0fd;
+            color: #0078d4;
+        }
+
+        .download-card .os-icon.linux {
+            background: #fdf3e0;
+            color: #b45309;
+        }
+
+        .download-card:not(.disabled):hover .os-icon.macos {
+            background: #17243a;
+            color: #fff;
         }
 
         .download-card .download-platform {
@@ -397,7 +422,8 @@
             pointer-events: none;
         }
 
-        .download-card.disabled i {
+        .download-card.disabled .os-icon {
+            background: #eef2f7;
             color: #94a3b8;
         }
 
@@ -412,6 +438,22 @@
             font-weight: 700;
             letter-spacing: .4px;
             text-transform: uppercase;
+        }
+
+        .download-note {
+            max-width: 640px;
+            margin: 24px auto 0;
+            font-size: 13px;
+            color: #64748b;
+            line-height: 1.6;
+            text-align: center;
+        }
+
+        .download-note code {
+            font-size: 12px;
+            background: #eef2f7;
+            padding: 1px 6px;
+            border-radius: 5px;
         }
 
         /* CTA Section */
@@ -758,7 +800,7 @@
                 <a href="#features" class="btn-hero btn-secondary">Explore the modules</a>
             </div>
             <a href="<?= base_url('downloads/BERPS.dmg'); ?>" class="hero-download" download>
-                <i class="fas fa-apple" aria-hidden="true"></i> Download the desktop app for macOS
+                <i class="fab fa-apple" aria-hidden="true"></i> Download the desktop app for macOS
             </a>
         </div>
     </section>
@@ -819,21 +861,27 @@
         </div>
         <div class="download-cards">
             <a class="download-card" href="<?= base_url('downloads/BERPS.dmg'); ?>" download>
-                <i class="fas fa-laptop"></i>
-                <span class="download-platform">Download for macOS</span>
-                <span class="download-meta">BERPS.dmg</span>
+                <span class="os-icon macos"><i class="fab fa-apple"></i></span>
+                <span class="download-platform">macOS</span>
+                <span class="download-meta">BERPS.dmg · Apple Silicon · macOS 12+</span>
             </a>
             <div class="download-card disabled">
-                <i class="fas fa-desktop"></i>
+                <span class="os-icon windows"><i class="fab fa-windows"></i></span>
                 <span class="download-platform">Windows</span>
+                <span class="download-meta">.exe installer · Windows 10+</span>
                 <span class="download-soon">Coming soon</span>
             </div>
             <div class="download-card disabled">
-                <i class="fas fa-server"></i>
+                <span class="os-icon linux"><i class="fab fa-linux"></i></span>
                 <span class="download-platform">Linux</span>
+                <span class="download-meta">AppImage · .deb</span>
                 <span class="download-soon">Coming soon</span>
             </div>
         </div>
+        <p class="download-note">
+            macOS install: open <code>BERPS.dmg</code>, drag BERPS into <code>Applications</code>. On first launch,
+            right-click the app and choose <code>Open</code> — macOS asks once because the app isn't notarized yet.
+        </p>
     </section>
 
     <!-- CTA Section -->
