@@ -36,3 +36,4 @@ $RECYCLE.BIN/
 
 # CodeIgniter session files (keep the dir, its .htaccess and index.html)
 application/sessions/ci_session*
+downloads/

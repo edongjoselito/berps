@@ -320,6 +320,84 @@
             color: var(--success);
         }
 
+        /* Desktop app download */
+        .desktop-app {
+            padding: 80px 32px;
+            background: #f6f8fb;
+        }
+
+        .desktop-app .section-title {
+            margin-bottom: 40px;
+        }
+
+        .download-cards {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            max-width: 960px;
+            margin: 0 auto;
+        }
+
+        .download-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            min-width: 220px;
+            padding: 26px 30px;
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            text-decoration: none;
+            color: var(--text-dark, #17243a);
+            transition: border-color .2s, box-shadow .2s, transform .2s;
+        }
+
+        .download-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 10px 30px rgba(23, 36, 58, 0.08);
+            transform: translateY(-2px);
+        }
+
+        .download-card i {
+            font-size: 26px;
+            color: var(--primary);
+            margin-bottom: 6px;
+        }
+
+        .download-card .download-platform {
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .download-card .download-meta {
+            font-size: 12.5px;
+            color: #64748b;
+        }
+
+        .download-card.disabled {
+            opacity: 0.55;
+            pointer-events: none;
+        }
+
+        .download-card.disabled i {
+            color: #94a3b8;
+        }
+
+        .download-soon {
+            display: inline-block;
+            margin-top: 2px;
+            padding: 2px 9px;
+            border-radius: 999px;
+            background: #eef2f7;
+            color: #64748b;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: .4px;
+            text-transform: uppercase;
+        }
+
         /* CTA Section */
         .cta {
             padding: 80px 32px;
@@ -641,6 +719,7 @@
         </button>
         <div class="navbar-nav" id="publicNavigation">
             <a href="#features"><i class="fas fa-star"></i> Features</a>
+            <a href="#desktop-app"><i class="fas fa-download"></i> Desktop App</a>
             <a href="<?= site_url('Login/signup_page'); ?>" class="btn-nav-secondary"><i class="fas fa-user-plus"></i> Sign Up</a>
             <a href="#" class="btn-nav" id="loginBtn"><i class="fas fa-sign-in-alt"></i> Login</a>
         </div>
@@ -709,6 +788,31 @@
                         <li><i class="fas fa-check" aria-hidden="true"></i> Calendar, goals, and reminders</li>
                     </ul>
                 </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Desktop App -->
+    <section class="desktop-app" id="desktop-app">
+        <div class="section-title">
+            <h2>Get the desktop app</h2>
+            <p>Staff can work from a dedicated BERPS app — tasks, attendance, tickets, and goals in a native window, not a browser tab.</p>
+        </div>
+        <div class="download-cards">
+            <a class="download-card" href="<?= base_url('downloads/BERPS.dmg'); ?>" download>
+                <i class="fas fa-laptop"></i>
+                <span class="download-platform">Download for macOS</span>
+                <span class="download-meta">BERPS.dmg</span>
+            </a>
+            <div class="download-card disabled">
+                <i class="fas fa-desktop"></i>
+                <span class="download-platform">Windows</span>
+                <span class="download-soon">Coming soon</span>
+            </div>
+            <div class="download-card disabled">
+                <i class="fas fa-server"></i>
+                <span class="download-platform">Linux</span>
+                <span class="download-soon">Coming soon</span>
             </div>
         </div>
     </section>
