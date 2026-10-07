@@ -1,7 +1,6 @@
 AddType application/manifest+json .webmanifest
 
 RewriteEngine On
-RewriteBase /berps/
 
 # Route everything that isn't a real file or directory through index.php
 RewriteCond %{REQUEST_FILENAME} !-f
