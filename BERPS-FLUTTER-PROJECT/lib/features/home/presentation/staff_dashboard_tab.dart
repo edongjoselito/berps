@@ -6,6 +6,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/network/api_exception.dart';
+import '../../../core/services/notification_service.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/desktop_kit.dart';
 import '../../../core/utils/haptics.dart';
@@ -69,6 +70,10 @@ class _StaffDashboardTabState extends State<StaffDashboardTab> {
   late Future<List<Note>> _notesFuture;
   late Future<List<Reminder>> _remindersFuture;
 
+  /// Last loaded dashboard — kept on screen while a background refetch runs
+  /// so remote-triggered refreshes swap content in place.
+  StaffDashboard? _lastData;
+
   @override
   void initState() {
     super.initState();
@@ -76,6 +81,20 @@ class _StaffDashboardTabState extends State<StaffDashboardTab> {
     _rankingFuture = _loadRanking();
     _notesFuture = _loadNotes();
     _remindersFuture = _loadReminders();
+    NotificationService.instance.revision.addListener(_onRemoteChange);
+  }
+
+  @override
+  void dispose() {
+    NotificationService.instance.revision.removeListener(_onRemoteChange);
+    super.dispose();
+  }
+
+  /// The desktop notification poller observed a server-side change — pull
+  /// fresh data without dropping what's already rendered.
+  void _onRemoteChange() {
+    if (!mounted) return;
+    _refetch(silent: true);
   }
 
   Future<StaffDashboard> _loadDashboard() {
@@ -108,14 +127,19 @@ class _StaffDashboardTabState extends State<StaffDashboardTab> {
         .then((data) => data.reminders);
   }
 
-  void _reload() {
-    Haptics.light();
+  void _refetch({bool silent = false}) {
+    if (!silent) _lastData = null;
     setState(() {
       _future = _loadDashboard();
       _rankingFuture = _loadRanking();
       _notesFuture = _loadNotes();
       _remindersFuture = _loadReminders();
     });
+  }
+
+  void _reload() {
+    Haptics.light();
+    _refetch();
   }
 
   String _greeting() {
@@ -138,13 +162,7 @@ class _StaffDashboardTabState extends State<StaffDashboardTab> {
     return RefreshIndicator(
       color: AppTheme.primary,
       onRefresh: () async {
-        Haptics.light();
-        setState(() {
-          _future = _loadDashboard();
-          _rankingFuture = _loadRanking();
-          _notesFuture = _loadNotes();
-          _remindersFuture = _loadReminders();
-        });
+        _reload();
         await _future;
         await _notesFuture;
         await _remindersFuture;
@@ -152,6 +170,8 @@ class _StaffDashboardTabState extends State<StaffDashboardTab> {
       child: FutureBuilder<StaffDashboard>(
         future: _future,
         builder: (context, snapshot) {
+          if (snapshot.hasData) _lastData = snapshot.data;
+          final data = snapshot.data ?? _lastData;
           return ListView(
             physics: const AlwaysScrollableScrollPhysics(),
             padding: EdgeInsets.fromLTRB(gutter, 12, gutter, 28),
@@ -185,23 +205,20 @@ class _StaffDashboardTabState extends State<StaffDashboardTab> {
                 ),
                 const SizedBox(height: 18),
               ],
-              if (snapshot.connectionState == ConnectionState.waiting)
+              if (data == null &&
+                  snapshot.connectionState == ConnectionState.waiting)
                 const _DashboardSkeleton()
-              else if (snapshot.hasError)
+              else if (data == null)
                 _ErrorState(
                   message: snapshot.error is ApiException
                       ? (snapshot.error as ApiException).message
-                      : snapshot.error.toString(),
-                  onRetry: _reload,
-                )
-              else if (!snapshot.hasData)
-                _ErrorState(
-                  message: 'Dashboard data is unavailable right now.',
+                      : (snapshot.error?.toString() ??
+                            'Dashboard data is unavailable right now.'),
                   onRetry: _reload,
                 )
               else
                 _DashboardContent(
-                  data: snapshot.data!,
+                  data: data,
                   session: widget.session,
                   rankingFuture: _rankingFuture,
                   notesFuture: _notesFuture,
@@ -517,7 +534,8 @@ class _DashboardContent extends StatelessWidget {
             child: FutureBuilder<StaffRanking>(
               future: rankingFuture,
               builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
+                if (snapshot.connectionState == ConnectionState.waiting &&
+                    !snapshot.hasData) {
                   return const _RankingSkeleton();
                 }
                 if (snapshot.hasError || !snapshot.hasData) {
@@ -619,7 +637,8 @@ class _DashboardContent extends StatelessWidget {
           FutureBuilder<StaffRanking>(
             future: rankingFuture,
             builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
+              if (snapshot.connectionState == ConnectionState.waiting &&
+                  !snapshot.hasData) {
                 return const _RankingSkeleton();
               }
               if (snapshot.hasError || !snapshot.hasData) {

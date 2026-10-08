@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/network/api_exception.dart';
+import '../../../core/services/notification_service.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/date_formatters.dart';
 import '../../../core/utils/haptics.dart';
@@ -35,10 +36,28 @@ class _AdminDashboardTabState extends State<AdminDashboardTab> {
   final AdminApi _api = AdminApi();
   late Future<AdminDashboard> _future;
 
+  /// Last loaded data — kept on screen while a background refetch runs so
+  /// remote-triggered refreshes swap content in place.
+  AdminDashboard? _lastData;
+
   @override
   void initState() {
     super.initState();
     _future = _load();
+    NotificationService.instance.revision.addListener(_onRemoteChange);
+  }
+
+  @override
+  void dispose() {
+    NotificationService.instance.revision.removeListener(_onRemoteChange);
+    super.dispose();
+  }
+
+  /// The desktop notification poller observed a server-side change — pull
+  /// fresh data without dropping what's already rendered.
+  void _onRemoteChange() {
+    if (!mounted) return;
+    _refetch(silent: true);
   }
 
   Future<AdminDashboard> _load() => _api.fetchDashboard(
@@ -46,9 +65,14 @@ class _AdminDashboardTabState extends State<AdminDashboardTab> {
     token: widget.session.token,
   );
 
+  void _refetch({bool silent = false}) {
+    if (!silent) _lastData = null;
+    setState(() => _future = _load());
+  }
+
   void _reload() {
     Haptics.light();
-    setState(() => _future = _load());
+    _refetch();
   }
 
   String _peso(double v) {
@@ -70,6 +94,8 @@ class _AdminDashboardTabState extends State<AdminDashboardTab> {
       child: FutureBuilder<AdminDashboard>(
         future: _future,
         builder: (context, snapshot) {
+          if (snapshot.hasData) _lastData = snapshot.data;
+          final data = snapshot.data ?? _lastData;
           return ListView(
             physics: const AlwaysScrollableScrollPhysics(),
             padding: EdgeInsets.fromLTRB(gutter, 12, gutter, 28),
@@ -86,17 +112,19 @@ class _AdminDashboardTabState extends State<AdminDashboardTab> {
                 child: AdminGreetingCard(session: widget.session),
               ),
               const SizedBox(height: 18),
-              if (snapshot.connectionState == ConnectionState.waiting)
+              if (data == null &&
+                  snapshot.connectionState == ConnectionState.waiting)
                 _loading()
-              else if (snapshot.hasError)
+              else if (data == null)
                 AdminErrorView(
                   message: snapshot.error is ApiException
                       ? (snapshot.error as ApiException).message
-                      : snapshot.error.toString(),
+                      : (snapshot.error?.toString() ??
+                            'Dashboard data is unavailable right now.'),
                   onRetry: _reload,
                 )
               else
-                _content(context, snapshot.data!),
+                _content(context, data),
             ],
           );
         },

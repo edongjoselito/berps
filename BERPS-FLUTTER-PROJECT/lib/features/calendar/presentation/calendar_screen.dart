@@ -4,6 +4,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/network/api_exception.dart';
+import '../../../core/services/notification_service.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/desktop_kit.dart';
 import '../../../core/utils/haptics.dart';
@@ -316,9 +317,27 @@ class _CalendarDashboardTabState extends State<CalendarDashboardTab> {
   DateTime _selectedDay = DateTime.now();
   Future<List<CalendarDayItem>>? _future;
 
+  /// Last loaded items — kept on screen while a background refetch runs so
+  /// remote-triggered refreshes swap content in place.
+  List<CalendarDayItem>? _lastItems;
+
   @override
   void initState() {
     super.initState();
+    _reload();
+    NotificationService.instance.revision.addListener(_onRemoteChange);
+  }
+
+  @override
+  void dispose() {
+    NotificationService.instance.revision.removeListener(_onRemoteChange);
+    super.dispose();
+  }
+
+  /// The desktop notification poller observed a server-side change — pull
+  /// fresh data without dropping what's already rendered.
+  void _onRemoteChange() {
+    if (!mounted) return;
     _reload();
   }
 
@@ -744,7 +763,9 @@ class _CalendarDashboardTabState extends State<CalendarDashboardTab> {
         child: FutureBuilder<List<CalendarDayItem>>(
           future: _future,
           builder: (context, snapshot) {
-            final items = snapshot.data ?? const <CalendarDayItem>[];
+            if (snapshot.hasData) _lastItems = snapshot.data;
+            final items =
+                snapshot.data ?? _lastItems ?? const <CalendarDayItem>[];
             final title = _view == _CalendarView.month
                 ? '${_monthNamesFull[_month - 1]} $_year'
                 : _view == _CalendarView.week

@@ -114,6 +114,9 @@ class _StaffHomeScreenState extends State<StaffHomeScreen> {
         (_) => _refreshBadges(),
       );
       NotificationService.instance.openRequest.addListener(_consumeOpenRequest);
+      // The poller bumps revision when it sees data change — keep badge
+      // counts in step with the freshly refetched tab content.
+      NotificationService.instance.revision.addListener(_refreshBadges);
     }
   }
 
@@ -907,6 +910,7 @@ class _StaffHomeScreenState extends State<StaffHomeScreen> {
     NotificationService.instance.openRequest.removeListener(
       _consumeOpenRequest,
     );
+    NotificationService.instance.revision.removeListener(_refreshBadges);
     _badgeTimer?.cancel();
     _tabNotifier.dispose();
     super.dispose();

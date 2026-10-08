@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io' show Platform;
 
-import 'package:flutter/foundation.dart' show kIsWeb, ValueNotifier;
+import 'package:flutter/foundation.dart' show debugPrint, kIsWeb, ValueNotifier;
 import 'package:local_notifier/local_notifier.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:window_manager/window_manager.dart';
@@ -67,6 +67,15 @@ class NotificationService {
   /// listens and consumes; value is the tab key ('dashboard'|'tasks'|'attendance').
   final ValueNotifier<String?> openRequest = ValueNotifier<String?>(null);
 
+  /// Bumped whenever a poll observes a change in the watched data. Visible
+  /// tabs listen and silently refetch, so incoming items render without a
+  /// manual reload.
+  final ValueNotifier<int> revision = ValueNotifier<int>(0);
+
+  /// Fingerprint of the last successful poll — compared each tick so the UI
+  /// only refreshes when something actually changed.
+  String _lastFingerprint = '';
+
   bool get enabled => _prefs?.getBool(_kEnabled) ?? true;
 
   Future<void> setEnabled(bool value) async {
@@ -95,6 +104,7 @@ class NotificationService {
   /// call repeatedly (e.g. token refresh swaps the session object).
   void start(StaffSession session) {
     if (!isDesktop) return;
+    debugPrint('[notif] start: ${session.username} @ ${session.baseUrl}');
     _session = session;
     _consecutiveFailures = 0;
     _restartTimer();
@@ -105,6 +115,7 @@ class NotificationService {
     _session = null;
     _timer?.cancel();
     _timer = null;
+    _lastFingerprint = '';
   }
 
   void _restartTimer() {
@@ -121,6 +132,7 @@ class NotificationService {
     final session = _session;
     if (session == null || _ticking || !enabled) return;
     _ticking = true;
+    debugPrint('[notif] tick @ ${_hhmm()}');
     try {
       final isAdmin = session.position.trim().toLowerCase() == 'admin';
       final _Snapshot snap;
@@ -162,7 +174,15 @@ class NotificationService {
       }
       _consecutiveFailures = 0;
       await _process(snap, session);
-    } catch (_) {
+      final fingerprint = snap.fingerprint;
+      if (_lastFingerprint.isNotEmpty && fingerprint != _lastFingerprint) {
+        revision.value++;
+        debugPrint('[notif] data changed — UI refresh signaled');
+      }
+      _lastFingerprint = fingerprint;
+      debugPrint('[notif] tick ok — tasks:${snap.openCount} open:${snap.openSlot} timeIn:${snap.hasTimeIn}');
+    } catch (e) {
+      debugPrint('[notif] tick failed: $e');
       // Network hiccups and expired tokens just retry next tick; give up after
       // a sustained streak so we don't hammer a dead session forever.
       _consecutiveFailures += 1;
@@ -457,6 +477,7 @@ class _Snapshot {
     required this.titles,
     required this.newItemTitle,
     required this.hasDigest,
+    required this.fingerprint,
     this.unassignedCount,
     this.hasTimeIn,
     this.openSlot,
@@ -474,20 +495,40 @@ class _Snapshot {
   ) {
     final ids = <int>[];
     final titles = <int, String>{};
+    final fp = <String>[];
     for (final task in tasks?.tasks ?? const <StaffTask>[]) {
       if (task.id > 0) {
         ids.add(task.id);
         titles[task.id] = task.title.isEmpty ? 'Untitled task' : task.title;
       }
+      fp.add(
+        '${task.id}|${task.title}|${task.statusValue}|${task.dueDate}|'
+        '${task.priorityValue}|${task.assignedPersonId}|${task.latestCommentId}',
+      );
+    }
+    fp.sort();
+    if (tasks != null) {
+      final s = tasks.stats;
+      fp.add(
+        'stats:${s.open},${s.closed},${s.dueToday},${s.dueSoon},'
+        '${s.overdue},${s.undated},${s.forwarded}',
+      );
     }
     final openSlot = attendance?.status.openSlotLabel.trim() ?? '';
+    final hasTimeIn =
+        tasks?.hasTimeInToday ?? attendance?.status.hasRecordToday;
+    fp.add(
+      'att:$hasTimeIn|$openSlot|${attendance?.status.latestTimeInLabel ?? ''}',
+    );
+    fp.add('unassigned:${dashboard?.unassignedSupportCount}');
     return _Snapshot._(
       watchIds: ids,
       titles: titles,
       newItemTitle: 'New task assigned to you',
       hasDigest: tasks != null,
+      fingerprint: fp.join(';'),
       unassignedCount: dashboard?.unassignedSupportCount,
-      hasTimeIn: tasks?.hasTimeInToday ?? attendance?.status.hasRecordToday,
+      hasTimeIn: hasTimeIn,
       openSlot: openSlot.isEmpty ? null : openSlot,
       latestTimeIn: attendance?.status.latestTimeInLabel ?? '',
       openCount: tasks?.stats.open ?? 0,
@@ -500,17 +541,29 @@ class _Snapshot {
   factory _Snapshot.forAdmin(AdminTasksData data) {
     final ids = <int>[];
     final titles = <int, String>{};
+    final fp = <String>[];
     for (final task in data.tasks) {
       if (task.id > 0 && task.assignedName.trim().isEmpty) {
         ids.add(task.id);
         titles[task.id] = task.title.isEmpty ? 'Untitled task' : task.title;
       }
+      fp.add(
+        '${task.id}|${task.title}|${task.status}|${task.dueDate}|'
+        '${task.priorityValue}|${task.assignedName}',
+      );
     }
+    fp.sort();
+    final c = data.counts;
+    fp.add(
+      'stats:${c.open},${c.closed},${c.dueToday},${c.dueSoon},'
+      '${c.overdue},${c.withoutDueDate}',
+    );
     return _Snapshot._(
       watchIds: ids,
       titles: titles,
       newItemTitle: 'New unassigned task',
       hasDigest: true,
+      fingerprint: fp.join(';'),
       hasTimeIn: null,
       openCount: data.counts.open,
       dueToday: data.counts.dueToday,
@@ -522,6 +575,10 @@ class _Snapshot {
   final List<int> watchIds;
   final Map<int, String> titles;
   final String newItemTitle;
+
+  /// Content signature of everything the poll fetched — compared between
+  /// ticks so [NotificationService.revision] only bumps on real changes.
+  final String fingerprint;
 
   /// Whether digest stats are available this session.
   final bool hasDigest;

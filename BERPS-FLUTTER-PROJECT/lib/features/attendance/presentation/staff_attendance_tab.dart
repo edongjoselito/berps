@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/network/api_exception.dart';
+import '../../../core/services/notification_service.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/csv_export.dart';
 import '../../../core/widgets/desktop_kit.dart';
@@ -43,6 +44,10 @@ class _StaffAttendanceTabState extends State<StaffAttendanceTab> {
   late String _to = _today();
   Future<StaffAttendanceData>? _future;
 
+  /// Last loaded data — kept on screen while a background refetch runs so
+  /// remote-triggered refreshes swap content in place.
+  StaffAttendanceData? _lastData;
+
   @override
   void initState() {
     super.initState();
@@ -53,9 +58,24 @@ class _StaffAttendanceTabState extends State<StaffAttendanceTab> {
       _to = _isoDate(now);
     }
     _reload();
+    NotificationService.instance.revision.addListener(_onRemoteChange);
   }
 
-  void _reload() {
+  @override
+  void dispose() {
+    NotificationService.instance.revision.removeListener(_onRemoteChange);
+    super.dispose();
+  }
+
+  /// The desktop notification poller observed a server-side change — pull
+  /// fresh data without dropping what's already rendered.
+  void _onRemoteChange() {
+    if (!mounted) return;
+    _reload(silent: true);
+  }
+
+  void _reload({bool silent = false}) {
+    if (!silent) _lastData = null;
     setState(() {
       _future = _api.fetchAttendance(
         baseUrl: widget.session.baseUrl,
@@ -291,6 +311,8 @@ class _StaffAttendanceTabState extends State<StaffAttendanceTab> {
       child: FutureBuilder<StaffAttendanceData>(
         future: _future,
         builder: (context, snapshot) {
+          if (snapshot.hasData) _lastData = snapshot.data;
+          final data = snapshot.data ?? _lastData;
           return ListView(
             physics: const AlwaysScrollableScrollPhysics(),
             padding: EdgeInsets.fromLTRB(
@@ -324,10 +346,8 @@ class _StaffAttendanceTabState extends State<StaffAttendanceTab> {
                             DeskIconButton(
                               icon: LucideIcons.download,
                               tooltip: 'Export CSV',
-                              onTap:
-                                  snapshot.hasData &&
-                                      snapshot.data!.records.isNotEmpty
-                                  ? () => _exportCsv(snapshot.data!.records)
+                              onTap: data != null && data.records.isNotEmpty
+                                  ? () => _exportCsv(data.records)
                                   : null,
                             ),
                             const SizedBox(width: 8),
@@ -362,35 +382,28 @@ class _StaffAttendanceTabState extends State<StaffAttendanceTab> {
                   ),
                 ),
               if (!AppTheme.isDesktop) const SizedBox(height: 18),
-              if (snapshot.connectionState == ConnectionState.waiting)
+              if (data == null &&
+                  snapshot.connectionState == ConnectionState.waiting)
                 const _AttendanceSkeleton()
-              else if (snapshot.hasError)
+              else if (data == null)
                 AppErrorCard(
                   title: 'Unable to load attendance',
                   message: snapshot.error is ApiException
                       ? (snapshot.error as ApiException).message
-                      : snapshot.error.toString(),
-                  onRetry: () {
-                    Haptics.medium();
-                    _reload();
-                  },
-                )
-              else if (!snapshot.hasData)
-                AppErrorCard(
-                  title: 'Unable to load attendance',
-                  message: 'Attendance data is unavailable right now.',
+                      : (snapshot.error?.toString() ??
+                            'Attendance data is unavailable right now.'),
                   onRetry: () {
                     Haptics.medium();
                     _reload();
                   },
                 )
               else if (AppTheme.isDesktop)
-                _buildDesktop(snapshot.data!)
+                _buildDesktop(data)
               else ...[
                 FadeSlide(
                   delay: const Duration(milliseconds: 120),
                   child: _PunchHeroCard(
-                    data: snapshot.data!,
+                    data: data,
                     onTimeIn: () => _runPunchAction(
                       () => _api.timeIn(
                         baseUrl: widget.session.baseUrl,
@@ -408,7 +421,7 @@ class _StaffAttendanceTabState extends State<StaffAttendanceTab> {
                 const SizedBox(height: 18),
                 FadeSlide(
                   delay: const Duration(milliseconds: 180),
-                  child: _SummaryRow(summary: snapshot.data!.summary),
+                  child: _SummaryRow(summary: data.summary),
                 ),
                 const SizedBox(height: 20),
                 FadeSlide(
@@ -419,7 +432,7 @@ class _StaffAttendanceTabState extends State<StaffAttendanceTab> {
                   ),
                 ),
                 const SizedBox(height: 10),
-                ...snapshot.data!.records.asMap().entries.map(
+                ...data.records.asMap().entries.map(
                   (entry) => Padding(
                     padding: const EdgeInsets.only(bottom: 12),
                     child: FadeSlide(
@@ -428,7 +441,7 @@ class _StaffAttendanceTabState extends State<StaffAttendanceTab> {
                     ),
                   ),
                 ),
-                if (snapshot.data!.records.isEmpty)
+                if (data.records.isEmpty)
                   const AppEmptyState(
                     icon: LucideIcons.inbox,
                     title: 'No attendance entries',

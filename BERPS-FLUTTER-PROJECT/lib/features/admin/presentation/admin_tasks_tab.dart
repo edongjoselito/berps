@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/network/api_exception.dart';
+import '../../../core/services/notification_service.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/desktop_kit.dart';
 import '../../../core/utils/date_formatters.dart';
@@ -26,12 +27,30 @@ class AdminTasksTab extends StatefulWidget {
 class _AdminTasksTabState extends State<AdminTasksTab> {
   final AdminApi _api = AdminApi();
   late Future<AdminTasksData> _future;
+
+  /// Last loaded data — kept on screen while a background refetch runs so
+  /// remote-triggered refreshes swap content in place.
+  AdminTasksData? _lastData;
   String _status = 'open';
 
   @override
   void initState() {
     super.initState();
     _future = _load();
+    NotificationService.instance.revision.addListener(_onRemoteChange);
+  }
+
+  @override
+  void dispose() {
+    NotificationService.instance.revision.removeListener(_onRemoteChange);
+    super.dispose();
+  }
+
+  /// The desktop notification poller observed a server-side change — pull
+  /// fresh data without dropping what's already rendered.
+  void _onRemoteChange() {
+    if (!mounted) return;
+    _reload(silent: true);
   }
 
   Future<AdminTasksData> _load() => _api.fetchTasks(
@@ -40,10 +59,14 @@ class _AdminTasksTabState extends State<AdminTasksTab> {
     status: _status,
   );
 
-  void _reload() => setState(() => _future = _load());
+  void _reload({bool silent = false}) {
+    if (!silent) _lastData = null;
+    setState(() => _future = _load());
+  }
 
   void _setStatus(String s) {
     Haptics.light();
+    _lastData = null;
     setState(() {
       _status = s;
       _future = _load();
@@ -97,6 +120,8 @@ class _AdminTasksTabState extends State<AdminTasksTab> {
         child: FutureBuilder<AdminTasksData>(
           future: _future,
           builder: (context, snapshot) {
+            if (snapshot.hasData) _lastData = snapshot.data;
+            final data = snapshot.data ?? _lastData;
             return ListView(
               physics: const AlwaysScrollableScrollPhysics(),
               padding: EdgeInsets.fromLTRB(gutter, 12, gutter, 96),
@@ -117,7 +142,8 @@ class _AdminTasksTabState extends State<AdminTasksTab> {
                   onSelected: _setStatus,
                 ),
                 const SizedBox(height: 16),
-                if (snapshot.connectionState == ConnectionState.waiting)
+                if (data == null &&
+                    snapshot.connectionState == ConnectionState.waiting)
                   ...List.generate(
                     4,
                     (_) => const Padding(
@@ -125,15 +151,17 @@ class _AdminTasksTabState extends State<AdminTasksTab> {
                       child: Skeleton(height: 96, radius: 18),
                     ),
                   )
-                else if (snapshot.hasError)
+                else if (data == null)
                   Padding(
                     padding: const EdgeInsets.only(top: 50),
                     child: AdminErrorView(
-                      message: snapshot.error.toString(),
+                      message:
+                          snapshot.error?.toString() ??
+                          'Tasks are unavailable right now.',
                       onRetry: _reload,
                     ),
                   )
-                else if (snapshot.data!.tasks.isEmpty)
+                else if (data.tasks.isEmpty)
                   const Padding(
                     padding: EdgeInsets.only(top: 50),
                     child: AdminEmptyView(
@@ -143,7 +171,7 @@ class _AdminTasksTabState extends State<AdminTasksTab> {
                     ),
                   )
                 else
-                  ...snapshot.data!.tasks.map(_taskCard),
+                  ...data.tasks.map(_taskCard),
               ],
             );
           },

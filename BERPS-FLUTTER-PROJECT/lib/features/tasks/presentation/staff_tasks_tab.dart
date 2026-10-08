@@ -5,6 +5,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/network/api_exception.dart';
+import '../../../core/services/notification_service.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/csv_export.dart';
 import '../../../core/widgets/desktop_kit.dart';
@@ -44,6 +45,11 @@ class _StaffTasksTabState extends State<StaffTasksTab> {
   final StaffApi _api = StaffApi();
   SessionStore? _store;
   Future<StaffTasksData>? _future;
+
+  /// Last loaded data — kept on screen while a background refetch runs so
+  /// remote-triggered refreshes swap content in place instead of flashing
+  /// the skeleton (or an error card on a transient failure).
+  StaffTasksData? _lastData;
   String _status = 'open';
   String _scope = '';
   String _statFilter = ''; // '', 'open', 'due_today', 'overdue', 'done'
@@ -87,6 +93,20 @@ class _StaffTasksTabState extends State<StaffTasksTab> {
     _applyStatFilterState();
     _reload();
     unawaited(_restoreFilterPreset());
+    NotificationService.instance.revision.addListener(_onRemoteChange);
+  }
+
+  @override
+  void dispose() {
+    NotificationService.instance.revision.removeListener(_onRemoteChange);
+    super.dispose();
+  }
+
+  /// The desktop notification poller observed a server-side change — pull
+  /// fresh data without dropping what's already rendered.
+  void _onRemoteChange() {
+    if (!mounted) return;
+    setState(() => _future = _fetch());
   }
 
   /// Restores the saved status/scope preset when the tab wasn't opened with
@@ -131,15 +151,16 @@ class _StaffTasksTabState extends State<StaffTasksTab> {
     }
   }
 
+  Future<StaffTasksData> _fetch() => _api.fetchTasks(
+    baseUrl: widget.session.baseUrl,
+    token: widget.session.token,
+    status: _status,
+    scope: _scope,
+  );
+
   void _reload() {
-    setState(() {
-      _future = _api.fetchTasks(
-        baseUrl: widget.session.baseUrl,
-        token: widget.session.token,
-        status: _status,
-        scope: _scope,
-      );
-    });
+    _lastData = null;
+    setState(() => _future = _fetch());
     unawaited(_store?.saveTasksFilter(_status, _scope) ?? Future.value());
   }
 
@@ -189,6 +210,7 @@ class _StaffTasksTabState extends State<StaffTasksTab> {
 
   void _applyStatFilter(String filter) {
     Haptics.light();
+    _lastData = null;
     setState(() {
       // Tapping the active stat filter again clears it
       if (_statFilter == filter) {
@@ -652,6 +674,10 @@ class _StaffTasksTabState extends State<StaffTasksTab> {
       child: FutureBuilder<StaffTasksData>(
         future: _future,
         builder: (context, snapshot) {
+          // Snapshot data survives a future swap; _lastData survives a
+          // failed refetch. Both keep rendered content stable.
+          if (snapshot.hasData) _lastData = snapshot.data;
+          final data = snapshot.data ?? _lastData;
           return ListView(
             physics: const AlwaysScrollableScrollPhysics(),
             padding: EdgeInsets.fromLTRB(
@@ -665,8 +691,8 @@ class _StaffTasksTabState extends State<StaffTasksTab> {
                 bottom: false,
                 child: MobileHeader(
                   title: 'Tasks',
-                  subtitle: AppTheme.isDesktop && snapshot.hasData
-                      ? '${snapshot.data!.stats.open} open · ${snapshot.data!.stats.overdue} overdue · ${snapshot.data!.stats.dueToday} due today'
+                  subtitle: AppTheme.isDesktop && data != null
+                      ? '${data.stats.open} open · ${data.stats.overdue} overdue · ${data.stats.dueToday} due today'
                       : null,
                   leadingIcon: LucideIcons.list,
                   onLeadingTap: widget.onMenu == null
@@ -688,10 +714,8 @@ class _StaffTasksTabState extends State<StaffTasksTab> {
                             DeskIconButton(
                               icon: LucideIcons.download,
                               tooltip: 'Export CSV',
-                              onTap:
-                                  snapshot.hasData &&
-                                      snapshot.data!.tasks.isNotEmpty
-                                  ? () => _exportCsv(snapshot.data!.tasks)
+                              onTap: data != null && data.tasks.isNotEmpty
+                                  ? () => _exportCsv(data.tasks)
                                   : null,
                             ),
                             const SizedBox(width: 8),
@@ -699,8 +723,8 @@ class _StaffTasksTabState extends State<StaffTasksTab> {
                               icon: LucideIcons.plus,
                               filled: true,
                               tooltip: 'New task (⌘N)',
-                              onTap: snapshot.hasData
-                                  ? () => _openEditor(snapshot.data!)
+                              onTap: data != null
+                                  ? () => _openEditor(data)
                                   : null,
                             ),
                             const SizedBox(width: 8),
@@ -711,26 +735,28 @@ class _StaffTasksTabState extends State<StaffTasksTab> {
                 ),
               ),
               const SizedBox(height: 16),
-              if (snapshot.connectionState == ConnectionState.waiting)
+              if (data == null &&
+                  snapshot.connectionState == ConnectionState.waiting)
                 const _TasksSkeleton()
-              else if (snapshot.hasError)
+              else if (data == null)
                 AppErrorCard(
                   title: 'Unable to load tasks',
                   message: snapshot.error is ApiException
                       ? (snapshot.error as ApiException).message
-                      : snapshot.error.toString(),
+                      : (snapshot.error?.toString() ??
+                            'Tasks are unavailable right now.'),
                   onRetry: () {
                     Haptics.medium();
                     _reload();
                   },
                 )
               else if (AppTheme.isDesktop)
-                ..._buildDesktopBody(snapshot.data!)
+                ..._buildDesktopBody(data)
               else ...[
                 FadeSlide(
                   delay: const Duration(milliseconds: 60),
                   child: _TaskStatsRow(
-                    stats: snapshot.data!.stats,
+                    stats: data.stats,
                     activeFilter: _statFilter,
                     onStatTap: _applyStatFilter,
                   ),
@@ -741,10 +767,8 @@ class _StaffTasksTabState extends State<StaffTasksTab> {
                   child: _TaskFilters(
                     status: _status,
                     scope: _scope,
-                    canAdd: snapshot.hasData,
-                    onAdd: snapshot.hasData
-                        ? () => _openEditor(snapshot.data!)
-                        : null,
+                    canAdd: true,
+                    onAdd: () => _openEditor(data),
                     onStatusChanged: (value) {
                       Haptics.light();
                       setState(() {
@@ -764,22 +788,22 @@ class _StaffTasksTabState extends State<StaffTasksTab> {
                   ),
                 ),
                 const SizedBox(height: 18),
-                if (!snapshot.data!.hasTimeInToday)
+                if (!data.hasTimeInToday)
                   FadeSlide(
                     delay: const Duration(milliseconds: 180),
                     child: const _TimeInWarning(),
                   ),
-                if (!snapshot.data!.hasTimeInToday) const SizedBox(height: 18),
+                if (!data.hasTimeInToday) const SizedBox(height: 18),
                 FadeSlide(
                   delay: const Duration(milliseconds: 190),
                   child: _TaskSectionHeader(
                     icon: LucideIcons.listChecks,
                     title: _sectionTitle(),
-                    count: snapshot.data!.tasks.length,
+                    count: data.tasks.length,
                   ),
                 ),
                 const SizedBox(height: 10),
-                if (snapshot.data!.tasks.isEmpty)
+                if (data.tasks.isEmpty)
                   const AppEmptyState(
                     icon: LucideIcons.squareCheck,
                     title: 'No tasks match the current filter',
@@ -787,15 +811,14 @@ class _StaffTasksTabState extends State<StaffTasksTab> {
                         'Try a different status or clear the active stat filter.',
                   )
                 else
-                  ...snapshot.data!.tasks.asMap().entries.map(
+                  ...data.tasks.asMap().entries.map(
                     (entry) => Padding(
                       padding: const EdgeInsets.only(bottom: 12),
                       child: FadeSlide(
                         delay: Duration(milliseconds: 200 + 40 * entry.key),
                         child: _TaskCard(
                           task: entry.value,
-                          onTap: () =>
-                              _openTaskActions(snapshot.data!, entry.value),
+                          onTap: () => _openTaskActions(data, entry.value),
                         ),
                       ),
                     ),
