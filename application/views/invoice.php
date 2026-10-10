@@ -82,15 +82,15 @@ $recurringSchedule = $recurringScheduleRaw !== '' && $recurringScheduleRaw !== '
     ? date('F j, Y', strtotime($recurringScheduleRaw))
     : '';
 
-$dueDateRaw = $recurringScheduleRaw !== '' && $recurringScheduleRaw !== '0000-00-00'
-    ? $recurringScheduleRaw
-    : ($receiveDateRaw !== '' && $receiveDateRaw !== '0000-00-00' ? $receiveDateRaw : $transactionDateRaw);
+$dueDateRaw = $receiveDateRaw !== '' && $receiveDateRaw !== '0000-00-00'
+    ? $receiveDateRaw
+    : ($recurringScheduleRaw !== '' && $recurringScheduleRaw !== '0000-00-00' ? $recurringScheduleRaw : $transactionDateRaw);
 $dueDate = $dueDateRaw !== '' && $dueDateRaw !== '0000-00-00'
     ? date('F j, Y', strtotime($dueDateRaw))
     : 'Not specified';
 
 $this->load->helper('invoice_coverage');
-$coveredMonths = invoice_service_coverage_label($dueDateRaw, $recurringFrequency, $invoiceData->coverageOption ?? 'coming');
+$coveredMonths = invoice_service_coverage_label($recurringScheduleRaw !== '' && $recurringScheduleRaw !== '0000-00-00' ? $recurringScheduleRaw : $dueDateRaw, $recurringFrequency, $invoiceData->coverageOption ?? 'coming');
 
 $totalDue = (float) ($invoiceData->TotalDue ?? 0);
 $amountPaid = (float) ($invoiceData->AmountPaid ?? 0);
@@ -454,30 +454,32 @@ $backLabel = isset($backLabel) && trim((string) $backLabel) !== ''
         }
 
         .invoice-stripe {
-            height: 5px;
-            background: linear-gradient(90deg, #1e40af 0%, #3b82f6 50%, #60a5fa 100%);
+            height: 2px;
+            background: var(--ink);
         }
 
         .invoice-inner {
-            padding: 44px 48px 40px;
+            padding: 32px 40px 36px;
         }
 
         .hero {
             display: grid;
-            grid-template-columns: 1fr auto;
-            gap: 32px;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 24px;
             align-items: flex-start;
-            padding-bottom: 32px;
+            padding-bottom: 24px;
             margin-bottom: 0;
             border-bottom: 1.5px solid var(--line);
         }
 
         .brand-name {
-            font-size: 1.85rem;
+            font-size: 1.35rem;
             font-weight: 700;
-            letter-spacing: -0.04em;
+            letter-spacing: -0.025em;
             color: var(--ink);
-            line-height: 1;
+            line-height: 1.2;
+            overflow-wrap: anywhere;
+            text-wrap: balance;
             margin-bottom: 8px;
         }
 
@@ -488,20 +490,12 @@ $backLabel = isset($backLabel) && trim((string) $backLabel) !== ''
         }
 
         .brand-meta span {
-            display: inline-block;
-            margin-right: 14px;
+            display: block;
+            margin: 0;
         }
 
         .brand-meta span::before {
-            content: '';
-            display: inline-block;
-            width: 3px;
-            height: 3px;
-            border-radius: 50%;
-            background: var(--muted-light);
-            vertical-align: middle;
-            margin-right: 6px;
-            margin-bottom: 2px;
+            content: none;
         }
 
         .brand-meta span:first-child::before {
@@ -510,6 +504,7 @@ $backLabel = isset($backLabel) && trim((string) $backLabel) !== ''
 
         .invoice-mark {
             text-align: right;
+            max-width: 260px;
         }
 
         .invoice-type-label {
@@ -527,12 +522,14 @@ $backLabel = isset($backLabel) && trim((string) $backLabel) !== ''
         }
 
         .invoice-heading {
-            font-size: 2.4rem;
-            font-weight: 800;
-            letter-spacing: -0.06em;
+            font-size: 1.65rem;
+            font-weight: 700;
+            letter-spacing: -0.025em;
             color: var(--ink);
-            line-height: 1;
+            line-height: 1.25;
             margin-bottom: 12px;
+            overflow-wrap: anywhere;
+            font-variant-numeric: tabular-nums;
         }
 
         .status-pill {
@@ -825,6 +822,7 @@ $backLabel = isset($backLabel) && trim((string) $backLabel) !== ''
 
             .invoice-mark {
                 text-align: left;
+                max-width: none;
             }
 
             .invoice-heading {
@@ -881,9 +879,10 @@ $backLabel = isset($backLabel) && trim((string) $backLabel) !== ''
             }
 
             .invoice-stripe {
-                height: 5px !important;
-                background: #1e40af !important;
-                margin: 0 0 14pt 0 !important;
+                height: 0 !important;
+                border-top: 1pt solid #1f2937 !important;
+                background: none !important;
+                margin: 0 0 12pt 0 !important;
                 border-radius: 0 !important;
             }
 
@@ -893,9 +892,9 @@ $backLabel = isset($backLabel) && trim((string) $backLabel) !== ''
 
             .hero {
                 display: grid !important;
-                grid-template-columns: 1fr 220px !important;
+                grid-template-columns: minmax(0, 1fr) auto !important;
                 align-items: start !important;
-                gap: 18pt !important;
+                gap: 14pt !important;
                 padding-bottom: 16pt !important;
                 margin-bottom: 14pt !important;
                 border-bottom: 1px solid #cbd5e1 !important;
@@ -904,20 +903,21 @@ $backLabel = isset($backLabel) && trim((string) $backLabel) !== ''
             }
 
             .brand-name {
-                font-size: 18pt !important;
+                font-size: 13pt !important;
                 font-weight: 700 !important;
-                line-height: 1.1 !important;
+                line-height: 1.2 !important;
                 margin-bottom: 6pt !important;
             }
 
             .brand-meta {
                 font-size: 8.5pt !important;
                 line-height: 1.5 !important;
-                color: #64748b !important;
+                color: #374151 !important;
             }
 
             .invoice-mark {
                 text-align: right !important;
+                max-width: 180pt !important;
             }
 
             .invoice-type-label {
@@ -934,9 +934,9 @@ $backLabel = isset($backLabel) && trim((string) $backLabel) !== ''
             }
 
             .invoice-heading {
-                font-size: 21pt !important;
-                font-weight: 800 !important;
-                line-height: 1 !important;
+                font-size: 17pt !important;
+                font-weight: 700 !important;
+                line-height: 1.25 !important;
                 margin-bottom: 8pt !important;
             }
 
@@ -1513,6 +1513,43 @@ $backLabel = isset($backLabel) && trim((string) $backLabel) !== ''
             }
         }
     </style>
+    <style>
+        .invoice-mark .status-pill {
+            background: transparent;
+            border: 1px solid currentColor;
+            border-radius: 4px;
+            padding: 4px 9px;
+            font-size: 0.7rem;
+            letter-spacing: 0.06em;
+        }
+        .invoice-mark .status-pill::before { display: none; }
+        @media print {
+            .invoice-mark .status-pill {
+                background: transparent !important;
+                color: #1f2937 !important;
+                border: 0.5pt solid #6b7280 !important;
+                border-radius: 2pt !important;
+                padding: 3pt 6pt !important;
+            }
+        }
+        .invoice-date-editor { margin-bottom: 20px; padding: 16px; background: #fff; border: 1px solid #dbe2ea; border-radius: 10px; }
+        .invoice-date-editor summary { cursor: pointer; font-weight: 600; }
+        .invoice-date-editor form { display: flex; flex-wrap: wrap; align-items: end; gap: 16px; margin-top: 16px; }
+        .invoice-date-editor label { display: flex; flex-direction: column; gap: 6px; }
+        .invoice-date-editor input:not([type="hidden"]), .invoice-date-editor textarea, .invoice-date-editor select { padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; font: inherit; max-width: 100%; box-sizing: border-box; }
+        .invoice-item-description { flex: 1 1 100%; }
+        .invoice-item-description textarea { resize: vertical; width: 100%; }
+        .invoice-date-feedback { padding: 12px; margin-bottom: 16px; background: #ecfdf5; color: #166534; }
+        .invoice-date-feedback.error { background: #fef2f2; color: #991b1b; }
+        @media print { .invoice-date-editor, .invoice-date-feedback { display: none !important; } }
+        /* Keep every invoice label and value readable on screen and in print. */
+        .page-shell .invoice-card .invoice-inner,
+        .page-shell .invoice-card .invoice-inner * {
+            color: #000 !important;
+            -webkit-text-fill-color: #000 !important;
+            text-shadow: none !important;
+        }
+    </style>
     <link rel="stylesheet" href="<?= base_url('assets/css/fonts.css'); ?>">
 </head>
 
@@ -1556,6 +1593,51 @@ $backLabel = isset($backLabel) && trim((string) $backLabel) !== ''
         </div>
         <?php endif; ?>
 
+        <?php if (!$isPdfRender): ?>
+            <?php foreach (array('success', 'danger') as $messageType): ?>
+                <?php if ($message = $this->session->flashdata($messageType)): ?>
+                    <div class="invoice-date-feedback <?= $messageType === 'danger' ? 'error' : ''; ?>" role="status"><?= htmlspecialchars($message, ENT_QUOTES, 'UTF-8'); ?></div>
+                <?php endif; ?>
+            <?php endforeach; ?>
+            <?php if (!empty($canEditDates)): ?>
+                <details class="invoice-date-editor">
+                    <summary>Edit dates</summary>
+                    <form method="post" action="<?= base_url('Page/updateInvoiceDates'); ?>">
+                        <input type="hidden" name="id" value="<?= (int) $orderID; ?>">
+                        <?php if (config_item('csrf_protection')): ?>
+                            <input type="hidden" name="<?= htmlspecialchars((string) $this->security->get_csrf_token_name(), ENT_QUOTES, 'UTF-8'); ?>" value="<?= htmlspecialchars((string) $this->security->get_csrf_hash(), ENT_QUOTES, 'UTF-8'); ?>">
+                        <?php endif; ?>
+                        <label>Invoice Date <input type="date" name="TransDate" value="<?= htmlspecialchars($transactionDateRaw, ENT_QUOTES, 'UTF-8'); ?>" required></label>
+                        <label>Due Date <input type="date" name="ReceiveDate" value="<?= htmlspecialchars($dueDateRaw, ENT_QUOTES, 'UTF-8'); ?>" required></label>
+                        <button type="submit" class="btn btn-primary">Save dates</button>
+                    </form>
+                </details>
+                <?php if ((int) ($invoiceData->recurringTemplateID ?? 0) > 0 || $recurringFrequency === 'none' || $recurringFrequency === ''): ?>
+                    <details class="invoice-date-editor">
+                        <summary>Add item to this invoice only</summary>
+                        <p>Use this for seasonal or one-time charges. Future recurring invoices will keep their usual items.</p>
+                        <form method="post" action="<?= base_url('Page/addInvoiceOnlyItem'); ?>">
+                            <input type="hidden" name="id" value="<?= (int) $orderID; ?>">
+                            <?php if (config_item('csrf_protection')): ?>
+                                <input type="hidden" name="<?= htmlspecialchars((string) $this->security->get_csrf_token_name(), ENT_QUOTES, 'UTF-8'); ?>" value="<?= htmlspecialchars((string) $this->security->get_csrf_hash(), ENT_QUOTES, 'UTF-8'); ?>">
+                            <?php endif; ?>
+                            <label class="invoice-item-description">Description <textarea name="description" rows="3" maxlength="250" required></textarea></label>
+                            <label>Quantity <input type="number" name="quantity" value="1" min="1" max="1000000" step="1" required></label>
+                            <label>Unit
+                                <select name="unit" required>
+                                    <?php foreach (($invoiceOnlyUnits ?? array('each')) as $unitOption): ?>
+                                        <option value="<?= htmlspecialchars($unitOption, ENT_QUOTES, 'UTF-8'); ?>"><?= htmlspecialchars(ucfirst($unitOption), ENT_QUOTES, 'UTF-8'); ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </label>
+                            <label>Unit price (PHP) <input type="number" name="unitPrice" min="0" max="1000000000" step="0.01" required></label>
+                            <button type="submit" class="btn btn-primary">Add item</button>
+                        </form>
+                    </details>
+                <?php endif; ?>
+            <?php endif; ?>
+        <?php endif; ?>
+
         <div class="invoice-card">
             <div class="invoice-stripe"></div>
 
@@ -1580,8 +1662,7 @@ $backLabel = isset($backLabel) && trim((string) $backLabel) !== ''
                     </div>
 
                     <div class="invoice-mark">
-                        <div class="invoice-type-label">Official Invoice</div>
-                        <div class="invoice-heading">Invoice</div>
+                        <div class="invoice-heading">Invoice <?= htmlspecialchars($invoiceNo, ENT_QUOTES, 'UTF-8'); ?></div>
                         <div class="status-pill <?= htmlspecialchars($statusClass, ENT_QUOTES, 'UTF-8'); ?>">
                             <?= htmlspecialchars($statusLabel, ENT_QUOTES, 'UTF-8'); ?>
                         </div>
@@ -1605,10 +1686,6 @@ $backLabel = isset($backLabel) && trim((string) $backLabel) !== ''
                         <span class="meta-label">Invoice Details</span>
                         <div class="details-grid">
                             <div class="detail-item">
-                                <div class="detail-label">Invoice No.</div>
-                                <div class="detail-value"><?= htmlspecialchars($invoiceNo, ENT_QUOTES, 'UTF-8'); ?></div>
-                            </div>
-                            <div class="detail-item">
                                 <div class="detail-label">Invoice Date</div>
                                 <div class="detail-value"><?= htmlspecialchars($transactionDate, ENT_QUOTES, 'UTF-8'); ?></div>
                             </div>
@@ -1620,22 +1697,10 @@ $backLabel = isset($backLabel) && trim((string) $backLabel) !== ''
                                 <div class="detail-label">Reference ID</div>
                                 <div class="detail-value"><?= htmlspecialchars($orderID !== '' ? $orderID : '—', ENT_QUOTES, 'UTF-8'); ?></div>
                             </div>
-                            <div class="detail-item">
-                                <div class="detail-label">Printed</div>
-                                <div class="detail-value"><?= htmlspecialchars(date('M j, Y g:i A'), ENT_QUOTES, 'UTF-8'); ?></div>
-                            </div>
                             <?php if ($recurringFrequency !== '' && $recurringFrequency !== 'none'): ?>
                                 <div class="detail-item">
                                     <div class="detail-label">Recurring</div>
                                     <div class="detail-value"><?= htmlspecialchars(ucfirst($recurringFrequency), ENT_QUOTES, 'UTF-8'); ?></div>
-                                </div>
-                                <div class="detail-item">
-                                    <div class="detail-label">Invoice Generation Timing</div>
-                                    <div class="detail-value"><?= ($invoiceData->coverageOption ?? 'coming') === 'previous' ? 'After Service Is Served' : 'Before Service Is Served'; ?></div>
-                                </div>
-                                <div class="detail-item">
-                                    <div class="detail-label">Recurring Due Date</div>
-                                    <div class="detail-value"><?= htmlspecialchars($recurringSchedule !== '' ? $recurringSchedule : 'Not specified', ENT_QUOTES, 'UTF-8'); ?></div>
                                 </div>
                             <?php endif; ?>
                         </div>

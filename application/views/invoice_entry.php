@@ -1175,7 +1175,7 @@ if (empty($invoiceItems)) {
                     '  <div class="form-row">' +
                     '    <div class="form-group col-md-12">' +
                     '      <label>Description</label>' +
-                    '      <input type="text" class="form-control" name="itemDescription[]" value="' + escapeHtml(row.itemDescription) + '" required>' +
+                    '      <textarea class="form-control" name="itemDescription[]" rows="3" style="resize: vertical;" required>' + escapeHtml(row.itemDescription) + '</textarea>' +
                     '    </div>' +
                     '  </div>' +
                     '  <div class="form-row">' +
@@ -1204,7 +1204,7 @@ if (empty($invoiceItems)) {
                 var rows = itemRows.querySelectorAll('[data-item-row]');
                 return Array.prototype.map.call(rows, function(row) {
                     return {
-                        itemDescription: row.querySelector('input[name="itemDescription[]"]').value || '',
+                        itemDescription: row.querySelector('textarea[name="itemDescription[]"]').value || '',
                         itemQuantity: normalizeQuantity(row.querySelector('input[name="itemQuantity[]"]').value || '1'),
                         itemDurationUnit: row.querySelector('select[name="itemDurationUnit[]"]').value || defaultInvoiceUnit,
                         itemUnitPrice: normalizeMoney(row.querySelector('input[name="itemUnitPrice[]"]').value || '0')
@@ -1492,7 +1492,7 @@ if (empty($invoiceItems)) {
 
             itemRows.addEventListener('input', function(event) {
                 if (
-                    event.target.matches('input[name="itemDescription[]"]') ||
+                    event.target.matches('textarea[name="itemDescription[]"]') ||
                     event.target.matches('input[name="itemQuantity[]"]') ||
                     event.target.matches('input[name="itemUnitPrice[]"]')
                 ) {

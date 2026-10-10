@@ -262,7 +262,20 @@ $config['encryption_key'] = '$2y$10$D2IRUB4gSnvq9qPSyGifp.rzE2WBEzgIBPfsma7v4qqg
 $config['sess_driver']            = 'files';
 $config['sess_cookie_name']       = 'ci_session';
 $config['sess_expiration']        = 7200;
-$config['sess_save_path']         = FCPATH . 'application/sessions';
+
+// Use PHP's configured session directory: Apache may inherit a developer-only
+// system temp path. Strip optional PHP "N;MODE;" prefixes from the setting.
+$session_base_path = ini_get('session.save_path');
+$session_path_parts = explode(';', $session_base_path);
+$session_base_path = end($session_path_parts);
+if ($session_base_path === '')
+{
+    $session_base_path = sys_get_temp_dir();
+}
+// The files driver creates this app-specific directory with mode 0700 as the
+// PHP process owner. Keep sessions separate from other apps and installations.
+$config['sess_save_path']         = rtrim($session_base_path, '/\\') . DIRECTORY_SEPARATOR
+    . 'berps_sessions_' . substr(sha1(FCPATH), 0, 12);
 $config['sess_match_ip']          = FALSE;
 $config['sess_time_to_update']    = 300;
 $config['sess_regenerate_destroy'] = FALSE;

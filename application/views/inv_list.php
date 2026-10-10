@@ -405,8 +405,10 @@
                                                                                           </a>
 
                                                                                           <a class="dropdown-item text-danger"
-                                                                                               href="<?= base_url(); ?>Page/deleteJO?id=<?= $row->orderID; ?>&return_to=invList"
-                                                                                               onclick="return confirm('Are you sure you want to delete this record?');">
+                                                                                               href="<?= base_url(); ?>Page/deleteJO?id=<?= (int) $row->orderID; ?>&amp;return_to=invList&amp;customer=<?= rawurlencode($selectedCustomerId); ?>"
+                                                                                               data-berps-confirm="Are you sure you want to delete invoice #<?= htmlspecialchars((string) $row->InvoiceNo, ENT_QUOTES, 'UTF-8'); ?>?"
+                                                                                               data-berps-confirm-title="Delete invoice"
+                                                                                               data-berps-confirm-label="Delete invoice">
                                                                                                <i class="fa fa-trash"></i> Delete
                                                                                           </a>
                                                                                      <?php endif; ?>

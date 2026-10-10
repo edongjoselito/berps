@@ -9313,12 +9313,12 @@ class Page extends CI_Controller
 
   private function _resolveInvoiceReportDueDate($invoice)
   {
-    $dueDate = $this->_normalizeDateInput(is_object($invoice) ? ($invoice->recurringScheduleDate ?? '') : ($invoice['recurringScheduleDate'] ?? ''));
+    $dueDate = $this->_normalizeDateInput(is_object($invoice) ? ($invoice->ReceiveDate ?? '') : ($invoice['ReceiveDate'] ?? ''));
     if ($dueDate !== null) {
       return $dueDate;
     }
 
-    $dueDate = $this->_normalizeDateInput(is_object($invoice) ? ($invoice->ReceiveDate ?? '') : ($invoice['ReceiveDate'] ?? ''));
+    $dueDate = $this->_normalizeDateInput(is_object($invoice) ? ($invoice->recurringScheduleDate ?? '') : ($invoice['recurringScheduleDate'] ?? ''));
     if ($dueDate !== null) {
       return $dueDate;
     }
@@ -12981,20 +12981,29 @@ class Page extends CI_Controller
     $invoice = $id > 0 ? $this->CashModel->getInvoiceByOrderID($id, $settingsID) : null;
     $inferredReturnTo = ($invoice && isset($invoice->invoiceSource) && $invoice->invoiceSource === 'Others') ? 'invList' : 'joList';
     $returnTo = in_array($returnToInput, array('invList', 'joList'), true) ? $returnToInput : $inferredReturnTo;
+    $returnUrl = 'Page/' . $returnTo;
+    $customer = trim((string) $this->input->get('customer'));
+    if ($returnTo === 'invList' && $customer !== '') {
+      $returnUrl .= '?customer=' . rawurlencode($customer);
+    }
 
     if (!$this->_is_admin_user()) {
-      redirect('Page/' . $returnTo);
+      $this->session->set_flashdata('danger', 'Access denied. Only admins can delete invoices.');
+      redirect($returnUrl);
       return;
     }
 
     if ($invoice) {
       $this->db->where('orderID', $invoice->orderID);
       $this->db->where('settingsID', $settingsID);
-      $this->db->update('invoice', array(
+      $updated = $this->db->update('invoice', array(
         'invoiceStat' => 'Deleted',
       ));
-
-      $this->_rewindRecurringGenerationForRemovedChild($invoice, $settingsID);
+      if (!$updated) {
+        $this->session->set_flashdata('danger', 'Unable to delete the invoice. Please try again.');
+        redirect($returnUrl);
+        return;
+      }
 
       if ($this->db->table_exists('invoice_items')) {
         $this->db
@@ -13002,9 +13011,12 @@ class Page extends CI_Controller
           ->where('settingsID', $settingsID)
           ->delete('invoice_items');
       }
+      $this->session->set_flashdata('success', 'Invoice #' . $invoice->InvoiceNo . ' has been deleted successfully.');
+    } else {
+      $this->session->set_flashdata('danger', 'Invoice not found.');
     }
 
-    redirect('Page/' . $returnTo);
+    redirect($returnUrl);
   }
 
   function voidInvoice()
@@ -19938,6 +19950,122 @@ class Page extends CI_Controller
     $this->load->view('payment_history', $result);
   }
 
+  private function _getInvoiceOnlyUnitChoices($settingsID)
+  {
+    return array_values(array_unique(array_merge(
+      array('each', 'month', 'year', 'quarter', 'pcs'),
+      $this->_getInvoiceUnitChoices($settingsID)
+    )));
+  }
+
+  function addInvoiceOnlyItem()
+  {
+    if (strtolower((string) $this->input->method()) !== 'post') {
+      show_error('Method not allowed.', 405);
+      return;
+    }
+    if (!$this->_is_admin_user() && !$this->_is_staff_user()) {
+      show_error('You do not have permission to add invoice items.', 403);
+      return;
+    }
+    $settingsID = $this->session->userdata('settingsID');
+    $id = (int) $this->input->post('id');
+    $invoice = $id > 0 && $settingsID ? $this->CashModel->getInvoiceByOrderID($id, $settingsID) : null;
+    if (!$invoice || !$this->_can_current_staff_access_invoice($invoice)
+      || strtolower((string) $invoice->invoiceStat) !== 'active') {
+      show_404();
+      return;
+    }
+    $returnUrl = 'Page/invoice?id=' . $id;
+    // A template is also an invoice in this schema. Never add a seasonal item
+    // to its item rows: the generator copies those rows into future invoices.
+    if ((int) ($invoice->recurringTemplateID ?? 0) <= 0
+      && $this->_normalizeRecurringFrequency($invoice->recurringFrequency ?? 'none') !== 'none') {
+      $this->session->set_flashdata('danger', 'Add seasonal items to a generated invoice, not the recurring template.');
+      redirect($returnUrl);
+      return;
+    }
+    $description = trim((string) $this->input->post('description'));
+    $descriptionLength = preg_match_all('/./us', $description);
+    $unit = strtolower(trim((string) $this->input->post('unit')));
+    $quantity = filter_var($this->input->post('quantity'), FILTER_VALIDATE_INT, array('options' => array('min_range' => 1, 'max_range' => 1000000)));
+    $price = $this->_normalizeInvoiceItemAmount($this->input->post('unitPrice'));
+    if ($description === '' || $descriptionLength === false || $descriptionLength > 250 || $quantity === false
+      || !in_array($unit, $this->_getInvoiceOnlyUnitChoices($settingsID), true)
+      || $price === null || !is_finite($price) || $price < 0 || $price > 1000000000) {
+      $this->session->set_flashdata('danger', 'Enter a description (up to 250 characters), a positive whole quantity, a listed unit, and a valid non-negative unit price.');
+      redirect($returnUrl);
+      return;
+    }
+
+    $this->_ensureInvoiceItemsTable();
+    $this->db->trans_begin();
+    $locked = $this->db->query('SELECT * FROM invoice WHERE orderID = ? AND settingsID = ? FOR UPDATE', array($id, $settingsID))->row();
+    if (!$locked || strtolower((string) $locked->invoiceStat) !== 'active'
+      || !$this->_can_current_staff_access_invoice($locked)
+      || ((int) ($locked->recurringTemplateID ?? 0) <= 0
+        && $this->_normalizeRecurringFrequency($locked->recurringFrequency ?? 'none') !== 'none')) {
+      $this->db->trans_rollback();
+      $this->session->set_flashdata('danger', 'This invoice can no longer accept seasonal items.');
+      redirect($returnUrl);
+      return;
+    }
+    $items = $this->_loadInvoiceItems($locked, $settingsID);
+    $lineTotal = round($quantity * $price, 2);
+    $items[] = array('itemDescription' => $description, 'itemQuantity' => $quantity,
+      'itemDurationUnit' => $unit, 'itemUnitPrice' => $price, 'lineTotal' => $lineTotal);
+    $total = round((float) $locked->TotalDue + $lineTotal, 2);
+    $this->_persistInvoiceItems($id, $settingsID, $items);
+    $this->db->where('orderID', $id)->where('settingsID', $settingsID)->update('invoice', array(
+      'TotalDue' => $total, 'Balance' => round($total - (float) $locked->AmountPaid, 2),
+    ));
+    $saved = $this->db->trans_status() !== false;
+    if ($saved) {
+      $saved = $this->db->trans_commit() !== false;
+    } else {
+      $this->db->trans_rollback();
+    }
+    $this->session->set_flashdata($saved ? 'success' : 'danger', $saved
+      ? 'Item added to this invoice only. The recurring template is unchanged.'
+      : 'Unable to add the item. Please try again.');
+    redirect($returnUrl);
+  }
+
+  function updateInvoiceDates()
+  {
+    if (strtolower((string) $this->input->method()) !== 'post') {
+      show_error('Method not allowed.', 405);
+      return;
+    }
+    if (!$this->_is_admin_user() && !$this->_is_staff_user()) {
+      show_error('You do not have permission to edit invoice dates.', 403);
+      return;
+    }
+
+    $settingsID = $this->session->userdata('settingsID');
+    $id = (int) $this->input->post('id');
+    $invoice = $id > 0 && $settingsID ? $this->CashModel->getInvoiceByOrderID($id, $settingsID) : null;
+    if (!$invoice || !$this->_can_current_staff_access_invoice($invoice)
+      || strtolower((string) $invoice->invoiceStat) !== 'active') {
+      show_404();
+      return;
+    }
+
+    $invoiceDate = $this->_normalizeDateInput($this->input->post('TransDate'));
+    $dueDate = $this->_normalizeDateInput($this->input->post('ReceiveDate'));
+    if ($invoiceDate === null || $dueDate === null) {
+      $this->session->set_flashdata('danger', 'Enter a valid Invoice Date and Due Date.');
+      redirect('Page/invoice?id=' . $id);
+      return;
+    }
+
+    $saved = $this->db->where('orderID', $id)->where('settingsID', $settingsID)
+      ->update('invoice', array('TransDate' => $invoiceDate, 'ReceiveDate' => $dueDate));
+    $this->session->set_flashdata($saved ? 'success' : 'danger', $saved
+      ? 'Invoice dates updated successfully.' : 'Unable to save invoice dates. Please try again.');
+    redirect('Page/invoice?id=' . $id);
+  }
+
   function invoice()
   {
     $id = trim((string) $this->input->get('id'));
@@ -19979,6 +20107,9 @@ class Page extends CI_Controller
     $result['business'] = !empty($businessDetails) ? $businessDetails[0] : null;
     $result['invoiceFooter'] = !empty($invoiceFooter) ? $invoiceFooter[0] : null;
     $result['autoPrint'] = $this->input->get('print') == '1' || strtolower((string) $this->input->get('autoprint')) === 'true';
+    $result['canEditDates'] = ($this->_is_admin_user() || $this->_is_staff_user())
+      && strtolower((string) $invoice->invoiceStat) === 'active';
+    $result['invoiceOnlyUnits'] = $result['canEditDates'] ? $this->_getInvoiceOnlyUnitChoices($settingsID) : array();
     if ($this->_is_client_user()) {
       $result['backUrl'] = base_url() . 'Page/clientProfile?tab=invoices';
       $result['backLabel'] = 'Back to My Invoices';
@@ -20657,13 +20788,13 @@ class Page extends CI_Controller
 
   private function _createRecurringInvoiceOccurrence($template, $settingsID, $frequency, $scheduleDate)
   {
-    // Only an active invoice blocks generation for a schedule date; a voided or
-    // deleted occurrence must not permanently suppress the billing period.
+    // A deleted occurrence records an intentional skipped billing period.
+    // Keep it as a generation barrier even if the schedule cursor is rewound.
     $existingOccurrence = $this->db
       ->select('orderID, InvoiceNo')
       ->from('invoice')
       ->where('settingsID', $settingsID)
-      ->where('invoiceStat', 'active')
+      ->where_in('invoiceStat', array('active', 'Deleted'))
       ->group_start()
       ->where('orderID', (int) $template->orderID)
       ->or_where('recurringTemplateID', (int) $template->orderID)
