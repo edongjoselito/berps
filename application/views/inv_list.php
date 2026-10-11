@@ -301,7 +301,7 @@
                                                                  ?>
                                                                  <tr>
                                                                       <td>
-                                                                           <a class="inv-no-link" href="<?= base_url(); ?>Page/invoice?id=<?= $row->orderID; ?>">
+                                                                           <a class="inv-no-link" href="<?= base_url(); ?>Page/invoice?id=<?= $row->orderID; ?>" target="_blank" rel="noopener">
                                                                                 #<?= $row->InvoiceNo; ?>
                                                                            </a>
                                                                       </td>
