@@ -9069,7 +9069,10 @@ class Page extends CI_Controller
     $templateOrderIDs = array_values(array_unique(array_filter(array_map(function ($row) {
       return (int) ($row->orderID ?? 0);
     }, (array) $templates))));
-    $generatedInvoices = $this->CashModel->recurringGeneratedInvoices($settingsID, $templateOrderIDs);
+    // An empty ID list would drop the template filter and list every child ever generated.
+    $generatedInvoices = !empty($templateOrderIDs)
+      ? $this->CashModel->recurringGeneratedInvoices($settingsID, $templateOrderIDs)
+      : array();
     $terminatedInvoices = $this->CashModel->recurringTerminatedInvoices($settingsID);
     $dashboard = $this->_buildRecurringInvoiceDashboard($templates, $generatedInvoices);
 
@@ -9675,7 +9678,29 @@ class Page extends CI_Controller
       'readyCount' => 0,
       'needsGenerationCount' => 0,
       'generatedInvoiceCount' => 0,
+      'generatedPaidCount' => 0,
+      'generatedUnpaidCount' => 0,
+      'openBalance' => 0.0,
+      'openInvoiceCount' => 0,
+      'pastDueBalance' => 0.0,
+      'pastDueCount' => 0,
     );
+
+    // Adds one invoice (template or generated child) to the open/past-due totals.
+    $addToOpenTotals = function ($invoice) use (&$totals, $today) {
+      $balance = round((float) ($invoice->Balance ?? 0), 2);
+      if ($balance <= 0.00001) {
+        return;
+      }
+
+      $totals['openBalance'] += $balance;
+      $totals['openInvoiceCount']++;
+      $dueDate = $this->_resolveInvoiceReportDueDate($invoice);
+      if ($dueDate !== null && strtotime($dueDate) < strtotime($today)) {
+        $totals['pastDueBalance'] += $balance;
+        $totals['pastDueCount']++;
+      }
+    };
 
     foreach ((array) $templates as $template) {
       $templateId = (int) ($template->orderID ?? 0);
@@ -9750,6 +9775,16 @@ class Page extends CI_Controller
         ? max(0, (int) floor((strtotime($upcomingDueDate) - strtotime($today)) / 86400))
         : null;
       $latestGeneratedInvoice = !empty($generatedByTemplate[$templateId]) ? $generatedByTemplate[$templateId][0] : null;
+      $seriesOpenBalance = 0.0;
+      $seriesUnpaidCount = 0;
+      foreach (array_merge(array($template), $generatedByTemplate[$templateId] ?? array()) as $seriesInvoice) {
+        $seriesBalance = round((float) ($seriesInvoice->Balance ?? 0), 2);
+        if ($seriesBalance > 0.00001) {
+          $seriesOpenBalance += $seriesBalance;
+          $seriesUnpaidCount++;
+        }
+      }
+      $addToOpenTotals($template);
       $frequencyLabel = $this->_formatRecurringFrequencyLabel($frequency);
       $lastGeneratedFor = $this->_normalizeDateInput($template->lastRecurringGeneratedFor ?? '');
       if ($lastGeneratedFor === null || strtotime($lastGeneratedFor) < strtotime($baseScheduleDate)) {
@@ -9781,6 +9816,8 @@ class Page extends CI_Controller
         'statusLabel' => $statusLabel,
         'totalDue' => round((float) ($template->TotalDue ?? 0), 2),
         'balance' => round((float) ($template->Balance ?? 0), 2),
+        'seriesOpenBalance' => round($seriesOpenBalance, 2),
+        'seriesUnpaidCount' => $seriesUnpaidCount,
         'invoiceBy' => (string) ($template->invoiceBy ?? ''),
         'lastGeneratedFor' => $this->_normalizeDateInput($template->lastRecurringGeneratedFor ?? ''),
         'nextGenerationDate' => $nextGenerationDate,
@@ -9811,6 +9848,19 @@ class Page extends CI_Controller
       $templateId = (int) ($generatedInvoice->recurringTemplateID ?? 0);
       $template = $templatesById[$templateId] ?? null;
       $frequency = $this->_normalizeRecurringFrequency($template->recurringFrequency ?? ($generatedInvoice->recurringFrequency ?? 'none'));
+      // Same paid/partial/unpaid rule as the invoice list.
+      $balance = round((float) ($generatedInvoice->Balance ?? 0), 2);
+      $amountPaid = round((float) ($generatedInvoice->AmountPaid ?? 0), 2);
+      if ($balance <= 0.00001) {
+        $paymentState = 'paid';
+        $paymentStateLabel = 'Paid';
+        $totals['generatedPaidCount']++;
+      } else {
+        $paymentState = $amountPaid > 0 ? 'partial' : 'unpaid';
+        $paymentStateLabel = $amountPaid > 0 ? 'Partially Paid' : 'Unpaid';
+        $totals['generatedUnpaidCount']++;
+      }
+      $addToOpenTotals($generatedInvoice);
       $generatedRows[] = array(
         'orderID' => (int) ($generatedInvoice->orderID ?? 0),
         'InvoiceNo' => (string) ($generatedInvoice->InvoiceNo ?? ''),
@@ -9824,9 +9874,15 @@ class Page extends CI_Controller
         'templateInvoiceNo' => $template ? (string) ($template->InvoiceNo ?? '') : '',
         'templateDescription' => $template ? (string) ($template->JobDescription ?? '') : '',
         'totalDue' => round((float) ($generatedInvoice->TotalDue ?? 0), 2),
-        'balance' => round((float) ($generatedInvoice->Balance ?? 0), 2),
+        'amountPaid' => $amountPaid,
+        'balance' => $balance,
+        'paymentState' => $paymentState,
+        'paymentStateLabel' => $paymentStateLabel,
       );
     }
+
+    $totals['openBalance'] = round($totals['openBalance'], 2);
+    $totals['pastDueBalance'] = round($totals['pastDueBalance'], 2);
 
     usort($templateRows, function ($left, $right) {
       $leftDueSoon = !empty($left['isDueSoon']) ? 0 : 1;

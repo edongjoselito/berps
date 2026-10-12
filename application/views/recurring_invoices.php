@@ -10,6 +10,11 @@ $dueSoonCount = (int) ($totals['dueSoonCount'] ?? 0);
 $readyCount = (int) ($totals['readyCount'] ?? 0);
 $needsGenerationCount = (int) ($totals['needsGenerationCount'] ?? 0);
 $generatedInvoiceCount = (int) ($totals['generatedInvoiceCount'] ?? count($generatedInvoices));
+$generatedPaidCount = (int) ($totals['generatedPaidCount'] ?? 0);
+$generatedUnpaidCount = (int) ($totals['generatedUnpaidCount'] ?? 0);
+$openBalance = (float) ($totals['openBalance'] ?? 0);
+$openInvoiceCount = (int) ($totals['openInvoiceCount'] ?? 0);
+$pastDueBalance = (float) ($totals['pastDueBalance'] ?? 0);
 $generatedThisRun = (int) ($generationSummary['generatedCount'] ?? 0);
 ?>
 <!DOCTYPE html>
@@ -244,7 +249,7 @@ $generatedThisRun = (int) ($generationSummary['generatedCount'] ?? 0);
 
                         .recurring-page .stat-strip {
                             display: grid;
-                            grid-template-columns: repeat(4, minmax(0, 1fr));
+                            grid-template-columns: repeat(5, minmax(0, 1fr));
                             gap: 16px;
                             margin-bottom: 22px;
                         }
@@ -284,6 +289,10 @@ $generatedThisRun = (int) ($generationSummary['generatedCount'] ?? 0);
                             background: linear-gradient(90deg, #6366f1, #818cf8);
                         }
 
+                        .recurring-page .stat-card.sc-balance::before {
+                            background: linear-gradient(90deg, #e11d48, #fb7185);
+                        }
+
                         .recurring-page .stat-label {
                             color: var(--text-faint);
                             font-size: 0.74rem;
@@ -300,6 +309,11 @@ $generatedThisRun = (int) ($generationSummary['generatedCount'] ?? 0);
                             line-height: 1;
                             letter-spacing: -0.04em;
                             margin-bottom: 8px;
+                        }
+
+                        .recurring-page .stat-value.is-money {
+                            font-size: 1.6rem;
+                            font-variant-numeric: tabular-nums;
                         }
 
                         .recurring-page .stat-meta {
@@ -472,10 +486,28 @@ $generatedThisRun = (int) ($generationSummary['generatedCount'] ?? 0);
                             text-decoration: none;
                         }
 
+                        .recurring-page .payment-filter {
+                            display: inline-flex;
+                            gap: 8px;
+                            flex-wrap: wrap;
+                        }
+
+                        .recurring-page .payment-filter .table-btn.is-active {
+                            background: var(--primary-soft);
+                            color: var(--primary-2);
+                            border-color: #bfd3ef;
+                        }
+
                         .recurring-page .empty-state {
                             text-align: center;
                             color: var(--text-soft);
                             padding: 28px 0;
+                        }
+
+                        @media (max-width: 1399px) {
+                            .recurring-page .stat-strip {
+                                grid-template-columns: repeat(3, minmax(0, 1fr));
+                            }
                         }
 
                         @media (max-width: 1199px) {
@@ -723,7 +755,12 @@ $generatedThisRun = (int) ($generationSummary['generatedCount'] ?? 0);
                         <div class="stat-card sc-generated">
                             <div class="stat-label">Generated Records</div>
                             <div class="stat-value"><?= number_format($generatedInvoiceCount); ?></div>
-                            <div class="stat-meta">Child invoices already created from recurring templates.</div>
+                            <div class="stat-meta"><?= number_format($generatedPaidCount); ?> paid · <?= number_format($generatedUnpaidCount); ?> unpaid. Paid invoices stay listed as history.</div>
+                        </div>
+                        <div class="stat-card sc-balance">
+                            <div class="stat-label">Open Balance (PHP)</div>
+                            <div class="stat-value is-money"><?= number_format($openBalance, 2); ?></div>
+                            <div class="stat-meta"><?= number_format($openInvoiceCount); ?> unpaid invoice(s) across templates and generated invoices · <?= number_format($pastDueBalance, 2); ?> past due.</div>
                         </div>
                     </div>
 
@@ -748,7 +785,8 @@ $generatedThisRun = (int) ($generationSummary['generatedCount'] ?? 0);
                                             <th>Window Opens</th>
                                             <th>Status</th>
                                             <th>Invoice Covering Due Date</th>
-                                            <th class="num-cell">Total Due</th>
+                                            <th class="num-cell">Per Cycle</th>
+                                            <th class="num-cell">Open Balance</th>
                                             <th>Actions</th>
                                         </tr>
                                     </thead>
@@ -819,6 +857,13 @@ $generatedThisRun = (int) ($generationSummary['generatedCount'] ?? 0);
                                                         <?php endif; ?>
                                                     </td>
                                                     <td class="num-cell"><?= number_format((float) ($row['totalDue'] ?? 0), 2); ?></td>
+                                                    <td class="num-cell">
+                                                        <?= number_format((float) ($row['seriesOpenBalance'] ?? 0), 2); ?>
+                                                        <div class="line-sub">
+                                                            <?php $seriesUnpaidCount = (int) ($row['seriesUnpaidCount'] ?? 0); ?>
+                                                            <?= $seriesUnpaidCount > 0 ? number_format($seriesUnpaidCount) . ' unpaid' : 'Fully paid'; ?>
+                                                        </div>
+                                                    </td>
                                                     <td>
                                                         <div class="table-actions">
                                                             <a class="table-btn" href="<?= htmlspecialchars($templateInvoiceUrl, ENT_QUOTES, 'UTF-8'); ?>">
@@ -847,7 +892,7 @@ $generatedThisRun = (int) ($generationSummary['generatedCount'] ?? 0);
                                             <?php endforeach; ?>
                                         <?php else: ?>
                                             <tr>
-                                                <td colspan="11" class="empty-state">No recurring invoice templates found.</td>
+                                                <td colspan="12" class="empty-state">No recurring invoice templates found.</td>
                                             </tr>
                                         <?php endif; ?>
                                     </tbody>
@@ -860,7 +905,12 @@ $generatedThisRun = (int) ($generationSummary['generatedCount'] ?? 0);
                         <div class="panel-header">
                             <div>
                                 <h2 class="panel-title">Generated Recurring Invoices</h2>
-                                <p class="panel-subtitle">These are the child invoices that were automatically created from the recurring templates.</p>
+                                <p class="panel-subtitle">Child invoices created from the recurring templates. Paying an invoice does not stop the series; paid invoices stay here as history with a zero balance.</p>
+                            </div>
+                            <div class="payment-filter" role="group" aria-label="Filter generated invoices by payment status">
+                                <button type="button" class="table-btn is-active" data-payment-filter="open">Unpaid (<?= number_format($generatedUnpaidCount); ?>)</button>
+                                <button type="button" class="table-btn" data-payment-filter="paid">Paid (<?= number_format($generatedPaidCount); ?>)</button>
+                                <button type="button" class="table-btn" data-payment-filter="all">All (<?= number_format($generatedInvoiceCount); ?>)</button>
                             </div>
                         </div>
                         <div class="panel-body">
@@ -876,6 +926,7 @@ $generatedThisRun = (int) ($generationSummary['generatedCount'] ?? 0);
                                             <th>Frequency</th>
                                             <th class="num-cell">Total Due</th>
                                             <th class="num-cell">Balance</th>
+                                            <th>Status</th>
                                             <th>Actions</th>
                                         </tr>
                                     </thead>
@@ -887,8 +938,10 @@ $generatedThisRun = (int) ($generationSummary['generatedCount'] ?? 0);
                                                 $templateUrl = !empty($row['templateOrderID'])
                                                     ? base_url() . 'Page/invoice?id=' . rawurlencode((string) $row['templateOrderID'])
                                                     : '';
+                                                $paymentState = (string) ($row['paymentState'] ?? 'unpaid');
+                                                $paymentStateClass = $paymentState === 'paid' ? 'is-success' : ($paymentState === 'partial' ? 'is-warning' : 'is-danger');
                                                 ?>
-                                                <tr>
+                                                <tr data-payment-state="<?= htmlspecialchars($paymentState, ENT_QUOTES, 'UTF-8'); ?>">
                                                     <td>
                                                         <a class="link-quiet" href="<?= htmlspecialchars($invoiceUrl, ENT_QUOTES, 'UTF-8'); ?>">
                                                             #<?= htmlspecialchars((string) ($row['InvoiceNo'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>
@@ -915,6 +968,7 @@ $generatedThisRun = (int) ($generationSummary['generatedCount'] ?? 0);
                                                     <td><span class="chip is-slate"><?= htmlspecialchars((string) ($row['frequencyLabel'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></span></td>
                                                     <td class="num-cell"><?= number_format((float) ($row['totalDue'] ?? 0), 2); ?></td>
                                                     <td class="num-cell"><?= number_format((float) ($row['balance'] ?? 0), 2); ?></td>
+                                                    <td><span class="chip <?= $paymentStateClass; ?>"><?= htmlspecialchars((string) ($row['paymentStateLabel'] ?? 'Unpaid'), ENT_QUOTES, 'UTF-8'); ?></span></td>
                                                     <td>
                                                         <div class="table-actions">
                                                             <a class="table-btn" href="<?= htmlspecialchars($invoiceUrl, ENT_QUOTES, 'UTF-8'); ?>">
@@ -932,7 +986,7 @@ $generatedThisRun = (int) ($generationSummary['generatedCount'] ?? 0);
                                             <?php endforeach; ?>
                                         <?php else: ?>
                                             <tr>
-                                                <td colspan="9" class="empty-state">No generated recurring invoices have been created yet.</td>
+                                                <td colspan="10" class="empty-state">No generated recurring invoices have been created yet.</td>
                                             </tr>
                                         <?php endif; ?>
                                     </tbody>
@@ -1043,16 +1097,29 @@ $generatedThisRun = (int) ($generationSummary['generatedCount'] ?? 0);
         (function($) {
             'use strict';
 
+            // DataTables cannot initialise over the colspan "no records" row, so empty tables stay plain HTML.
+            function initTable(selector, options) {
+                var $table = $(selector);
+                if ($table.find('tbody td.empty-state').length) {
+                    return null;
+                }
+                return $table.DataTable(options);
+            }
+
             $(function() {
-                $('#recurring-template-table').DataTable({
+                initTable('#recurring-template-table', {
                     responsive: true,
                     autoWidth: false,
                     stateSave: true,
                     pageLength: 25,
                     order: [],
                     columnDefs: [{
-                        targets: [9],
+                        targets: [9, 10],
                         className: 'text-right'
+                    }, {
+                        // Keep who/when/how much visible; long text columns collapse first.
+                        targets: [0, 1, 5, 10, 9],
+                        responsivePriority: 1
                     }, {
                         targets: -1,
                         orderable: false,
@@ -1060,7 +1127,22 @@ $generatedThisRun = (int) ($generationSummary['generatedCount'] ?? 0);
                     }]
                 });
 
-                $('#recurring-generated-table').DataTable({
+                // Unpaid is the default view: paid children are history, not money owed.
+                var generatedPaymentFilter = 'open';
+                $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
+                    if (settings.nTable.id !== 'recurring-generated-table' || generatedPaymentFilter === 'all') {
+                        return true;
+                    }
+
+                    var state = $(settings.aoData[dataIndex].nTr).attr('data-payment-state');
+                    if (!state) {
+                        return true;
+                    }
+
+                    return generatedPaymentFilter === 'paid' ? state === 'paid' : state !== 'paid';
+                });
+
+                var generatedTable = initTable('#recurring-generated-table', {
                     responsive: true,
                     autoWidth: false,
                     stateSave: true,
@@ -1070,13 +1152,26 @@ $generatedThisRun = (int) ($generationSummary['generatedCount'] ?? 0);
                         targets: [6, 7],
                         className: 'text-right'
                     }, {
+                        // Keep the paid/unpaid status and balance visible; long text columns collapse first.
+                        targets: [0, 2, 4, 7, 8],
+                        responsivePriority: 1
+                    }, {
                         targets: -1,
                         orderable: false,
                         searchable: false
                     }]
                 });
 
-                $('#recurring-terminated-table').DataTable({
+                $('[data-payment-filter]').on('click', function() {
+                    generatedPaymentFilter = $(this).attr('data-payment-filter');
+                    $('[data-payment-filter]').removeClass('is-active');
+                    $(this).addClass('is-active');
+                    if (generatedTable) {
+                        generatedTable.draw();
+                    }
+                });
+
+                initTable('#recurring-terminated-table', {
                     responsive: true,
                     autoWidth: false,
                     stateSave: true,
