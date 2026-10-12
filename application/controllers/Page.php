@@ -5,6 +5,7 @@ class Page extends CI_Controller
   private $currentCompanyFeatureKeys = array();
   private $currentCompanyFeatureAccessLoaded = false;
   private $currentCompanyFeatureRestrictionsActive = false;
+  private $lastInvoiceEmailError = '';
 
   function __construct()
   {
@@ -13163,7 +13164,8 @@ class Page extends CI_Controller
     if ($this->_sendInvoiceEmailCore($invoice, $settingsID, $recipientEmail, $emailMessage)) {
       $this->session->set_flashdata('success', 'Invoice #' . $invoiceNo . ' has been sent to ' . $recipientEmail . ' successfully.');
     } else {
-      $this->session->set_flashdata('danger', 'Failed to send email. Please check your email configuration.');
+      $reason = $this->lastInvoiceEmailError !== '' ? ' Mail server said: ' . mb_substr($this->lastInvoiceEmailError, 0, 300) : '';
+      $this->session->set_flashdata('danger', 'Failed to send invoice #' . $invoiceNo . ' to ' . $recipientEmail . '.' . $reason);
     }
 
     redirect('Page/invList');
@@ -13236,6 +13238,7 @@ class Page extends CI_Controller
     }
 
     if ($fromEmail === '') {
+      $this->lastInvoiceEmailError = 'No valid sender address: set smtp_user in config/email.php or the business email.';
       return false;
     }
 
@@ -13256,7 +13259,18 @@ class Page extends CI_Controller
 
     $this->email->message($emailBody);
 
-    return (bool) $this->email->send();
+    if ($this->email->send()) {
+      return true;
+    }
+
+    // Keep the mail server's replies so a failed send can be diagnosed (they never include the password).
+    $debugLines = array_values(array_filter(array_map(function ($line) {
+      return trim(preg_replace('/\s+/', ' ', strip_tags($line)));
+    }, preg_split('#<br\s*/?>|</pre>#i', (string) $this->email->print_debugger(array())))));
+    $this->lastInvoiceEmailError = implode(' | ', array_slice($debugLines, -2));
+    log_message('error', 'Invoice email #' . $invoiceNo . ' to ' . $recipientEmail . ' failed: ' . implode(' | ', $debugLines));
+
+    return false;
   }
 
   private function _buildInvoiceEmailHTML($invoice, $items, $business, $invoiceFooter, $fromName, $fromEmail, $emailMessage = '')
