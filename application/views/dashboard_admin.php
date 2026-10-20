@@ -41,6 +41,12 @@ $quickActions = array(
         'url' => base_url() . 'Page/joList',
     ),
     array(
+        'label' => 'My Task',
+        'meta' => 'Review tasks assigned to your account.',
+        'icon' => 'mdi-format-list-checks',
+        'url' => base_url() . 'Page/projectAddTask?scope=mine',
+    ),
+    array(
         'label' => 'Payments',
         'meta' => 'Monitor collections and posted credits.',
         'icon' => 'mdi-credit-card-outline',
@@ -351,6 +357,12 @@ $quickActions = array(
                             overflow: hidden;
                         }
 
+                        .admin-dashboard-page .theme-card.task-due-card {
+                            position: relative;
+                            z-index: 1;
+                            overflow: visible;
+                        }
+
                         .admin-dashboard-page .theme-card-head {
                             padding: 18px 22px;
                             border-bottom: 1px solid var(--line);
@@ -606,10 +618,15 @@ $quickActions = array(
                         }
 
                         .admin-dashboard-page .task-queue-item {
+                            position: relative;
                             border: 1px solid var(--line);
                             border-radius: var(--radius-lg);
                             background: var(--surface-soft);
                             padding: 14px 15px;
+                        }
+
+                        .admin-dashboard-page .task-queue-item.has-open-menu {
+                            z-index: 20;
                         }
 
                         .admin-dashboard-page .task-queue-top {
@@ -618,6 +635,87 @@ $quickActions = array(
                             gap: 12px;
                             align-items: flex-start;
                             margin-bottom: 8px;
+                        }
+
+                        .admin-dashboard-page .task-queue-controls {
+                            display: flex;
+                            align-items: center;
+                            gap: 8px;
+                            flex-shrink: 0;
+                        }
+
+                        .admin-dashboard-page .task-queue-actions {
+                            position: relative;
+                        }
+
+                        .admin-dashboard-page .task-queue-menu-btn {
+                            display: inline-flex;
+                            align-items: center;
+                            justify-content: center;
+                            width: 34px;
+                            height: 34px;
+                            border: 1px solid var(--line);
+                            border-radius: 9px;
+                            background: #fff;
+                            color: var(--text);
+                            cursor: pointer;
+                        }
+
+                        .admin-dashboard-page .task-queue-menu-btn:hover,
+                        .admin-dashboard-page .task-queue-menu-btn:focus {
+                            color: var(--primary-2);
+                            border-color: var(--primary);
+                            outline: none;
+                        }
+
+                        .admin-dashboard-page .task-queue-action-menu {
+                            display: none;
+                            position: absolute;
+                            z-index: 5;
+                            top: calc(100% + 6px);
+                            right: 0;
+                            width: 210px;
+                            padding: 6px 0;
+                            border: 1px solid var(--line);
+                            border-radius: 10px;
+                            background: #fff;
+                            box-shadow: 0 12px 28px rgba(15, 23, 42, 0.18);
+                        }
+
+                        .admin-dashboard-page .task-queue-action-menu.show {
+                            display: block;
+                        }
+
+                        .admin-dashboard-page .task-queue-action-menu.opens-up {
+                            top: auto;
+                            bottom: calc(100% + 6px);
+                        }
+
+                        .admin-dashboard-page .task-queue-action-menu a {
+                            display: flex;
+                            align-items: center;
+                            gap: 12px;
+                            padding: 10px 14px;
+                            color: var(--text);
+                            font-size: 0.9rem;
+                            text-decoration: none;
+                        }
+
+                        .admin-dashboard-page .task-queue-action-menu a:hover,
+                        .admin-dashboard-page .task-queue-action-menu a:focus {
+                            background: var(--surface-soft);
+                            color: var(--primary-2);
+                            text-decoration: none;
+                        }
+
+                        .admin-dashboard-page .task-queue-action-menu a.action-delete {
+                            color: var(--danger);
+                        }
+
+                        .admin-dashboard-page .task-queue-action-divider {
+                            height: 1px;
+                            margin: 6px 0;
+                            background: var(--line);
                         }
 
                         .admin-dashboard-page .task-queue-title {
@@ -1069,9 +1167,9 @@ $quickActions = array(
 
                     <div class="dashboard-layout">
                         <div class="dashboard-main">
-                            <div class="theme-card">
+                            <div class="theme-card task-due-card">
                                 <div class="theme-card-head">
-                                    <h5 class="theme-card-title">Billing Shortcuts</h5>
+                                    <h5 class="theme-card-title">Quick Links</h5>
                                     <!-- <div class="theme-card-subtitle">Jump straight into the areas admins use most for invoicing, collections, and client management.</div> -->
                                 </div>
                                 <div class="theme-card-body">
@@ -1121,13 +1219,43 @@ $quickActions = array(
                                                 $taskTitle = trim((string) ($taskRow->task ?? 'Untitled task'));
                                                 $projectLabel = trim((string) ($taskRow->projectDescription ?? 'No project'));
                                                 $assigneeLabel = trim((string) ($taskRow->assignedPersonName ?? 'Unassigned'));
+                                                $taskId = (int) ($taskRow->taskID ?? 0);
+                                                $taskActionUrl = base_url('Page/projectAddTask?');
                                                 ?>
                                                 <div class="task-queue-item">
                                                     <div class="task-queue-top">
                                                         <div class="task-queue-title"><?= htmlspecialchars($taskTitle, ENT_QUOTES, 'UTF-8'); ?></div>
-                                                        <span class="task-queue-date <?= htmlspecialchars($dueClass, ENT_QUOTES, 'UTF-8'); ?>">
-                                                            <?= htmlspecialchars($dueLabel, ENT_QUOTES, 'UTF-8'); ?>
-                                                        </span>
+                                                        <div class="task-queue-controls">
+                                                            <span class="task-queue-date <?= htmlspecialchars($dueClass, ENT_QUOTES, 'UTF-8'); ?>">
+                                                                <?= htmlspecialchars($dueLabel, ENT_QUOTES, 'UTF-8'); ?>
+                                                            </span>
+                                                            <div class="task-queue-actions">
+                                                                <button type="button" class="task-queue-menu-btn" data-task-id="<?= $taskId; ?>" aria-label="Task actions" aria-expanded="false">
+                                                                    <i class="fa-solid fa-ellipsis-vertical"></i>
+                                                                </button>
+                                                                <div class="task-queue-action-menu" id="task-queue-menu-<?= $taskId; ?>">
+                                                                    <a href="<?= htmlspecialchars(base_url('Page/taskStat?id=') . $taskId, ENT_QUOTES, 'UTF-8'); ?>">
+                                                                        <i class="fa-regular fa-eye"></i> View
+                                                                    </a>
+                                                                    <a href="<?= htmlspecialchars($taskActionUrl . http_build_query(array('task_action' => 'update', 'task_id' => $taskId)), ENT_QUOTES, 'UTF-8'); ?>">
+                                                                        <i class="fa-solid fa-pen-to-square"></i> Update
+                                                                    </a>
+                                                                    <a href="<?= htmlspecialchars($taskActionUrl . http_build_query(array('task_action' => 'status', 'task_id' => $taskId)), ENT_QUOTES, 'UTF-8'); ?>">
+                                                                        <i class="fa-solid fa-clipboard-check"></i> Add Status
+                                                                    </a>
+                                                                    <a href="<?= htmlspecialchars($taskActionUrl . http_build_query(array('task_action' => 'forward', 'task_id' => $taskId)), ENT_QUOTES, 'UTF-8'); ?>">
+                                                                        <i class="fa-solid fa-share"></i> Forward
+                                                                    </a>
+                                                                    <a href="<?= htmlspecialchars($taskActionUrl . http_build_query(array('task_action' => 'comment', 'task_id' => $taskId)), ENT_QUOTES, 'UTF-8'); ?>">
+                                                                        <i class="fa-regular fa-comment-dots"></i> Add Comment
+                                                                    </a>
+                                                                    <div class="task-queue-action-divider"></div>
+                                                                    <a class="action-delete" href="<?= htmlspecialchars(base_url('Page/deleteTask/') . $taskId, ENT_QUOTES, 'UTF-8'); ?>" onclick="return confirm('Are you sure you want to delete this task?');">
+                                                                        <i class="fa-solid fa-trash"></i> Delete
+                                                                    </a>
+                                                                </div>
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                     <div class="task-queue-meta">
                                                         Due <?= htmlspecialchars(date('M j, Y', strtotime($dueDateRaw)), ENT_QUOTES, 'UTF-8'); ?>
@@ -1292,6 +1420,40 @@ $quickActions = array(
 
     <script>
         $(document).ready(function() {
+            $('.task-queue-menu-btn').on('click', function(event) {
+                event.stopPropagation();
+                var menu = $('#task-queue-menu-' + $(this).data('task-id'));
+                var isOpen = menu.hasClass('show');
+
+                $('.task-queue-action-menu').removeClass('show opens-up');
+                $('.task-queue-menu-btn').attr('aria-expanded', 'false');
+                $('.task-queue-item').removeClass('has-open-menu');
+
+                if (!isOpen) {
+                    menu.addClass('show');
+                    $(this).attr('aria-expanded', 'true');
+                    $(this).closest('.task-queue-item').addClass('has-open-menu');
+
+                    var buttonBounds = this.getBoundingClientRect();
+                    var menuHeight = menu[0].getBoundingClientRect().height;
+                    var spaceBelow = window.innerHeight - buttonBounds.bottom;
+                    var spaceAbove = buttonBounds.top;
+                    if (spaceBelow < menuHeight + 8 && spaceAbove > spaceBelow) {
+                        menu.addClass('opens-up');
+                    }
+                }
+            });
+
+            $(document).on('click', function() {
+                $('.task-queue-action-menu').removeClass('show opens-up');
+                $('.task-queue-menu-btn').attr('aria-expanded', 'false');
+                $('.task-queue-item').removeClass('has-open-menu');
+            });
+
+            $('.task-queue-action-menu').on('click', function(event) {
+                event.stopPropagation();
+            });
+
             // Prospect Notes Modal - Populate data when opened
             $('#prospectNotesModal').on('show.bs.modal', function(event) {
                 var button = $(event.relatedTarget);

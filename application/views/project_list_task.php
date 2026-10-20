@@ -186,15 +186,19 @@ $priorityClasses = array('1' => 'priority-high', '2' => 'priority-medium', '3' =
                             <div>
                                 <h5 class="theme-card-title">
                                     <?=
-                                        $taskScope === 'forwarded'
-                                        ? 'Forwarded Task Queue'
-                                        : ($statusFilter === 'closed' ? 'Closed Task Register' : ($statusFilter === 'all' ? 'All Task Register' : 'Open Task Register'));
+                                        $taskScope === 'mine'
+                                        ? 'My Tasks'
+                                        : ($taskScope === 'forwarded'
+                                            ? 'Forwarded Task Queue'
+                                            : ($statusFilter === 'closed' ? 'Closed Task Register' : ($statusFilter === 'all' ? 'All Task Register' : 'Open Task Register')));
                                     ?>
                                 </h5>
                                 <div class="theme-card-subtitle">
-                                    <?= $taskScope === 'forwarded'
-                                        ? 'Forwarded tasks assigned to you that still need your first action.'
-                                        : 'Newest tasks appear first so fresh entries are immediately visible to the team.'; ?>
+                                    <?= $taskScope === 'mine'
+                                        ? 'Tasks assigned to your account.'
+                                        : ($taskScope === 'forwarded'
+                                            ? 'Forwarded tasks assigned to you that still need your first action.'
+                                            : 'Newest tasks appear first so fresh entries are immediately visible to the team.'); ?>
                                 </div>
                             </div>
                             <div class="btn-group" role="group" aria-label="Task status filter">
@@ -406,6 +410,8 @@ $priorityClasses = array('1' => 'priority-high', '2' => 'priority-medium', '3' =
                                 <div class="empty-state">
                                     <?php if ($statusFilter === 'closed'): ?>
                                         No closed tasks are recorded yet.
+                                    <?php elseif ($taskScope === 'mine'): ?>
+                                        No tasks are assigned to your account.
                                     <?php elseif ($taskScope === 'forwarded'): ?>
                                         No forwarded tasks are waiting for your action.
                                     <?php elseif ($statusFilter === 'all'): ?>
@@ -990,6 +996,30 @@ $priorityClasses = array('1' => 'priority-high', '2' => 'priority-medium', '3' =
                         var f = $(this).find('form')[0];
                         if (f) f.reset();
                     });
+
+                var taskAction = <?= json_encode(isset($taskAction) ? (string) $taskAction : ''); ?>;
+                var taskActionId = <?= isset($taskActionId) ? (int) $taskActionId : 0; ?>;
+                if (taskAction && taskActionId > 0) {
+                    var taskActionSelector = {
+                        update: '.action-update[data-id="' + taskActionId + '"]',
+                        status: '.action-status[data-task-id="' + taskActionId + '"]',
+                        forward: '.action-forward[data-task-id="' + taskActionId + '"]',
+                        comment: '.action-comment[data-task-id="' + taskActionId + '"]'
+                    }[taskAction];
+                    var taskActionButton = taskActionSelector ? $(taskActionSelector) : $();
+                    if (taskActionButton.length) {
+                        taskActionButton.first().trigger('click');
+                    }
+
+                    var cleanQuery = new URLSearchParams(window.location.search);
+                    cleanQuery.delete('task_action');
+                    cleanQuery.delete('task_id');
+                    var cleanUrl = window.location.pathname;
+                    if (cleanQuery.toString()) {
+                        cleanUrl += '?' + cleanQuery.toString();
+                    }
+                    window.history.replaceState({}, document.title, cleanUrl);
+                }
 
                 $('#task_file').on('change', function() {
                     var fileName = ($(this).val() || '').split('\\').pop();

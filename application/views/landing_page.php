@@ -7,15 +7,19 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#e8f1fb">
+    <meta name="berps-base-url" content="<?= htmlspecialchars(base_url(), ENT_QUOTES, 'UTF-8'); ?>">
+    <meta name="berps-offline-user" content="">
 
     <title>BERPS - Business Resource Planning System</title>
 
     <link rel="icon" type="image/png" href="<?= base_url('assets/images/logo-sm1.png'); ?>">
     <link rel="apple-touch-icon" sizes="180x180" href="<?= base_url('assets/images/icons/berps-192.png'); ?>">
-    <link rel="manifest" href="<?= base_url('manifest.webmanifest?v=1'); ?>">
+    <link rel="manifest" href="<?= base_url('manifest.webmanifest?v=2'); ?>">
+    <link rel="stylesheet" href="<?= base_url('assets/css/pwa.css?v=1'); ?>">
     <link rel="stylesheet" href="<?= base_url('assets/css/fonts.css'); ?>">
     <link rel="stylesheet" href="<?= base_url('assets/css/berps-design-system.css'); ?>?v=20260722-5">
     <link rel="stylesheet" href="<?= base_url('assets/plugins/fontawesome-free/css/all.min.css'); ?>">
+    <script src="<?= base_url('assets/js/pwa.js?v=1'); ?>" defer></script>
 
     <style>
         :root {

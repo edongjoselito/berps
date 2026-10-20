@@ -18683,19 +18683,37 @@ class Page extends CI_Controller
       $statusFilter = 'open'; // Default to open tasks
     }
     $taskScope = strtolower(trim((string) $this->input->get('scope')));
-    if (!in_array($taskScope, ['forwarded'], true)) {
+    if (!in_array($taskScope, ['forwarded', 'mine'], true)) {
       $taskScope = '';
+    }
+    $taskAction = strtolower(trim((string) $this->input->get('task_action')));
+    $taskActionId = (int) $this->input->get('task_id');
+    if (!in_array($taskAction, ['update', 'status', 'forward', 'comment'], true) || $taskActionId < 1) {
+      $taskAction = '';
+      $taskActionId = 0;
     }
 
     if ($isAdmin) {
-      $taskData = $this->CashModel->taskList($settingsID);
-      $result['openTaskCount'] = $this->CashModel->countOpenTasks($settingsID);
-      $result['closedTaskCount'] = $this->CashModel->countClosedTasks($settingsID);
-      $result['dueTodayTaskCount'] = $this->CashModel->countOpenTasksDueToday($settingsID, null, $today);
-      $result['dueSoonTaskCount'] = $this->CashModel->countOpenTasksDueSoon($settingsID, $taskWindowDays, null, $today);
-      $result['overdueTaskCount'] = $this->CashModel->countOpenTasksOverdue($settingsID, null, $today);
-      $result['undatedTaskCount'] = $this->CashModel->countOpenTasksWithoutDueDate($settingsID);
-      $result['taskDueQueue'] = $this->CashModel->openTaskDueQueue($settingsID, null, 6, $taskWindowDays, $today);
+      if ($taskScope === 'mine') {
+        $user_id = $this->session->userdata('user_id');
+        $taskData = $this->CashModel->taskListStaff($settingsID, $user_id);
+        $result['openTaskCount'] = $this->CashModel->countOpenTasksStaff($settingsID, $user_id);
+        $result['closedTaskCount'] = $this->CashModel->countClosedTasksStaff($settingsID, $user_id);
+        $result['dueTodayTaskCount'] = $this->CashModel->countOpenTasksDueToday($settingsID, $user_id, $today);
+        $result['dueSoonTaskCount'] = $this->CashModel->countOpenTasksDueSoon($settingsID, $taskWindowDays, $user_id, $today);
+        $result['overdueTaskCount'] = $this->CashModel->countOpenTasksOverdue($settingsID, $user_id, $today);
+        $result['undatedTaskCount'] = $this->CashModel->countOpenTasksWithoutDueDate($settingsID, $user_id);
+        $result['taskDueQueue'] = $this->CashModel->openTaskDueQueue($settingsID, $user_id, 6, $taskWindowDays, $today);
+      } else {
+        $taskData = $this->CashModel->taskList($settingsID);
+        $result['openTaskCount'] = $this->CashModel->countOpenTasks($settingsID);
+        $result['closedTaskCount'] = $this->CashModel->countClosedTasks($settingsID);
+        $result['dueTodayTaskCount'] = $this->CashModel->countOpenTasksDueToday($settingsID, null, $today);
+        $result['dueSoonTaskCount'] = $this->CashModel->countOpenTasksDueSoon($settingsID, $taskWindowDays, null, $today);
+        $result['overdueTaskCount'] = $this->CashModel->countOpenTasksOverdue($settingsID, null, $today);
+        $result['undatedTaskCount'] = $this->CashModel->countOpenTasksWithoutDueDate($settingsID);
+        $result['taskDueQueue'] = $this->CashModel->openTaskDueQueue($settingsID, null, 6, $taskWindowDays, $today);
+      }
     } else {
       $user_id = $this->session->userdata('user_id');
       $username = trim((string) ($this->session->userdata('username') ?? 'system'));
@@ -18732,6 +18750,8 @@ class Page extends CI_Controller
 
     $result['statusFilter'] = $statusFilter;
     $result['taskScope'] = $taskScope;
+    $result['taskAction'] = $taskAction;
+    $result['taskActionId'] = $taskActionId;
     $result['taskDueWindowDays'] = $taskWindowDays;
 
     // Load staff list from employee table (needed for Forward Task modal)

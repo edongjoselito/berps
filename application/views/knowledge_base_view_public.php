@@ -8,11 +8,18 @@ $attachment_name = trim((string) ($article->attachment_name ?? ''));
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#1f5bc6">
+    <meta name="berps-base-url" content="<?= htmlspecialchars(base_url(), ENT_QUOTES, 'UTF-8'); ?>">
+    <meta name="berps-offline-user" content="">
     <title><?= htmlspecialchars($article->title, ENT_QUOTES, 'UTF-8'); ?> - Knowledge Base</title>
 
+    <link rel="manifest" href="<?= base_url('manifest.webmanifest?v=2'); ?>">
+    <link rel="apple-touch-icon" href="<?= base_url('assets/images/icons/berps-192.png'); ?>">
+    <link rel="stylesheet" href="<?= base_url('assets/css/pwa.css?v=1'); ?>">
     <link rel="stylesheet" href="<?= base_url('assets/css/bootstrap.min.css'); ?>">
     <link rel="stylesheet" href="<?= base_url('assets/css/icons.min.css'); ?>">
     <link rel="stylesheet" href="<?= base_url('assets/css/app.min.css'); ?>">
+    <script src="<?= base_url('assets/js/pwa.js?v=1'); ?>" defer></script>
     <style>
         body {
             background-color: #f8f9fa;

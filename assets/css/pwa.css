@@ -1,0 +1,53 @@
+.berps-pwa-notice {
+    position: fixed;
+    z-index: 11000;
+    right: 16px;
+    bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    max-width: min(520px, calc(100vw - 32px));
+    padding: 12px 14px;
+    border: 1px solid #d7e2f2;
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, .16);
+    color: #17233b;
+    font-size: 14px;
+}
+
+.berps-pwa-notice[hidden] {
+    display: none;
+}
+
+.berps-pwa-notice__message {
+    flex: 1;
+    line-height: 1.4;
+}
+
+.berps-pwa-notice__button {
+    flex: 0 0 auto;
+    border: 0;
+    border-radius: 8px;
+    padding: 8px 12px;
+    background: #1f5bc6;
+    color: #fff;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.berps-pwa-notice.is-offline {
+    border-color: #f2c7c7;
+    background: #fff8f8;
+}
+
+@media (max-width: 480px) {
+    .berps-pwa-notice {
+        right: 10px;
+        bottom: 10px;
+        left: 10px;
+        max-width: none;
+        align-items: flex-start;
+    }
+}

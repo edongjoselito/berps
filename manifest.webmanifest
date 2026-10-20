@@ -1,8 +1,9 @@
 {
-  "name": "BERPS Staff Portal",
-  "short_name": "BERPS Staff",
-  "description": "BERPS staff portal - tasks, attendance, and business operations.",
-  "start_url": "./page/staff",
+  "id": "./",
+  "name": "BERPS Business Resource Planning System",
+  "short_name": "BERPS",
+  "description": "BERPS business operations and resource planning platform.",
+  "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "background_color": "#ffffff",
@@ -12,13 +13,13 @@
       "src": "assets/images/icons/berps-192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "assets/images/icons/berps-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     }
   ]
 }
