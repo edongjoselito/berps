@@ -402,7 +402,7 @@ $data2 = isset($data2) ? $data2 : array();
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label for="paymentDate" class="form-label">Payment Date *</label>
-                                                <input type="date" class="form-control" id="paymentDate" name="paymentDate" value="<?= date('Y-m-d'); ?>" required>
+                                                <input type="date" class="form-control" id="paymentDate" name="paymentDate" value="<?= date('Y-m-d'); ?>" min="2000-01-01" max="<?= date('Y-m-d'); ?>" required>
                                             </div>
                                         </div>
                                     </div>

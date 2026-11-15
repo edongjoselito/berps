@@ -40,6 +40,10 @@ UPDATE payments SET PDate = '2025-10-15' WHERE paymentID = 6269 AND settingsID =
 UPDATE payments SET PDate = '2025-11-15' WHERE paymentID = 6268 AND settingsID = 1 AND InvoiceNo = '100197' AND PDate = '2026-11-15';
 UPDATE payments SET PDate = '2025-12-15' WHERE paymentID = 6267 AND settingsID = 1 AND InvoiceNo = '100198' AND PDate = '2026-12-15';
 
+-- Wesleyan #100188 was entered with the rest of the Jul 2024-Feb 2025 batch.
+-- Its neighbours match their invoice dates; this one alone has year 2026.
+UPDATE payments SET PDate = '2025-02-15' WHERE paymentID = 6323 AND settingsID = 1 AND InvoiceNo = '100188' AND PDate = '2026-02-15';
+
 -- IHMA #100087: year typed as 0023; neighbouring payments in the batch are Feb 2023.
 UPDATE payments SET PDate = '2023-02-12' WHERE paymentID = 6176 AND settingsID = 1 AND InvoiceNo = '100087' AND PDate = '0023-02-12';
 

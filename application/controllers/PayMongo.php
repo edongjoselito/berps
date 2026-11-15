@@ -647,9 +647,21 @@ class PayMongo extends CI_Controller
             return;
         }
 
+        date_default_timezone_set('Asia/Manila');
+        $paymentDate = date('Y-m-d');
+        if (!empty($row->paid_at)) {
+            $paidAtTimestamp = strtotime((string) $row->paid_at);
+            $candidateDate = $paidAtTimestamp !== false ? date('Y-m-d', $paidAtTimestamp) : null;
+            if ($candidateDate !== null && $candidateDate >= '2000-01-01' && $candidateDate <= $paymentDate) {
+                $paymentDate = $candidateDate;
+            } else {
+                log_message('error', 'PayMongo _recordLedgerPayment: invalid or future paid_at; using current date. ID=' . $onlinePaymentId);
+            }
+        }
+
         $paymentData = array(
             'InvoiceNo'        => $invoiceNo,
-            'PDate'            => $row->paid_at ? date('Y-m-d', strtotime($row->paid_at)) : date('Y-m-d'),
+            'PDate'            => $paymentDate,
             'AmountPaid'       => (float) $row->amount,
             'TaxAmount'        => 0,
             'ORNo'             => $row->paymongo_payment_id ?: '',

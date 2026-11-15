@@ -892,27 +892,10 @@ class CashModel extends CI_Model
 
 		$regularPayments = $this->db->get()->result();
 
-		// Get delivery payments
-		$this->db->select('d.deliveryNo as InvoiceNo, d.customerName as Customer, d.amountPaid as AmountPaid, d.updatedAt as PDate, d.deliveredBy as Cashier, "Delivery Payment" as TransDescription, "Valid" as ORStat, 0 as TaxAmount');
-		$this->db->from('customer_deliveries d');
-		$this->db->where('d.settingsID', $settingsID);
-		$this->db->where('d.amountPaid >', 0);
-		$this->db->order_by('d.updatedAt', 'ASC');
-
-		if ($from) {
-			$this->db->where('DATE(d.updatedAt) >=', $from);
-		}
-		if ($to) {
-			$this->db->where('DATE(d.updatedAt) <=', $to);
-		}
-		if ($paymentSource && strtolower($paymentSource) !== 'delivery payment') {
-			$this->db->where('1 = 0'); // Exclude delivery payments if looking for specific payment source
-		}
-
-		$deliveryPayments = $this->db->get()->result();
-
-		// Combine both payment types
-		return array_merge($regularPayments, $deliveryPayments);
+		// Delivery collections are also written to payments. Reading the delivery
+		// table here would duplicate them and would use updatedAt instead of the
+		// actual payment date.
+		return $regularPayments;
 	}
 
 	function accountingInvoices($settingsID, $from = null, $to = null)
@@ -1167,18 +1150,17 @@ class CashModel extends CI_Model
 	//Todays Payments
 	function todaysPayments($settingsID, $date)
 	{
-		// Regular payments
-		$query = $this->db->query("SELECT sum(AmountPaid) as Total FROM payments where settingsID='" . $settingsID . "' and ORStat='Valid' and PDate='" . $date . "'");
-		$regularPayments = $query->result();
-
-		// Delivery payments
-		$deliveryQuery = $this->db->query("SELECT sum(amountPaid) as Total FROM customer_deliveries where settingsID='" . $settingsID . "' and DATE(updatedAt)='" . $date . "' and amountPaid > 0");
-		$deliveryPayments = $deliveryQuery->result();
-
-		// Combine results
-		$total = ($regularPayments[0]->Total ?? 0) + ($deliveryPayments[0]->Total ?? 0);
-
-		return [(object)['Total' => $total]];
+		// The payments ledger is the single source of truth. Delivery payments
+		// already create a payments row; summing customer_deliveries again can
+		// double count them, and updatedAt may change for non-payment edits.
+		return $this->db
+			->select('COALESCE(SUM(AmountPaid), 0) AS Total', false)
+			->from('payments')
+			->where('settingsID', $settingsID)
+			->where('ORStat', 'Valid')
+			->where('PDate', $date)
+			->get()
+			->result();
 	}
 
 	function todaysPaymentsStaff($settingsID, $name)
@@ -1218,18 +1200,13 @@ class CashModel extends CI_Model
 	//TotalPayments
 	function totalPayments($settingsID)
 	{
-		// Regular payments
-		$query = $this->db->query("SELECT sum(AmountPaid) as Total FROM payments where ORStat='Valid' and settingsID='" . $settingsID . "'");
-		$regularPayments = $query->result();
-
-		// Delivery payments
-		$deliveryQuery = $this->db->query("SELECT sum(amountPaid) as Total FROM customer_deliveries where settingsID='" . $settingsID . "' and amountPaid > 0");
-		$deliveryPayments = $deliveryQuery->result();
-
-		// Combine results
-		$total = ($regularPayments[0]->Total ?? 0) + ($deliveryPayments[0]->Total ?? 0);
-
-		return [(object)['Total' => $total]];
+		return $this->db
+			->select('COALESCE(SUM(AmountPaid), 0) AS Total', false)
+			->from('payments')
+			->where('ORStat', 'Valid')
+			->where('settingsID', $settingsID)
+			->get()
+			->result();
 	}
 
 	//TotalPayments Summary
@@ -1343,10 +1320,11 @@ class CashModel extends CI_Model
 	}
 
 	//Edit Payment
-	function updatePayment($id)
+	function updatePayment($id, $settingsID)
 	{
 		$this->paymentBaseQuery();
 		$this->db->where('p.paymentID', $id);
+		$this->db->where('p.settingsID', $settingsID);
 		$result = $this->db->get()->row();
 		return $result ? [$result] : [];
 	}

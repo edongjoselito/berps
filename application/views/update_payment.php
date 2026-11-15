@@ -1,3 +1,4 @@
+<?php $paymentDanger = (string) ($this->session->flashdata('danger') ?? ''); ?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -13,6 +14,11 @@
     <div class="content-page">
       <div class="content">
         <div class="container-fluid update-payment-page">
+          <?php if ($paymentDanger !== ''): ?>
+            <div class="alert alert-danger" role="alert">
+              <?= htmlspecialchars($paymentDanger, ENT_QUOTES, 'UTF-8'); ?>
+            </div>
+          <?php endif; ?>
           <style>
             .update-payment-page .page-title-box {
               padding: 12px 0;
@@ -90,7 +96,7 @@
                     <div class="form-row">
                       <div class="form-group col-md-3">
                         <label for="payment-date">Payment Date</label>
-                        <input type="date" class="form-control" id="payment-date" name="PDate" value="<?= $data[0]->PDate; ?>" required>
+                        <input type="date" class="form-control" id="payment-date" name="PDate" value="<?= htmlspecialchars((string) $data[0]->PDate, ENT_QUOTES, 'UTF-8'); ?>" min="2000-01-01" max="<?= date('Y-m-d'); ?>" required>
                       </div>
                       <div class="form-group col-md-3">
                         <label for="payment-amount">Amount Paid</label>

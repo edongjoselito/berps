@@ -832,7 +832,7 @@ $progressPercentage = $totalDue > 0 ? max(0, min(100, ($previousPayments / $tota
                                     <div class="form-row">
                                         <div class="form-group col-md-4">
                                             <label for="payment-date">Payment Date</label>
-                                            <input type="date" class="form-control" id="payment-date" name="PDate" value="<?= date('Y-m-d'); ?>" <?= $isFullyPaid ? 'disabled readonly' : 'required'; ?>>
+                                            <input type="date" class="form-control" id="payment-date" name="PDate" value="<?= date('Y-m-d'); ?>" min="2000-01-01" max="<?= date('Y-m-d'); ?>" <?= $isFullyPaid ? 'disabled readonly' : 'required'; ?>>
                                         </div>
                                         <div class="form-group col-md-4">
                                             <label for="payment-orno">O.R. No.</label>

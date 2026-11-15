@@ -12266,6 +12266,37 @@ class Page extends CI_Controller
     return null;
   }
 
+  /**
+   * Validate a user-entered payment date without silently changing it.
+   * Collections may be back-dated, but they must be a real business date and
+   * cannot be posted in the future. This prevents year typos from appearing as
+   * income months later (for example, 2025-11-15 entered as 2026-11-15).
+   */
+  private function _validatePaymentDateInput($value, &$errorMessage = null)
+  {
+    date_default_timezone_set('Asia/Manila');
+
+    $date = $this->_normalizeDateInput($value);
+    if ($date === null) {
+      $errorMessage = 'Enter a valid payment date in YYYY-MM-DD format.';
+      return null;
+    }
+
+    if ($date < '2000-01-01') {
+      $errorMessage = 'Payment date cannot be earlier than January 1, 2000. Check the year and try again.';
+      return null;
+    }
+
+    $today = date('Y-m-d');
+    if ($date > $today) {
+      $errorMessage = 'Payment date cannot be in the future. Check the year and try again.';
+      return null;
+    }
+
+    $errorMessage = null;
+    return $date;
+  }
+
   private function _normalizeTaskLabel($value)
   {
     $value = preg_replace('/\s+/', ' ', trim((string) $value));
@@ -12625,6 +12656,11 @@ class Page extends CI_Controller
 
   function addPayment()
   {
+    if ($this->input->method() !== 'post') {
+      redirect('Page/paymentList');
+      return;
+    }
+
     $settingsID = $this->session->userdata('settingsID');
     $name = $this->_currentUserDisplayName();
     $InvoiceNo = trim((string) $this->input->post('InvoiceNo'));
@@ -12641,8 +12677,24 @@ class Page extends CI_Controller
     $PaymentReference = trim((string) $this->input->post('PaymentReference'));
 
     date_default_timezone_set('Asia/Manila');
-    $postedDate = trim((string) $this->input->post('PDate'));
-    $date = $this->_normalizeDateInput($postedDate) ?: date("Y-m-d");
+    $dateError = null;
+    $postedPaymentDate = trim((string) $this->input->post('PDate'));
+    // A legacy payment modal does not expose a date field; only an omitted
+    // date defaults to today. Any supplied malformed or future date is blocked.
+    $date = $postedPaymentDate === ''
+      ? date('Y-m-d')
+      : $this->_validatePaymentDateInput($postedPaymentDate, $dateError);
+    if ($date === null) {
+      $this->session->set_flashdata('danger', $dateError);
+      redirect('Page/paymentList');
+      return;
+    }
+
+    if ($this->_paymentCreditedAmount($AmountPaid, $TaxAmount) <= 0) {
+      $this->session->set_flashdata('danger', 'Enter a valid amount paid or BIR Form 2307 tax credit.');
+      redirect('Page/paymentList');
+      return;
+    }
     $paymentPayload = array(
       'InvoiceNo' => $InvoiceNo,
       'PDate' => $date,
@@ -12721,7 +12773,8 @@ class Page extends CI_Controller
 
       $orderID = trim((string) $this->input->post('orderID'));
       $InvoiceNo = trim((string) $this->input->post('InvoiceNo'));
-      $PDate = $this->_normalizeDateInput($this->input->post('PDate')) ?: date('Y-m-d');
+      $dateError = null;
+      $PDate = $this->_validatePaymentDateInput($this->input->post('PDate'), $dateError);
       $AmountPaid = $this->_normalizePaymentAmount($this->input->post('AmountPaid'));
       $TaxAmount = $this->_normalizePaymentAmount($this->input->post('TaxAmount'));
       $ORNo = trim((string) $this->input->post('ORNo'));
@@ -12754,6 +12807,12 @@ class Page extends CI_Controller
         . '&InvoiceNo=' . rawurlencode((string) $invoiceRecord->InvoiceNo)
         . '&PaymentSource=' . rawurlencode($resolvedSource)
         . '&return_to=' . rawurlencode($returnTo);
+
+      if ($PDate === null) {
+        $this->session->set_flashdata('payment_notice', $dateError);
+        redirect($redirectUrl);
+        return;
+      }
 
       if ($currentBalance <= 0) {
         $this->session->set_flashdata('payment_notice', 'Invoice #' . $invoiceRecord->InvoiceNo . ' is already fully paid.');
@@ -12983,9 +13042,13 @@ class Page extends CI_Controller
       return;
     }
 
-    $id = $this->input->get('id');
-    $result['data'] = $this->CashModel->updatePayment($id);
     $settingsID = $this->session->userdata('settingsID');
+    $id = $this->input->get('id');
+    $result['data'] = $this->CashModel->updatePayment($id, $settingsID);
+    if (empty($result['data'])) {
+      show_404();
+      return;
+    }
     $result['data2'] = $this->CashModel->getClients($settingsID);
     $this->load->view('update_payment', $result);
 
@@ -12994,7 +13057,8 @@ class Page extends CI_Controller
       $id = $this->input->post('id');
       $existingPayment = isset($result['data'][0]) ? $result['data'][0] : null;
       $InvoiceNo = trim((string) $this->input->post('InvoiceNo'));
-      $PDate = $this->_normalizeDateInput($this->input->post('PDate')) ?: date('Y-m-d');
+      $dateError = null;
+      $PDate = $this->_validatePaymentDateInput($this->input->post('PDate'), $dateError);
       $AmountPaid = $this->_normalizePaymentAmount($this->input->post('AmountPaid'));
       $TaxAmount = $this->_normalizePaymentAmount($this->input->post('TaxAmount'));
       $ORNo = trim((string) $this->input->post('ORNo'));
@@ -13007,7 +13071,20 @@ class Page extends CI_Controller
       $TransDescription = trim((string) $this->input->post('TransDescription'));
       $PaymentReference = trim((string) $this->input->post('PaymentReference'));
 
+      if ($PDate === null) {
+        $this->session->set_flashdata('danger', $dateError);
+        redirect('Page/updatePayment?id=' . rawurlencode((string) $id));
+        return;
+      }
+
+      if ($this->_paymentCreditedAmount($AmountPaid, $TaxAmount) <= 0) {
+        $this->session->set_flashdata('danger', 'Enter a valid amount paid or BIR Form 2307 tax credit.');
+        redirect('Page/updatePayment?id=' . rawurlencode((string) $id));
+        return;
+      }
+
       $this->db->where('paymentID', $id);
+      $this->db->where('settingsID', $settingsID);
       $this->db->update('payments', array(
         'InvoiceNo' => $InvoiceNo,
         'PDate' => $PDate,
@@ -22014,13 +22091,27 @@ class Page extends CI_Controller
 
     $deliveryNo = $this->input->post('deliveryNo');
     $customerName = $this->input->post('customerName');
-    $amountPaid = $this->input->post('paymentAmount');
-    $taxAmount = $this->input->post('taxAmount');
-    $paymentDate = $this->input->post('paymentDate');
+    $amountPaid = $this->_normalizePaymentAmount($this->input->post('paymentAmount'));
+    $taxAmount = $this->_normalizePaymentAmount($this->input->post('taxAmount'));
+    $dateError = null;
+    $paymentDate = $this->_validatePaymentDateInput($this->input->post('paymentDate'), $dateError);
     $paymentMode = $this->input->post('paymentMode');
     $referenceNo = $this->input->post('referenceNo');
     $paymentNotes = $this->input->post('paymentNotes');
     $settingsID = $this->session->userdata('settingsID');
+
+    $deliveryReturnUrl = 'Page/deliveryPayment?deliveryNo=' . urlencode($deliveryNo) . '&customer=' . urlencode($customerName);
+    if ($paymentDate === null) {
+      $this->session->set_flashdata('danger', $dateError);
+      redirect($deliveryReturnUrl);
+      return;
+    }
+
+    if ($this->_paymentCreditedAmount($amountPaid, $taxAmount) <= 0) {
+      $this->session->set_flashdata('danger', 'Enter a valid payment amount or BIR Form 2307 tax credit.');
+      redirect($deliveryReturnUrl);
+      return;
+    }
 
     // Auto-create customer delivery tables if they don't exist
     $this->_ensureCustomerDeliveryTables();
@@ -22044,7 +22135,7 @@ class Page extends CI_Controller
 
         if (!$this->upload->do_upload('birAttachment')) {
           $this->session->set_flashdata('danger', 'File upload failed: ' . $this->upload->display_errors());
-          redirect('Page/deliveryPayment?deliveryNo=' . urlencode($deliveryNo) . '&customer=' . urlencode($customerName));
+          redirect($deliveryReturnUrl);
           return;
         }
 
@@ -22052,7 +22143,7 @@ class Page extends CI_Controller
         $attachmentPath = $config['upload_path'] . $uploadData['file_name'];
       } else {
         $this->session->set_flashdata('danger', 'BIR Form 2307 attachment is required when tax amount is greater than 0');
-        redirect('Page/deliveryPayment?deliveryNo=' . urlencode($deliveryNo) . '&customer=' . urlencode($customerName));
+        redirect($deliveryReturnUrl);
         return;
       }
     }
@@ -22070,16 +22161,15 @@ class Page extends CI_Controller
         'ORStat' => 'Valid',
         'Cashier' => $this->session->userdata('username'),
         'settingsID' => $settingsID,
-        'TransDescription' => 'Payment for delivery ' . $deliveryNo,
-        'paymentID' => 'DEL_' . $deliveryNo . '_' . date('YmdHis')
+        'TransDescription' => 'Payment for delivery ' . $deliveryNo
       ];
 
       $this->db->insert('payments', $paymentData);
+      $newPaymentID = (int) $this->db->insert_id();
 
-      // If there's an attachment, we could store it in a separate table or as a note
-      if ($attachmentPath) {
-        // For now, we'll add attachment info to the description
-        $this->db->where('paymentID', 'DEL_' . $deliveryNo . '_' . date('YmdHis'));
+      if ($attachmentPath && $newPaymentID > 0) {
+        $this->db->where('paymentID', $newPaymentID);
+        $this->db->where('settingsID', $settingsID);
         $this->db->update('payments', [
           'TransDescription' => 'Payment for delivery ' . $deliveryNo . ' (BIR Form attached: ' . basename($attachmentPath) . ')'
         ]);
@@ -22180,13 +22270,26 @@ class Page extends CI_Controller
     $paymentType = $this->input->post('paymentType');
     $referenceId = $this->input->post('referenceId');
     $referenceNumber = $this->input->post('referenceNumber');
-    $amountPaid = $this->input->post('paymentAmount');
-    $taxAmount = $this->input->post('taxAmount');
-    $paymentDate = $this->input->post('paymentDate');
+    $amountPaid = $this->_normalizePaymentAmount($this->input->post('paymentAmount'));
+    $taxAmount = $this->_normalizePaymentAmount($this->input->post('taxAmount'));
+    $dateError = null;
+    $paymentDate = $this->_validatePaymentDateInput($this->input->post('paymentDate'), $dateError);
     $paymentMode = $this->input->post('paymentMode');
     $referenceNo = $this->input->post('referenceNo');
     $paymentNotes = $this->input->post('paymentNotes');
     $settingsID = $this->session->userdata('settingsID');
+
+    if ($paymentDate === null) {
+      $this->session->set_flashdata('danger', $dateError);
+      redirect('Page/unifiedPayment');
+      return;
+    }
+
+    if ($this->_paymentCreditedAmount($amountPaid, $taxAmount) <= 0) {
+      $this->session->set_flashdata('danger', 'Enter a valid payment amount or BIR Form 2307 tax credit.');
+      redirect('Page/unifiedPayment');
+      return;
+    }
 
     // Handle file upload if tax amount > 0
     $attachmentPath = null;
@@ -22230,15 +22333,15 @@ class Page extends CI_Controller
         'ORStat' => 'Valid',
         'Cashier' => $this->session->userdata('username'),
         'settingsID' => $settingsID,
-        'TransDescription' => 'Payment for ' . $paymentType . ' ' . $referenceNumber,
-        'paymentID' => strtoupper(substr($paymentType, 0, 3)) . '_' . $referenceNumber . '_' . date('YmdHis')
+        'TransDescription' => 'Payment for ' . $paymentType . ' ' . $referenceNumber
       ];
 
       $this->db->insert('payments', $paymentData);
+      $newPaymentID = (int) $this->db->insert_id();
 
-      // If there's an attachment, add info to description
-      if ($attachmentPath) {
-        $this->db->where('paymentID', $paymentData['paymentID']);
+      if ($attachmentPath && $newPaymentID > 0) {
+        $this->db->where('paymentID', $newPaymentID);
+        $this->db->where('settingsID', $settingsID);
         $this->db->update('payments', [
           'TransDescription' => 'Payment for ' . $paymentType . ' ' . $referenceNumber . ' (BIR Form attached: ' . basename($attachmentPath) . ')'
         ]);
@@ -22254,7 +22357,7 @@ class Page extends CI_Controller
         $this->_updateJobOrderPayment($referenceId, $amountPaid, $taxAmount, $settingsID);
         break;
       case 'delivery':
-        $this->_updateDeliveryPayment($referenceId, $referenceNumber, $amountPaid, $settingsID);
+        $this->_updateDeliveryPayment($referenceId, $referenceNumber, $this->_paymentCreditedAmount($amountPaid, $taxAmount), $settingsID);
         break;
     }
 
@@ -22359,7 +22462,7 @@ class Page extends CI_Controller
         return array();
       }
 
-      $this->db->select('d.deliveryNo as number, d.customerName as customer, d.balance as remainingBalance, d.amountPaid as amountPaid, d.totalAmount as amount, d.deliveryStatus as status, d.deliveryDate as date');
+      $this->db->select('MIN(d.deliveryID) as id, d.deliveryNo as number, d.customerName as customer, SUM(d.balance) as remainingBalance, SUM(d.amountPaid) as amountPaid, SUM(d.totalAmount) as amount, MAX(d.deliveryStatus) as status, MAX(d.deliveryDate) as date', false);
       $this->db->from('customer_deliveries d');
       $this->db->where('d.settingsID', $settingsID);
       $this->db->where('d.balance >', 0); // Only unpaid deliveries
@@ -22384,7 +22487,6 @@ class Page extends CI_Controller
       $results = $query->result();
 
       foreach ($results as $result) {
-        $result->id = $result->number;
         $result->status = ucfirst($result->status);
       }
 
@@ -22403,7 +22505,7 @@ class Page extends CI_Controller
     $invoice = $this->db->get('invoice')->row();
 
     if ($invoice) {
-      $newAmountPaid = $invoice->AmountPaid + $amountPaid;
+      $newAmountPaid = (float) $invoice->AmountPaid + $this->_paymentCreditedAmount($amountPaid, $taxAmount);
       $newBalance = $invoice->TotalDue - $newAmountPaid;
 
       $status = 'Pending';
@@ -22431,7 +22533,7 @@ class Page extends CI_Controller
     $jobOrder = $this->db->get('joborder')->row();
 
     if ($jobOrder) {
-      $newAmountPaid = $jobOrder->AmountPaid + $amountPaid;
+      $newAmountPaid = (float) $jobOrder->AmountPaid + $this->_paymentCreditedAmount($amountPaid, $taxAmount);
       $newBalance = $jobOrder->TotalDue - $newAmountPaid;
 
       $status = 'Pending';
@@ -22454,7 +22556,22 @@ class Page extends CI_Controller
   private function _updateDeliveryPayment($deliveryId, $deliveryNo, $amountPaid, $settingsID)
   {
     $this->load->model('DeliveryModel');
-    $this->DeliveryModel->update_grouped_delivery_payment($deliveryNo, '', $amountPaid, $settingsID);
+    $delivery = $this->db
+      ->where('deliveryID', (int) $deliveryId)
+      ->where('settingsID', $settingsID)
+      ->get('customer_deliveries')
+      ->row();
+
+    if (!$delivery) {
+      return false;
+    }
+
+    $resolvedDeliveryNo = trim((string) ($delivery->deliveryNo ?? '')) !== ''
+      ? (string) $delivery->deliveryNo
+      : (string) $deliveryNo;
+    $customerName = (string) ($delivery->customerName ?? '');
+
+    return $this->DeliveryModel->update_grouped_delivery_payment($resolvedDeliveryNo, $customerName, $amountPaid, $settingsID);
   }
 
   function editCustomerDelivery()

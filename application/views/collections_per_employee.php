@@ -321,7 +321,7 @@ $(document).ready(function() {
                     <div class="col-md-3 mb-3">
                       <label for="validationCustom020">Payment Date</label>
                       <div class="input-group">
-                        <input type="date" class="form-control" name="PDate" id="validationCustom020" required>
+                        <input type="date" class="form-control" name="PDate" id="validationCustom020" value="<?= date('Y-m-d'); ?>" min="2000-01-01" max="<?= date('Y-m-d'); ?>" required>
                         <!-- <div class="valid-feedback">
                           Looks good!
                         </div> -->

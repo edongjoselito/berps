@@ -5,6 +5,7 @@ $todayDateValue = isset($currentDayDate) ? (string) $currentDayDate : date('Y-m-
 $showingToday = !empty($showingTodayOnly);
 $isAdmin = strtolower(trim((string) $this->session->userdata('level'))) === 'admin';
 $clients = isset($data2) && is_array($data2) ? $data2 : array();
+$paymentDanger = (string) ($this->session->flashdata('danger') ?? '');
 
 $paymentRecords = isset($data) ? $data : array();
 if ($paymentRecords instanceof Traversable) {
@@ -78,6 +79,11 @@ $filterQueryString = http_build_query(array(
         <div class="content-page">
             <div class="content">
                 <div class="container-fluid payment-list-page berps-page">
+                    <?php if ($paymentDanger !== ''): ?>
+                        <div class="alert alert-danger" role="alert">
+                            <?= htmlspecialchars($paymentDanger, ENT_QUOTES, 'UTF-8'); ?>
+                        </div>
+                    <?php endif; ?>
 
 
                     <div class="pay-hero">
@@ -386,7 +392,7 @@ $filterQueryString = http_build_query(array(
                         <div class="form-row">
                             <div class="form-group col-md-3">
                                 <label for="payment-date">Date</label>
-                                <input type="date" class="form-control" id="payment-date" name="PDate" value="<?= date('Y-m-d'); ?>" required>
+                                <input type="date" class="form-control" id="payment-date" name="PDate" value="<?= date('Y-m-d'); ?>" min="2000-01-01" max="<?= date('Y-m-d'); ?>" required>
                             </div>
                             <div class="form-group col-md-3">
                                 <label for="payment-amount">Amount Paid</label>
