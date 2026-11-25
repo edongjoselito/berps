@@ -1,0 +1,786 @@
+/* ==========================================================================
+   BERPS Desktop — "Meridian" skin
+   Injected by preload.js into every portal page. Scoped under html.berps-desktop
+   so the website's own CSS is never affected when viewed in a browser.
+   ========================================================================== */
+
+html.berps-desktop {
+  /* Rebrand tokens — overrides berps-design-system.css variables */
+  --berps-primary: #2563eb;
+  --berps-primary-hover: #1d4ed8;
+  --berps-primary-soft: #eaf1ff;
+  --berps-primary-border: #c3d5fb;
+
+  --berps-bg: #f3f6fc;
+  --berps-surface: #ffffff;
+  --berps-surface-soft: #f8fafd;
+  --berps-surface-muted: #edf1f8;
+
+  --berps-text: #101f3c;
+  --berps-text-muted: #5a6b88;
+  --berps-text-subtle: #8b98b0;
+  --berps-border: #e3e8f2;
+  --berps-border-strong: #ccd5e4;
+
+  --berps-success: #12805c;
+  --berps-success-soft: #e7f7f0;
+  --berps-warning: #b3620e;
+  --berps-warning-soft: #fef4e4;
+  --berps-danger: #d23449;
+  --berps-danger-soft: #fdeef1;
+  --berps-info: #0f6e94;
+  --berps-info-soft: #e8f6fb;
+
+  --berps-radius-xs: 5px;
+  --berps-radius-sm: 8px;
+  --berps-radius-md: 10px;
+  --berps-radius-lg: 14px;
+  --berps-radius-pill: 999px;
+
+  --berps-shadow-sm: 0 1px 2px rgba(16, 31, 60, 0.05);
+  --berps-shadow-md: 0 10px 30px rgba(16, 31, 60, 0.08);
+  --berps-shadow-lg: 0 24px 60px rgba(16, 31, 60, 0.16);
+
+  /* Sidebar — deeper, richer navy with a hint of indigo */
+  --berps-sidebar-bg-start: #0d1830;
+  --berps-sidebar-bg-end: #17284d;
+  --berps-sidebar-gradient:
+    radial-gradient(140% 90% at 0% 0%, rgba(96, 140, 255, 0.16) 0%, transparent 55%),
+    linear-gradient(168deg, var(--berps-sidebar-bg-start) 0%, var(--berps-sidebar-bg-end) 100%);
+  --berps-sidebar-text: rgba(226, 234, 248, 0.62);
+  --berps-sidebar-text-strong: #ffffff;
+  --berps-sidebar-hairline: rgba(255, 255, 255, 0.09);
+  --berps-sidebar-active-bg: linear-gradient(90deg, rgba(110, 158, 255, 0.20), rgba(110, 158, 255, 0.06));
+  --berps-sidebar-accent: #7da6ff;
+  --berps-sidebar-submenu-bg: rgba(4, 10, 24, 0.28);
+}
+
+/* ------------------------------------------------------------------ shell */
+
+html.berps-desktop body {
+  background: var(--berps-bg);
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter",
+    "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+html.berps-desktop #wrapper {
+  background: var(--berps-bg);
+}
+
+/* -------------------------------------------------------------- drag zones
+   macOS runs with a hidden inset titlebar — the traffic lights float over the
+   sidebar brand, so it needs clearance and drag regions on dead space. */
+
+html.berps-platform-darwin .berps-sidebar-brand {
+  padding-top: 52px;
+  -webkit-app-region: drag;
+}
+
+html.berps-platform-darwin .navbar-custom {
+  -webkit-app-region: drag;
+}
+
+html.berps-platform-darwin .navbar-custom a,
+html.berps-platform-darwin .navbar-custom button,
+html.berps-platform-darwin .navbar-custom .dropdown,
+html.berps-platform-darwin .navbar-custom .dropdown-menu,
+html.berps-platform-darwin .berps-menu-toggle,
+html.berps-platform-darwin .berps-sidebar-brand a {
+  -webkit-app-region: no-drag;
+}
+
+/* ----------------------------------------------------------------- topbar */
+
+html.berps-desktop .navbar-custom {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: saturate(160%) blur(12px);
+  border-bottom: 1px solid var(--berps-border);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.6) inset;
+}
+
+html.berps-desktop .berps-topbar-title {
+  font-size: 1.02rem;
+  font-weight: 750;
+  letter-spacing: -0.01em;
+  color: var(--berps-text);
+}
+
+html.berps-desktop .berps-menu-toggle {
+  border-radius: var(--berps-radius-sm);
+  box-shadow: none;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+html.berps-desktop .berps-menu-toggle:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--berps-shadow-sm);
+}
+
+html.berps-desktop .navbar-custom .topnav-menu .nav-link {
+  border-radius: var(--berps-radius-sm);
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+html.berps-desktop .pro-user-name {
+  font-weight: 600;
+  color: var(--berps-text);
+}
+
+html.berps-desktop .navbar-custom .dropdown-menu {
+  border-radius: var(--berps-radius-lg);
+  padding: 6px;
+  box-shadow: var(--berps-shadow-lg);
+  border: 1px solid var(--berps-border);
+}
+
+html.berps-desktop .navbar-custom .dropdown-menu .dropdown-item {
+  border-radius: var(--berps-radius-sm);
+  padding: 9px 12px;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+html.berps-desktop .navbar-custom .dropdown-menu .dropdown-item i {
+  font-size: 1rem;
+  color: var(--berps-text-muted);
+}
+
+html.berps-desktop .navbar-custom .dropdown-menu .dropdown-item:hover {
+  background: var(--berps-primary-soft);
+  color: var(--berps-primary);
+}
+
+html.berps-desktop .navbar-custom .dropdown-menu .dropdown-item:hover i {
+  color: var(--berps-primary);
+}
+
+html.berps-desktop .navbar-custom .dropdown-menu .noti-title {
+  padding: 6px 12px 4px;
+}
+
+html.berps-desktop .navbar-custom .dropdown-menu .noti-title h6 {
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--berps-text-subtle);
+}
+
+/* ---------------------------------------------------------------- sidebar */
+
+html.berps-desktop .left-side-menu {
+  background: var(--berps-sidebar-gradient);
+  box-shadow: 1px 0 0 rgba(255, 255, 255, 0.04), 8px 0 32px rgba(13, 24, 48, 0.18);
+}
+
+html.berps-desktop .berps-sidebar-brand {
+  border-bottom: 1px solid var(--berps-sidebar-hairline);
+  padding: 1.5rem 1.5rem 1.25rem;
+}
+
+html.berps-desktop .berps-sidebar-brand img {
+  height: 46px;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.25));
+}
+
+/* menu items as rounded pills instead of hard edge bars */
+html.berps-desktop #sidebar-menu .menu-title {
+  padding: 1.1rem 1.35rem 0.4rem;
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.38);
+}
+
+html.berps-desktop #sidebar-menu > ul > li {
+  padding: 1px 0.65rem;
+}
+
+html.berps-desktop #sidebar-menu > ul > li > a {
+  border-left: 0;
+  border-radius: var(--berps-radius-sm);
+  padding: 0.68rem 0.9rem;
+  font-weight: 500;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+html.berps-desktop #sidebar-menu > ul > li > a i {
+  font-size: 1.08rem;
+  opacity: 0.8;
+  transition: opacity 0.15s ease;
+}
+
+html.berps-desktop #sidebar-menu > ul > li > a:hover,
+html.berps-desktop #sidebar-menu > ul > li > a:focus {
+  color: var(--berps-sidebar-text-strong);
+  background: rgba(255, 255, 255, 0.07);
+}
+
+html.berps-desktop #sidebar-menu > ul > li > a.active,
+html.berps-desktop #sidebar-menu li.mm-active > a {
+  color: #fff;
+  background: var(--berps-sidebar-active-bg);
+  box-shadow: inset 0 0 0 1px rgba(125, 166, 255, 0.22);
+}
+
+html.berps-desktop #sidebar-menu li.mm-active > a i {
+  opacity: 1;
+  color: var(--berps-sidebar-accent);
+}
+
+/* submenus: indented rail instead of darkened block */
+html.berps-desktop #sidebar-menu .nav-second-level {
+  background: transparent;
+  position: relative;
+  margin: 2px 0 4px;
+}
+
+html.berps-desktop #sidebar-menu .nav-second-level::before {
+  content: "";
+  position: absolute;
+  left: 1.72rem;
+  top: 4px;
+  bottom: 4px;
+  width: 1px;
+  background: rgba(255, 255, 255, 0.10);
+}
+
+html.berps-desktop .nav-second-level li a,
+html.berps-desktop .nav-thrid-level li a {
+  border-left: 0;
+  padding: 0.45rem 0.9rem 0.45rem 2.6rem;
+  border-radius: var(--berps-radius-sm);
+  margin: 0 0.65rem;
+  font-size: 0.8rem;
+}
+
+html.berps-desktop .nav-second-level li a:hover,
+html.berps-desktop .nav-second-level li a:focus,
+html.berps-desktop .nav-second-level li a.active,
+html.berps-desktop .nav-second-level li.mm-active > a,
+html.berps-desktop .nav-thrid-level li a:hover,
+html.berps-desktop .nav-thrid-level li a:focus {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+html.berps-desktop .berps-sidebar-logout a:hover,
+html.berps-desktop .berps-sidebar-logout a:focus {
+  background: rgba(226, 60, 80, 0.22);
+}
+
+/* --------------------------------------------------------------- content */
+
+html.berps-desktop .content-page .content {
+  background: var(--berps-bg);
+}
+
+/* --------------------------------------------------------------- cards */
+
+html.berps-desktop .card,
+html.berps-desktop .panel {
+  background: var(--berps-surface);
+  border: 1px solid var(--berps-border);
+  border-radius: var(--berps-radius-lg);
+  box-shadow: var(--berps-shadow-sm);
+}
+
+html.berps-desktop .card:hover,
+html.berps-desktop .panel:hover {
+  box-shadow: var(--berps-shadow-md);
+}
+
+html.berps-desktop .card,
+html.berps-desktop .panel {
+  transition: box-shadow 0.18s ease;
+}
+
+html.berps-desktop .card .card-header,
+html.berps-desktop .panel-header {
+  border-bottom: 1px solid var(--berps-border);
+  background: var(--berps-surface);
+  border-radius: var(--berps-radius-lg) var(--berps-radius-lg) 0 0;
+}
+
+html.berps-desktop .panel-header--blue {
+  background: linear-gradient(90deg, var(--berps-primary-soft), transparent 70%);
+}
+
+html.berps-desktop .panel-title,
+html.berps-desktop .card .card-title {
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--berps-text);
+}
+
+html.berps-desktop .panel-subtitle {
+  color: var(--berps-text-muted);
+}
+
+/* -------------------------------------------------------- dashboard hero */
+
+html.berps-desktop .staff-dashboard-admin .dash-hero {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--berps-radius-lg);
+  background:
+    radial-gradient(120% 160% at 90% -20%, rgba(125, 166, 255, 0.35) 0%, transparent 50%),
+    linear-gradient(115deg, #1e3f8f 0%, #2563eb 58%, #3b82f6 100%);
+  box-shadow: 0 18px 44px rgba(37, 99, 235, 0.28);
+}
+
+html.berps-desktop .staff-dashboard-admin .dash-hero__eyebrow {
+  color: rgba(255, 255, 255, 0.75);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+html.berps-desktop .staff-dashboard-admin .dash-hero__title {
+  color: #fff;
+  font-weight: 750;
+  letter-spacing: -0.02em;
+}
+
+html.berps-desktop .staff-dashboard-admin .dash-hero__subtitle {
+  color: rgba(255, 255, 255, 0.82);
+}
+
+html.berps-desktop .staff-dashboard-admin .dash-hero-btn {
+  border-radius: var(--berps-radius-pill);
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  color: #fff;
+  backdrop-filter: blur(6px);
+  transition: background-color 0.15s ease, transform 0.15s ease;
+}
+
+html.berps-desktop .staff-dashboard-admin .dash-hero-btn:hover,
+html.berps-desktop .staff-dashboard-admin .dash-hero-btn:focus {
+  background: rgba(255, 255, 255, 0.24);
+  transform: translateY(-1px);
+  color: #fff;
+}
+
+html.berps-desktop .staff-dashboard-admin .dash-hero-btn--solid {
+  background: #fff;
+  color: var(--berps-primary);
+  border-color: #fff;
+  font-weight: 700;
+}
+
+html.berps-desktop .staff-dashboard-admin .dash-hero-btn--solid:hover,
+html.berps-desktop .staff-dashboard-admin .dash-hero-btn--solid:focus {
+  background: #f0f5ff;
+  color: var(--berps-primary-hover);
+}
+
+html.berps-desktop .staff-dashboard-admin .dash-hero-btn__badge {
+  background: rgba(13, 24, 48, 0.35);
+  border-radius: var(--berps-radius-pill);
+}
+
+/* ------------------------------------------------------------ KPI cards */
+
+html.berps-desktop .staff-dashboard-admin .kpi-card {
+  border-radius: var(--berps-radius-lg);
+  border: 1px solid var(--berps-border);
+  background: var(--berps-surface);
+  box-shadow: var(--berps-shadow-sm);
+  transition: transform 0.16s ease, box-shadow 0.16s ease;
+}
+
+html.berps-desktop .staff-dashboard-admin .kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--berps-shadow-md);
+}
+
+html.berps-desktop .staff-dashboard-admin .kpi-card__icon {
+  border-radius: var(--berps-radius-md);
+}
+
+html.berps-desktop .staff-dashboard-admin .kpi-card__num {
+  font-weight: 750;
+  letter-spacing: -0.02em;
+}
+
+html.berps-desktop .staff-dashboard-admin .kpi-card__bar {
+  border-radius: 0 0 var(--berps-radius-lg) var(--berps-radius-lg);
+  height: 3px;
+}
+
+/* ------------------------------------------------------ priority queue */
+
+html.berps-desktop .staff-dashboard-admin .side-card {
+  border-radius: var(--berps-radius-lg);
+  border: 1px solid var(--berps-border);
+  background: var(--berps-surface);
+  box-shadow: var(--berps-shadow-sm);
+}
+
+html.berps-desktop .staff-dashboard-admin .side-card--orange .side-card__icon {
+  background: var(--berps-warning-soft);
+  color: var(--berps-warning);
+}
+
+html.berps-desktop .staff-dashboard-admin .queue-item {
+  border-radius: var(--berps-radius-sm);
+  transition: background-color 0.14s ease;
+}
+
+html.berps-desktop .staff-dashboard-admin .queue-item:hover,
+html.berps-desktop .staff-dashboard-admin .queue-item:focus {
+  background: var(--berps-primary-soft);
+}
+
+html.berps-desktop .staff-dashboard-admin .side-card__more {
+  border-top: 1px solid var(--berps-border);
+  color: var(--berps-primary);
+  font-weight: 600;
+}
+
+/* -------------------------------------------------------------- buttons */
+
+html.berps-desktop .btn {
+  border-radius: var(--berps-radius-sm);
+  font-weight: 600;
+  letter-spacing: 0;
+  transition: transform 0.12s ease, box-shadow 0.15s ease,
+    background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+html.berps-desktop .btn:active {
+  transform: translateY(0.5px);
+}
+
+html.berps-desktop .btn-primary {
+  background: var(--berps-primary);
+  border-color: var(--berps-primary);
+  box-shadow: 0 1px 2px rgba(37, 99, 235, 0.25);
+}
+
+html.berps-desktop .btn-primary:hover,
+html.berps-desktop .btn-primary:focus {
+  background: var(--berps-primary-hover);
+  border-color: var(--berps-primary-hover);
+  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.3);
+}
+
+html.berps-desktop .btn-secondary {
+  background: var(--berps-surface-muted);
+  border-color: var(--berps-surface-muted);
+  color: var(--berps-text);
+}
+
+html.berps-desktop .btn-outline-primary {
+  color: var(--berps-primary);
+  border-color: var(--berps-primary-border);
+}
+
+html.berps-desktop .btn-outline-primary:hover,
+html.berps-desktop .btn-outline-primary:focus {
+  background: var(--berps-primary);
+  border-color: var(--berps-primary);
+}
+
+html.berps-desktop .btn-light {
+  background: var(--berps-surface);
+  border-color: var(--berps-border);
+  color: var(--berps-text-muted);
+}
+
+/* --------------------------------------------------------------- badges */
+
+html.berps-desktop .badge,
+html.berps-desktop .badge-pill {
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+html.berps-desktop .badge-primary,
+html.berps-desktop .badge.badge-primary {
+  background: var(--berps-primary-soft);
+  color: var(--berps-primary);
+}
+
+html.berps-desktop .badge-success {
+  background: var(--berps-success-soft);
+  color: var(--berps-success);
+}
+
+html.berps-desktop .badge-warning {
+  background: var(--berps-warning-soft);
+  color: var(--berps-warning);
+}
+
+html.berps-desktop .badge-danger {
+  background: var(--berps-danger-soft);
+  color: var(--berps-danger);
+}
+
+html.berps-desktop .badge-info {
+  background: var(--berps-info-soft);
+  color: var(--berps-info);
+}
+
+html.berps-desktop .badge-secondary {
+  background: var(--berps-surface-muted);
+  color: var(--berps-text-muted);
+}
+
+/* --------------------------------------------------------------- tables */
+
+html.berps-desktop .table,
+html.berps-desktop .leaderboard-table {
+  font-size: 0.85rem;
+}
+
+html.berps-desktop .table thead th,
+html.berps-desktop .leaderboard-table thead th {
+  background: var(--berps-surface-soft);
+  border-bottom: 1px solid var(--berps-border);
+  color: var(--berps-text-muted);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.7rem 0.9rem;
+}
+
+html.berps-desktop .table thead th.bg-secondary,
+html.berps-desktop .table thead.bg-secondary th {
+  background: var(--berps-surface-soft) !important;
+  color: var(--berps-text-muted) !important;
+}
+
+html.berps-desktop .table tbody td,
+html.berps-desktop .leaderboard-table tbody td {
+  border-top: 1px solid var(--berps-border);
+  padding: 0.75rem 0.9rem;
+  vertical-align: middle;
+}
+
+html.berps-desktop .table-hover tbody tr:hover,
+html.berps-desktop .leaderboard-table tbody tr:hover {
+  background: var(--berps-primary-soft);
+}
+
+html.berps-desktop .table-striped tbody tr:nth-of-type(odd) {
+  background: var(--berps-surface-soft);
+}
+
+html.berps-desktop .staff-dashboard-admin .rank-badge {
+  border-radius: var(--berps-radius-pill);
+  font-weight: 700;
+}
+
+/* --------------------------------------------------------- DataTables */
+
+html.berps-desktop .dataTables_wrapper .dataTables_filter input,
+html.berps-desktop .dataTables_wrapper .dataTables_length select {
+  border: 1px solid var(--berps-border);
+  border-radius: var(--berps-radius-sm);
+  padding: 6px 10px;
+}
+
+html.berps-desktop .dataTables_wrapper .dataTables_filter input:focus {
+  border-color: var(--berps-primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+  outline: none;
+}
+
+html.berps-desktop .page-item.active .page-link {
+  background: var(--berps-primary);
+  border-color: var(--berps-primary);
+}
+
+html.berps-desktop .page-link {
+  color: var(--berps-primary);
+  border-color: var(--berps-border);
+}
+
+html.berps-desktop .page-link:hover {
+  background: var(--berps-primary-soft);
+  border-color: var(--berps-border);
+}
+
+/* ---------------------------------------------------------------- forms */
+
+html.berps-desktop .form-control,
+html.berps-desktop .custom-select,
+html.berps-desktop textarea.form-control {
+  border: 1px solid var(--berps-border-strong);
+  border-radius: var(--berps-radius-sm);
+  min-height: var(--berps-control-height);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+html.berps-desktop .form-control:focus,
+html.berps-desktop .custom-select:focus {
+  border-color: var(--berps-primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+html.berps-desktop label {
+  font-weight: 600;
+  color: var(--berps-text);
+  font-size: 0.82rem;
+}
+
+/* --------------------------------------------------------------- modals */
+
+html.berps-desktop .modal-content {
+  border: 0;
+  border-radius: var(--berps-radius-lg);
+  box-shadow: var(--berps-shadow-lg);
+  overflow: hidden;
+}
+
+html.berps-desktop .modal-header {
+  border-bottom: 1px solid var(--berps-border);
+}
+
+html.berps-desktop .modal-header.bg-primary {
+  background: var(--berps-surface) !important;
+  color: var(--berps-text) !important;
+}
+
+html.berps-desktop .modal-header.bg-primary .close {
+  color: var(--berps-text-muted);
+  text-shadow: none;
+}
+
+html.berps-desktop .modal-footer {
+  border-top: 1px solid var(--berps-border);
+  background: var(--berps-surface-soft);
+}
+
+html.berps-desktop .modal-backdrop.show {
+  opacity: 0.45;
+}
+
+/* ---------------------------------------------------------- sweetalert2 */
+
+html.berps-desktop .swal2-popup {
+  border-radius: var(--berps-radius-lg) !important;
+  box-shadow: var(--berps-shadow-lg) !important;
+  font-family: inherit;
+}
+
+html.berps-desktop .swal2-title {
+  font-weight: 750;
+  letter-spacing: -0.01em;
+}
+
+html.berps-desktop .swal2-confirm {
+  border-radius: var(--berps-radius-sm) !important;
+  font-weight: 600;
+}
+
+/* --------------------------------------------------------- sticky notes */
+
+html.berps-desktop .sticky-notes-toggle {
+  background: var(--berps-primary);
+  box-shadow: var(--berps-shadow-lg);
+  border-radius: var(--berps-radius-pill);
+  transition: transform 0.16s ease, box-shadow 0.16s ease;
+}
+
+html.berps-desktop .sticky-notes-toggle:hover {
+  transform: translateY(-2px) scale(1.03);
+}
+
+html.berps-desktop .sticky-notes-panel {
+  border-radius: var(--berps-radius-lg);
+  border: 1px solid var(--berps-border);
+  box-shadow: var(--berps-shadow-lg);
+}
+
+html.berps-desktop .sticky-notes-header {
+  background: linear-gradient(115deg, #1e3f8f, #2563eb);
+}
+
+/* -------------------------------------------------------------- alerts */
+
+html.berps-desktop .alert {
+  border-radius: var(--berps-radius-md);
+  border: 1px solid transparent;
+}
+
+html.berps-desktop .alert-success {
+  background: var(--berps-success-soft);
+  border-color: rgba(18, 128, 92, 0.2);
+  color: var(--berps-success);
+}
+
+html.berps-desktop .alert-danger {
+  background: var(--berps-danger-soft);
+  border-color: rgba(210, 52, 73, 0.2);
+  color: var(--berps-danger);
+}
+
+/* --------------------------------------------------------- breadcrumbs */
+
+html.berps-desktop .breadcrumb {
+  background: transparent;
+}
+
+html.berps-desktop .breadcrumb-item.active {
+  color: var(--berps-text-muted);
+}
+
+/* ------------------------------------------------------------ scrollbar */
+
+html.berps-desktop ::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+html.berps-desktop ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+html.berps-desktop ::-webkit-scrollbar-thumb {
+  background: rgba(90, 107, 136, 0.28);
+  border-radius: 6px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+html.berps-desktop ::-webkit-scrollbar-thumb:hover {
+  background: rgba(90, 107, 136, 0.45);
+  background-clip: content-box;
+}
+
+/* ----------------------------------------------------------------- misc */
+
+html.berps-desktop .footer {
+  border-top: 1px solid var(--berps-border);
+  color: var(--berps-text-subtle);
+}
+
+html.berps-desktop .nav-tabs .nav-link.active {
+  color: var(--berps-primary);
+  border-bottom-color: var(--berps-primary);
+}
+
+html.berps-desktop .progress {
+  border-radius: var(--berps-radius-pill);
+  background: var(--berps-surface-muted);
+}
+
+html.berps-desktop .progress-bar {
+  background: var(--berps-primary);
+}
+
+/* selection + focus */
+html.berps-desktop ::selection {
+  background: var(--berps-primary);
+}
+
+html.berps-desktop :where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 3px solid rgba(37, 99, 235, 0.28) !important;
+}

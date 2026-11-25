@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BERPS Desk</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+  <div id="app" hidden>
+    <aside id="side">
+      <div class="side-brand"><img class="side-mark" src="logo.png" alt="BERPS"><span class="side-word">BERPS<em>Desk</em></span></div>
+      <nav class="side-nav">
+        <button class="side-item" title="Today" data-nav="home">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2.5"/></svg>
+          <span>Today</span>
+        </button>
+        <button class="side-item" title="Tasks" data-nav="tasks">
+          <svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="m8.5 12.5 2.5 2.5 5-5.5"/></svg>
+          <span>Tasks</span>
+        </button>
+        <button class="side-item" title="Support" data-nav="support">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.5"/><path d="m6 6 4 4m4 4 4 4m0-12-4 4m-4 4-4 4"/></svg>
+          <span>Support</span>
+        </button>
+        <button class="side-item" title="Calendar" data-nav="calendar">
+          <svg viewBox="0 0 24 24"><rect x="4" y="5.5" width="16" height="15" rx="2.5"/><path d="M4 10.5h16M8.5 3.5v4M15.5 3.5v4"/><path d="M8 14h3M8 17h5"/></svg>
+          <span>Calendar</span>
+        </button>
+        <button class="side-item" title="Notes" data-nav="notes">
+          <svg viewBox="0 0 24 24"><path d="M6 3.5h9L19 7.5V20a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 5 20V5a1.5 1.5 0 0 1 1-1.5Z"/><path d="M15 3.5v4h4M8.5 11h7M8.5 14.5h7M8.5 18h4"/></svg>
+          <span>Notes</span>
+        </button>
+        <button class="side-item" title="Reminders" data-nav="reminders">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="7.5"/><path d="M12 9.5V13l2.5 2M5.5 3.5 3 6m18 0-2.5-2.5"/></svg>
+          <span>Reminders</span>
+        </button>
+        <button class="side-item" title="Attendance" data-nav="attendance">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2.5"/></svg>
+          <span>Attendance</span>
+        </button>
+        <button class="side-item" title="Goals" data-nav="goals">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1" fill="currentColor"/></svg>
+          <span>Goals</span>
+        </button>
+        <button class="side-item" title="Ranking" data-nav="ranking">
+          <svg viewBox="0 0 24 24"><path d="M7 4h10v4a5 5 0 0 1-10 0V4Z"/><path d="M7 5H4.5v1.5A3.5 3.5 0 0 0 8 10M17 5h2.5v1.5A3.5 3.5 0 0 1 16 10M12 13v3M8.5 20h7l-1-4h-5l-1 4Z"/></svg>
+          <span>Ranking</span>
+        </button>
+        <button class="side-item" title="Notifications" data-nav="alerts">
+          <svg viewBox="0 0 24 24"><path d="M6 9.5a6 6 0 0 1 12 0c0 4 1.5 5.5 2 6.5H4c.5-1 2-2.5 2-6.5Z"/><path d="M9.8 19a2.3 2.3 0 0 0 4.4 0"/></svg>
+          <span>Notifications</span>
+          <span class="side-badge" id="navBadge" hidden></span>
+        </button>
+      </nav>
+      <div class="side-foot">
+        <button class="side-item" title="Settings" data-nav="settings">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 13.5a7.6 7.6 0 0 0 0-3l1.7-1.3-1.7-3-2 1a7.7 7.7 0 0 0-2.6-1.5L14.5 3h-3l-.3 2.2a7.7 7.7 0 0 0-2.6 1.5l-2-1-1.7 3L6.6 10.5a7.6 7.6 0 0 0 0 3L4.9 14.8l1.7 3 2-1a7.7 7.7 0 0 0 2.6 1.5l.3 2.2h3l.3-2.2a7.7 7.7 0 0 0 2.6-1.5l2 1 1.7-3Z"/></svg>
+          <span>Settings</span>
+        </button>
+        <div class="side-user" data-nav="settings" role="button" tabindex="0" title="Account &amp; settings">
+          <div class="side-avatar" id="sideAvatar"><span id="sideAvatarText">?</span></div>
+          <div class="side-user-meta">
+            <div class="side-user-name" id="sideName">—</div>
+            <div class="side-user-role" id="sideRole">—</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <main id="view" tabindex="-1"></main>
+  </div>
+
+  <!-- boot / loading -->
+  <div id="boot">
+    <img class="boot-mark" src="logo.png" alt="BERPS">
+    <div class="boot-name">BERPS<small>DESK</small></div>
+    <div class="boot-bar"></div>
+  </div>
+
+  <!-- modal + toasts -->
+  <div id="modal" hidden></div>
+  <div id="toasts" aria-live="polite"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

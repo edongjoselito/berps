@@ -1,0 +1,78 @@
+/* Task Tools extension styles — scoped to injected controls only. */
+
+.berps-task-close {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 8px;
+  padding: 2px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 18px;
+  color: #12805c;
+  background: #e7f7f0;
+  border: 1px solid rgba(18, 128, 92, 0.25);
+  border-radius: 999px;
+  cursor: pointer;
+  vertical-align: middle;
+  transition: background-color .14s ease, color .14s ease;
+}
+
+.berps-task-close:hover {
+  background: #12805c;
+  color: #fff;
+  text-decoration: none;
+}
+
+.berps-task-close--menu {
+  display: flex;
+  margin: 2px 6px;
+  border: 0;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 13px;
+}
+
+.berps-task-close--menu::before {
+  content: "\2713";
+  font-weight: 800;
+  margin-right: 6px;
+}
+
+.berps-row-closed {
+  opacity: 0.55;
+  transition: opacity .25s ease;
+}
+
+#berps-task-toast {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 2147483000;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.berps-task-toast__item {
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  background: #101f3c;
+  box-shadow: 0 12px 32px rgba(16, 31, 60, 0.28);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity .2s ease, transform .2s ease;
+}
+
+.berps-task-toast__item.is-in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.berps-task-toast__item--ok { background: #12805c; }
+.berps-task-toast__item--warn { background: #b3620e; }
+.berps-task-toast__item--err { background: #d23449; }

@@ -1,0 +1,10 @@
+{
+  "id": "task-tools",
+  "name": "Task Tools",
+  "version": "1.0.0",
+  "description": "One-click close task action on task list pages, plus Alt+T shortcut to the task list.",
+  "enabled": true,
+  "matches": ["{origin}/*"],
+  "js": ["task-tools.js"],
+  "css": ["task-tools.css"]
+}

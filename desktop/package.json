@@ -1,7 +1,7 @@
 {
   "name": "berps-staff",
-  "version": "1.0.0",
-  "description": "BERPS Staff Portal desktop app",
+  "version": "2.0.2",
+  "description": "BERPS Desk — native staff desktop app",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
@@ -16,11 +16,15 @@
   },
   "build": {
     "appId": "com.berps.staff",
-    "productName": "BERPS Staff",
+    "productName": "BERPS Desk",
     "files": [
       "main.js",
       "preload.js",
       "offline.html",
+      "splash.html",
+      "skin.css",
+      "app/**/*",
+      "extensions/**/*",
       "build/icon.png"
     ],
     "directories": {
@@ -32,7 +36,7 @@
       "identity": null
     },
     "dmg": {
-      "title": "BERPS Staff"
+      "title": "BERPS Desk"
     },
     "win": {
       "target": "nsis"
