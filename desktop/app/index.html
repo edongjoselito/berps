@@ -71,11 +71,34 @@
     <main id="view" tabindex="-1"></main>
   </div>
 
+  <!-- desktop status bar -->
+  <footer id="statusbar">
+    <span class="sb-item" id="sbConn" title="Portal server"><span class="sb-dot" id="sbConnDot"></span><span id="sbConnTxt">—</span></span>
+    <span class="sb-item" id="sbAtt" hidden title="Attendance"><span class="sb-att-dot" id="sbAttDot"></span><span id="sbAttTxt"></span></span>
+    <span class="sb-flex"></span>
+    <button class="sb-item sb-btn" id="sbUnread" hidden title="Unread notifications — open Notifications"></button>
+    <span class="sb-item sb-dim" id="sbSync"></span>
+    <span class="sb-item sb-dim" id="sbVer"></span>
+  </footer>
+
   <!-- boot / loading -->
   <div id="boot">
     <img class="boot-mark" src="logo.png" alt="BERPS">
     <div class="boot-name">BERPS<small>DESK</small></div>
     <div class="boot-bar"></div>
+  </div>
+
+  <!-- command palette (⌘K) -->
+  <div id="palette" hidden>
+    <div class="pal-box">
+      <div class="pal-field">
+        <svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6"/><path d="m15.5 15.5 5 5"/></svg>
+        <input id="palInput" type="text" placeholder="Type a command or search tasks, tickets, notes…" autocomplete="off" spellcheck="false">
+        <kbd>esc</kbd>
+      </div>
+      <div class="pal-list" id="palList"></div>
+      <div class="pal-foot"><span><kbd>↑↓</kbd> select</span><span><kbd>↵</kbd> run</span><span><kbd>esc</kbd> close</span></div>
+    </div>
   </div>
 
   <!-- modal + toasts -->

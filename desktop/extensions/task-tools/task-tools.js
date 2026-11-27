@@ -62,11 +62,50 @@ function markRowClosed(statusEl) {
   if (btn) btn.remove();
 }
 
+// Styled confirm — window.confirm renders a bare browser dialog and reads
+// as "webpage inside an app".
+function confirmClose() {
+  return new Promise(function (resolve) {
+    var host = document.createElement('div');
+    host.id = 'berps-tt-confirm';
+    host.innerHTML =
+      '<div class="btt-backdrop"></div>' +
+      '<div class="btt-card" role="dialog" aria-modal="true" aria-label="Close task">' +
+        '<div class="btt-title">Close task?</div>' +
+        '<div class="btt-msg">It will be marked as closed and recorded in the task history.</div>' +
+        '<div class="btt-actions">' +
+          '<button type="button" class="btt-btn btt-cancel">Cancel</button>' +
+          '<button type="button" class="btt-btn btt-ok">Close task</button>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(host);
+    var done = function (yes) {
+      document.removeEventListener('keydown', onKey, true);
+      host.remove();
+      resolve(yes);
+    };
+    var onKey = function (e) {
+      if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); done(false); }
+      else if (e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); done(true); }
+    };
+    document.addEventListener('keydown', onKey, true);
+    host.querySelector('.btt-backdrop').addEventListener('click', function () { done(false); });
+    host.querySelector('.btt-cancel').addEventListener('click', function () { done(false); });
+    host.querySelector('.btt-ok').addEventListener('click', function () { done(true); });
+    host.querySelector('.btt-ok').focus();
+  });
+}
+
 function closeTask(statusEl) {
   var taskId = statusEl.getAttribute('data-task-id');
   if (!taskId) return;
-  if (!window.confirm('Close this task?')) return;
+  confirmClose().then(function (yes) {
+    if (!yes) return;
+    postClose(statusEl, taskId);
+  });
+}
 
+function postClose(statusEl, taskId) {
   var body = new URLSearchParams({
     dataid: taskId,
     note: CLOSE_NOTE,

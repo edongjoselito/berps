@@ -111,7 +111,8 @@
       };
       var onKey = function (e) {
         if (e.key === 'Escape') { e.preventDefault(); done(false); }
-        else if (e.key === 'Enter') { e.preventDefault(); done(true); }
+        // Destructive dialogs never confirm on Enter — explicit click only.
+        else if (e.key === 'Enter' && !danger) { e.preventDefault(); done(true); }
       };
       document.addEventListener('keydown', onKey, true);
       host.querySelector('.modal-backdrop').addEventListener('click', function () { done(false); });
@@ -119,7 +120,8 @@
         b.addEventListener('click', function () { done(b.getAttribute('data-x') === '1'); });
       });
       var ok = host.querySelector('[data-x="1"]');
-      if (ok) ok.focus();
+      var cancel = host.querySelector('[data-x="0"]');
+      ((danger ? cancel : ok) || ok || cancel).focus();
     });
   }
 
@@ -222,9 +224,12 @@
         return null;
       }
       if (res.status === 0) {
+        updateConnUI(false);
         toast(res.json && res.json.message ? res.json.message : 'Cannot reach the server.', 'err');
         return null;
       }
+      updateConnUI(true);
+      sbSync();
       if (!res.json) {
         toast('The server had a problem (' + res.status + '). Please try again.', 'err');
         return null;
@@ -259,6 +264,446 @@
     trophy: '<svg viewBox="0 0 24 24"><path d="M7 4h10v4a5 5 0 0 1-10 0V4Z"/><path d="M7 5H4.5v1.5A3.5 3.5 0 0 0 8 10M17 5h2.5v1.5A3.5 3.5 0 0 1 16 10M12 13v3M8.5 20h7l-1-4h-5l-1 4Z"/></svg>',
   };
 
+  /* ------------------------------------------------------------- statusbar */
+
+  function sbInit() {
+    var ver = document.getElementById('sbVer');
+    if (ver) ver.textContent = 'v' + (B.version || '');
+    var su = document.getElementById('sbUnread');
+    if (su) su.addEventListener('click', function () { go('#/alerts'); });
+    updateConnUI(navigator.onLine !== false);
+    window.addEventListener('offline', function () { updateConnUI(false); });
+    window.addEventListener('online', function () {
+      updateConnUI(true);
+      pollNotifs();
+    });
+  }
+
+  function updateConnUI(online) {
+    var d = document.getElementById('sbConnDot');
+    var t = document.getElementById('sbConnTxt');
+    if (!d || !t) return;
+    d.className = 'sb-dot ' + (online ? 'is-on' : 'is-off');
+    t.textContent = online
+      ? (state.server ? String(state.server).replace(/^https?:\/\//, '').replace(/\/+$/, '') : 'Connected')
+      : 'Offline';
+  }
+
+  function sbSync() {
+    var el = document.getElementById('sbSync');
+    if (el) el.textContent = 'Synced ' + new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+  }
+
+  function sbAtt(att) {
+    var el = document.getElementById('sbAtt');
+    if (!el) return;
+    var open = !!(att && att.can_time_out);
+    var done = att && !att.can_time_in && !att.can_time_out;
+    el.hidden = false;
+    var dot = document.getElementById('sbAttDot');
+    var txt = document.getElementById('sbAttTxt');
+    if (dot) dot.className = 'sb-att-dot ' + (open ? 'is-in' : done ? 'is-out' : '');
+    if (txt) txt.textContent = open ? 'Timed in' : done ? 'Timed out' : 'Not timed in';
+    pushTray(att);
+  }
+
+  function sbUnread(n) {
+    var el = document.getElementById('sbUnread');
+    if (!el) return;
+    el.hidden = !n;
+    el.textContent = (n > 99 ? '99+' : n) + ' unread';
+  }
+
+  function pushTray(att) {
+    if (!B.trayStatus) return;
+    B.trayStatus({
+      phase: att && att.can_time_out ? 'in' : att && att.can_time_in ? 'off' : att ? 'out' : 'unknown',
+      canIn: !!(att && att.can_time_in),
+      canOut: !!(att && att.can_time_out),
+    });
+  }
+
+  /* ---------------------------------------------------- menu + key commands */
+
+  function clickEl(id) { var el = document.getElementById(id); if (el) el.click(); }
+  function focusEl(id) { var el = document.getElementById(id); if (el) { el.focus(); if (el.select) el.select(); } }
+
+  var ROUTE_TITLES = {
+    home: 'Today', tasks: 'Tasks', support: 'Support', calendar: 'Calendar',
+    notes: 'Notes', reminders: 'Reminders', attendance: 'Attendance',
+    goals: 'Goals', ranking: 'Ranking', alerts: 'Notifications', settings: 'Settings',
+  };
+
+  var NEW_ACTIONS = {
+    tasks: function () { clickEl('taskNew'); },
+    notes: function () { clickEl('noteNew'); },
+    reminders: function () { focusEl('rTitle'); },
+    calendar: function () { clickEl('calNew'); },
+    support: function () { focusEl('supSearch'); },
+  };
+
+  var REFRESH_ACTIONS = {
+    home: function () { loadHome(true); },
+    tasks: loadTasks,
+    support: loadSupList,
+    notes: loadNotes,
+    reminders: loadReminders,
+    calendar: loadCalendar,
+    attendance: vAttendance,
+    goals: vGoals,
+    ranking: vRanking,
+    alerts: function () { loadNotifs(); refreshBadge(); },
+    settings: verifySession,
+  };
+
+  function menuAction(a) {
+    if (!state.user) return;
+    switch (a) {
+      case 'new':
+        if (NEW_ACTIONS[state.route]) NEW_ACTIONS[state.route]();
+        else { go('#/tasks'); setTimeout(function () { clickEl('taskNew'); }, 80); }
+        break;
+      case 'refresh': (REFRESH_ACTIONS[state.route] || function () {})(); break;
+      case 'search': { var s = view.querySelector('.search input'); if (s) { s.focus(); if (s.select) s.select(); } break; }
+      case 'toggle-sidebar': document.body.classList.toggle('side-collapsed'); break;
+      case 'mark-read':
+        api('POST', '/staff/notifications/mark-seen').then(function () {
+          refreshBadge();
+          if (state.route === 'alerts') loadNotifs();
+        });
+        break;
+      case 'time-in': punch('time-in'); break;
+      case 'time-out': punch('time-out'); break;
+      case 'palette': openPalette(); break;
+    }
+  }
+
+  /* ----------------------------------------------------- keyboard list nav */
+
+  function listRows(selector) { return [].slice.call(view.querySelectorAll(selector)); }
+
+  function moveIntoView(el) { if (el && el.scrollIntoView) el.scrollIntoView({ block: 'nearest' }); }
+
+  function selectSup(id) {
+    sup.sel = String(id);
+    document.querySelectorAll('#supRows .trow').forEach(function (r) {
+      r.classList.toggle('is-sel', r.getAttribute('data-sup') === String(id));
+    });
+    renderSupDetail(id);
+  }
+
+  function openNoteById(id) {
+    nts.sel = String(id);
+    document.querySelectorAll('#noteRows .nrow2').forEach(function (r) {
+      r.classList.toggle('is-sel', r.getAttribute('data-note') === String(id));
+    });
+    renderNoteEditor(nts.list.find(function (n) { return String(n.id) === String(id); }));
+  }
+
+  function listAdapter() {
+    if (state.route === 'tasks') {
+      return {
+        rows: listRows('#taskRows .trow[data-task]'),
+        idOf: function (r) { return r.getAttribute('data-task'); },
+        sel: function () { return state.tasks.sel; },
+        open: selectTask,
+      };
+    }
+    if (state.route === 'support') {
+      return {
+        rows: listRows('#supRows .trow[data-sup]'),
+        idOf: function (r) { return r.getAttribute('data-sup'); },
+        sel: function () { return sup.sel; },
+        open: selectSup,
+      };
+    }
+    if (state.route === 'notes') {
+      return {
+        rows: listRows('#noteRows .nrow2[data-note]'),
+        idOf: function (r) { return r.getAttribute('data-note'); },
+        sel: function () { return nts.sel; },
+        open: openNoteById,
+      };
+    }
+    return null;
+  }
+
+  function listMove(dir) {
+    var a = listAdapter();
+    if (!a || !a.rows.length) return;
+    var idx = a.rows.findIndex(function (r) { return String(a.idOf(r)) === String(a.sel()); });
+    idx = idx === -1 ? (dir > 0 ? 0 : a.rows.length - 1)
+                     : Math.max(0, Math.min(a.rows.length - 1, idx + dir));
+    a.open(a.idOf(a.rows[idx]));
+    moveIntoView(a.rows[idx]);
+  }
+
+  function toggleSelectedRow() {
+    if (state.route !== 'tasks') return;
+    var a = listAdapter();
+    if (!a) return;
+    var row = a.rows.find(function (r) { return String(a.idOf(r)) === String(state.tasks.sel); }) || a.rows[0];
+    if (!row) return;
+    var chk = row.querySelector('[data-check]');
+    if (chk) chk.click(); // closeTask / reopenTask through the existing handler
+  }
+
+  function openSelectedRow() {
+    var a = listAdapter();
+    if (!a || !a.rows.length) return;
+    if (!a.sel()) { a.open(a.idOf(a.rows[0])); moveIntoView(a.rows[0]); }
+  }
+
+  function deleteSelectedRow() {
+    if (state.route === 'tasks' && state.tasks.sel) {
+      var t = state.tasks.list.find(function (x) { return String(x.id) === String(state.tasks.sel); }) || state.tasks.detail;
+      confirmDeleteTask(t);
+    } else if (state.route === 'notes' && nts.sel) {
+      var n = nts.list.find(function (x) { return String(x.id) === String(nts.sel); });
+      if (n) confirmDeleteNote(n);
+    }
+  }
+
+  function backOut() {
+    if (state.route === 'tasks' && state.tasks.sel) {
+      state.tasks.sel = null; renderDetailEmpty(); renderTaskList();
+    } else if (state.route === 'support' && sup.sel) {
+      sup.sel = null; renderSupEmpty(); renderSupList();
+    } else if (state.route === 'notes' && nts.sel) {
+      nts.sel = null; renderNoteEmpty(); renderNoteList();
+    }
+  }
+
+  document.addEventListener('keydown', function (e) {
+    var inField = e.target && e.target.closest && e.target.closest('input, textarea, select, [contenteditable="true"]');
+    var modalOpen = !document.getElementById('modal').hidden;
+
+    if ((e.metaKey || e.ctrlKey) && !e.shiftKey && !e.altKey && !modalOpen) {
+      var k = e.key.toLowerCase();
+      if (k === 'n') { e.preventDefault(); menuAction('new'); return; }
+      if (k === 'f') { e.preventDefault(); menuAction('search'); return; }
+      if (k === 'r') { e.preventDefault(); menuAction('refresh'); return; }
+      if (k === 'k') { e.preventDefault(); menuAction('palette'); return; }
+    }
+    if (palState.open) {
+      if (e.key === 'Escape') { e.preventDefault(); closePalette(); }
+      return; // the palette input owns the rest while it's up
+    }
+    if (inField || modalOpen || e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey) return;
+
+    // Space/Enter keep their native click semantics on focused controls.
+    var interactive = e.target && e.target.closest &&
+      e.target.closest('button, a, select, [role="button"], [role="checkbox"], label');
+
+    switch (e.key) {
+      case 'j': case 'J': case 'ArrowDown': e.preventDefault(); listMove(1); break;
+      case 'k': case 'K': case 'ArrowUp': e.preventDefault(); listMove(-1); break;
+      case ' ': {
+        // On a focused task row, Space toggles its checkbox; elsewhere it
+        // toggles the selected row — but never steals the click from a
+        // focused control.
+        var row = e.target && e.target.closest && e.target.closest('.trow[data-task]');
+        if (row && state.route === 'tasks') {
+          e.preventDefault();
+          var chk = row.querySelector('[data-check]');
+          if (chk) chk.click();
+        } else if (!interactive) {
+          e.preventDefault(); toggleSelectedRow();
+        }
+        break;
+      }
+      case 'Enter': if (!interactive) openSelectedRow(); break;
+      case 'Delete': case 'Backspace': deleteSelectedRow(); break;
+      case 'Escape': backOut(); break;
+    }
+  });
+
+  if (B.onMenuAction) B.onMenuAction(function (a) { menuAction(a); });
+
+  /* ----------------------------------------------------- edit context menu */
+
+  if (B.contextMenu) {
+    document.addEventListener('contextmenu', function (e) {
+      var el = e.target && e.target.closest && e.target.closest('input, textarea');
+      if (!el) return;
+      e.preventDefault();
+      B.contextMenu([
+        { role: 'undo' }, { role: 'redo' }, { sep: true },
+        { role: 'cut' }, { role: 'copy' }, { role: 'paste' }, { sep: true },
+        { role: 'selectAll' },
+      ]);
+    });
+  }
+
+  /* -------------------------------------------------------- command palette */
+
+  var palState = { open: false, items: [], sel: 0, q: '' };
+  var palData = { warmed: false, tasks: null, sup: null, notes: null };
+
+  var PAL_COMMANDS = [
+    { t: 'New task', icon: 'box', run: function () { go('#/tasks'); setTimeout(function () { clickEl('taskNew'); }, 80); } },
+    { t: 'New note', icon: 'edit', run: function () { go('#/notes'); setTimeout(function () { clickEl('noteNew'); }, 80); } },
+    { t: 'New reminder', icon: 'alarm', run: function () { go('#/reminders'); setTimeout(function () { focusEl('rTitle'); }, 80); } },
+    { t: 'Search tickets', icon: 'lifebuoy', run: function () { go('#/support'); setTimeout(function () { focusEl('supSearch'); }, 80); } },
+    { t: 'Time in', icon: 'check', run: function () { punch('time-in'); } },
+    { t: 'Time out', icon: 'check', run: function () { punch('time-out'); } },
+    { t: 'Open web portal', icon: 'forward', run: function () { B.portal.open(); } },
+    { t: 'Mark all notifications read', icon: 'bell', run: function () { menuAction('mark-read'); } },
+    { t: 'Refresh this view', icon: 'refresh', hint: '⌘R', run: function () { menuAction('refresh'); } },
+    { t: 'Toggle sidebar', icon: 'back', run: function () { menuAction('toggle-sidebar'); } },
+    { t: 'Appearance: System', icon: 'at', run: function () { B.setTheme('system'); } },
+    { t: 'Appearance: Light', icon: 'at', run: function () { B.setTheme('light'); } },
+    { t: 'Appearance: Dark', icon: 'at', run: function () { B.setTheme('dark'); } },
+    { t: 'Sign out…', icon: 'logout', run: function () { go('#/settings'); } },
+  ];
+  Object.keys(ROUTE_TITLES).forEach(function (r) {
+    PAL_COMMANDS.push({ t: 'Go to ' + ROUTE_TITLES[r], icon: 'pointer', run: function () { go('#/' + r); } });
+  });
+
+  // Every query token must appear in the text; earlier matches rank higher.
+  function palScore(q, text) {
+    text = String(text || '').toLowerCase();
+    var score = 0;
+    var toks = String(q || '').trim().toLowerCase().split(/\s+/);
+    for (var i = 0; i < toks.length; i++) {
+      var idx = text.indexOf(toks[i]);
+      if (idx === -1) return -1;
+      score += idx === 0 ? 0 : idx + 4;
+    }
+    return score;
+  }
+
+  function palItems() {
+    var q = palState.q.trim();
+    var out = [];
+    PAL_COMMANDS.forEach(function (c) {
+      var s = q ? palScore(q, c.t) : 0;
+      if (s >= 0) out.push({ score: s, icon: c.icon, title: c.t, meta: 'Command', hint: c.hint || '', run: c.run });
+    });
+    if (q) {
+      var add = function (list, kind, icon, mkTitle, mkMeta) {
+        (list || []).forEach(function (x) {
+          var s = palScore(q, mkTitle(x) + ' ' + mkMeta(x));
+          if (s >= 0) out.push({ score: s + 6, icon: icon, title: mkTitle(x), meta: mkMeta(x), run: function () { openTarget({ type: kind, id: x.id }); } });
+        });
+      };
+      add(palData.tasks || state.tasks.list, 'task', 'box',
+        function (t) { return t.title || ''; },
+        function (t) { return 'Task · ' + (t.project_name || 'No project'); });
+      add(palData.sup || sup.list, 'ticket', 'lifebuoy',
+        function (i) { return (i.ticket_number ? i.ticket_number + ' ' : '') + (i.title || ''); },
+        function (i) { return 'Ticket' + (i.customer_name ? ' · ' + i.customer_name : ''); });
+      add(palData.notes || nts.list, 'note', 'edit',
+        function (n) { return n.title || 'Untitled'; },
+        function () { return 'Note'; });
+      out.sort(function (a, b) { return a.score - b.score; });
+    }
+    return out.slice(0, 14);
+  }
+
+  function renderPalette() {
+    if (!palState.open) return;
+    var host = document.getElementById('palList');
+    if (!host) return;
+    palState.items = palItems();
+    if (palState.sel >= palState.items.length) palState.sel = Math.max(0, palState.items.length - 1);
+    host.innerHTML = palState.items.length ? palState.items.map(function (it, i) {
+      return '<button class="pal-item' + (i === palState.sel ? ' is-sel' : '') + '" data-pi="' + i + '">' +
+        '<span class="pal-ico">' + (I[it.icon] || I.pointer) + '</span>' +
+        '<span class="pal-t">' + esc(it.title) + '</span>' +
+        '<span class="pal-m">' + esc(it.meta || '') + '</span>' +
+        (it.hint ? '<kbd class="pal-hint">' + esc(it.hint) + '</kbd>' : '') +
+        '</button>';
+    }).join('') : '<div class="pal-empty">No matching commands or items.</div>';
+    host.querySelectorAll('[data-pi]').forEach(function (row) {
+      row.addEventListener('mouseenter', function () { palState.sel = +row.getAttribute('data-pi'); markPalSel(); });
+      row.addEventListener('click', function () { runPalette(+row.getAttribute('data-pi')); });
+    });
+  }
+
+  function markPalSel() {
+    var host = document.getElementById('palList');
+    if (!host) return;
+    host.querySelectorAll('[data-pi]').forEach(function (row) {
+      var sel = +row.getAttribute('data-pi') === palState.sel;
+      row.classList.toggle('is-sel', sel);
+      if (sel && row.scrollIntoView) row.scrollIntoView({ block: 'nearest' });
+    });
+  }
+
+  function openPalette() {
+    if (!state.user || palState.open) return;
+    var modal = document.getElementById('modal');
+    if (modal && !modal.hidden) return; // modal dialogs own the screen
+    palState = { open: true, items: [], sel: 0, q: '' };
+    document.getElementById('palette').hidden = false;
+    var inp = document.getElementById('palInput');
+    inp.value = '';
+    renderPalette();
+    setTimeout(function () { inp.focus(); }, 0);
+    warmPalette();
+  }
+
+  function closePalette() {
+    if (!palState.open) return;
+    palState.open = false;
+    document.getElementById('palette').hidden = true;
+  }
+
+  function runPalette(i) {
+    var it = palState.items[i];
+    closePalette();
+    if (it && it.run) it.run();
+  }
+
+  // The lists populate lazily — palette search gets useful after first use
+  // without needing the user to visit each view first.
+  function warmPalette() {
+    if (palData.warmed) return;
+    palData.warmed = true;
+    api('GET', '/staff/tasks?status=all&scope=all').then(function (r) { if (r && r.tasks) { palData.tasks = r.tasks; renderPalette(); } });
+    api('GET', '/staff/support/issues?scope=all').then(function (r) { if (r && r.issues) { palData.sup = r.issues; renderPalette(); } });
+    api('GET', '/staff/notes').then(function (r) { if (r && r.notes) { palData.notes = r.notes; renderPalette(); } });
+  }
+
+  var palInput = document.getElementById('palInput');
+  palInput.addEventListener('input', function () { palState.q = this.value; palState.sel = 0; renderPalette(); });
+  palInput.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowDown') { e.preventDefault(); palState.sel = Math.min(palState.items.length - 1, palState.sel + 1); markPalSel(); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); palState.sel = Math.max(0, palState.sel - 1); markPalSel(); }
+    else if (e.key === 'Enter') { e.preventDefault(); runPalette(palState.sel); }
+    else if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); closePalette(); }
+  });
+  document.getElementById('palette').addEventListener('click', function (e) { if (e.target === this) closePalette(); });
+
+  /* ------------------------------------------------------ open-a-thing deep links */
+
+  // Notification clicks, berps:// links and palette picks all land here.
+  function openTarget(t) {
+    if (!t || !state.user) return;
+    if (t.type === 'task' && t.id != null) {
+      state.tasks.status = 'all'; state.tasks.scope = 'all';
+      if (state.route !== 'tasks') go('#/tasks');
+      selectTask(String(t.id));
+    } else if ((t.type === 'ticket' || t.type === 'support') && t.id != null) {
+      sup.scope = 'all';
+      if (state.route !== 'support') go('#/support');
+      selectSup(String(t.id));
+    } else if (t.type === 'note' && t.id != null) {
+      var id = String(t.id);
+      if (state.route !== 'notes') go('#/notes');
+      var found = nts.list.some(function (n) { return String(n.id) === id; });
+      if (found) openNoteById(id);
+      else loadNotes().then(function () { openNoteById(id); });
+    } else if (t.type === 'route' && t.id) {
+      go('#/' + t.id);
+    } else {
+      go('#/alerts');
+    }
+  }
+
+  if (B.onOpenTarget) B.onOpenTarget(function (t) { openTarget(t); });
+
   /* ------------------------------------------------------------------ app */
 
   function initials() {
@@ -283,7 +728,25 @@
 
   function showLogin(message) {
     document.body.classList.add('is-logged-out');
+    document.title = 'Sign in — BERPS Desk';
     state.user = null;
+    var sbA = document.getElementById('sbAtt');
+    if (sbA) sbA.hidden = true;
+    sbUnread(0);
+    pushTray(null);
+    // Drop cached per-user data so a re-login never flashes the previous user.
+    state.dash = null;
+    state.notifs = null;
+    state.tasks.list = [];
+    state.tasks.sel = null;
+    sup.list = [];
+    sup.sel = null;
+    nts.list = [];
+    nts.sel = null;
+    notifSeen.primed = false;
+    notifSeen.ids.clear();
+    palData.warmed = false;
+    palData.tasks = palData.sup = palData.notes = null;
     appEl.hidden = false;
     bootEl.classList.add('is-done');
     view.innerHTML =
@@ -298,6 +761,9 @@
             '<div class="field"><label for="liPass">Password</label><input id="liPass" type="password" required autocomplete="current-password"></div>' +
             '<button class="btn btn-primary login-btn" id="liBtn" type="submit">Sign in</button>' +
           '</form>' +
+          (state.prefs && state.prefs.touchIdSupported && state.prefs.touchId && B.unlock
+            ? '<button class="btn btn-ghost login-btn" type="button" id="liTouch">Use Touch ID</button>'
+            : '') +
           '<div class="login-server"><span class="dot"></span><span>' + esc(state.server || '') + '</span></div>' +
         '</div>' +
       '</div>';
@@ -314,10 +780,22 @@
           if (res && res.ok) {
             state.user = res.user;
             showApp();
+            pollNotifs();
           } else {
             showLoginError((res && res.message) || 'Login failed.');
           }
         });
+    });
+
+    var liTouch = document.getElementById('liTouch');
+    if (liTouch) liTouch.addEventListener('click', function () {
+      var b = this;
+      b.disabled = true; b.textContent = 'Waiting for Touch ID…';
+      B.unlock().then(function (u) {
+        b.disabled = false; b.textContent = 'Use Touch ID';
+        if (u && u.ok) enterApp();
+        else showLoginError((u && u.message) || 'Touch ID was not accepted.');
+      });
     });
   }
 
@@ -348,6 +826,7 @@
     if (!routes[name]) name = 'home';
     if (!state.user) return;
     state.route = name;
+    document.title = (ROUTE_TITLES[name] || 'BERPS Desk') + ' — BERPS Desk';
     document.querySelectorAll('.side-item').forEach(function (b) {
       b.classList.toggle('is-active', b.getAttribute('data-nav') === name);
     });
@@ -417,6 +896,27 @@
         if (e.target.closest('.tcheck')) return;
         selectTask(row.getAttribute('data-task'));
       });
+      row.addEventListener('contextmenu', function (e) {
+        if (!B.contextMenu) return;
+        e.preventDefault();
+        var id = row.getAttribute('data-task');
+        var closed = row.classList.contains('is-closed');
+        var t = state.tasks.list.find(function (x) { return String(x.id) === String(id); }) || state.tasks.detail;
+        var items = [
+          { id: 'open', label: 'Open' },
+          { id: closed ? 'reopen' : 'close', label: closed ? 'Reopen task' : 'Close task' },
+        ];
+        if ((state.tasks.staff || []).length && !closed) items.push({ id: 'forward', label: 'Forward…' });
+        items.push({ sep: true }, { id: 'delete', label: 'Delete task…' },
+          { sep: true }, { id: 'copy', label: 'Copy task ID', copyText: '#' + id });
+        B.contextMenu(items).then(function (a) {
+          if (a === 'open') selectTask(id);
+          else if (a === 'close') closeTask(id);
+          else if (a === 'reopen') reopenTask(id);
+          else if (a === 'forward' && t) forwardTaskModal(t);
+          else if (a === 'delete' && t) confirmDeleteTask(t);
+        });
+      });
     });
     host.querySelectorAll('[data-check]').forEach(function (b) {
       b.addEventListener('click', function (e) {
@@ -469,6 +969,11 @@
       '</div>';
 
     document.getElementById('homeRefresh').addEventListener('click', function () { loadHome(true); });
+    if (state.dash) { // paint last fetch instantly, then revalidate
+      renderAttStrip(state.dash.attendance || {});
+      renderNeeds(state.dash);
+      renderStatList(state.dash);
+    }
     loadHome();
   }
 
@@ -508,6 +1013,7 @@
 
   function renderAttStrip(att) {
     var host = document.getElementById('attStrip');
+    sbAtt(att);
     if (!host) return;
     var open = !!att.can_time_out;
     var done = !att.can_time_in && !att.can_time_out;
@@ -534,7 +1040,9 @@
       if (!res) return;
       if (res.ok) {
         toast(res.message || 'Recorded.', 'ok');
-        if (state.route === 'home') loadHome(); else vAttendance();
+        if (state.route === 'home') loadHome();
+        else if (state.route === 'attendance') vAttendance();
+        else api('GET', '/staff/dashboard').then(function (d) { if (d) sbAtt(d.attendance || {}); });
       } else {
         toast(res.message || 'Could not record attendance.', 'warn');
       }
@@ -672,6 +1180,7 @@
     });
 
     if (state.tasks.sel) renderDetail(state.tasks.sel); else renderDetailEmpty();
+    if (state.tasks.list.length) renderTaskList(); // cached rows first; revalidate silently
     loadTasks();
   }
 
@@ -847,38 +1356,56 @@
           });
         });
       });
-      if (fg) fg.addEventListener('click', function () {
-        formModal({
-          title: 'Forward task', sub: 'Task #' + t.id + ' · ' + t.title,
-          body: pickerHtml(state.tasks.staff, 'Forward to') + '<div class="f-field"><label class="f-label">Note (optional)</label><input class="f-input" name="note" placeholder="Anything they should know?"></div>',
-          okLabel: 'Forward',
-          onOpen: bindPicker,
-          onSubmit: function (form) {
-            var to = +form.querySelector('.picker').dataset.uid || 0;
-            if (!to) { toast('Pick who to forward this task to.', 'warn'); return; }
-            return api('POST', '/staff/tasks/' + t.id + '/forward', { forward_to: to, forward_note: form.note.value.trim() }).then(function (res) {
-              if (res && res.ok) { toast(res.message || 'Task forwarded.', 'ok'); loadTasks(); renderDetail(t.id); return true; }
-              if (res && res.message && /time in|attend/i.test(res.message)) { toast('Time in first, then forward tasks.', 'warn'); go('#/attendance'); return true; }
-              if (res) toast(res.message || 'Could not forward task.', 'err');
-              return false;
-            });
-          },
+      if (fg) fg.addEventListener('click', function () { forwardTaskModal(t); });
+      if (del) del.addEventListener('click', function () { confirmDeleteTask(t); });
+    });
+  }
+
+  function forwardTaskModal(t) {
+    formModal({
+      title: 'Forward task', sub: 'Task #' + t.id + ' · ' + t.title,
+      body: pickerHtml(state.tasks.staff, 'Forward to') + '<div class="f-field"><label class="f-label">Note (optional)</label><input class="f-input" name="note" placeholder="Anything they should know?"></div>',
+      okLabel: 'Forward',
+      onOpen: bindPicker,
+      onSubmit: function (form) {
+        var to = +form.querySelector('.picker').dataset.uid || 0;
+        if (!to) { toast('Pick who to forward this task to.', 'warn'); return; }
+        return api('POST', '/staff/tasks/' + t.id + '/forward', { forward_to: to, forward_note: form.note.value.trim() }).then(function (res) {
+          if (res && res.ok) { toast(res.message || 'Task forwarded.', 'ok'); loadTasks(); renderDetail(t.id); return true; }
+          if (res && res.message && /time in|attend/i.test(res.message)) { toast('Time in first, then forward tasks.', 'warn'); go('#/attendance'); return true; }
+          if (res) toast(res.message || 'Could not forward task.', 'err');
+          return false;
         });
+      },
+    });
+  }
+
+  function confirmDeleteTask(t) {
+    if (!t) return;
+    confirmBox('Delete task?', '“' + (t.title || 'This task') + '” will be permanently deleted.', 'Delete', true).then(function (yes) {
+      if (!yes) return;
+      api('POST', '/staff/tasks/' + t.id + '/delete', {}).then(function (res) {
+        if (!res) return;
+        if (res.ok) {
+          toast('Task deleted.', 'ok');
+          if (String(state.tasks.sel) === String(t.id)) { state.tasks.sel = null; renderDetailEmpty(); }
+          loadTasks();
+        } else toast(res.message || 'Could not delete task.', 'err');
       });
-      if (del) del.addEventListener('click', function () {
-        confirmBox('Delete task?', '“' + t.title + '” will be permanently deleted.', 'Delete', true).then(function (yes) {
-          if (!yes) return;
-          api('POST', '/staff/tasks/' + t.id + '/delete', {}).then(function (res) {
-            if (!res) return;
-            if (res.ok) {
-              toast('Task deleted.', 'ok');
-              state.tasks.sel = null;
-              renderDetailEmpty();
-              loadTasks();
-            } else toast(res.message || 'Could not delete task.', 'err');
-          });
-        });
-      });
+    });
+  }
+
+  // Flips the check state instantly in the model + rows; the API call races
+  // behind and a failure path repaints it back — no waiting for the network.
+  function paintTaskStatus(id, closed) {
+    var apply = function (t) { if (t) t.status = closed ? 'closed' : 'open'; };
+    apply(state.tasks.list.find(function (t) { return String(t.id) === String(id); }));
+    if (state.tasks.detail && String(state.tasks.detail.id) === String(id)) apply(state.tasks.detail);
+    apply((palData.tasks || []).find(function (t) { return String(t.id) === String(id); }));
+    view.querySelectorAll('.trow[data-task="' + id + '"]').forEach(function (row) {
+      row.classList.toggle('is-closed', closed);
+      var c = row.querySelector('[data-check]');
+      if (c) { c.classList.toggle('is-done', closed); c.setAttribute('aria-checked', String(closed)); }
     });
   }
 
@@ -887,14 +1414,16 @@
     var title = task ? task.title : 'this task';
     confirmBox('Close task?', '“' + title + '” will be marked as closed and recorded in the task history.', 'Close task').then(function (yes) {
       if (!yes) return;
+      paintTaskStatus(id, true);
       api('POST', '/staff/tasks/' + id + '/status', { task_status: '0', note: 'Closed via BERPS Desk' }).then(function (res) {
-        if (!res) return;
-        if (res.ok) {
+        if (res && res.ok) {
           toast('Task closed.', 'ok');
           if (state.route === 'tasks') { loadTasks(); if (String(state.tasks.sel) === String(id)) renderDetail(id); }
           else if (state.route === 'home') loadHome();
           return;
         }
+        paintTaskStatus(id, false);
+        if (!res) { toast('No connection — task not closed.', 'err'); return; }
         if (res.message && /time in/i.test(res.message)) {
           toast('Time in first, then close tasks.', 'warn');
           go('#/attendance');
@@ -906,13 +1435,17 @@
   }
 
   function reopenTask(id) {
+    paintTaskStatus(id, false);
     api('POST', '/staff/tasks/' + id + '/status', { task_status: '1', note: 'Reopened via BERPS Desk' }).then(function (res) {
-      if (!res) return;
-      if (res.ok) {
+      if (res && res.ok) {
         toast('Task reopened.', 'ok');
         if (state.route === 'tasks') { loadTasks(); if (String(state.tasks.sel) === String(id)) renderDetail(id); }
         else if (state.route === 'home') loadHome();
-      } else if (res.message && /time in/i.test(res.message)) {
+        return;
+      }
+      paintTaskStatus(id, true);
+      if (!res) { toast('No connection — task not reopened.', 'err'); return; }
+      if (res.message && /time in/i.test(res.message)) {
         toast('Time in first, then reopen tasks.', 'warn');
         go('#/attendance');
       } else toast(res.message || 'Could not reopen the task.', 'err');
@@ -953,6 +1486,7 @@
     });
     document.getElementById('supSearch').addEventListener('input', function (e) { sup.q = e.target.value; renderSupList(); });
     if (sup.sel) renderSupDetail(sup.sel); else renderSupEmpty();
+    if (sup.list.length) renderSupList(); // cached rows first
     loadSupList();
   }
 
@@ -1013,10 +1547,20 @@
     }).join('') + (rows.length > limit ? '<button class="panel-more" id="supMore">Show more (' + (rows.length - limit) + ' left)</button>' : '')
       : '<div class="empty">' + I.lifebuoy + '<div class="empty-title">' + (q ? 'No matching tickets' : 'No tickets') + '</div></div>';
     host.querySelectorAll('[data-sup]').forEach(function (row) {
-      row.addEventListener('click', function () {
-        sup.sel = row.getAttribute('data-sup');
-        host.querySelectorAll('.trow').forEach(function (r) { r.classList.toggle('is-sel', r === row); });
-        renderSupDetail(sup.sel);
+      row.addEventListener('click', function () { selectSup(row.getAttribute('data-sup')); });
+      row.addEventListener('contextmenu', function (e) {
+        if (!B.contextMenu) return;
+        e.preventDefault();
+        var id = row.getAttribute('data-sup');
+        var i = sup.list.find(function (x) { return String(x.id) === String(id); });
+        if (!i) return;
+        var items = [{ id: 'open', label: 'Open' }];
+        if (!i.is_closed) items.push({ id: 'close', label: 'Close ticket…' });
+        items.push({ sep: true }, { id: 'copy', label: 'Copy ticket number', copyText: i.ticket_number || ('#' + id) });
+        B.contextMenu(items).then(function (a) {
+          if (a === 'open') selectSup(id);
+          else if (a === 'close') closeTicketModal(i);
+        });
       });
     });
     var more = document.getElementById('supMore');
@@ -1161,23 +1705,25 @@
       });
 
       var cb = document.getElementById('supClose');
-      if (cb) cb.addEventListener('click', function () {
-        formModal({
-          title: 'Close ticket', sub: i.ticket_number + ' · ' + (i.title || ''),
-          body: '<div class="f-field"><label class="f-label">Resolution message <span class="req">*</span></label>' +
-            '<textarea class="f-area" name="msg" placeholder="How was this resolved? The customer will see this."></textarea></div>',
-          okLabel: 'Close ticket', okClass: 'btn-success',
-          onSubmit: function (form) {
-            var msg = form.msg.value.trim();
-            if (!msg) { toast('A resolution message is required.', 'warn'); form.msg.focus(); return; }
-            return api('POST', '/staff/support/issues/' + id + '/close', { close_message: msg }).then(function (r) {
-              if (r && r.ok) { toast('Ticket closed.', 'ok'); sup.sel = null; renderSupEmpty(); loadSupList(); return true; }
-              if (r) toast(r.message || 'Could not close the ticket.', 'err');
-              return false;
-            });
-          },
+      if (cb) cb.addEventListener('click', function () { closeTicketModal(i); });
+    });
+  }
+
+  function closeTicketModal(i) {
+    formModal({
+      title: 'Close ticket', sub: i.ticket_number + ' · ' + (i.title || ''),
+      body: '<div class="f-field"><label class="f-label">Resolution message <span class="req">*</span></label>' +
+        '<textarea class="f-area" name="msg" placeholder="How was this resolved? The customer will see this."></textarea></div>',
+      okLabel: 'Close ticket', okClass: 'btn-success',
+      onSubmit: function (form) {
+        var msg = form.msg.value.trim();
+        if (!msg) { toast('A resolution message is required.', 'warn'); form.msg.focus(); return; }
+        return api('POST', '/staff/support/issues/' + i.id + '/close', { close_message: msg }).then(function (r) {
+          if (r && r.ok) { toast('Ticket closed.', 'ok'); sup.sel = null; renderSupEmpty(); loadSupList(); return true; }
+          if (r) toast(r.message || 'Could not close the ticket.', 'err');
+          return false;
         });
-      });
+      },
     });
   }
 
@@ -1201,6 +1747,7 @@
     document.getElementById('noteNew').addEventListener('click', function () { nts.sel = null; renderNoteEditor(null); document.querySelectorAll('#noteRows .nrow2').forEach(function (r) { r.classList.remove('is-sel'); }); });
     document.getElementById('noteSearch').addEventListener('input', function (e) { nts.q = e.target.value; renderNoteList(); });
     renderNoteEmpty();
+    if (nts.list.length) renderNoteList(); // cached rows first
     loadNotes().then(function () {
       var n = nts.sel && nts.list.find(function (x) { return String(x.id) === String(nts.sel); });
       if (n) renderNoteEditor(n);
@@ -1237,13 +1784,32 @@
       '</div>';
     }).join('') : '<div class="empty">' + I.inbox + '<div class="empty-title">' + (q ? 'No matching notes' : 'No notes') + '</div></div>';
     host.querySelectorAll('[data-note]').forEach(function (row) {
-      var open = function () {
-        nts.sel = row.getAttribute('data-note');
-        host.querySelectorAll('.nrow2').forEach(function (r) { r.classList.toggle('is-sel', r === row); });
-        renderNoteEditor(nts.list.find(function (n) { return String(n.id) === String(nts.sel); }));
-      };
+      var open = function () { openNoteById(row.getAttribute('data-note')); };
       row.addEventListener('click', function (e) { if (!e.target.closest('[data-fav]')) open(); });
       row.addEventListener('keydown', function (e) { if (e.key === 'Enter' && !e.target.closest('[data-fav]')) open(); });
+      row.addEventListener('contextmenu', function (e) {
+        if (!B.contextMenu) return;
+        e.preventDefault();
+        var id = row.getAttribute('data-note');
+        var n = nts.list.find(function (x) { return String(x.id) === String(id); });
+        if (!n) return;
+        B.contextMenu([
+          { id: 'open', label: 'Open' },
+          { id: 'fav', label: n.is_favorite ? 'Unfavorite' : 'Favorite' },
+          { sep: true },
+          { id: 'copy', label: 'Copy title', copyText: n.title || 'Untitled' },
+          { sep: true },
+          { id: 'del', label: 'Delete…' },
+        ]).then(function (a) {
+          if (a === 'open') openNoteById(id);
+          else if (a === 'fav') {
+            api('POST', '/staff/notes/' + id + '/favorite').then(function (r) {
+              if (r && r.ok) { n.is_favorite = !n.is_favorite; renderNoteList(); }
+              else if (r) toast(r.message || 'Could not update favorite.', 'err');
+            });
+          } else if (a === 'del') confirmDeleteNote(n);
+        });
+      });
     });
     host.querySelectorAll('[data-fav]').forEach(function (b) {
       b.addEventListener('click', function (e) {
@@ -1325,13 +1891,16 @@
     });
     if (!n.id) document.getElementById('nTitle').focus();
     var del = document.getElementById('nDelete');
-    if (del) del.addEventListener('click', function () {
-      confirmBox('Delete note?', '“' + (n.title || 'This note') + '” will be deleted permanently.', 'Delete', true).then(function (yes) {
-        if (!yes) return;
-        api('POST', '/staff/notes/' + n.id + '/delete').then(function (r) {
-          if (r && r.ok) { toast('Note deleted.', 'ok'); nts.sel = null; renderNoteEmpty(); loadNotes(); }
-          else toast((r && r.message) || 'Could not delete.', 'err');
-        });
+    if (del) del.addEventListener('click', function () { confirmDeleteNote(n); });
+  }
+
+  function confirmDeleteNote(n) {
+    if (!n) return;
+    confirmBox('Delete note?', '“' + (n.title || 'This note') + '” will be deleted permanently.', 'Delete', true).then(function (yes) {
+      if (!yes) return;
+      api('POST', '/staff/notes/' + n.id + '/delete').then(function (r) {
+        if (r && r.ok) { toast('Note deleted.', 'ok'); nts.sel = null; renderNoteEmpty(); loadNotes(); }
+        else toast((r && r.message) || 'Could not delete.', 'err');
       });
     });
   }
@@ -1759,6 +2328,7 @@
     api('GET', '/staff/dashboard').then(function (d) {
       if (!d) return;
       var att = d.attendance || {};
+      sbAtt(att);
       var s = document.getElementById('clockStatus');
       if (s) s.textContent = att.notice || att.status_label || '';
       var bin = document.getElementById('btnIn2');
@@ -1825,12 +2395,18 @@
       busy(b, true);
       api('POST', '/staff/notifications/mark-seen').then(function () { busy(b, false); loadNotifs(); refreshBadge(); });
     });
+    if (state.notifs) paintNotifs(state.notifs); // cached first, then revalidate
     loadNotifs();
   }
 
   function loadNotifs() {
     api('GET', '/staff/notifications?limit=50').then(function (res) {
       if (!res) { errorBox(document.getElementById('notifList'), 'Could not load notifications.', loadNotifs); return; }
+      paintNotifs(res);
+    });
+  }
+
+  function paintNotifs(res) {
       state.notifs = res;
       updateBadge(res.unseen_total || 0);
       var host = document.getElementById('notifList');
@@ -1848,14 +2424,10 @@
           '</div>' + (linked ? '<span class="chev">›</span>' : '') + '</div>';
       }).join('') : '<div class="empty">' + I.bell + '<div class="empty-title">All caught up</div></div>';
       bindNotifRows(host, items);
-    });
   }
 
   function openNotif(n) {
-    if (!n) return;
-    if (n.source === 'support' && n.issue_id) { sup.sel = String(n.issue_id); sup.scope = 'all'; go('#/support'); }
-    else if (n.task_id) { state.tasks.sel = String(n.task_id); state.tasks.status = 'all'; state.tasks.scope = 'all'; go('#/tasks'); }
-    else go('#/alerts');
+    if (n) openTarget(notifTarget(n));
   }
 
   function bindNotifRows(host, items) {
@@ -1867,22 +2439,50 @@
     });
   }
 
-  var lastUnseen = null;
   function updateBadge(n) {
     n = +n || 0;
-    if (lastUnseen !== null && n > lastUnseen && B.notify) {
-      var diff = n - lastUnseen;
-      B.notify('BERPS Desk', 'You have ' + diff + ' new notification' + (diff === 1 ? '' : 's') + '.', '#/alerts');
-    }
-    lastUnseen = n;
     var b = document.getElementById('navBadge');
     if (b) { b.hidden = !n; b.textContent = n > 99 ? '99+' : n; }
+    sbUnread(n);
     if (B.setBadge) B.setBadge(n);
   }
 
   function refreshBadge() {
     api('GET', '/staff/notifications?limit=1').then(function (res) {
       if (res) updateBadge(res.unseen_total || 0);
+    });
+  }
+
+  // Background poll: badge stays fresh and genuinely new notifications arrive
+  // as native toasts that open the actual task/ticket when clicked. Toasts are
+  // skipped while the app is focused — the badge + status bar already show it.
+  var notifSeen = { primed: false, ids: new Set() };
+
+  function notifTarget(n) {
+    if (n.task_id) return { type: 'task', id: n.task_id };
+    if (n.source === 'support' && n.issue_id) return { type: 'ticket', id: n.issue_id };
+    return { type: 'alerts' };
+  }
+
+  function pollNotifs() {
+    if (!state.user) return;
+    api('GET', '/staff/notifications?limit=10').then(function (res) {
+      if (!res) return;
+      state.notifs = res;
+      updateBadge(res.unseen_total || 0);
+      var items = res.notifications || [];
+      if (!notifSeen.primed) {
+        items.forEach(function (n) { notifSeen.ids.add(String(n.id)); });
+        notifSeen.primed = true;
+        return;
+      }
+      var fresh = items.filter(function (n) { return !n.is_seen && !notifSeen.ids.has(String(n.id)); });
+      items.forEach(function (n) { notifSeen.ids.add(String(n.id)); });
+      if (notifSeen.ids.size > 300) notifSeen.ids = new Set(Array.from(notifSeen.ids).slice(-100));
+      if (document.hasFocus()) return;
+      fresh.slice(0, 2).forEach(function (n) {
+        if (B.notify) B.notify(n.title || 'BERPS Desk', n.message || '', '#/alerts', notifTarget(n));
+      });
     });
   }
 
@@ -1907,6 +2507,14 @@
           '<div class="set-row"><span class="k">Session</span><span class="v" id="sessState">Checking…</span>' +
           '<button class="btn btn-ghost" id="reAuth" style="padding:4px 10px">Verify</button></div>' +
         '</div></div>' +
+        '<div class="panel"><div class="panel-head">Desktop</div><div class="panel-body flush">' +
+          '<div class="set-row"><span class="k">Launch at login</span><span class="v muted">Open BERPS Desk when you sign in to this computer.</span>' +
+          '<input type="checkbox" class="set-check" id="setLoginItem"></div>' +
+          '<div class="set-row" id="setTouchIdRow" hidden><span class="k">Touch ID</span><span class="v muted">Ask for Touch ID when BERPS Desk opens with a saved session.</span>' +
+          '<input type="checkbox" class="set-check" id="setTouchId"></div>' +
+          '<div class="set-row"><span class="k">Summon hotkey</span><span class="v muted">Show or hide BERPS Desk from anywhere.</span>' +
+          '<span class="v" id="setHotkey"></span></div>' +
+        '</div></div>' +
         '<div class="panel"><div class="panel-head">Web portal</div><div class="panel-body flush">' +
           '<div class="set-row"><span class="k">Full portal</span><span class="v muted">Projects, invoices, payroll and everything else not in this app. Return with ⌘⇧D or the “← BERPS Desk” button.</span>' +
           '<button class="btn btn-ghost" id="openPortal">Open portal</button></div>' +
@@ -1922,11 +2530,28 @@
     if (av) document.getElementById('setAvatar').style.backgroundImage = 'url(' + av + ')';
     document.getElementById('reAuth').addEventListener('click', verifySession);
     document.getElementById('openPortal').addEventListener('click', function () { B.portal.open(); });
+    document.getElementById('setLoginItem').addEventListener('change', function () {
+      if (B.setLoginItem) B.setLoginItem(this.checked);
+    });
+    document.getElementById('setTouchId').addEventListener('change', function () {
+      if (B.setSetting) B.setSetting('touchId', this.checked);
+    });
+    if (B.settings) B.settings().then(function (p) {
+      p = p || {};
+      var li = document.getElementById('setLoginItem');
+      if (li) li.checked = !!p.openAtLogin;
+      var tir = document.getElementById('setTouchIdRow');
+      if (tir) tir.hidden = !p.touchIdSupported;
+      var ti = document.getElementById('setTouchId');
+      if (ti) ti.checked = !!p.touchId;
+      var hk = document.getElementById('setHotkey');
+      if (hk) hk.textContent = p.summonHotkey || '—';
+    });
     verifySession();
     document.getElementById('logoutBtn').addEventListener('click', function () {
       confirmBox('Sign out?', 'You will need your username and password to sign back in.', 'Sign out', true).then(function (yes) {
         if (!yes) return;
-        B.auth.logout().then(function () { lastUnseen = null; updateBadge(0); lastUnseen = null; history.replaceState(null, '', '#/home'); showLogin(); });
+        B.auth.logout().then(function () { updateBadge(0); history.replaceState(null, '', '#/home'); showLogin(); });
       });
     });
   }
@@ -1947,18 +2572,39 @@
   /* ------------------------------------------------------------------ boot */
 
   document.body.classList.add('is-logged-out');
+  sbInit();
 
-  B.auth.state().then(function (s) {
+  function loadPrefs() {
+    if (!B.settings) { state.prefs = {}; return Promise.resolve(); }
+    return B.settings()
+      .then(function (p) { state.prefs = p || {}; })
+      .catch(function () { state.prefs = {}; });
+  }
+
+  function enterApp(s) {
+    if (s && s.user) state.user = s.user;
+    return B.auth.me().then(function (res) {
+      if (res && res.ok) { state.user = res.user; showApp(); pollNotifs(); }
+      else showLogin();
+    });
+  }
+
+  loadPrefs().then(function () {
+    return B.auth.state();
+  }).then(function (s) {
     state.server = (s && s.server) || '';
-    if (s && s.loggedIn) {
-      state.user = s.user;
-      return B.auth.me().then(function (res) {
-        if (res && res.ok) { state.user = res.user; showApp(); refreshBadge(); }
-        else showLogin();
+    updateConnUI(true);
+    if (!(s && s.loggedIn)) { showLogin(); return; }
+    // Saved session + Touch ID enabled → gate entry behind biometrics.
+    // Cancelling lands on the normal sign-in form with a retry button.
+    if (state.prefs.touchId && state.prefs.touchIdSupported && B.unlock) {
+      return B.unlock().then(function (u) {
+        if (u && u.ok) return enterApp(s);
+        showLogin('Unlock BERPS Desk with Touch ID, or sign in again.');
       });
     }
-    showLogin();
+    return enterApp(s);
   }).catch(function () { showLogin('Cannot reach the app services.'); });
 
-  setInterval(function () { if (state.user) refreshBadge(); }, 90000);
+  setInterval(pollNotifs, 60000);
 })();

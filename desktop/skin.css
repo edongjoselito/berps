@@ -37,6 +37,8 @@ html.berps-desktop {
   --berps-radius-lg: 14px;
   --berps-radius-pill: 999px;
 
+  --berps-control-height: 34px;
+
   --berps-shadow-sm: 0 1px 2px rgba(16, 31, 60, 0.05);
   --berps-shadow-md: 0 10px 30px rgba(16, 31, 60, 0.08);
   --berps-shadow-lg: 0 24px 60px rgba(16, 31, 60, 0.16);
@@ -783,4 +785,182 @@ html.berps-desktop ::selection {
 
 html.berps-desktop :where(a, button, input, select, textarea, [tabindex]):focus-visible {
   outline: 3px solid rgba(37, 99, 235, 0.28) !important;
+}
+
+/* ==========================================================================
+   Dark mode — Desk + Portal share the theme (nativeTheme → .berps-dark).
+   The portal's own stylesheet isn't fully variable-driven, so this covers
+   the shell, surfaces, tables, forms and dialogs — the parts people stare
+   at all day. Deep-in page content keeps its own colors.
+   ========================================================================== */
+
+html.berps-desktop.berps-dark {
+  color-scheme: dark;
+
+  --berps-primary: #5b8cff;
+  --berps-primary-hover: #7da3ff;
+  --berps-primary-soft: rgba(91, 140, 255, 0.14);
+  --berps-primary-border: #2e4470;
+
+  --berps-bg: #0b1020;
+  --berps-surface: #131a2e;
+  --berps-surface-soft: #17203a;
+  --berps-surface-muted: #1c2742;
+
+  --berps-text: #e7ecf6;
+  --berps-text-muted: #93a0bb;
+  --berps-text-subtle: #6b7a98;
+  --berps-border: #232e4d;
+  --berps-border-strong: #31405f;
+
+  --berps-success: #35bd8b;
+  --berps-success-soft: rgba(53, 189, 139, 0.14);
+  --berps-warning: #dfa051;
+  --berps-warning-soft: rgba(223, 160, 81, 0.14);
+  --berps-danger: #e35d72;
+  --berps-danger-soft: rgba(227, 93, 114, 0.15);
+  --berps-info: #55b4d8;
+  --berps-info-soft: rgba(85, 180, 216, 0.14);
+
+  --berps-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --berps-shadow-md: 0 10px 30px rgba(0, 0, 0, 0.35);
+  --berps-shadow-lg: 0 24px 60px rgba(0, 0, 0, 0.5);
+
+  --berps-sidebar-bg-start: #0a0f22;
+  --berps-sidebar-bg-end: #101a36;
+}
+
+html.berps-desktop.berps-dark body {
+  background: var(--berps-bg);
+  color: var(--berps-text);
+}
+
+html.berps-desktop.berps-dark .navbar-custom {
+  background: rgba(19, 26, 46, 0.9);
+}
+
+html.berps-desktop.berps-dark .berps-topbar-title,
+html.berps-desktop.berps-dark .pro-user-name,
+html.berps-desktop.berps-dark label {
+  color: var(--berps-text);
+}
+
+html.berps-desktop.berps-dark .card,
+html.berps-desktop.berps-dark .panel {
+  background: var(--berps-surface);
+  border-color: var(--berps-border);
+}
+
+html.berps-desktop.berps-dark .card .card-header,
+html.berps-desktop.berps-dark .panel-header {
+  background: var(--berps-surface);
+  border-color: var(--berps-border);
+}
+
+html.berps-desktop.berps-dark .panel-title,
+html.berps-desktop.berps-dark .card .card-title {
+  color: var(--berps-text);
+}
+
+html.berps-desktop.berps-dark .table thead th,
+html.berps-desktop.berps-dark .leaderboard-table thead th {
+  background: var(--berps-surface-soft);
+  color: var(--berps-text-muted);
+  border-color: var(--berps-border);
+}
+
+html.berps-desktop.berps-dark .table tbody td,
+html.berps-desktop.berps-dark .leaderboard-table tbody td {
+  border-color: var(--berps-border);
+  color: var(--berps-text);
+}
+
+html.berps-desktop.berps-dark .table-striped tbody tr:nth-of-type(odd) {
+  background: var(--berps-surface-soft);
+}
+
+html.berps-desktop.berps-dark .form-control,
+html.berps-desktop.berps-dark .custom-select,
+html.berps-desktop.berps-dark textarea.form-control {
+  background: var(--berps-surface-soft);
+  color: var(--berps-text);
+  border-color: var(--berps-border-strong);
+}
+
+html.berps-desktop.berps-dark .form-control:focus,
+html.berps-desktop.berps-dark .custom-select:focus {
+  border-color: var(--berps-primary);
+  box-shadow: 0 0 0 3px rgba(91, 140, 255, 0.2);
+}
+
+html.berps-desktop.berps-dark .modal-content {
+  background: var(--berps-surface);
+  color: var(--berps-text);
+}
+
+html.berps-desktop.berps-dark .modal-header.bg-primary {
+  background: var(--berps-surface) !important;
+}
+
+html.berps-desktop.berps-dark .modal-footer {
+  background: var(--berps-surface-soft);
+  border-color: var(--berps-border);
+}
+
+html.berps-desktop.berps-dark .navbar-custom .dropdown-menu {
+  background: var(--berps-surface);
+  border-color: var(--berps-border);
+}
+
+html.berps-desktop.berps-dark .navbar-custom .dropdown-menu .dropdown-item {
+  color: var(--berps-text);
+}
+
+html.berps-desktop.berps-dark .btn-light {
+  background: var(--berps-surface);
+  border-color: var(--berps-border);
+  color: var(--berps-text-muted);
+}
+
+html.berps-desktop.berps-dark .btn-secondary {
+  background: var(--berps-surface-muted);
+  border-color: var(--berps-surface-muted);
+  color: var(--berps-text);
+}
+
+html.berps-desktop.berps-dark .page-link {
+  background: var(--berps-surface);
+  border-color: var(--berps-border);
+  color: var(--berps-primary);
+}
+
+html.berps-desktop.berps-dark .dataTables_wrapper .dataTables_filter input,
+html.berps-desktop.berps-dark .dataTables_wrapper .dataTables_length select {
+  background: var(--berps-surface-soft);
+  color: var(--berps-text);
+}
+
+html.berps-desktop.berps-dark .swal2-popup {
+  background: var(--berps-surface) !important;
+  color: var(--berps-text) !important;
+}
+
+html.berps-desktop.berps-dark .swal2-title,
+html.berps-desktop.berps-dark .swal2-content {
+  color: var(--berps-text) !important;
+}
+
+html.berps-desktop.berps-dark .footer {
+  color: var(--berps-text-subtle);
+  border-color: var(--berps-border);
+}
+
+html.berps-desktop.berps-dark ::-webkit-scrollbar-thumb {
+  background: rgba(147, 160, 187, 0.3);
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+html.berps-desktop.berps-dark :where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline-color: rgba(91, 140, 255, 0.35) !important;
 }

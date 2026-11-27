@@ -5,9 +5,11 @@ const invoke = (channel, ...args) => ipcRenderer.invoke(channel, ...args);
 const api = {
   isDesktop: true,
   platform: process.platform,
-  version: '2.0.2',
+  version: '2.1.0',
 
-  // Session + API (used by the native app UI in app/index.html)
+  // Session + API (used by the native app UI in app/index.html).
+  // The main process only honours these from file:// pages — portal pages
+  // get the shell APIs below but not the authenticated API surface.
   auth: {
     login: (username, password) => invoke('berps:auth-login', { username, password }),
     me: () => invoke('berps:auth-me'),
@@ -23,23 +25,50 @@ const api = {
   openExternal: (url) => invoke('berps:open-external', url),
 
   // shell
-  notify: (title, body, hash) => invoke('berps:notify', { title, body, hash }),
+  notify: (title, body, hash, target) => invoke('berps:notify', { title, body, hash, target }),
   setBadge: (count) => invoke('berps:badge', count),
+  trayStatus: (s) => invoke('berps:tray-status', s),
+  contextMenu: (items) => invoke('berps:context-menu', items),
+  theme: () => invoke('berps:theme'),
+  setTheme: (t) => invoke('berps:theme-set', t),
+
+  // desktop settings + security
+  settings: () => invoke('berps:settings'),
+  setSetting: (key, value) => invoke('berps:settings-set', { key, value }),
+  setLoginItem: (open) => invoke('berps:login-item-set', open),
+  unlock: () => invoke('berps:unlock'),
+
   onNavigate: (cb) => ipcRenderer.on('berps:navigated', (_e, url) => cb(url)),
   onMenuGoto: (cb) => ipcRenderer.on('berps:menu-goto', (_e, hash) => cb(hash)),
+  onMenuAction: (cb) => ipcRenderer.on('berps:menu-action', (_e, action) => cb(action)),
+  onOpenTarget: (cb) => ipcRenderer.on('berps:open-target', (_e, target) => cb(target)),
 };
 
 contextBridge.exposeInMainWorld('berps', api);
 try { window.berps = api; } catch (_) { /* non-fatal */ }
 
 /* ---------------------------------------------------------------------------
- * Portal pages get the desktop skin + matching extensions injected, plus a
- * floating "Back to BERPS Desk" button so the web portal is never a dead end.
- * Local app pages (file://) skip straight past this.
+ * Theme — the main process owns nativeTheme; preload mirrors it onto <html>
+ * as .berps-dark so both the app and the skinned portal can react.
+ * ------------------------------------------------------------------------- */
+
+let currentDark = false;
+function applyTheme() {
+  if (document.documentElement) {
+    document.documentElement.classList.toggle('berps-dark', currentDark);
+  }
+}
+invoke('berps:theme').then((t) => { currentDark = !!(t && t.dark); applyTheme(); });
+ipcRenderer.on('berps:theme-changed', (_e, t) => { currentDark = !!(t && t.dark); applyTheme(); });
+
+/* ---------------------------------------------------------------------------
+ * Portal pages get the desktop skin + matching extensions injected. Local
+ * app pages (file://) skip straight past this.
  * ------------------------------------------------------------------------- */
 
 const skinnedDocs = new WeakSet();
 const extensionRuns = new WeakMap();
+const EXTENSION_WORLD = 745; // isolated world id for extension scripts
 
 function runsFor(doc) {
   let set = extensionRuns.get(doc);
@@ -65,30 +94,14 @@ async function runExtensions() {
     if (ran.has(key)) continue;
     for (const js of ext.js) {
       try {
-        await webFrame.executeJavaScript(`(function(){\n${js}\n})();`);
+        // Isolated world: extensions get the DOM but not the page's JS globals.
+        await webFrame.executeJavaScriptInIsolatedWorld(EXTENSION_WORLD, [{ code: `(function(){\n${js}\n})();` }]);
         ran.add(key);
       } catch (err) {
         console.warn(`[berps] ${ext.id} js:`, err);
       }
     }
   }
-}
-
-function addBackButton() {
-  if (!document.body || document.getElementById('berps-desk-back')) return;
-  const btn = document.createElement('button');
-  btn.id = 'berps-desk-back';
-  btn.type = 'button';
-  btn.textContent = '← BERPS Desk';
-  btn.title = 'Back to the BERPS Desk app (⌘⇧D)';
-  btn.setAttribute('style', [
-    'position:fixed', 'left:14px', 'bottom:14px', 'z-index:2147483646',
-    'padding:8px 14px', 'border:0', 'border-radius:999px',
-    'background:#0e1630', 'color:#fff', 'font:600 12px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif',
-    'box-shadow:0 8px 24px rgba(14,22,48,.35)', 'cursor:pointer', '-webkit-app-region:no-drag',
-  ].join(';'));
-  btn.addEventListener('click', () => invoke('berps:app-open'));
-  document.body.appendChild(btn);
 }
 
 let portalOriginPromise = null;
@@ -102,12 +115,12 @@ async function decoratePortalPage() {
   if (!location.href.startsWith(origin)) return; // not a portal page
   injectSkin();
   runExtensions();
-  addBackButton();
 }
 
 window.addEventListener('DOMContentLoaded', () => {
   const el = document.documentElement;
   el.classList.add('berps-desktop', `berps-platform-${process.platform}`);
+  applyTheme();
   decoratePortalPage();
 });
 
