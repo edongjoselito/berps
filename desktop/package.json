@@ -20,6 +20,7 @@
   "build": {
     "appId": "com.berps.staff",
     "productName": "BERPS Desk",
+    "afterPack": "./build/afterPack.js",
     "files": [
       "main.js",
       "preload.js",
@@ -29,6 +30,7 @@
       "app/**/*",
       "extensions/**/*",
       "build/icon.png",
+      "build/icon-dark.png",
       "node_modules/**",
       "package.json"
     ],

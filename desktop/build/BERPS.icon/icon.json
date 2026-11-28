@@ -1,0 +1,41 @@
+{
+  "fill" : {
+    "solid" : "srgb:1.00000,1.00000,1.00000,1.00000"
+  },
+  "fill-specializations" : [
+    {
+      "appearance" : "dark",
+      "value" : {
+        "solid" : "srgb:0.05098,0.09412,0.18824,1.00000"
+      }
+    }
+  ],
+  "groups" : [
+    {
+      "name" : "main",
+      "layers" : [
+        {
+          "name" : "icon",
+          "image-name" : "icon.png",
+          "image-name-specializations" : [
+            {
+              "appearance" : "dark",
+              "value" : "icon-dark.png"
+            }
+          ],
+          "position" : {
+            "scale" : 1.0,
+            "translation-in-points" : [0.0, 0.0]
+          }
+        }
+      ],
+      "position" : {
+        "scale" : 1.0,
+        "translation-in-points" : [0.0, 0.0]
+      }
+    }
+  ],
+  "supported-platforms" : {
+    "squares" : ["macOS"]
+  }
+}

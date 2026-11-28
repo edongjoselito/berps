@@ -76,8 +76,18 @@ function saveSettings() {
   try { fs.writeFileSync(settingsFile(), JSON.stringify(settings)); } catch (_) { /* ignore */ }
 }
 
+// The Dock icon follows system appearance — dark tile variant in dark mode.
+// (The Finder icon's variants come from the Icon Composer bundle via afterPack;
+// this covers the running Dock icon on every macOS version.)
+function updateDockIcon(dark) {
+  if (!isMac || !app.dock || !app.isReady()) return;
+  const p = path.join(__dirname, 'build', dark ? 'icon-dark.png' : 'icon.png');
+  try { app.dock.setIcon(nativeImage.createFromPath(p)); } catch (_) { /* non-fatal */ }
+}
+
 function broadcastTheme() {
   const dark = nativeTheme.shouldUseDarkColors;
+  updateDockIcon(dark);
   for (const w of [deskWindow, portalWindow]) {
     if (w && !w.isDestroyed()) w.webContents.send('berps:theme-changed', { dark });
   }
@@ -867,6 +877,7 @@ if (!gotLock) {
   app.whenReady().then(() => {
     loadSettings();
     nativeTheme.themeSource = settings.theme;
+    updateDockIcon(nativeTheme.shouldUseDarkColors);
     loadExtensions();
     try { skinCss = fs.readFileSync(path.join(__dirname, 'skin.css'), 'utf8'); } catch (_) { skinCss = ''; }
     buildMenu();
