@@ -1,5 +1,6 @@
 const { app, BrowserWindow, Menu, Notification, Tray, clipboard, dialog, globalShortcut, ipcMain, nativeImage, nativeTheme, net, safeStorage, shell, systemPreferences } = require('electron');
 const fs = require('fs');
+const os = require('os');
 const path = require('path');
 
 // Optional dependency — auto-update works once a publish target is configured.
@@ -77,11 +78,15 @@ function saveSettings() {
 }
 
 // The Dock icon follows system appearance — dark tile variant in dark mode.
-// (The Finder icon's variants come from the Icon Composer bundle via afterPack;
-// this covers the running Dock icon on every macOS version.)
+// On macOS 26+ the packaged app already gets that from the Icon Composer asset
+// (Assets.car supplies light/dark/tinted variants and the system applies the
+// icon shape), so the PNG swap only runs in dev and on older macOS. The PNGs
+// must have the tile baked in — dock.setIcon() draws the image verbatim.
+const systemThemedIcon = isMac && app.isPackaged && parseInt(os.release(), 10) >= 25;
+
 function updateDockIcon(dark) {
-  if (!isMac || !app.dock || !app.isReady()) return;
-  const p = path.join(__dirname, 'build', dark ? 'icon-dark.png' : 'icon.png');
+  if (!isMac || !app.dock || !app.isReady() || systemThemedIcon) return;
+  const p = path.join(__dirname, 'build', dark ? 'icon-dark.png' : 'icon-light.png');
   try { app.dock.setIcon(nativeImage.createFromPath(p)); } catch (_) { /* non-fatal */ }
 }
 

@@ -30,6 +30,7 @@
       "app/**/*",
       "extensions/**/*",
       "build/icon.png",
+      "build/icon-light.png",
       "build/icon-dark.png",
       "node_modules/**",
       "package.json"
